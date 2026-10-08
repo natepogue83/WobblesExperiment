@@ -72,12 +72,12 @@ function bannerCard(title, sub, done) {
 
 export function momentsFor(world, events) {
   lastWorld = world;
-  for (const e of events) {
-    if (e.kind === 'discovery') queue.push({ kind: 'discovery', e });
-    else if (e.kind === 'birth') queue.push({ kind: 'birth', e });
-    else if (e.kind === 'death') queue.push({ kind: 'death', e });
-    else if (e.kind === 'goal_reached') continue;
-  }
+  // A long catch-up (a sleeping laptop) would bury you in cards: the recap tells
+  // that story, so show at most the three newest big moments, and none if old.
+  const big = events.filter(e => e.kind === 'discovery' || e.kind === 'birth' || e.kind === 'death');
+  if (big.length && world.tick - big[0].t > 24) return;
+  for (const e of big.slice(-3)) queue.push({ kind: e.kind, e });
+  if (queue.length > 5) queue.splice(0, queue.length - 5);
   if (!showing) next(world);
 }
 
