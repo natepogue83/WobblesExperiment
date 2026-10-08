@@ -573,3 +573,11 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .keeper-title { font: 600 12px var(--display); color: #ffe7a6; margin-top: 1px; }
 .keeper-title.wary { color: #ffc2b0; }
 .keeper-title.fond { color: #ffd6e6; }
+
+/* Gatherings */
+.gnote { animation: gnote 2.6s ease-in-out infinite; }
+@keyframes gnote { 0% { opacity: 0; transform: translate(0, 10px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -30px) rotate(12deg); } }
+.gring { animation: gring 3s linear infinite; transform-box: fill-box; transform-origin: center; opacity: .8; }
+@keyframes gring { to { stroke-dashoffset: -72; } }
+.gflag { transform-box: fill-box; transform-origin: 50% 0%; animation: gflag 1.4s ease-in-out infinite alternate; }
+@keyframes gflag { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }

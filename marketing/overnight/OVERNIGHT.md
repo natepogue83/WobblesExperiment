@@ -73,6 +73,7 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Wobblins ask you for things,** from day one: berries when they're hungry, a friend when they're lonely, rain in a dry spell, stones to stack, flowers. A golden bubble shows what they want, and the top of the screen says how to help. Granting an ask makes them glow and gives belief. If you ignore it, they give up after a while.
 - **They give you a name** from what you do most: the Rainmaker, the Thrower, the Gentle Hand, the Storm-Bringer. It says whether they mean it fondly or nervously, and they mention it when they talk.
 - **They remember how you treat them.** Pick up a Wobblin that trusts you and it snuggles into your hand; one you have scared or flung around struggles to get away.
+- **You can see their culture:** notes float over a song, a glowing ring marks a fire or rain dance, and bunting goes up across the valley for a festival.
 - **Tall grass sways in the foreground,** and rain splashes ripple on the ground.
 - **Matchmaking:** drop one Wobblin onto another for a hug and they stay together for a while. Close friends pair up far sooner (in a test, the first pair formed after 11 days instead of 25). This is how you breed for a trait.
 - **A "How to play" card** (the ? button) lists every gesture and how belief works, for anyone you hand it to.

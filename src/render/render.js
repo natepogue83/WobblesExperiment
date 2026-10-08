@@ -57,6 +57,31 @@ function charmOf(world, w) {
   return o ? (o.state.giftId || o.state.curio || null) : null;
 }
 
+function gatheringsSVG(list) {
+  let s = '';
+  const NOTE = '<path d="M-2 4 V-6 L6 -8 V2" stroke="#6b4fb0" stroke-width="2" fill="none"/><circle cx="-3.6" cy="4" r="2.8" fill="#6b4fb0"/><circle cx="4.4" cy="2" r="2.8" fill="#6b4fb0"/>';
+  for (const g of list) {
+    const z = ZONES[g.zone];
+    if (!z) continue;
+    if (g.kind === 'song') {
+      for (let i = 0; i < 5; i++) s += `<g transform="translate(${z.cx - 60 + i * 30} ${z.cy - 60})"><g class="gnote" style="animation-delay:-${(i * 0.45).toFixed(2)}s">${NOTE}</g></g>`;
+    } else if (g.kind === 'fire_dance' || g.kind === 'rain_dance') {
+      const c = g.kind === 'fire_dance' ? '#ffb35a' : '#8fc6f0';
+      s += `<ellipse class="gring" cx="${z.cx}" cy="${z.cy + 18}" rx="${z.rx * 0.55}" ry="${z.ry * 0.45}" fill="none" stroke="${c}" stroke-width="4" stroke-dasharray="10 8"/>`;
+    } else if (g.kind === 'festival') {
+      const x0 = z.cx - z.rx * 0.8, x1 = z.cx + z.rx * 0.8, y = z.cy - 70;
+      s += `<path d="M${x0} ${y} Q${z.cx} ${y + 40} ${x1} ${y}" stroke="#7a5a3a" stroke-width="1.6" fill="none"/>`;
+      const cols = ['#c9563c', '#ffd24a', '#4a8ac9', '#5aa86b', '#b9a0f0', '#ff9fb2'];
+      for (let i = 1; i < 14; i++) {
+        const t = i / 14, x = x0 + (x1 - x0) * t, yy = y + 40 * 2 * t * (1 - t) * 1.0;
+        s += `<path class="gflag" style="animation-delay:-${(i * 0.13).toFixed(2)}s" d="M${(x - 6).toFixed(0)} ${yy.toFixed(0)} L${x.toFixed(0)} ${(yy + 14).toFixed(0)} L${(x + 6).toFixed(0)} ${yy.toFixed(0)} Z" fill="${cols[i % cols.length]}"/>`;
+      }
+      for (let i = 0; i < 4; i++) s += `<g transform="translate(${z.cx - 80 + i * 55} ${z.cy - 95})"><g class="gnote" style="animation-delay:-${(i * 0.6).toFixed(2)}s">${NOTE}</g></g>`;
+    }
+  }
+  return s;
+}
+
 // Worn dirt paths between the places they go back and forth between most.
 function trailsSVG(trails) {
   let s = '';
@@ -164,9 +189,15 @@ export function renderState(world) {
       reactions: last.data.reactions || {},
       x: tgt ? tgt.x : s ? s.x : z.cx, y: tgt ? tgt.y : s ? s.y : z.cy };
   }
+  const gatherings = [];
+  for (let i = world.events.length - 1; i >= 0; i--) {
+    const e = world.events[i];
+    if (e.t < world.tick - 1) break;
+    if (e.kind === 'ritual' || e.kind === 'festival') gatherings.push({ kind: e.kind === 'festival' ? 'festival' : e.data.kind, zone: e.data.zone });
+  }
   const trails = Object.entries(world.trails || {}).filter(([, n]) => n >= 4).map(([k, n]) => { const [a, b] = k.split('|'); return { a, b, n }; });
   return {
-    seed: world.seed, tick: world.tick, colonyName: world.colonyName, reaction, trails,
+    seed: world.seed, tick: world.tick, colonyName: world.colonyName, reaction, trails, gatherings,
     climate: { ...world.climate },
     objects, wobblins
   };
@@ -273,6 +304,9 @@ export function drawSVG(svg, rs, opts = {}) {
     const g = el('g', { class: 'nightglow', 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, L.effects);
     g.innerHTML = '<defs><radialGradient id="nightglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".55"/><stop offset=".5" stop-color="#ff9a3a" stop-opacity=".18"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient></defs>' + glow;
   }
+
+  // Gatherings you can see: notes over a song, a glowing ring for a dance, bunting for a festival.
+  if (rs.gatherings && rs.gatherings.length) el('g', { class: 'gatherings', 'pointer-events': 'none' }, L.effects).innerHTML = gatheringsSVG(rs.gatherings);
 
   // The tall grass in front, last, so it frames the valley.
   el('g', { class: 'fg-grass', 'pointer-events': 'none' }, L.effects).innerHTML = foregroundSVG(rs.seed, { hour, season: rs.climate.season });
