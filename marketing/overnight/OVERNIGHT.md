@@ -71,6 +71,8 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Portraits show flower crowns, frizz and charms.** The zap is easier to see from across the valley.
 - **Smoother redraws:** the Wobblins no longer twitch when a new day starts.
 - **Wobblins ask you for things,** from day one: berries when they're hungry, a friend when they're lonely, rain in a dry spell, stones to stack, flowers. A golden bubble shows what they want, and the top of the screen says how to help. Granting an ask makes them glow and gives belief. If you ignore it, they give up after a while.
+- **They remember how you treat them.** Pick up a Wobblin that trusts you and it snuggles into your hand; one you have scared or flung around struggles to get away.
+- **Tall grass sways in the foreground,** and rain splashes ripple on the ground.
 - **Matchmaking:** drop one Wobblin onto another for a hug and they stay together for a while. Close friends pair up far sooner (in a test, the first pair formed after 11 days instead of 25). This is how you breed for a trait.
 - **A "How to play" card** (the ? button) lists every gesture and how belief works, for anyone you hand it to.
 - **A quiet goodbye card** when a Wobblin dies: how it died, what it knew, who will miss it, and how many children carry on.

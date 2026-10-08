@@ -504,6 +504,14 @@ function wireWobblins(svg) {
         base = g.getAttribute('transform');
         trail = [];
         g.classList.add('held');
+        // They remember how you've treated them: the wary struggle, the devoted snuggle in.
+        const me = world.wobblins.find(x => x.id === w.id);
+        if (me) {
+          const mood = me.faith < -0.2 ? 'struggle' : me.faith > 0.45 ? 'snuggle' : '';
+          if (mood) g.classList.add(mood);
+          g.querySelector('.emote')?.remove();
+          g.insertAdjacentHTML('beforeend', emoteSVG(mood === 'struggle' ? 'scared' : mood === 'snuggle' ? 'love' : 'curious'));
+        }
         play('lift');
         g.parentNode.append(g);           // lift above the others
         document.body.classList.add('is-dragging');
@@ -537,7 +545,7 @@ function wireWobblins(svg) {
         const flags = held ? { ...(held.shaken ? { shaken: true } : held.cradled ? { cradled: true } : {}) } : {};
         held = null;
         heldFlags[w.id] = flags;
-        g.classList.remove('cradled', 'shook'); g.querySelector('.held-z')?.remove();
+        g.classList.remove('cradled', 'shook', 'struggle', 'snuggle'); g.querySelector('.held-z')?.remove();
         dragging = false;
         document.body.classList.remove('is-dragging');
         svg.classList.remove('watching');
