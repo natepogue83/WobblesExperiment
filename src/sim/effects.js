@@ -14,7 +14,7 @@ const SITES = {
   garden: ['meadow', 'grove'],
   raft: ['riverbank', 'pondsite'],
   mural: ['hollow', 'hill', 'meadow'],
-  totem: ['hill'],
+  totem: ['hill', 'meadow'],
   temple: ['hill']
 };
 
@@ -32,13 +32,16 @@ export function buildStructure(world, kind, w, ev, state = {}) {
   for (const zone of SITES[kind]) {
     let slot = freeSlotIn(world, zone);
     if (!slot && USES_STONE.has(kind)) {
-      const pile = liveObjects(world).find(o => o.kind === 'stones' && o.zone === zone);
-      if (pile) { pile.state.gone = true; pile.hp = 0; pile.state.usedFor = kind; slot = pile.slot; }
+      // A temple rises on the boulder you dropped, if there is one.
+      const kinds = kind === 'temple' ? ['boulder', 'stones'] : ['stones'];
+      const pile = kinds.map(k => liveObjects(world).find(o => o.kind === k && o.zone === zone)).find(Boolean);
+      if (pile) { pile.state.gone = true; pile.hp = 0; pile.state.usedFor = kind; slot = pile.slot; state = { ...state, builtOn: pile.id }; }
     }
     if (!slot) continue;
     const o = makeObject(world, { kind, slot, by: [w.id], origin: { event: ev.id }, state });
-    emit(world, { kind: 'built', actors: [w.id], target: o.id, data: { kind, zone, discovery: ev.target }, salience: 4,
-      causes: [{ event: ev.id }] });
+    const causes = [{ event: ev.id }];
+    if (state.builtOn) causes.push({ object: state.builtOn });
+    emit(world, { kind: 'built', actors: [w.id], target: o.id, data: { kind, zone, discovery: ev.target, builtOn: state.builtOn || null }, salience: 4, causes });
     return o;
   }
   return null;

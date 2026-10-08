@@ -132,6 +132,8 @@ export function createWorld(seed, opts = {}) {
     miracleUntil: -1,
     riverBend: null,
     lastKeeperTick: 0,
+    wishes: [],                   // { id, by, want, t, until, event, done }
+    lastFestival: null,
     noticed: {},                  // material kind -> first tick a Wobblin saw it
     events: [],
     nextIds: { w: 1, o: 1, e: 1 }

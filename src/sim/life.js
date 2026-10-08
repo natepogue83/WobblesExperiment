@@ -5,6 +5,7 @@ import { emit } from './events.js';
 import { makeObject, makeWobblin, TRAITS } from './world.js';
 import { trait } from './creatures.js';
 import { buildStructure } from './effects.js';
+import { cultureStep } from './culture.js';
 import { alive, liveObjects, findWobblin, idNum, r3 } from './util.js';
 
 // Huts are built only by the Hut discovery (Day 5). Each intact hut houses
@@ -97,7 +98,7 @@ function strangerStep(world) {
   const live = alive(world);
   if (!live.length || live.length >= 6 || hutCapacity(world) === 0) return;
   const r = rngFor(world.seed, 'stranger', world.tick);
-  if (!chance(r, SOCIAL.strangerChance)) return;
+  if (!chance(r, SOCIAL.strangerChance * (live.length < 4 ? 2 : 1))) return;
   const w = makeWobblin(world, { bornTick: world.tick - LIFE.babyUntil - 8, zone: 'riverbank' });
   emit(world, { kind: 'stranger_arrived', actors: [w.id], data: { zone: 'riverbank', by: 'road' }, salience: 4 });
 }
@@ -145,7 +146,8 @@ function faithStep(world) {
       const r = rngFor(world.seed, 'offering', world.tick, w.id);
       if (chance(r, 0.08)) {
         world.offerings = r3(world.offerings + mult);
-        emit(world, { kind: 'offering', actors: [w.id], data: { amount: mult }, salience: 1 });
+        const pond = w.beliefs.includes('keeper_watches_pond') && liveObjects(world).some(o => o.kind === 'pond');
+        emit(world, { kind: 'offering', actors: [w.id], data: { amount: mult, into: pond ? 'pond' : 'shrine' }, salience: 1 });
       }
     }
   }
@@ -153,6 +155,7 @@ function faithStep(world) {
 
 export function lifeEventsStep(world) {
   faithStep(world);
+  cultureStep(world);
   deathsStep(world);
   healStep(world);
   hutBuildingStep(world);

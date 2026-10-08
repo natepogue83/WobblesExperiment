@@ -65,7 +65,7 @@ export const NEEDS = {
 };
 
 export const SOCIAL = {
-  pairChance: 0.08, pairSociability: 0.4, pairSociabilityMin: 0.25, pairMood: 0.5,
+  pairChance: 0.08, pairSociability: 0.35, pairSociabilityMin: 0.2, pairMood: 0.45,
   birthChance: 0.08, birthFood: 0.3, birthGap: 20,
   injuryDeath: 3, healEvery: 16,
   strangerChance: 0.015, hutBuildChance: 0.06,
@@ -77,7 +77,7 @@ export const FIRE = { burnMin: 3, burnMax: 6, spreadChance: 0.15 };
 export const CLIMATE = { driftPeriod: 240, driftAmp: 0.08 };
 
 export const EXPERIMENT = {
-  base: { 1: 0.05, 2: 0.035, 3: 0.025, 4: 0.015 },
+  base: { 1: 0.05, 2: 0.035, 3: 0.035, 4: 0.02 },
   successBase: { 1: 0.6, 2: 0.5, 3: 0.45, 4: 0.4 },
   pAttemptCap: 0.35,
   colonyCapPerTick: 2,

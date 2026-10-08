@@ -59,12 +59,36 @@ export function wobblinSVG(w, opts = {}) {
       </g>
       ${elder ? `<path d="M-11 ${eyeY - e - 3} q4 -2 8 0 M3 ${eyeY - e - 3} q4 -2 8 0" stroke="#f4f0e6" stroke-width="2" fill="none"/>` : ''}
       <path d="M-3 -11 Q0 -9 3 -11" stroke="${dark}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      ${carriedSVG(w.carry || [])}
     </g>`;
+}
+
+// A mural shows the Keeper act it remembers (a real event from the log).
+function muralIcon(kind) {
+  const ink = '#7a3b2c';
+  switch (kind) {
+    case 'lightning': return `<path d="M2 -30 L-6 -16 L0 -16 L-4 -4" stroke="${ink}" stroke-width="2.5" fill="none"/>`;
+    case 'rain': return `<g stroke="#3b5f8a" stroke-width="2"><path d="M-10 -26 l-3 8"/><path d="M0 -28 l-3 8"/><path d="M10 -26 l-3 8"/></g>`;
+    case 'stone': return `<ellipse cx="0" cy="-14" rx="9" ry="6" fill="none" stroke="${ink}" stroke-width="2.5"/>`;
+    case 'plant': return `<path d="M0 -4 L0 -22 M0 -14 q-7 -4 -9 -10 M0 -16 q7 -4 9 -10" stroke="#3f6b2f" stroke-width="2.5" fill="none"/>`;
+    case 'miracle': return `<path d="M-14 -6 A14 14 0 0 1 14 -6" stroke="#c9563c" stroke-width="3" fill="none"/><path d="M-10 -6 A10 10 0 0 1 10 -6" stroke="#4a8ac9" stroke-width="3" fill="none"/>`;
+    default: return `<circle cx="0" cy="-16" r="6" fill="none" stroke="${ink}" stroke-width="2.5"/><circle cx="0" cy="-16" r="1.5" fill="${ink}"/>`;
+  }
+}
+
+// Little items a Wobblin carries once it knows how: knowledge is visible.
+export function carriedSVG(carry) {
+  let s = '';
+  if (carry.includes('torch')) s += `<g transform="translate(17 -12)"><rect x="-1.5" y="0" width="3" height="12" fill="#7a5a3a"/><path class="flame" d="M-4 1 Q-4 -7 0 -10 Q4 -6 4 1 Z" fill="#f08a2c"/></g>`;
+  if (carry.includes('tool')) s += `<path d="M-22 -8 L-15 -16 L-12 -10 Z" fill="#5c6670" stroke="#363d44"/>`;
+  if (carry.includes('basket')) s += `<g transform="translate(-21 -2)"><path d="M-6 -8 L6 -8 L4 0 L-4 0 Z" fill="#c7a25a" stroke="#8a6a2e"/><path d="M-5 -5 L5 -5" stroke="#8a6a2e"/></g>`;
+  return s;
 }
 
 export function objectSVG(o) {
   switch (o.kind) {
     case 'stones':
+      if (o.state.stacked) return '<g fill="#9a9488" stroke="#6f695e"><ellipse cx="0" cy="-3" rx="11" ry="5"/><ellipse cx="0" cy="-11" rx="8" ry="4"/><ellipse cx="0" cy="-18" rx="5.5" ry="3"/><ellipse cx="0" cy="-23" rx="3" ry="2"/></g>';
       return `<ellipse cx="-8" cy="0" rx="10" ry="7" fill="#9a9488"/><ellipse cx="7" cy="2" rx="8" ry="6" fill="#827c71"/><ellipse cx="0" cy="-7" rx="7" ry="5" fill="#b0a99c"/>`;
     case 'boulder':
       return `<path d="M-46 8 Q-50 -30 -10 -38 Q30 -44 46 -10 Q54 8 40 12 Z" fill="#8a8478"/><path d="M-30 -18 Q-10 -32 16 -28" stroke="#a49e92" stroke-width="4" fill="none"/>`;
@@ -101,9 +125,40 @@ export function objectSVG(o) {
       if (c === 'reed_bundle') return `<g stroke="#8a9a4a" stroke-width="3"><path d="M-10 0 L8 -22"/><path d="M-6 0 L12 -20"/><path d="M-2 0 L14 -16"/></g><path d="M-2 -10 L6 -6" stroke="#5a4020" stroke-width="3"/>`;
       return `<ellipse cx="0" cy="-6" rx="10" ry="8" fill="#b86f4c"/>`;
     }
+    case 'wall':
+      return `<g fill="#9d978b" stroke="#6f695e" stroke-width="1.5"><rect x="-34" y="-12" width="16" height="12" rx="3"/><rect x="-17" y="-12" width="16" height="12" rx="3"/><rect x="0" y="-12" width="16" height="12" rx="3"/><rect x="17" y="-12" width="16" height="12" rx="3"/><rect x="-26" y="-23" width="16" height="11" rx="3"/><rect x="-9" y="-23" width="16" height="11" rx="3"/><rect x="8" y="-23" width="16" height="11" rx="3"/></g>`;
+    case 'hearth':
+      return `<g fill="#8f897d" stroke="#615b51"><ellipse cx="-16" cy="-3" rx="7" ry="5"/><ellipse cx="16" cy="-3" rx="7" ry="5"/><ellipse cx="-8" cy="2" rx="7" ry="5"/><ellipse cx="8" cy="2" rx="7" ry="5"/></g><path class="flame" d="M-9 -2 Q-10 -22 -2 -30 Q0 -18 5 -24 Q12 -12 9 -2 Z" fill="#f08a2c"/><path class="flame" d="M-4 -2 Q-4 -12 1 -17 Q5 -10 4 -2 Z" fill="#ffd25a"/>${o.state.pots ? '<path d="M18 -14 Q26 -14 26 -6 Q26 0 20 0 Q14 0 14 -6 Q14 -14 18 -14 Z" fill="#b86f4c"/>' : ''}`;
+    case 'garden':
+      return `<rect x="-34" y="-10" width="68" height="16" rx="4" fill="#7a5a3a"/><g fill="#6db35a">${[-26, -13, 0, 13, 26].map(x => `<path d="M${x} -6 q-5 -8 0 -12 q5 4 0 12 Z"/>`).join('')}</g>`;
+    case 'raft':
+      return `<g fill="#a07a4a" stroke="#6a4f2e">${[-18, -9, 0, 9].map(x => `<rect x="${x}" y="-6" width="8" height="10" rx="2"/>`).join('')}</g><path d="M0 -6 L0 -26 L12 -14 Z" fill="#e6dcc0"/>`;
+    case 'totem':
+      return `<rect x="-7" y="-50" width="14" height="50" rx="3" fill="#8a6440" stroke="#5a3f24"/><circle cx="-3" cy="-40" r="2" fill="#222"/><circle cx="3" cy="-40" r="2" fill="#222"/><path d="M-4 -33 Q0 -30 4 -33" stroke="#222" fill="none"/><path d="M-14 -24 L14 -24" stroke="#5a3f24" stroke-width="4"/>`;
+    case 'temple':
+      return `<path d="M-46 0 L-46 -10 L46 -10 L46 0 Z" fill="#b3ab9b"/><g fill="#cfc6b3" stroke="#8f8672">${[-36, -18, 0, 18, 36].map(x => `<rect x="${x - 4}" y="-40" width="8" height="30"/>`).join('')}</g><path d="M-52 -40 L0 -64 L52 -40 Z" fill="#d9cfb8" stroke="#8f8672"/><circle cx="0" cy="-48" r="5" fill="#f3d36b"/>`;
+    case 'mural':
+      return `<path d="M-30 0 Q-34 -26 -10 -32 Q16 -36 30 -20 Q36 -4 26 0 Z" fill="#a49e92"/>${muralIcon(o.state.depictsKind)}`;
+    case 'ruin':
+      return `<g fill="#8a857b" opacity="0.85"><rect x="-22" y="-8" width="12" height="8" rx="2"/><rect x="-6" y="-14" width="10" height="14" rx="2" transform="rotate(12)"/><rect x="10" y="-6" width="12" height="6" rx="2"/></g><path d="M-26 0 Q0 -4 26 0" stroke="#6d8f4a" stroke-width="3" fill="none"/>`;
+    case 'scorch':
+      return `<ellipse cx="0" cy="-2" rx="30" ry="9" fill="#3b2f27" opacity="0.8"/><path d="M-14 -4 L-10 -16 M2 -4 L4 -20 M14 -4 L10 -14" stroke="#2a211b" stroke-width="3"/>`;
     case 'hut':
       return `<path d="M-26 0 V-18 L0 -38 L26 -18 V0 Z" fill="#b48a5a" stroke="#7a5a3a" stroke-width="2"/><path d="M-6 0 V-12 Q0 -17 6 -12 V0 Z" fill="#4a3424"/>`;
     default:
       return `<circle cx="0" cy="-8" r="10" fill="#c9a" stroke="#866" stroke-width="2"/>`;
   }
+}
+
+// Thought bubbles (icons, no emoji).
+export function bubbleSVG(kind) {
+  const bub = inner => '<g transform="translate(14 -58)"><circle cx="-10" cy="14" r="2.5" fill="#fff" opacity=".9"/><circle cx="0" cy="0" r="11" fill="#fff" opacity=".95" stroke="#c9c2b0"/>' + inner + '</g>';
+  switch (kind) {
+    case 'spark': return bub('<path d="M0 -7 L2 -2 L7 0 L2 2 L0 7 L-2 2 L-7 0 L-2 -2 Z" fill="#f2b632"/>');
+    case 'question': return bub('<path d="M-3 -3 Q-3 -7 0 -7 Q4 -7 4 -3 Q4 0 0 1 L0 3" stroke="#555" stroke-width="2" fill="none"/><circle cx="0" cy="6" r="1.3" fill="#555"/>');
+    case 'smoke': return bub('<g fill="#9a9a9a"><circle cx="-3" cy="1" r="4"/><circle cx="3" cy="-2" r="4"/><circle cx="1" cy="3" r="3"/></g>');
+    case 'ponder': return bub('<g fill="#777"><circle cx="-4" cy="0" r="1.6"/><circle cx="0" cy="0" r="1.6"/><circle cx="4" cy="0" r="1.6"/></g>');
+    case 'heart': return bub('<path d="M0 5 L-6 -1 Q-7 -6 -3 -6 Q0 -6 0 -3 Q0 -6 3 -6 Q7 -6 6 -1 Z" fill="#d8566a"/>');
+  }
+  return '';
 }

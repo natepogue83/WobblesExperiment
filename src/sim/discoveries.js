@@ -16,11 +16,12 @@
 // drivers.needs: which unmet needs raise the chance (food, warmth, rest, mood, safety).
 //   "comfort" means the opposite: a warm, fed Wobblin is more likely.
 // hobby: a hobby that makes this discovery more likely.
+// rate: a per-discovery pacing multiplier on the tier base rate (tuning).
 // build: the structure this discovery puts in the world (effects.js).
 // embodiedBy: object kinds that keep this knowledge alive after the last knower dies.
 
 const T = (id, name, tier, prereqs, stimuli, traits, needs, extra = {}) =>
-  ({ id, name, tier, prereqs, stimuli, drivers: { traits, needs }, social: false, build: null, embodiedBy: [], hobby: null, ...extra });
+  ({ id, name, tier, prereqs, stimuli, drivers: { traits, needs }, social: false, build: null, embodiedBy: [], hobby: null, rate: 1, ...extra });
 
 export const DISCOVERIES = [
   // ---- Tier 1: Noticing ---------------------------------------------------
@@ -39,8 +40,8 @@ export const DISCOVERIES = [
     { hobby: 'collecting shiny things' }),
 
   // ---- Tier 2: Making -----------------------------------------------------
-  T('fire_carrying', 'Fire Carrying', 2, ['fire_warmth'], [{ anyOf: ['fire'] }, { anyOf: ['tree'] }], { boldness: 1 }, { warmth: 1 },
-    { build: 'kept_fire', embodiedBy: ['kept_fire'] }),
+  T('fire_carrying', 'Fire Carrying', 2, ['fire_warmth'], [{ anyOf: ['fire'] }, { anyOf: ['tree', 'bush', 'reeds'] }], { boldness: 1 }, { warmth: 1 },
+    { build: 'kept_fire', embodiedBy: ['kept_fire'], rate: 2 }),
   T('sharp_stone', 'Sharp Stone', 2, ['stone_stacking'], [{ anyOf: ['stones', 'boulder', 'item:flint'] }], { patience: 1 }, {}),
   T('wall', 'Wall', 2, ['stone_stacking'], [{ stones: 3 }], { patience: 1 }, { safety: 1 },
     { build: 'wall', embodiedBy: ['wall'] }),
@@ -49,13 +50,13 @@ export const DISCOVERIES = [
   T('fishing', 'Fishing', 2, ['wading'], [{ anyOf: ['fish'] }], { patience: 1 }, { food: 1 }),
   T('clay_shaping', 'Clay Shaping', 2, ['digging'], [{ anyOf: ['clay', 'item:clay_lump'] }], { playfulness: 1, patience: 0.5 }, {}),
   T('song', 'Song', 2, ['rhythm'], [{ wobblins: 2 }], { sociability: 1 }, { mood: 1 }, { social: true, hobby: 'humming' }),
-  T('weaving', 'Weaving', 2, ['leaf_bed'], [{ anyOf: ['reeds', 'tree', 'item:reed_bundle'] }], { patience: 1 }, {}),
+  T('weaving', 'Weaving', 2, ['leaf_bed'], [{ anyOf: ['reeds', 'tree', 'bush', 'item:reed_bundle'] }], { patience: 1 }, {}, { rate: 1.5 }),
 
   // ---- Tier 3: Building ---------------------------------------------------
   T('hearth', 'Hearth', 3, ['fire_carrying', 'stone_stacking'], [{ anyOf: ['kept_fire'] }, { anyOf: ['stones', 'boulder'] }], { patience: 1 }, { warmth: 1 },
     { build: 'hearth', embodiedBy: ['hearth'] }),
   T('hut', 'Hut', 3, ['wall', 'weaving'], [{ zone: 'hollow', near: true }, { anyOf: ['stones', 'boulder', 'wall'] }, { anyOf: ['reeds', 'tree', 'bush', 'item:reed_bundle'] }],
-    { patience: 1 }, { warmth: 1, safety: 1 }, { build: 'hut', embodiedBy: ['hut'] }),
+    { patience: 1 }, { warmth: 1, safety: 1 }, { build: 'hut', embodiedBy: ['hut'], rate: 2 }),
   T('cooking', 'Cooking', 3, ['hearth', ['foraging', 'fishing']], [{ anyOf: ['hearth'] }, { anyOf: ['bush', 'fish', 'garden'] }], { curiosity: 1 }, { food: 1 }),
   T('pottery', 'Pottery', 3, ['clay_shaping', 'hearth'], [{ anyOf: ['clay', 'item:clay_lump'] }, { anyOf: ['hearth'] }], { patience: 1 }, {},
     { build: 'pots' }),
@@ -76,7 +77,7 @@ export const DISCOVERIES = [
     { build: 'temple', embodiedBy: ['temple'] }),
   T('star_watching', 'Star Watching', 4, ['lore'], [{ zone: 'hill' }, { condition: 'clear' }], { curiosity: 1, patience: 1 }, {},
     { hobby: 'watching clouds' }),
-  T('herb_healing', 'Herb Healing', 4, ['garden', 'lore'], [{ anyOf: ['garden'] }, { condition: 'injured' }], { sociability: 1, patience: 1 }, {})
+  T('herb_healing', 'Herb Healing', 4, ['garden', 'lore'], [{ anyOf: ['garden', 'bush'] }, { condition: 'injured' }], { sociability: 1, patience: 1 }, {}, { rate: 2 })
 ];
 
 // Sorted driver keys, computed once (hot path).

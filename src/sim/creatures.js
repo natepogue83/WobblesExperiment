@@ -67,13 +67,16 @@ function foodIn(objs, zone, w) {
 function updateNeeds(world, w, objs, live) {
   const n = w.needs, c = world.climate;
   // Food: decays; foraging (activity) refills, scaled by the zone.
-  n.food -= NEEDS.foodDecay;
+  // Pottery: stored food goes further.
+  n.food -= NEEDS.foodDecay * (knows(w, 'pottery') && objs.some(o => o.kind === 'hearth' && o.state.pots) ? 0.7 : 1);
   if (w.activity === 'forage') n.food += foodIn(objs, w.zone, w);
   // Warmth: drifts up on mild days; cold nights, cold snaps and rain chill.
   const others = live.filter(o => o !== w && o.zone === w.zone).length;
   n.warmth += NEEDS.warmthDrift + c.drift + c.tempMod;
-  if (c.cold) n.warmth -= NEEDS.coldNight;
-  if (c.rain > 0) n.warmth -= NEEDS.rainChill;
+  // Body heat: a chilled Wobblin loses warmth more slowly.
+  // A stargazer's warning lets everyone bed down before a cold night.
+  const loss = (c.cold ? NEEDS.coldNight * (c.warned ? 0.6 : 1) : 0) + (c.rain > 0 ? NEEDS.rainChill : 0);
+  n.warmth -= n.warmth < 0.25 ? loss * 0.5 : loss;
   if (w.activity === 'warm' || w.activity === 'rest') {
     n.warmth += NEEDS.huddle * Math.min(3, others) + (w.zone === 'hollow' ? NEEDS.shelter : 0);
     if (knows(w, 'leaf_bed')) n.warmth += 0.06;
@@ -81,6 +84,7 @@ function updateNeeds(world, w, objs, live) {
   }
   const fires = warmthSources(objs, w.zone);
   if (fires) n.warmth += knows(w, 'fire_warmth') ? 0.4 : NEEDS.fireWarm;
+  if (knows(w, 'wall') && zoneObjects(objs, w.zone).some(o => o.kind === 'wall')) n.safety += 0.05;
   n.warmth = Math.min(n.warmth, 0.75 + (fires ? 0.25 : 0));
   // Rest.
   n.rest += w.activity === 'rest' ? NEEDS.restGain + (knows(w, 'leaf_bed') ? 0.1 : 0) : -NEEDS.restDecay;
@@ -115,7 +119,7 @@ function chooseActivity(world, w, objs, live) {
     const heat = st.heat;
     const company = st.wobs - (w.zone === z ? 1 : 0);
     const huts = st.huts;
-    add('warm', z, cold * (0.2 + heat * (1 + w.traits.boldness) * 2 + company * 0.4 + (z === 'hollow' ? 0.3 : 0) + huts * 0.8), 'warmth');
+    add('warm', z, (2 * cold + 6 * cold * cold) * (0.2 + heat * (1 + w.traits.boldness) * 2 + company * 0.4 + (z === 'hollow' ? 0.3 : 0) + huts * 0.8), 'warmth');
   }
   // Tired: rest where you are, or in the hollow.
   const tired = Math.max(0, 1 - n.rest / NEEDS.tired);

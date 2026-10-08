@@ -126,7 +126,7 @@ function fireStep(world) {
   for (const f of liveObjects(world).filter(o => o.kind === 'fire')) {
     if (f.state.kept) continue;                       // a kept fire (Day 4+) does not burn out
     const r = rngFor(world.seed, 'fire-spread', world.tick, f.id);
-    if (world.climate.rain > 0 || world.tick + 1 >= f.state.until) {
+    if ((world.climate.rain > 0 && !f.state.kept) || world.tick + 1 >= f.state.until) {
       f.state.gone = true; f.hp = 0;
       emit(world, { kind: 'fire_out', target: f.id, data: { zone: f.zone, rain: world.climate.rain > 0 }, salience: 1 });
       continue;
@@ -165,7 +165,8 @@ function prowlerStep(world, r) {
   const here = live.filter(w => w.zone === zone);
   let hurt = null;
   const victim = here[Math.floor(r() * here.length)];
-  if (r() < 0.35 - 0.25 * victim.traits.boldness) { victim.injuries++; hurt = victim.id; }
+  const walled = liveObjects(world).some(o => o.kind === 'wall' && o.zone === zone);
+  if (r() < (0.35 - 0.25 * victim.traits.boldness) * (walled ? 0.3 : 1)) { victim.injuries++; hurt = victim.id; }
   for (const w of here) w.needs.safety = r3(clamp01(w.needs.safety - NEEDS.prowlerFear));
   const ev = emit(world, { kind: 'prowler', actors: here.map(w => w.id), data: { zone, hurt }, salience: 3 });
   if (hurt) emit(world, { kind: 'injured', actors: [hurt], data: { cause: 'prowler' }, salience: 3, causes: [{ event: ev.id }] });

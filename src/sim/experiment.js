@@ -13,7 +13,7 @@ import { trait } from './creatures.js';
 import { isWet } from './nature.js';
 import { applyDiscoveryEffect, embodiments } from './effects.js';
 import { keeperRoot } from './causes.js';
-import { onExperimentFailed } from './misfires.js';
+import { onExperimentFailed, onExperimentSucceeded, FIRE_DISCOVERIES } from './misfires.js';
 
 // ---------------------------------------------------------------- context
 // Built once per tick so every Wobblin scores against the same snapshot.
@@ -70,7 +70,7 @@ function conditionMet(ctx, w, c) {
     case 'witnessed': return !!w.witnessed;
     case 'faith': return w.faith > 0.5;
     case 'clear': return ctx.world.climate.rain === 0;
-    case 'injured': return here.some(x => x.injuries > 0);
+    case 'injured': return ctx.live.some(x => x.injuries > 0);   // someone in the colony is hurt
   }
   return false;
 }
@@ -155,6 +155,7 @@ export function scoreCandidates(ctx, w) {
   const baby = w.stage === 'baby';
   for (const d of ctx.open) {
     if (w.knows[d.id] || ctx.knownByLiving.has(d.id)) continue;   // spreads by teaching instead
+    if (w.tabooUntil > t && FIRE_DISCOVERIES.has(d.id)) continue;  // Fire Taboo
     if (baby && d.tier > 1) continue;
     if (!prereqsMet(d, w.knows)) continue;
     const m = stimulusMatch(ctx, w, d);
@@ -171,11 +172,10 @@ export function scoreCandidates(ctx, w) {
     if (m.contrib.some(o => o.kind === 'gift')) nudge *= 1.5;
     let social = 1;
     if (d.social) social = 1 + 0.15 * Math.max(0, (ctx.wobZone[w.zone] || []).length - 2);
-    let score = EXPERIMENT.base[d.tier] * traitFactor(w, d, t) * stim * needFactor(w, d) * nudge * social;
+    let score = EXPERIMENT.base[d.tier] * d.rate * traitFactor(w, d, t) * stim * needFactor(w, d) * nudge * social;
     if (baby) score *= EXPERIMENT.babyRate;
     if (w.stage === 'elder') score *= 0.6;
     if (w.activity === 'rest') score *= 0.5;     // dozing, half awake
-    if (w.beliefs.includes('fire_taboo') && w.taboUntil > t && d.drivers.traits.boldness) score *= 0;
     if (score > 0) out.push({ d, score, match: m });
   }
   return out;
@@ -282,6 +282,7 @@ export function experimentStep(world) {
       // They credit the Keeper when a Keeper act led to it.
       if (keeperRoot(world, ev)) w.faith = r3(clamp(w.faith + 0.1, -1, 1));
       if (world.pondering[w.id]) delete world.pondering[w.id][c.d.id];
+      onExperimentSucceeded(world, w, c.d, r);
     } else {
       onExperimentFailed(world, w, c.d, c.match, r);
     }
@@ -390,6 +391,8 @@ function forgettingStep(world, live) {
     const d = BY_ID[id];
     const holders = embodiments(world, d, objs);
     if (rec.orphanSince === null || rec.orphanSince === undefined) rec.orphanSince = t;
+    // An empty valley has nobody to learn from it yet: the clock waits.
+    else if (!live.length && holders.length) rec.orphanSince++;
     if (holders.length && t - rec.orphanSince < STRUCTURE_GRACE) continue;
     rec.forgotten = true;
     rec.forgottenTick = t;

@@ -3,7 +3,7 @@
 // effects, halos. Every living Wobblin and live object gets a stable element id.
 import { VIEW, ZONES, ZONE_IDS, RIVER, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
-import { wobblinSVG, objectSVG } from './sprites.js';
+import { wobblinSVG, objectSVG, bubbleSVG } from './sprites.js';
 
 export const LAYERS = ['sky', 'hills', 'terrain', 'nature', 'structures', 'wobblins', 'effects', 'halos'];
 const NATURE = new Set(['tree', 'bush', 'sprout', 'stones', 'boulder', 'reeds', 'fish', 'clay', 'gift', 'curio', 'fire']);
@@ -24,12 +24,28 @@ function objectPos(o) {
   return s2 ? { x: (s.x + s2.x) / 2, y: (s.y + s2.y) / 2 } : { x: s.x, y: s.y };
 }
 
+const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question' };
+const BUBBLE_RANK = { spark: 5, smoke: 4, ponder: 3, heart: 2, question: 1 };
+
 export function renderState(world) {
-  const objects = world.objects.filter(o => !o.state.gone).map(o => ({
-    id: o.id, kind: o.kind, zone: o.zone, ...objectPos(o),
-    layer: o.kind === 'pond' ? 'terrain' : NATURE.has(o.kind) ? 'nature' : 'structures',
-    state: o.state, keeper: o.origin.action !== undefined, age: world.tick - o.builtTick
-  }));
+  const evById = id => world.events[id - 1];
+  const objects = world.objects.filter(o => !o.state.gone).map(o => {
+    const st = o.kind === 'mural' && o.state.depicts ? { ...o.state, depictsKind: (evById(o.state.depicts) || { data: {} }).data.power || (evById(o.state.depicts) || { data: {} }).data.nudge || 'gift' } : o.state;
+    return {
+      id: o.id, kind: o.kind, zone: o.zone, ...objectPos(o),
+      layer: o.kind === 'pond' ? 'terrain' : NATURE.has(o.kind) ? 'nature' : 'structures',
+      state: st, keeper: o.origin.action !== undefined, age: world.tick - o.builtTick
+    };
+  });
+  // Thought bubbles from what happened last tick.
+  const bubbles = {};
+  for (let i = world.events.length - 1; i >= 0 && world.events[i].t >= world.tick - 1; i--) {
+    const e = world.events[i];
+    const b = BUBBLE[e.kind];
+    if (!b || !e.actors.length) continue;
+    const who = e.kind === 'taught' ? e.actors[1] : e.actors[0];
+    if (!bubbles[who] || BUBBLE_RANK[b] > BUBBLE_RANK[bubbles[who]]) bubbles[who] = b;
+  }
   // Spread Wobblins around their zone, stable per id and tick.
   const perZone = {};
   const wobblins = world.wobblins.filter(w => w.alive).map(w => {
@@ -39,6 +55,8 @@ export function renderState(world) {
     const ring = (k - 1) % 5, row = Math.floor((k - 1) / 5);
     return {
       id: w.id, name: w.name, stage: w.stage, look: w.look, zone: w.zone, activity: w.activity,
+      bubble: bubbles[w.id] || null,
+      carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)
     };
@@ -128,7 +146,7 @@ export function drawSVG(svg, rs, opts = {}) {
     const s = 1.5 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1);
     const g = el('g', { id: w.id, transform: `translate(${w.x},${w.y}) scale(${s})`, class: 'wobblin act-' + w.activity + (flinchZone === w.zone ? ' flinch' : '') }, L.wobblins);
     const lookDx = fresh ? Math.max(-1.5, Math.min(1.5, (fresh.x - w.x) / 60)) : 0;
-    g.innerHTML = wobblinSVG(w, { lookDx });
+    g.innerHTML = wobblinSVG(w, { lookDx }) + bubbleSVG(w.bubble);
   }
 
   if (rs.climate.rain > 0) {

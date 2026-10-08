@@ -9,6 +9,7 @@ import { r3, clamp, objectAtSlot, findWobblin, alive, liveObjects } from './util
 import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
+import { grantWishes } from './culture.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
 export const NUDGES = ['bless', 'curio', 'miracle'];
@@ -230,6 +231,7 @@ export function applyAction(world, a) {
         break;
       }
     }
+    grantWishes(world, a, world.events[world.events.length - 1].id);
     return { ok: true };
   }
 
@@ -256,6 +258,7 @@ export function applyAction(world, a) {
       for (const x of alive(world)) x.witnessed = true;
       emit(world, { kind: 'keeper_nudge', actors: seen, data: { nudge: 'miracle', ticks: POWER.miracleTicks, witnesses: seen },
         salience: 4, causes });
+      grantWishes(world, a, world.events[world.events.length - 1].id);
     }
     return { ok: true };
   }

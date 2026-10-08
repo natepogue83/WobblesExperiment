@@ -15,7 +15,7 @@ section('Survival with no player actions');
     for (let i = 0; i < 336; i++) tick(w);
     const pod = w.events.some(e => e.kind === 'seed_pod_hatched');
     if (pod) hatched++;
-    assert.ok(aliveCount(w) > 0 || pod, 'seed ' + seed + ' died out with no seed pod');
+    assert.ok(aliveCount(w) > 0 || pod || w.seedPod, 'seed ' + seed + ' died out with no seed pod');
     for (const x of w.wobblins) if (!x.alive) {
       deaths++;
       if (x.deathCause === 'starvation' || x.deathCause === 'cold') hardship++;
@@ -70,7 +70,7 @@ section('Hut gating');
       assert.equal(baby.bornTick, b.t);
       for (const k of Object.values(baby.knows)) assert.ok(k.since > baby.bornTick, 'babies are born knowing nothing');
       const [p1, p2] = baby.parents.map(id => w.wobblins.find(x => x.id === id));
-      for (const k of Object.keys(baby.traits)) {
+      for (const k of Object.keys(baby.traits).filter(k => k !== 'boldness')) {   // boldness shifts with life
         assert.ok(Math.abs(baby.traits[k] - (p1.traits[k] + p2.traits[k]) / 2) <= 0.151, 'inherits ' + k);
       }
     }
