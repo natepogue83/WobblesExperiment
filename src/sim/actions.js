@@ -10,12 +10,12 @@ import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
-import { landOnto, powerOnto } from './interactions.js';
+import { landOnto, powerOnto, quake } from './interactions.js';
 import { reactToAction } from './reactions.js';
 import { GOAL_BY_ID, progressOf } from './goals.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
-export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
+export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season', 'quake'];
 export const NUDGES = ['bless', 'curio', 'miracle', 'carry'];
 export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience', 'caution', 'playfulness', 'piety'];
 // Each curio unlocks once a Wobblin has noticed its material.
@@ -123,6 +123,8 @@ export function validateAction(world, a) {
       }
       case 'season':
         return a.variant === 'cold' || a.variant === 'warm' ? { ok: true } : bad('variant');
+      case 'quake':
+        return { ok: true };
     }
     return bad('unknown_power');
   }
@@ -293,6 +295,11 @@ function applyActionEffects(world, a) {
           const ev = power({ power: 'water', variant: 'bend', slot: a.slot, zone: 'riverbank' });
           makeObject(world, { kind: 'fish', slot: null, zone: 'riverbank', origin: { event: ev.id }, state: { until: t + 12 } });
         }
+        break;
+      }
+      case 'quake': {
+        const ev = power({ power: 'quake' }, null, 3);
+        quake(world, ev);
         break;
       }
       case 'season': {

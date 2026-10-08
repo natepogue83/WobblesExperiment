@@ -44,6 +44,7 @@ const CODES = {
   li: ['power', 'lightning', ['slot', 'onto']],
   wa: ['power', 'water', ['slot']],
   se: ['power', 'season', ['variant']],
+  qu: ['power', 'quake', []],
   bl: ['nudge', 'bless', ['target', 'trait']],
   cu: ['nudge', 'curio', ['curio', 'targets']],
   mi: ['nudge', 'miracle', []],

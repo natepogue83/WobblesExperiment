@@ -218,6 +218,37 @@ export function powerOnto(world, w, a, ev) {
   return null;
 }
 
+// The Keeper shakes the whole valley. Berries rain down (a feast, for once),
+// cairns topple, fish leap, a seed or two shakes loose, an old wall may fall,
+// and everyone has an opinion: playful ones whoop, careful ones never forget.
+export function quake(world, ev) {
+  const t = world.tick;
+  const r = rngFor(world.seed, 'quake', t);
+  const causes = [{ event: ev.id }];
+  const live = alive(world);
+  const out = { berries: 0, toppled: 0, sprouts: 0, fish: 0, walls: 0 };
+  for (const o of liveObjects(world)) {
+    if (o.kind === 'bush' && (o.state.berries || 0) > 0) {
+      const n = o.state.berries; o.state.berries = 0; out.berries += n;
+      for (const w of live.filter(x => x.zone === o.zone)) w.needs.food = r3(clamp01(w.needs.food + 0.08 * n));
+    } else if (o.kind === 'stones' && o.state.stacked) { o.state.stacked = false; out.toppled++; }
+    else if (o.kind === 'tree' && r() < 0.35) {
+      const slot = freeSlotIn(world, o.zone);
+      if (slot) { makeObject(world, { kind: 'sprout', slot, origin: { event: ev.id }, state: { grows: r() < 0.5 ? 'tree' : 'bush', readyAt: t + 6 } }); out.sprouts++; }
+    } else if (o.kind === 'wall' && r() < 0.25) { o.kind = 'ruin'; o.state.was = 'wall'; o.builtTick = t; out.walls++; }
+  }
+  if (r() < 0.7) { makeObject(world, { kind: 'fish', slot: null, zone: 'riverbank', origin: { event: ev.id }, state: { until: t + 8 } }); out.fish++; }
+  for (const w of live) {
+    w.heldUntil = Math.max(w.heldUntil || 0, t + 1);
+    if (w.activity === 'rest') w.needs.rest = r3(clamp01(w.needs.rest - 0.15));   // rudely woken
+    const fun = w.traits.playfulness > 0.6 && w.traits.boldness > 0.4;
+    if (fun) mood(w, 0.08);
+    else { w.needs.safety = r3(clamp01(w.needs.safety - 0.25)); shapeTrait(w, 'caution', 0.02); }
+    w.faith = r3(clamp(w.faith + (w.traits.piety > 0.6 ? 0.03 : -0.02), -1, 1));   // the devout think you are speaking to them
+  }
+  return emit(world, { kind: 'interaction', actors: live.map(w => w.id).slice(0, 8), data: { what: 'quake', ...out }, salience: 3, causes });
+}
+
 // Lightning on things that aren't plants (plants already catch fire).
 export function lightningOnto(world, target, strikeEvent) {
   const t = world.tick;

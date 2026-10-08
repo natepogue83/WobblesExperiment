@@ -15,6 +15,7 @@ export const ICONS = {
   rain: svg(`<g fill="#e9eef5" stroke="#9fb0c6" stroke-width="1.5"><circle cx="-8" cy="-18" r="8"/><circle cx="4" cy="-22" r="10"/><circle cx="12" cy="-16" r="7"/><rect x="-14" y="-18" width="30" height="9" rx="4"/></g><g stroke="#5f9fcf" stroke-width="2.5" stroke-linecap="round"><path d="M-8 -4 l-3 7"/><path d="M2 -4 l-3 7"/><path d="M12 -4 l-3 7"/></g>`, '-22 -34 44 44'),
   lightning: svg(`<path d="M4 -30 L-10 -6 L-1 -6 L-6 10 L12 -14 L2 -14 Z" fill="#ffe36b" stroke="#c9a23a" stroke-width="2" stroke-linejoin="round"/>`, '-18 -34 36 48'),
   water: svg(`<path d="M0 -26 Q14 -8 12 2 Q10 12 0 12 Q-10 12 -12 2 Q-14 -8 0 -26 Z" fill="#6aa7cf" stroke="#3f7ea8" stroke-width="2"/><ellipse cx="-4" cy="-2" rx="3" ry="6" fill="#bfe0f5"/>`, '-18 -30 36 46'),
+  quake: svg(`<path d="M-20 6 L-12 -2 L-6 6 L2 -6 L8 4 L14 -4 L20 6" stroke="#8a5a2a" stroke-width="3" fill="none" stroke-linejoin="round"/><path d="M-22 10 H22" stroke="#6b4a2a" stroke-width="3" stroke-linecap="round"/><path d="M-14 -12 l-4 -4 M0 -14 v-6 M14 -12 l4 -4" stroke="#c98a3a" stroke-width="2.2" stroke-linecap="round"/>`, '-24 -24 48 38'),
   cold: svg(`<g stroke="#8fc6f0" stroke-width="3" stroke-linecap="round"><path d="M0 -20 L0 16"/><path d="M-16 -11 L16 7"/><path d="M-16 7 L16 -11"/></g><circle r="4" cy="-2" fill="#dff1ff"/>`, '-20 -24 40 44'),
   warm: svg(`<circle r="10" cy="-4" fill="#ffc94a"/><g stroke="#ffb02e" stroke-width="3" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<path d="M0 -18 L0 -23" transform="rotate(${a} 0 -4)"/>`).join('')}</g>`, '-26 -30 52 52'),
   bless: svg(`<path d="M0 -24 L4 -10 L18 -8 L6 0 L10 14 L0 6 L-10 14 L-6 0 L-18 -8 L-4 -10 Z" fill="#fff1a8" stroke="#e0b94a" stroke-width="2" stroke-linejoin="round"/>`, '-22 -28 44 46'),
@@ -99,6 +100,7 @@ export function trayItems() {
         const s = nearestSlot(world, pt, s => s.startsWith('riverbank'), 200);
         return s ? { type: 'power', power: 'water', slot: s } : { error: 'Drop it by the river.' };
       } },
+    { row: 'powers', id: 'quake', label: 'Shake', cd: 'quake', ...anywhere({ type: 'power', power: 'quake' }) },
     { row: 'powers', id: 'cold', label: 'Cold snap', cd: 'season', ...anywhere({ type: 'power', power: 'season', variant: 'cold' }) },
     { row: 'powers', id: 'warm', label: 'Warm spell', cd: 'season', ...anywhere({ type: 'power', power: 'season', variant: 'warm' }) },
     { row: 'nudges', id: 'bless', label: 'Bless', cd: 'bless', target: 'wobblin',

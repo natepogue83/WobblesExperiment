@@ -110,6 +110,7 @@ const SOUNDS = {
   sad: () => [392, 330, 262].forEach((f, i) => tone(f, 0.5, { type: 'triangle', at: i * 0.3, vol: 0.16 })),
   hug: () => { tone(500, 0.18, { to: 700, vol: 0.2 }); tone(750, 0.25, { to: 620, vol: 0.18, at: 0.15 }); },
   bonk: () => { tone(900, 0.06, { type: 'square', to: 500, vol: 0.12 }); tone(240, 0.15, { to: 120, vol: 0.4, at: 0.02 }); },
+  rumble: () => { noise(1.3, { freq: 90, type: 'lowpass', vol: 0.8, attack: 0.08 }); tone(48, 1.2, { to: 36, vol: 0.5, vibrato: 4 }); noise(0.9, { freq: 600, q: 1, vol: 0.15, at: 0.2 }); },
   crunch: () => { noise(0.25, { freq: 2200, q: 2, vol: 0.35 }); noise(0.2, { freq: 600, q: 1.5, vol: 0.3, at: 0.06 }); }
 };
 

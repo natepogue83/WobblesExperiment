@@ -139,6 +139,37 @@ section('Lightning on odd things');
   ok('lightning in the river stuns fish up to the surface');
 }
 
+section('Shake the Valley');
+{
+  const w = createWorld(19, { barren: true });
+  const bush = makeObject(w, { kind: 'bush', slot: 'meadow.2', origin: { natural: true }, state: { berries: 3 } });
+  const cairn = makeObject(w, { kind: 'stones', slot: 'hill.2', origin: { natural: true }, state: { count: 2, stacked: true } });
+  const wall = makeObject(w, { kind: 'wall', slot: 'hollow.2', origin: { natural: true } });
+  for (const x of w.wobblins) { x.zone = 'meadow'; x.needs.food = 0.2; }
+  const [a, b] = w.wobblins;
+  a.traits.playfulness = 0.9; a.traits.boldness = 0.8; b.traits.playfulness = 0.1;
+  const K = knowledge(w), safeB = b.needs.safety;
+  assert.equal(applyAction(w, { seq: 1, t: 0, type: 'power', power: 'quake' }).ok, true);
+  const q = last(w, 'quake');
+  assert.equal(bush.state.berries, 0);
+  assert.equal(q.data.berries, 3);
+  assert.ok(w.wobblins.every(x => x.needs.food > 0.2), 'a feast of fallen berries');
+  assert.equal(cairn.state.stacked, false);
+  assert.ok(b.needs.safety < safeB);
+  assert.equal(knowledge(w), K);
+  assert.equal(applyAction(w, { seq: 2, t: 0, type: 'power', power: 'quake' }).reason, 'cooldown');
+  ok(`berries rain down (${q.data.berries}), cairns topple, timid ones are shaken${wall.kind === 'ruin' ? ', a wall fell' : ''}; no knowledge, and it recharges`);
+
+  const p = createWorld(19, { progression: true });
+  assert.equal(applyAction(p, { seq: 1, t: 0, type: 'power', power: 'quake' }).reason, 'locked_power');
+  const save = newSave({ seed: 23, createdAt: 0 });
+  const live = createWorld(23);
+  applyAction(live, appendAction(save, 0, { type: 'power', power: 'quake' }));
+  for (let i = 0; i < 10; i++) tick(live);
+  assert.equal(stateHash(replay(parseSave(serializeSave(save)), 10)), stateHash(live));
+  ok('locked until belief 26 in a new game; packs into the save and replays');
+}
+
 section('Ice');
 {
   const w = createWorld(17, { barren: true });

@@ -19,7 +19,7 @@ export const LIFE = {
 // Cooldowns in ticks. Value stored in world.cooldowns is the first usable tick.
 export const COOLDOWN = {
   stone: 2, plant: 3, rain: 3, lightning: 8, water: 12, season: 24,
-  bless: 4, curio: 6, miracle: 12, carry: 0
+  bless: 4, curio: 6, miracle: 12, carry: 0, quake: 16
 };
 
 export const COST = { season: 10, miracle: 20 };   // Devotion

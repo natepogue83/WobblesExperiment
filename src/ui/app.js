@@ -44,7 +44,7 @@ let shownUnlock = null;
 let wiping = false;         // erasing the save: never write it back on the way out
 function wipe() { wiping = true; clearSave(); const q = new URLSearchParams(location.search); q.delete('fresh'); location.href = location.pathname + (q.toString() ? '?' + q : ''); }     // last power_unlocked event already celebrated
 const UNLOCK_OF = { stones: 'stone', boulder: 'stone', bush: 'plant', tree: 'plant', rain: 'rain', lightning: 'lightning', water: 'water',
-  cold: 'season', warm: 'season', bless: 'bless', curio: 'curio', gift: 'gift', miracle: 'miracle' };
+  cold: 'season', warm: 'season', quake: 'quake', bless: 'bless', curio: 'curio', gift: 'gift', miracle: 'miracle' };
 
 function offset() {
   try { return Number(localStorage.getItem(DEBUG_OFFSET_KEY)) || 0; } catch { return 0; }
@@ -174,11 +174,12 @@ function act(action) {
 }
 
 // Every act has a sound, then whatever it set off, then how they felt about it.
-const ACTION_SOUND = { stones: 'thud', boulder: 'thump', plant: 'sprout', rain: 'rain', lightning: 'zap', water: 'splash', season: 'whoosh',
+const ACTION_SOUND = { quake: 'rumble', stones: 'thud', boulder: 'thump', plant: 'sprout', rain: 'rain', lightning: 'zap', water: 'splash', season: 'whoosh',
   bless: 'sparkle', curio: 'chime', miracle: 'fanfare', gift: 'chime', collect_offerings: 'chime' };
 function actionSound(a, events) {
   const key = a.type === 'power' ? (a.power === 'stone' ? a.variant : a.power) : a.type === 'nudge' ? a.nudge : a.type;
   if (ACTION_SOUND[key]) play(ACTION_SOUND[key]);
+  if (key === 'quake') { const st = $('#stage'); st.classList.remove('shaking'); void st.offsetWidth; st.classList.add('shaking'); setTimeout(() => st.classList.remove('shaking'), 1300); }
   const follow = events.filter(e => !['keeper_power', 'keeper_nudge', 'keeper_gift', 'offerings_collected'].includes(e.kind));
   if (follow.length) setTimeout(() => soundForEvents(follow), ACTION_SOUND[key] ? 160 : 0);
   const k = events.find(e => e.data && e.data.reactions);
@@ -585,7 +586,7 @@ const INTERACTION_TOAST = {
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
   king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',
   bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
-  zapped: 'ZAP! Frizzy.', gift_caught: 'Caught it!', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
+  zapped: 'ZAP! Frizzy.', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
 };
 const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
 function ontoLabel(id) {

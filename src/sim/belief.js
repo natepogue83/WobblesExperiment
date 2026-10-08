@@ -17,6 +17,7 @@ export const UNLOCKS = [
   { key: 'lightning', at: 10, name: 'Lightning' },
   { key: 'water', at: 16, name: 'Shape Water' },
   { key: 'curio', at: 22, name: 'Curios' },
+  { key: 'quake', at: 26, name: 'Shake the Valley' },
   { key: 'season', at: 30, name: 'Seasons' },
   { key: 'miracle', at: 40, name: 'Miracles' }
 ];

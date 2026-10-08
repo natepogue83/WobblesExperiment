@@ -48,6 +48,7 @@ function feel(world, w, a, here, r) {
     case 'lightning':
       fear = true; s = near ? -0.7 + 0.9 * T.boldness : -0.1 + 0.5 * T.boldness + (n.warmth < 0.4 ? 0.3 : 0); break;
     case 'water': s = 0.2 + 0.4 * T.playfulness + 0.2 * T.boldness; break;
+    case 'quake': fear = true; s = -0.6 + 0.7 * T.playfulness + 0.5 * T.boldness + (n.food < 0.4 ? 0.3 : 0); break;
     case 'season':
       s = a.variant === 'warm' ? 0.4 + 0.4 * (1 - n.warmth) : -0.5 + 0.6 * n.warmth + 0.2 * T.boldness; fear = a.variant === 'cold'; break;
     case 'bless': s = w.id === a.target ? 0.9 : 0.25 + 0.3 * T.sociability; break;
