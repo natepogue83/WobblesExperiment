@@ -125,7 +125,7 @@ const EVENT_SOUND = {
   friends: 'hug', ask_granted: 'chime', ask: 'heart', built: 'thud', fire_started: 'crunch', festival: 'fanfare', wish_granted: 'chime'
 };
 const INTERACTION_SOUND = {
-  hug: 'hug', comforted: 'hug', bonk: 'bonk', bowled_over: 'bonk', bush_squashed: 'crunch', snack: 'pop', stuck_in_tree: 'boing', singed: 'uhoh',
+  hug: 'hug', comforted: 'hug', swam: 'splash', rescued: 'hug', swept_downstream: 'splash', paint_splat: 'bonk', trampled: 'crunch', bonk: 'bonk', bowled_over: 'bonk', bush_squashed: 'crunch', snack: 'pop', stuck_in_tree: 'boing', singed: 'uhoh',
   caught_fish: 'splash', scared_fish: 'splash', through_the_roof: 'crunch', made_a_cairn: 'thud', treasure: 'chime',
   bonked: 'bonk', bonk_idea: 'bonk', squashed: 'thump', flower_crown: 'sprout', zapped: 'zap', gift_caught: 'chime',
   boulder_split: 'crunch', fish_stunned: 'splash', squabble: 'uhoh', skating: 'giggle', slipped: 'bonk', ice_cracked: 'splash', boulder_rolled: 'thump', cradled: 'coo', shaken: 'boing', snowman: 'pop', snowman_smashed: 'crunch', snowman_zapped: 'zap', stones_burst: 'crunch', charged: 'sparkle', static_shock: 'zap'

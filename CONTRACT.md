@@ -187,7 +187,9 @@ Social `friends rivals interaction keepsake goal_reached` (`data.what` names it:
 bush_squashed, snack, stuck_in_tree, fire_walk, singed, caught_fish, scared_fish,
 through_the_roof, made_a_cairn, treasure, king_of_the_hill, remembers, boulder_split,
 fish_stunned, squabble, pond_froze, pond_thawed, skating, slipped, ice_cracked, quake,
-bonked, bonk_idea, squashed, flower_crown, zapped, gift_caught).
+bonked, bonk_idea, squashed, flower_crown, zapped, gift_caught, comforted, swam, rescued,
+swept_downstream, paint_splat, repainted, trampled, weeded, cradled, shaken, snowman_smashed,
+snowman_zapped, stones_burst, charged, static_shock, boulder_rolled, tucked_in).
 
 Events are append-only and are the single source of truth for the recap,
 Chronicle, murals and the week-2 AI.

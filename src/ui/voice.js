@@ -32,7 +32,11 @@ function fromMemory(world, w, e) {
       return null;
     case 'interaction': {
       const T = {
-        hug: `${nameOf(world, other)} gives the best hugs.`, comforted: me ? `${nameOf(world, other)} got squashed, so I gave them a hug.` : `When it all went wrong, ${nameOf(world, other)} hugged me better.`, bonk: `${nameOf(world, other)} bumped right into me.`,
+        hug: `${nameOf(world, other)} gives the best hugs.`, swam: 'The river is the best! Throw me in again!', rescued: me ? `${nameOf(world, other)} fell in the river, so I jumped in after them.` : `I nearly floated away. ${nameOf(world, other)} saved me.`,
+        swept_downstream: d.fish ? 'The river carried me off. I came back with a fish, though.' : 'The river carried me ever so far. I am still damp.',
+        paint_splat: w.traits.playfulness > 0.5 ? 'I flew into the painting! Look at all my colours!' : 'I am covered in paint. It will not come off.',
+        trampled: 'I landed in the garden. Everyone shouted at me.', repainted: 'Someone smudged my mural. I fixed it.',
+        comforted: me ? `${nameOf(world, other)} got squashed, so I gave them a hug.` : `When it all went wrong, ${nameOf(world, other)} hugged me better.`, bonk: `${nameOf(world, other)} bumped right into me.`,
         bowled_over: me ? `I knocked ${nameOf(world, other)} flat. Not my fault!` : `${nameOf(world, other)} came flying out of nowhere and knocked me over.`,
         bush_squashed: 'I landed in the berries. Sticky.', snack: 'Berries! Right where I landed.',
         stuck_in_tree: 'I was stuck up a tree for ages.', fire_walk: 'The fire didn\'t scare me.', singed: 'My bottom is still warm from that fire.',

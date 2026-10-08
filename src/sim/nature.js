@@ -53,7 +53,7 @@ export function strike(world, slot, causes, data) {
 // Old Keeper things get used up so the valley never fills for good: curios and
 // gifts are taken home as keepsakes, spare stone piles are carried off for
 // building, scorch marks grow over and ruins crumble.
-export const TIDY = { keepsake: 48, stones: 72, cairn: 144, spareStones: 3, scorch: 48, ruin: 240 };
+export const TIDY = { keepsake: 48, stones: 72, cairn: 144, spareStones: 3, scorch: 48, ruin: 240, trampled: 12, smudged: 24 };
 function tidyStep(world) {
   const t = world.tick;
   if (t % 4 !== 0) return;   // every few days is plenty (and keeps replay fast)
@@ -77,6 +77,12 @@ function tidyStep(world) {
     } else if ((o.kind === 'scorch' && age >= TIDY.scorch && t - (o.state.burnedTick ?? o.builtTick) >= TIDY.scorch) ||
                (o.kind === 'ruin' && age >= TIDY.ruin)) {
       o.state.gone = true; o.hp = 0; o.state.faded = true;
+    } else if (o.kind === 'garden' && o.state.trampled !== undefined && t - o.state.trampled >= TIDY.trampled) {
+      delete o.state.trampled;   // the crops have stood back up
+    } else if (o.kind === 'mural' && o.state.smudged !== undefined && t - o.state.smudged >= TIDY.smudged) {
+      delete o.state.smudged;
+      const artist = live.find(w => w.id === o.by[0]);
+      if (artist) emit(world, { kind: 'interaction', actors: [artist.id], target: o.id, data: { what: 'repainted' }, salience: 1, causes: [{ object: o.id }] });
     }
   }
 }

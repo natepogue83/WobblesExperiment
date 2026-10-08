@@ -98,6 +98,27 @@ function mouth(face, dark) {
 }
 
 const daisy = (x, y, c, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="-3.4" rx="2" ry="3.2" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="1.9" fill="#ffcf3a"/></g>`;
+// Flung into a mural: splotches of paint (kept off the face).
+const PAINT = ['#c9563c', '#4a8ac9', '#5aa86b', '#f2b13a', '#b06bc9'];
+function paintSVG(i) {
+  const a = PAINT[i % 5], b = PAINT[(i + 2) % 5], c = PAINT[(i + 4) % 5];
+  // An irregular splat: spiky blob with a drip or two running down.
+  const splat = (x, y, r, col, rot = 0, drip = 0) => {
+    let d = '';
+    for (let k = 0; k < 8; k++) {
+      const t0 = (k / 8) * Math.PI * 2 + rot, t1 = ((k + 0.5) / 8) * Math.PI * 2 + rot;
+      const r0 = r * (k % 3 === 0 ? 1.25 : 1), r1 = r * 0.55;
+      d += (k ? 'Q' : 'M') + (k ? `${(x + Math.cos(t1 - Math.PI / 8) * r1 * 1.4).toFixed(1)} ${(y + Math.sin(t1 - Math.PI / 8) * r1 * 1.4).toFixed(1)} ` : '') + `${(x + Math.cos(t0) * r0).toFixed(1)} ${(y + Math.sin(t0) * r0).toFixed(1)} `;
+    }
+    return `<path d="${d}Z" fill="${col}"/>` + (drip ? `<path d="M${x} ${y + r * 0.6} q-1.4 ${drip * 0.6} 0 ${drip} q1.4 -${drip * 0.4} 0 -${drip}" stroke="${col}" stroke-width="2.4" stroke-linecap="round" fill="none"/>` : '');
+  };
+  return `<g class="paint" opacity=".93">` + splat(-9, -36, 5.5, a, 0.3) + splat(9, -38, 3.4, c, 1.1) + splat(-19, -15, 6, b, 0.7, 6) +
+    splat(18, -12, 5.2, a, 0.2, 5) + splat(2, -5, 4.2, c, 0.9) + splat(-9, -3, 2.6, a, 0) + `<circle cx="23" cy="-24" r="1.6" fill="${b}"/><circle cx="-24" cy="-28" r="1.4" fill="${c}"/></g>`;
+}
+// Fresh out of the river: a wet sheen and drips.
+const WET_DRIPS = '<g class="drips"><path d="M-21 -26 Q-14 -40 0 -42 Q14 -40 21 -26" stroke="#bfe3ff" stroke-width="2" fill="none" opacity=".7"/><ellipse cx="0" cy="-20" rx="23" ry="19" fill="#5aa3d8" opacity=".12"/>' +
+  ['-16 -10 0', '17 -14 .4', '-4 -2 .8', '9 -1 .2'].map(s => { const [x, y, d] = s.split(' '); return `<path class="drop" style="animation-delay:${d}s" d="M${x} ${y} q-2.4 3.4 0 5 q2.4 -1.6 0 -5 Z" fill="#7cc0f0"/>`; }).join('') + '</g>';
+
 const FLOWER_CROWN = `<g class="crown"><path d="M-17 -33 Q0 -44 17 -33" stroke="#5e8f3a" stroke-width="2" fill="none"/>${daisy(-14, -35, '#fff')}${daisy(-5, -39.5, '#ffb3c7', 1.1)}${daisy(5, -39.5, '#fff', 1.05)}${daisy(14, -35, '#c9b3ff')}</g>`;
 const BUTTERFLY_FRIEND = '<g class="crown-fly"><g class="wings"><path d="M0 0 Q-5 -6 -7 -1 Q-6 2 0 0 Z" fill="#ffb3d1"/><path d="M0 0 Q5 -6 7 -1 Q6 2 0 0 Z" fill="#ffd27a"/></g></g>';
 // Keepsakes worn on the body: a feather by the sprout, a shell or stone pendant,
@@ -154,6 +175,8 @@ export function wobblinSVG(w, opts = {}) {
       ${w.charm ? charmSVG(w.charm) : ''}
       ${w.flower ? FLOWER_CROWN + BUTTERFLY_FRIEND : ''}
       ${w.zapped ? ZAP_FRIZZ : ''}
+      ${w.paint !== null && w.paint !== undefined ? paintSVG(w.paint) : ''}
+      ${w.wet ? WET_DRIPS : ''}
       ${elder ? CANE : ''}
       ${carriedSVG(w.carry || [])}
     </g></g></g>`;

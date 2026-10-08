@@ -628,6 +628,7 @@ function wireWobblins(svg) {
         act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...flags });
         const last = world.events[world.events.length - 1];
         if (last && last.kind === 'interaction' && interactionToast(last)) toast(interactionToast(last));
+        riverAfter(w, p.x, water);
       },
       onCancel: () => {
         dragging = false;
@@ -727,6 +728,32 @@ function land(svg, g, w, x, y, water) {
   act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...(heldFlags[w.id] && heldFlags[w.id].shaken ? { shaken: true } : {}) });
   const ev = world.events[world.events.length - 1];
   if (ev && ev.kind === 'interaction') toast(interactionToast(ev));
+  riverAfter(w, x, water);
+}
+
+// After a dunk, the river does the rest: off downstream, or a friend wades in after them.
+function riverAfter(w, x, water) {
+  if (water !== 'riverbank') return;
+  let ev = null;
+  for (let i = world.events.length - 1; i >= 0 && world.events[i].t === world.tick; i--) {
+    const e = world.events[i];
+    if (e.kind === 'interaction' && e.target === w.id && ['swept_downstream', 'rescued', 'swam'].includes(e.data.what)) { ev = e; break; }
+  }
+  if (ev) {
+    const bank = (px) => riverYAt(px) - 44;
+    if (ev.data.what === 'swept_downstream') {
+      const dir = x < 600 ? 1 : -1, x2 = Math.max(70, Math.min(1130, x + dir * 190));
+      puppets.goTo(w.id, x2, riverYAt(x2), 1700);
+      setTimeout(() => puppets.goTo(w.id, x2 + dir * 10, bank(x2 + dir * 10), 1200), 1700);
+    } else if (ev.data.what === 'rescued') {
+      setTimeout(() => puppets.rushTo(ev.actors[0], w.id), 250);
+      setTimeout(() => puppets.goTo(w.id, x, bank(x), 1200), 1500);
+    } else if (ev.data.what === 'swam') {
+      const dir = x < 600 ? 1 : -1;
+      puppets.goTo(w.id, x + dir * 60, riverYAt(x + dir * 60), 1200);
+      setTimeout(() => puppets.goTo(w.id, x + dir * 40, bank(x + dir * 40), 1200), 1300);
+    }
+  }
 }
 
 // What a dropped or flung Wobblin lands on: another Wobblin first, then a thing.
@@ -750,6 +777,8 @@ function landingTarget(id, x, y) {
 }
 
 const INTERACTION_TOAST = {
+  swam: 'Cannonball! And a happy paddle back.', rescued: 'A friend wades in to the rescue!', swept_downstream: 'Whoosh! Off down the river...',
+  paint_splat: 'SPLAT. A Wobblin-shaped smudge.', trampled: 'Squish. Right in the vegetable patch.',
   hug: 'Aww, a hug.', comforted: 'A friend rushes over to help.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
   stuck_in_tree: 'Stuck in a tree!', fire_walk: 'Walked right through the fire...', singed: 'HOT HOT HOT! Off to the river.', caught_fish: 'Caught a fish!',
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',

@@ -10,7 +10,7 @@ import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
-import { landOnto, powerOnto, quake } from './interactions.js';
+import { landOnto, powerOnto, quake, riverDunk } from './interactions.js';
 import { reactToAction } from './reactions.js';
 import { GOAL_BY_ID, progressOf } from './goals.js';
 import { grantAsks } from './asks.js';
@@ -399,6 +399,7 @@ function applyActionEffects(world, a) {
       if (a.cradled) emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'cradled' }, salience: 2, causes });
       if (a.shaken) emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'shaken' }, salience: 2, causes });
       if (a.onto !== undefined) landOnto(world, w, a, causes);
+      else if (a.splash && a.zone === 'riverbank') riverDunk(world, w, a, causes);
     } else if (a.nudge === 'move') {
       // Picked up and set down somewhere else. Moving it doesn't make it new.
       const o = world.objects.find(x => x.id === a.target);

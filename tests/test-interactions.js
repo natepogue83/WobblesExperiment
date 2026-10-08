@@ -53,6 +53,57 @@ section('Dropping and flinging onto things');
   ok('none of it adds knowledge (rule zero)');
 }
 
+section('Rivers, murals and gardens');
+{
+  // Flung into the river: the bold swim, a friend on the bank wades in, the rest get swept off.
+  const seen = { swam: 0, rescued: 0, swept_downstream: 0 };
+  for (let seed = 1; seed <= 30; seed++) {
+    const w = createWorld(seed, { barren: true });
+    const [a, b] = w.wobblins;
+    const K = knowledge(w);
+    const kind = seed % 3;
+    if (kind === 0) Object.assign(a.traits, { boldness: 0.8, playfulness: 0.7 });
+    else Object.assign(a.traits, { boldness: 0.3, playfulness: 0.3 });
+    if (kind === 1) { b.zone = 'riverbank'; b.bonds = { [a.id]: 0.7 }; }
+    else for (const x of w.wobblins) x.bonds = {};
+    assert.equal(applyAction(w, { seq: 1, t: 0, type: 'nudge', nudge: 'carry', target: a.id, zone: 'riverbank', thrown: true, splash: true }).ok, true);
+    const e = w.events.filter(x => x.kind === 'interaction').pop();
+    assert.ok(e && seen[e.data.what] !== undefined, seed + ' ' + (e && e.data.what));
+    seen[e.data.what]++;
+    assert.ok(a.wetUntil > w.tick);
+    if (e.data.what === 'rescued') { assert.equal(e.actors[0], b.id); assert.ok(b.bonds[a.id] > 0.7); }
+    assert.equal(knowledge(w), K);
+  }
+  assert.ok(seen.swam === 10 && seen.rescued === 10 && seen.swept_downstream === 10, JSON.stringify(seen));
+  ok(`flung in the river: ${seen.swam} swam it, ${seen.rescued} were fished out by a friend, ${seen.swept_downstream} were swept downstream`);
+
+  const w = createWorld(5, { barren: true });
+  const [a, b, c] = w.wobblins;
+  for (const x of [a, b, c]) x.zone = 'hill';
+  const mural = makeObject(w, { kind: 'mural', slot: 'hill.1', by: [b.id], origin: { natural: true }, state: {} });
+  let seq = 0;
+  const carry = (x, extra) => applyAction(w, { seq: ++seq, t: w.tick, type: 'nudge', nudge: 'carry', target: x.id, ...extra });
+  assert.equal(carry(a, { zone: 'hill', onto: mural.id, thrown: true }).ok, true);
+  assert.ok(last(w, 'paint_splat'));
+  assert.ok(a.paintUntil > w.tick && mural.state.smudged === w.tick);
+  assert.ok((a.bonds[b.id] || 0) < 0, 'the artist is not pleased');
+  for (let i = 0; i < 28; i++) tick(w);
+  assert.equal(mural.state.smudged, undefined);
+  assert.ok(w.events.find(e => e.kind === 'interaction' && e.data.what === 'repainted' && e.actors[0] === b.id));
+  ok('flung into a mural: covered in paint, a Wobblin-shaped smudge, a cross artist who later repaints it');
+
+  for (const x of [a, b, c]) x.zone = 'meadow';
+  const garden = makeObject(w, { kind: 'garden', slot: 'meadow.2', origin: { natural: true }, state: {} });
+  c.knows.garden = { at: 0 };
+  assert.equal(carry(a, { zone: 'meadow', onto: garden.id, thrown: true }).ok, true);
+  assert.ok(last(w, 'trampled'));
+  assert.ok(garden.state.trampled !== undefined);
+  assert.ok((c.bonds[a.id] || 0) < 0, 'the gardener is cross');
+  for (let i = 0; i < 16; i++) tick(w);
+  assert.equal(garden.state.trampled, undefined);
+  ok('flung into the garden: the crops are flattened for a while and the gardeners are cross');
+}
+
 section('Dropped right on their heads');
 {
   const w = createWorld(31, { barren: true });

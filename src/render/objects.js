@@ -166,7 +166,8 @@ function objectArtInner(o, muralIcon) {
     case 'garden':
       return `<path d="M-38 6 L-32 -12 L32 -12 L38 6 Z" fill="${G('soil')}"/>` +
         [-8, -2, 4].map(y => `<path d="M-33 ${y} Q0 ${y - 2} 33 ${y}" stroke="#4a321e" stroke-width="1.6" fill="none" opacity="0.6"/>`).join('') +
-        [-26, -13, 0, 13, 26].map((x, i) => `<g transform="translate(${x} ${-6 + (i % 2) * 6})"><path d="M0 0 Q-7 -9 -1 -14 Q0 -7 0 0 Z" fill="${G('leaf2')}"/><path d="M0 0 Q7 -8 2 -14 Q1 -7 0 0 Z" fill="${G('leaf')}"/>${i % 2 ? '<circle cx="0" cy="1" r="2.6" fill="#f08a2c"/>' : ''}</g>`).join('');
+        (o.state.trampled !== undefined ? '<ellipse cx="0" cy="-4" rx="17" ry="6" fill="#3a2614" opacity=".45"/>' : '') +
+        [-26, -13, 0, 13, 26].map((x, i) => `<g transform="translate(${x} ${-6 + (i % 2) * 6})${o.state.trampled !== undefined ? ` rotate(${i < 2 ? -78 : i > 2 ? 78 : 0}) scale(${i === 2 ? '1 .35' : '.8'})` : ''}"><path d="M0 0 Q-7 -9 -1 -14 Q0 -7 0 0 Z" fill="${G('leaf2')}"/><path d="M0 0 Q7 -8 2 -14 Q1 -7 0 0 Z" fill="${G('leaf')}"/>${i % 2 ? '<circle cx="0" cy="1" r="2.6" fill="#f08a2c"/>' : ''}</g>`).join('');
     case 'raft':
       return shadow(30, 6) + `<g>` + [-20, -10, 0, 10].map(x => `<rect x="${x}" y="-7" width="9" height="12" rx="4" fill="${G('wood')}"/>`).join('') +
         `<path d="M-22 -3 h42 M-22 2 h42" stroke="#5a3f24" stroke-width="1.3"/></g><path d="M1 -7 L1 -38" stroke="#6b4a2a" stroke-width="2.4"/><path d="M2 -36 Q18 -26 14 -12 L2 -12 Z" fill="#f2ead6" stroke="#c9bfa4"/>`;
@@ -202,7 +203,8 @@ function objectArtInner(o, muralIcon) {
         `<circle cx="15" cy="-34" r="4.5" fill="#f2b13a" opacity=".9"/><path d="M15 -41 v-3 M21 -34 h3 M9 -34 h-3 M19 -39 l2 -2" stroke="#f2b13a" stroke-width="1.4"/>` +
         hand(-15, -12, '#c9563c') + hand(17, -10, '#4a8ac9', -12) + hand(-8, -36, '#5aa86b', 14, 0.7) +
         `<path d="M-22 -8 q4 3 8 0 q4 -3 8 0" stroke="#c9563c" stroke-width="1.4" fill="none" opacity=".7"/>` +
-        `<g transform="translate(0 4) scale(.9)">${muralIcon(o.state.depictsKind)}</g>`;
+        `<g transform="translate(0 4) scale(.9)">${muralIcon(o.state.depictsKind)}</g>` +
+        (o.state.smudged !== undefined ? '<g class="smear"><path d="M-3 -6 C-17 -7 -17 -33 -3 -35 C11 -35 12 -8 -3 -6 Z" fill="#7a5a8a" opacity=".5"/><path d="M-15 -22 l-8 5 M9 -27 l11 -4 M-4 -6 l-2 7 M5 -9 l4 6" stroke="#c9563c" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="M-9 -30 q6 -7 13 2" stroke="#4a8ac9" stroke-width="2.6" fill="none" opacity=".85"/></g>' : '');
     case 'snowman':
       return shadow(20, 5) + '<circle cx="0" cy="-12" r="13" fill="#f7fbff" stroke="#c9d8ea" stroke-width="1.2"/><circle cx="0" cy="-33" r="9.5" fill="#ffffff" stroke="#c9d8ea" stroke-width="1.2"/>' +
         '<ellipse cx="-4" cy="-15" rx="7" ry="9" fill="#ffffff" opacity=".7"/><circle cx="-3.2" cy="-35" r="1.4" fill="#2a2420"/><circle cx="3.2" cy="-35" r="1.4" fill="#2a2420"/>' +

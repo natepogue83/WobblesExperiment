@@ -7,7 +7,7 @@ import { emit } from './events.js';
 import { rngFor } from './rng.js';
 import { alive, liveObjects, findWobblin, findObject, r3, clamp, clamp01 } from './util.js';
 import { makeObject } from './world.js';
-import { slotIds } from './geometry.js';
+import { slotIds, ADJACENT } from './geometry.js';
 import { practice, shapeTrait } from './growth.js';
 import { SOCIAL } from './constants.js';
 
@@ -176,12 +176,64 @@ export function landOnto(world, w, a, causes) {
       laugh([w.id]);
       return say('snowman_smashed', { by: o.state.by }, 3, [w.id], [{ object: o.id }]);
     }
+    case 'mural': {
+      // Flung into a painting: a Wobblin-shaped smudge, and a Wobblin covered in paint.
+      if (!thrown) return null;
+      w.paintUntil = t + 24; w.paint = Math.floor(r() * 5);
+      o.state.smudged = t;
+      const artist = o.by[0] && findWobblin(world, o.by[0]);
+      if (artist && artist !== w && artist.alive) { mood(artist, -0.1); addBond(world, w, artist, -0.12); }
+      mood(w, w.traits.playfulness > 0.5 ? 0.1 : -0.05);
+      laugh([w.id]);
+      return say('paint_splat', { by: artist && artist !== w ? artist.id : null }, 3, [w.id], [{ object: o.id }]);
+    }
+    case 'garden': {
+      if (!thrown) { practice(world, w, 'foraging', 2); mood(w, 0.04); return say('weeded', {}, 1, [w.id], [{ object: o.id }]); }
+      // Squish: the crops are flattened for a while, and the gardeners are cross.
+      o.state.trampled = t;
+      mood(w, w.traits.playfulness > 0.5 ? 0.04 : -0.04);
+      for (const x of witnessesOf(world, o.zone, [w.id])) if (x.knows.garden) { mood(x, -0.06); addBond(world, x, w, -0.05); }
+      return say('trampled', {}, 3, [w.id], [{ object: o.id }]);
+    }
     case 'grave': {
       mood(w, -0.08);
       return say('remembers', { of: o.state.name }, 2, [w.id], [{ object: o.id }]);
     }
   }
   return null;
+}
+
+// Flung into the river with nothing to land on: the bold swim it, a friend may
+// wade in to the rescue, and everyone else gets swept a way downstream.
+export function riverDunk(world, w, a, causes) {
+  const t = world.tick;
+  const r = rngFor(world.seed, 'dunk', t, a.seq);
+  const say = (what, actors, data = {}, salience = 3) =>
+    emit(world, { kind: 'interaction', actors, target: w.id, data: { what, ...data }, salience, causes });
+  w.wetUntil = t + 2;
+  if (world.climate.season === 'cold') w.needs.warmth = r3(clamp01(w.needs.warmth - 0.1));
+  if (w.knows.wading || w.traits.boldness + w.traits.playfulness > 1.15) {
+    mood(w, 0.12); shapeTrait(w, 'boldness', 0.01);
+    return say('swam', [w.id], {}, 2);
+  }
+  let friend = null, fb = 0.3;
+  for (const x of alive(world)) {
+    if (x === w || x.stage === 'baby' || (x.zone !== 'riverbank' && !ADJACENT.riverbank.includes(x.zone))) continue;
+    const b = bond(x, w.id);
+    if (b > fb || (b === fb && friend && x.id < friend.id)) { fb = b; friend = x; }
+  }
+  if (friend) {
+    friend.zone = 'riverbank'; friend.wetUntil = t + 2;
+    friend.heldUntil = Math.max(friend.heldUntil || 0, t + 1);
+    addBond(world, friend, w, 0.12);
+    mood(w, 0.04); mood(friend, 0.04); shapeTrait(friend, 'boldness', 0.01);
+    return say('rescued', [friend.id, w.id]);
+  }
+  mood(w, -0.08); w.needs.safety = r3(clamp01(w.needs.safety - 0.1)); shapeTrait(w, 'caution', 0.02);
+  const fish = r() < 0.25;
+  if (fish) w.needs.food = r3(clamp01(w.needs.food + 0.2));
+  for (const x of witnessesOf(world, 'riverbank', [w.id])) mood(x, r3(0.02 + 0.04 * x.traits.playfulness));
+  return say('swept_downstream', [w.id], { fish });
 }
 
 // A Keeper power dropped right on a Wobblin's head. Pocket God slapstick, with

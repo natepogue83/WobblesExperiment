@@ -30,7 +30,7 @@ function objectPos(o) {
 }
 
 const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question', level_up: 'levelup' };
-const INTERACTION_BUBBLE = { static_shock: 'spark', charged: 'spark', stones_burst: 'smoke', bonk_idea: 'idea', flower_crown: 'heart', gift_caught: 'heart', squashed: 'smoke', bonked: 'smoke', zapped: 'spark', hug: 'heart', comforted: 'heart', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
+const INTERACTION_BUBBLE = { static_shock: 'spark', charged: 'spark', stones_burst: 'smoke', bonk_idea: 'idea', flower_crown: 'heart', gift_caught: 'heart', squashed: 'smoke', bonked: 'smoke', zapped: 'spark', hug: 'heart', comforted: 'heart', swam: 'heart', rescued: 'heart', swept_downstream: 'question', paint_splat: 'spark', trampled: 'smoke', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
 const BUBBLE_RANK = { spark: 5, levelup: 4.5, smoke: 4, ponder: 3, heart: 2, question: 1 };
 
 // Their strongest trait, if it really stands out (it shows in their brows).
@@ -49,7 +49,9 @@ export const OBJECT_SCALE = { snowman: 1.45, hut: 1.75, temple: 1.45, totem: 1.7
 // The keepsake a Wobblin treasures (its lucky charm), worn where you can see it.
 // What a portrait needs beyond the raw Wobblin: brows, crown, frizz, charm.
 export function decorOf(world, w) {
-  return { temper: temperOf(w), flower: (w.flowerUntil || 0) > world.tick, zapped: (w.zappedUntil || 0) > world.tick, charm: charmOf(world, w) };
+  return { temper: temperOf(w), flower: (w.flowerUntil || 0) > world.tick, zapped: (w.zappedUntil || 0) > world.tick, charm: charmOf(world, w), paint: paintOf(world, w) };
+}
+function paintOf(world, w) { return (w.paintUntil || 0) > world.tick ? (w.paint || 0) : null;
 }
 function charmOf(world, w) {
   if (!w.luckyCharm) return null;
@@ -172,6 +174,7 @@ export function renderState(world) {
       face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood, title: titleOf(w),
       flower: (w.flowerUntil || 0) > world.tick, charm: charmOf(world, w),
       ask: ((world.asks || []).find(a => !a.done && a.by === w.id) || {}).want || null, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
+      wet: (w.wetUntil || 0) > world.tick, paint: paintOf(world, w),
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)

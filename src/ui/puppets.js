@@ -87,6 +87,13 @@ export class Puppets {
     });
   }
 
+  // Hurry to a point (swept down the river, climbing out onto the bank).
+  goTo(id, x, y, ms = 1800) {
+    const p = this.p.get(id), now = performance.now();
+    if (!p || p.pinned) return;
+    p.tx = p.ax = x; p.ty = p.ay = y; p.arrived = false; p.chase = { until: now + ms }; p.idleUntil = now + ms + 3000;
+  }
+
   // Run to a friend's side (a comforting hug after a hard knock).
   rushTo(id, toId) {
     const p = this.p.get(id), q = this.p.get(toId), now = performance.now();

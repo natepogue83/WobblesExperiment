@@ -49,7 +49,7 @@ function zoneFood(objs, zone) {
   if (objs.stats && objs.stats[zone].food) return objs.stats[zone].food;
   const here = zoneObjects(objs, zone);
   const s = { bushes: here.filter(o => o.kind === 'bush').length, fish: here.some(o => o.kind === 'fish'),
-    garden: here.some(o => o.kind === 'garden'), hearth: here.some(o => o.kind === 'hearth') };
+    garden: here.some(o => o.kind === 'garden' && o.state.trampled === undefined), hearth: here.some(o => o.kind === 'hearth') };
   if (objs.stats) objs.stats[zone].food = s;
   return s;
 }
