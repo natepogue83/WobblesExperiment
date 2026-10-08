@@ -69,6 +69,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 - **Devotion is shown next to belief** once you have some, and a Miracle tile says how much it costs.
 - **You can see belief grow:** every act that delights them floats a "+1.6 belief" up from where it happened, and the belief bar flashes (scaring them shows a red minus).
+- **Twelve tricks to try** sit under the milestones in the Goals panel (a hug, a flower crown, juggling, to the rescue, art the hard way, on thin ice...). Each one you pull off is worth 1 belief, and the panel says how to do it, so it doubles as a list of what your hands can do.
 - **Ages and 15 milestones** (the Goals button). Examples: tame fire, welcome a baby, three generations, a temple. Claiming one gives belief, and belief unlocks powers.
 - **A fast start:** while you watch a new colony, its first 12 days pass at 20 seconds each, then slow to a day a minute. The first discoveries, asks and unlocks arrive within a few minutes.
 - **Each new power gets a banner** with its icon when belief unlocks it, and its tray tile glows until you try it.

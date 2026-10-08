@@ -22,7 +22,7 @@ experiment overlay, replay verification and save export/import).
 - **Drag small things** (stones, gifts, curios, sprouts, clay) to move them.
 - **Hover your hand or a power over them.** The trusting wave hello and the wary cover their heads; with lightning or a boulder overhead, the timid brace and the bold bounce.
 - **A golden bubble** means a Wobblin is asking you for something; grant it for belief. **Drop one Wobblin on another** for a hug: close friends pair up sooner, which is how you breed for a trait.
-- **Goals** lists milestones; claiming one adds belief, and belief unlocks powers. **Family** shows every generation; **Chronicle** is their story.
+- **Goals** lists milestones and tricks to try; claiming one adds belief, and belief unlocks powers. **Family** shows every generation; **Chronicle** is their story.
 - Dev: `?debug=1&fresh=1` starts over, `?debug=1&devload=/_dev_save.json` loads a prepared village (`node tests/_mkdev.mjs <seed> <ticks>` makes one).
 
 ## Test it
