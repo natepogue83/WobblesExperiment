@@ -62,6 +62,8 @@ function boulderSlots(world, slot) {
   return [slot, other];
 }
 
+const MAX_PILE = 4;
+
 function freeSlotNear(world, zone) {
   return freeSlotIn(world, zone) || ZONES[zone] && ['meadow', 'grove', 'hill', 'hollow'].map(z => freeSlotIn(world, z)).find(Boolean) || null;
 }
@@ -91,7 +93,9 @@ export function validateAction(world, a) {
       case 'stone': {
         if (a.variant !== 'stones' && a.variant !== 'boulder') return bad('variant');
         if (!slotInfo(a.slot)) return bad('slot');
-        if (objectAtSlot(world, a.slot)) return bad('occupied');
+        const there = objectAtSlot(world, a.slot);
+        // More stones on a small pile just make the pile bigger.
+        if (there && !(a.variant === 'stones' && there.kind === 'stones' && (there.state.count || 1) < MAX_PILE)) return bad('occupied');
         if (a.variant === 'boulder' && !boulderSlots(world, a.slot)) return bad('no_room');
         return { ok: true };
       }
@@ -236,6 +240,14 @@ function applyActionEffects(world, a) {
   if (a.type === 'power') {
     switch (a.power) {
       case 'stone': {
+        const pile = a.variant === 'stones' && objectAtSlot(world, a.slot);
+        if (pile) {
+          pile.state.count = (pile.state.count || 1) + 1;
+          pile.builtTick = t;   // freshly topped up
+          const ev = power({ power: 'stone', variant: 'stones', slot: a.slot, zone: pile.zone, added: true, ...(a.onto ? { onto: a.onto } : {}) }, pile.id);
+          if (a.onto) powerOnto(world, findWobblin(world, a.onto), a, ev);
+          break;
+        }
         const slots = a.variant === 'boulder' ? boulderSlots(world, a.slot) : null;
         const o = makeObject(world, {
           kind: a.variant, slot: a.slot, slots: slots || undefined, origin,

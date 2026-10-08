@@ -84,20 +84,25 @@ function birthStep(world) {
     if (a.lastBirth !== null && world.tick - a.lastBirth < SOCIAL.birthGap) continue;
     const r = rngFor(world.seed, 'birth', world.tick, a.id);
     if (!chance(r, SOCIAL.birthChance)) continue;
-    const traits = {};
+    // Each trait leans toward one parent or the other (so a very curious parent can
+    // have a very curious child), with a little noise and the odd surprise.
+    const traits = {}, from = {};
     const rm = rngFor(world.seed, 'mutate', world.tick, a.id);
     for (const k of ALL_TRAITS) {
-      traits[k] = (a.traits[k] + b.traits[k]) / 2;
-      if (rm() < 0.08) traits[k] += rm() < 0.5 ? -0.25 : 0.25;   // a surprising child
+      const lean = 0.15 + 0.7 * rm();
+      traits[k] = a.traits[k] * lean + b.traits[k] * (1 - lean);
+      from[k] = Math.abs(a.traits[k] - b.traits[k]) < 0.12 ? 'both' : lean > 0.6 ? a.id : lean < 0.4 ? b.id : 'both';
+      if (rm() < 0.08) { traits[k] += rm() < 0.5 ? -0.25 : 0.25; from[k] = 'surprise'; }   // a surprising child
     }
-    const baby = makeWobblin(world, { bornTick: world.tick, parents: [a.id, b.id], traits, zone: a.zone });
+    const baby = makeWobblin(world, { bornTick: world.tick, parents: [a.id, b.id], traits, traitNoise: 0.04, zone: a.zone });
     a.lastBirth = b.lastBirth = world.tick;
     // Babies inherit what their parents believe; knowledge comes by teaching.
     baby.beliefs = [...new Set([...a.beliefs, ...b.beliefs])].sort();
     baby.faith = r3((a.faith + b.faith) / 2);
     // Keep the genetics on record: the parents' average and what the baby got.
-    const mid = {}; for (const k of ALL_TRAITS) mid[k] = r3((a.traits[k] + b.traits[k]) / 2);
-    emit(world, { kind: 'birth', actors: [baby.id, a.id, b.id], data: { zone: a.zone, mid, born: { ...baby.traits } }, salience: 4 });
+    const mid = {}, pa = {}, pb = {};
+    for (const k of ALL_TRAITS) { mid[k] = r3((a.traits[k] + b.traits[k]) / 2); pa[k] = a.traits[k]; pb[k] = b.traits[k]; }
+    emit(world, { kind: 'birth', actors: [baby.id, a.id, b.id], data: { zone: a.zone, mid, pa, pb, from, born: { ...baby.traits } }, salience: 4 });
   }
 }
 

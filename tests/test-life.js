@@ -70,13 +70,15 @@ section('Hut gating');
       assert.equal(baby.bornTick, b.t);
       for (const k of Object.values(baby.knows)) assert.ok(k.since > baby.bornTick, 'babies are born knowing nothing');
       for (const k of Object.keys(b.data.mid)) {
-        const dev = Math.abs(b.data.born[k] - b.data.mid[k]);
-        assert.ok(dev <= 0.151 || Math.abs(dev - 0.25) <= 0.151 || b.data.born[k] === 0 || b.data.born[k] === 1, 'inherits ' + k);   // or a rare mutation
+        // Between the two parents (a little noise), or a rare surprise of +-0.25.
+        const lo = Math.min(b.data.pa[k], b.data.pb[k]) - 0.041, hi = Math.max(b.data.pa[k], b.data.pb[k]) + 0.041, v = b.data.born[k];
+        const within = x => x >= lo - 0.001 && x <= hi + 0.001;
+        assert.ok(within(v) || (b.data.from[k] === 'surprise' && (within(v - 0.25) || within(v + 0.25))) || v === 0 || v === 1, 'inherits ' + k);
       }
     }
   }
   assert.ok(withBirth / 50 >= 0.8, 'births in ' + withBirth + '/50');
-  ok('with Huts, at least 1 birth in ' + withBirth + '/50 seeds (>= 80%); babies inherit parent traits +-0.15; max population ' + maxPop);
+  ok('with Huts, at least 1 birth in ' + withBirth + '/50 seeds (>= 80%); each baby trait lies between the parents (or is a rare surprise); max population ' + maxPop);
 }
 
 section('Natural events');

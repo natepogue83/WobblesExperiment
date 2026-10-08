@@ -246,6 +246,9 @@ function templates(world, e, ctx) {
       }[d.what];
       return T || null;
     }
+    case 'keepsake': return d.item === 'stones'
+      ? [`${name} carried off an old pile of stones to build with.`, `${name} put some spare stones to use.`, `The old stones are gone: ${name} took them.`]
+      : [`${name} took the ${item(d.item)} home as a keepsake.`, `${name} kept the ${item(d.item)}.`, `The ${item(d.item)} went home with ${name}.`];
     case 'goal_reached': return [`Milestone: ${d.text}. Their belief in you grew.`, `You reached a milestone: ${d.text}.`, `${d.text}: done.`];
     case 'friends': return [`${name} and ${wob(world, e.actors[1])} are best friends now.`, `${name} and ${wob(world, e.actors[1])} are inseparable.`, `A friendship: ${name} and ${wob(world, e.actors[1])}.`];
     case 'rivals': return [`${name} and ${wob(world, e.actors[1])} can't stand each other.`, `A rivalry has started between ${name} and ${wob(world, e.actors[1])}.`, `${name} and ${wob(world, e.actors[1])} are rivals now.`];

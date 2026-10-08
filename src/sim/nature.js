@@ -49,6 +49,36 @@ export function strike(world, slot, causes, data) {
   return ev;
 }
 
+// ---- the valley tidies itself ------------------------------------------------
+// Old Keeper things get used up so the valley never fills for good: curios and
+// gifts are taken home as keepsakes, spare stone piles are carried off for
+// building, scorch marks grow over and ruins crumble.
+export const TIDY = { keepsake: 48, stones: 72, cairn: 144, spareStones: 3, scorch: 48, ruin: 240 };
+function tidyStep(world) {
+  const t = world.tick;
+  const live = alive(world);
+  const takerIn = zone => live.find(w => w.zone === zone && w.stage !== 'baby') || live.find(w => w.stage !== 'baby') || null;
+  const piles = liveObjects(world).filter(o => o.kind === 'stones');
+  let spare = piles.length - TIDY.spareStones;
+  for (const o of liveObjects(world)) {
+    const age = t - o.builtTick;
+    if ((o.kind === 'curio' && o.state.pullDone && age >= TIDY.keepsake) || (o.kind === 'gift' && age >= TIDY.keepsake)) {
+      const w = takerIn(o.zone);
+      o.state.gone = true; o.hp = 0; o.state.takenBy = w ? w.id : null;
+      if (w && !w.luckyCharm) w.luckyCharm = o.id;
+      if (w) emit(world, { kind: 'keepsake', actors: [w.id], target: o.id, data: { item: o.state.curio || o.state.giftId, zone: o.zone }, salience: 1, causes: [{ object: o.id }] });
+    } else if (o.kind === 'stones' && spare > 0 && age >= (o.state.stacked ? TIDY.cairn : TIDY.stones)) {
+      spare--;
+      const w = takerIn(o.zone);
+      o.state.gone = true; o.hp = 0; o.state.usedFor = 'building';
+      if (w) emit(world, { kind: 'keepsake', actors: [w.id], target: o.id, data: { item: 'stones', zone: o.zone }, salience: 1, causes: [{ object: o.id }] });
+    } else if ((o.kind === 'scorch' && age >= TIDY.scorch && t - (o.state.burnedTick ?? o.builtTick) >= TIDY.scorch) ||
+               (o.kind === 'ruin' && age >= TIDY.ruin)) {
+      o.state.gone = true; o.hp = 0; o.state.faded = true;
+    }
+  }
+}
+
 // ---- water: rain side effects, ponds, floods ----------------------------
 export function freeSlotIn(world, zone) {
   for (const s of slotIds(zone)) if (!objectAtSlot(world, s)) return s;
@@ -210,6 +240,7 @@ export function environmentStep(world) {
     if (o.kind === 'curio' && o.state.until !== undefined && t >= o.state.until) o.state.pullDone = true;
   }
 
+  tidyStep(world);
   fireStep(world);
   growthStep(world);
   pondStep(world);

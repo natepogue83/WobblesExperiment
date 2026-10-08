@@ -96,8 +96,15 @@ export function objectArt(o, muralIcon = () => '') {
       if (o.state.stacked) {
         return shadow(16, 4) + rock(0, 0, 13, 9, G('rock2')) + rock(1, -8, 10, 7, G('rock'), -4) + rock(-1, -15, 7.5, 5.5, G('rock2'), 6) + rock(0, -20.5, 4.5, 3.5, G('rock'));
       }
-      return shadow(22, 6) + rock(-9, 1, 11, 8, G('rock2'), -6) + rock(9, 3, 9, 7, G('rock'), 8) + rock(0, -5, 8, 6, G('rock'), 2) +
-        `<ellipse cx="-12" cy="-6" rx="4" ry="1.6" fill="#6f9a4a" opacity="0.7"/>`;
+      {
+        // A bigger pile for every handful added (up to 4).
+        const n = Math.min(4, o.state.count || 1);
+        let pile = shadow(22 + (n - 1) * 5, 6) + rock(-9, 1, 11, 8, G('rock2'), -6) + rock(9, 3, 9, 7, G('rock'), 8) + rock(0, -5, 8, 6, G('rock'), 2);
+        if (n >= 2) pile += rock(-19, 4, 8, 6, G('rock'), 10) + rock(18, 5, 7, 5.5, G('rock2'), -8);
+        if (n >= 3) pile += rock(-5, -11, 7, 5, G('rock2'), -4) + rock(6, -9, 6.5, 5, G('rock'), 6);
+        if (n >= 4) pile += rock(0, -16, 5.5, 4.2, G('rock'), 0) + rock(-26, 6, 6, 4.5, G('rock2'), 4);
+        return pile + `<ellipse cx="-12" cy="-6" rx="4" ry="1.6" fill="#6f9a4a" opacity="0.7"/>`;
+      }
     case 'boulder':
       return shadow(56, 12, 6) +
         `<path d="M-50 6 Q-56 -24 -26 -40 Q4 -52 32 -40 Q56 -26 52 0 Q48 12 22 12 Q-30 14 -50 6 Z" fill="${G('rock')}"/>` +

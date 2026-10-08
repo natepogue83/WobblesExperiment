@@ -38,11 +38,26 @@ const BLURB = {
   herb_healing: 'Healing herbs. Injuries mend faster now.'
 };
 
+const TRAIT_WORD = { curiosity: 'curiosity', boldness: 'bravery', sociability: 'friendliness', patience: 'patience', playfulness: 'playfulness', piety: 'faith', caution: 'caution' };
+
+// Which parent a baby takes after, trait by trait (from the birth event).
+export function inheritance(world, e) {
+  const name = id => (world.wobblins.find(w => w.id === id) || {}).name || '?';
+  const from = e.data.from || {}, born = e.data.born || {};
+  const lines = [];
+  for (const [k, who] of Object.entries(from)) {
+    if (who === 'surprise') lines.push({ k, text: (born[k] > (e.data.mid || {})[k] ? 'a surprising amount of ' : 'surprisingly little ') + TRAIT_WORD[k], v: born[k], rank: 2 });
+    else if (who !== 'both' && born[k] >= 0.55) lines.push({ k, text: name(who) + "'s " + TRAIT_WORD[k], v: born[k], rank: born[k] });
+  }
+  return lines.sort((x, y) => y.rank - x.rank).slice(0, 3);
+}
+
 let queue = [], showing = false;
 
 export function momentsFor(world, events) {
   for (const e of events) {
     if (e.kind === 'discovery') queue.push({ kind: 'discovery', e });
+    else if (e.kind === 'birth') queue.push({ kind: 'birth', e });
     else if (e.kind === 'goal_reached') continue;
   }
   if (!showing) next(world);
@@ -53,6 +68,7 @@ function next(world) {
   if (!m) { showing = false; return; }
   showing = true;
   if (m.kind === 'discovery') discoveryCard(world, m.e, () => next(world));
+  else if (m.kind === 'birth') birthCard(world, m.e, () => next(world));
 }
 
 function discoveryCard(world, e, done) {
@@ -79,8 +95,35 @@ function discoveryCard(world, e, done) {
   setTimeout(close, 5200);
 }
 
-function confetti(el, tier) {
-  const colors = ['#ffd24a', '#ff8fa3', '#7cc6ff', '#8ee08a', '#c9a6ff', '#ffb36b'];
+function birthCard(world, e, done) {
+  const [baby, a, b] = e.actors.map(id => world.wobblins.find(w => w.id === id));
+  if (!baby) { done(); return; }
+  const got = inheritance(world, e);
+  const card = document.createElement('div');
+  card.className = 'moment birth';
+  card.innerHTML = `
+    <div class="burst" aria-hidden="true"></div>
+    <div class="who">${wobblinSVGBox(baby)}</div>
+    <div class="what">
+      <small>A baby! · born to ${esc(a ? a.name : '?')} and ${esc(b ? b.name : '?')}</small>
+      <b>${esc(baby.name)}</b>
+      <p>${got.length ? esc(baby.name) + ' got ' + got.map(g => esc(g.text) + ' (' + Math.max(1, Math.round(g.v * 10)) + ')').join(', ').replace(/, ([^,]*)$/, ' and $1') + '.' : esc(baby.name) + ' is a little of both.'}</p>
+      <span class="meta">Tap them to see all their stats</span>
+    </div>`;
+  document.body.append(card);
+  confetti(card.querySelector('.burst'), 0, ['#ffc2d4', '#ffe1ea', '#ffd86b', '#c9e8ff']);
+  let gone = false;
+  const close = () => { if (gone) return; gone = true; card.classList.add('out'); setTimeout(() => { card.remove(); done(); }, 350); };
+  card.addEventListener('pointerdown', close);
+  setTimeout(close, 5200);
+}
+
+function wobblinSVGBox(w) {
+  return `<svg viewBox="-30 -58 60 64" width="96" height="100" aria-hidden="true">${wobblinSVG({ ...w, face: 'love', carry: [] })}</svg>`;
+}
+
+function confetti(el, tier, palette) {
+  const colors = palette || ['#ffd24a', '#ff8fa3', '#7cc6ff', '#8ee08a', '#c9a6ff', '#ffb36b'];
   const n = 26 + tier * 6;
   let html = '';
   for (let i = 0; i < n; i++) {

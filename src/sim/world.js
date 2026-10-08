@@ -43,13 +43,14 @@ export function makeWobblin(world, spec) {
   const id = 'w' + n;
   const r = rngFor(world.seed, 'wobblin', n);
   const traits = {};
+  const noise = spec.traitNoise ?? 0.15;   // babies stay close to what they inherited
   for (const k of TRAITS) {
-    const base = spec.traits ? spec.traits[k] + range(r, -0.15, 0.15) : range(r, 0.1, 0.9);
+    const base = spec.traits ? spec.traits[k] + range(r, -noise, noise) : range(r, 0.1, 0.9);
     traits[k] = r3(clamp01(base));
   }
   {
     const rc = rngFor(world.seed, 'caution', n);
-    const base = spec.traits && spec.traits.caution !== undefined ? spec.traits.caution + range(rc, -0.15, 0.15) : range(rc, 0.1, 0.9);
+    const base = spec.traits && spec.traits.caution !== undefined ? spec.traits.caution + range(rc, -noise, noise) : range(rc, 0.1, 0.9);
     traits.caution = r3(clamp01(base));
   }
   const lifespan = randInt(r, LIFE.lifespanMin, LIFE.lifespanMax);

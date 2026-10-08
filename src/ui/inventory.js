@@ -82,7 +82,7 @@ export function trayItems() {
   });
   const anywhere = action => ({ hint: pt => ({ x: pt.x, y: pt.y, r: 60, ok: true }), drop: () => action });
   return [
-    { row: 'powers', id: 'stones', label: 'Stones', cd: 'stone', ...slotDrop('stone', 'stones', (w, s) => free(w)(s)) },
+    { row: 'powers', id: 'stones', label: 'Stones', cd: 'stone', ...slotDrop('stone', 'stones', (w, s) => { const o = objectAtSlot(w, s); return !o || (o.kind === 'stones' && (o.state.count || 1) < 4); }) },
     { row: 'powers', id: 'boulder', label: 'Boulder', cd: 'stone', ...slotDrop('stone', 'boulder', (w, s) => free(w)(s)) },
     { row: 'powers', id: 'bush', label: 'Berry seed', cd: 'plant', ...slotDrop('plant', 'bush', (w, s) => free(w)(s)) },
     { row: 'powers', id: 'tree', label: 'Tree seed', cd: 'plant', ...slotDrop('plant', 'tree', (w, s) => free(w)(s) && !s.startsWith('riverbank')) },

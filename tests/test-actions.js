@@ -17,6 +17,19 @@ function knowledge(world) {
   return stableStringify({ d: world.discoveries, k: world.wobblins.map(w => [w.id, w.knows]) });
 }
 
+section('Stones on stones');
+{
+  const w = createWorld(11, { barren: true });
+  let seq = 0;
+  const drop = () => { const r = applyAction(w, { seq: ++seq, t: w.tick, type: 'power', power: 'stone', slot: 'meadow.1', variant: 'stones' }); tick(w); tick(w); return r; };
+  for (let i = 0; i < 4; i++) assert.equal(drop().ok, true);
+  const piles = w.objects.filter(o => o.kind === 'stones' && !o.state.gone);
+  assert.equal(piles.length, 1);
+  assert.equal(piles[0].state.count, 4);
+  assert.equal(drop().reason, 'occupied');
+  ok('more stones on a small pile make it bigger (up to 4), instead of needing a new spot');
+}
+
 section('Validation');
 {
   const w = createWorld(11, { barren: true });
@@ -24,7 +37,7 @@ section('Validation');
   assert.equal(applyAction(w, stone).ok, true);
   rejects(w, { ...stone, seq: 2, slot: 'meadow.3' }, 'cooldown');
   tick(w); tick(w);
-  rejects(w, { ...stone, seq: 3, t: 2, slot: 'meadow.1' }, 'occupied');
+  rejects(w, { ...stone, seq: 3, t: 2, slot: 'meadow.1', variant: 'boulder' }, 'occupied');
   rejects(w, { ...stone, seq: 4, t: 2, slot: 'meadow.99' }, 'slot');
   rejects(w, { ...stone, seq: 5, t: 2, slot: 'nowhere.1' }, 'slot');
   rejects(w, { ...stone, seq: 6, t: 2, variant: 'pebble', slot: 'meadow.2' }, 'variant');

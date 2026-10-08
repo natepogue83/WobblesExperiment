@@ -1,6 +1,7 @@
 // panels.js — recap card, Chronicle, Discovery Book and Wobblin cards.
 // Read-only views of the world; they never change it.
 import { DISCOVERIES, BY_ID } from '../sim/discoveries.js';
+import { inheritance } from './moments.js';
 import { describeEvent, keeperCause, actionName } from '../sim/recap.js';
 import { wobblinSVG } from '../render/sprites.js';
 import { SKILLS, SKILL_NAMES, levelOf, xpForLevel, MAX_LEVEL, titleOf } from '../sim/growth.js';
@@ -146,10 +147,13 @@ export function showWobblinCard(panel, world, w, { onBless, wantText, hints = []
   const memories = w.memories.slice(-4).reverse().map(id => world.events[id - 1]).filter(Boolean).map(e => h('li', {}, describeEvent(world, e)));
   const name = id => (world.wobblins.find(x => x.id === id) || {}).name;
   const kids = world.wobblins.filter(x => x.parents.includes(w.id));
+  const birth = w.parents.length ? world.events.find(e => e.kind === 'birth' && e.actors[0] === w.id) : null;
+  const got = birth ? inheritance(world, birth) : [];
   const pals = Object.entries(w.bonds || {}).filter(([id]) => world.wobblins.some(x => x.id === id && x.alive));
   const friends = pals.filter(([, v]) => v >= 0.5).map(([id]) => name(id)), rivals = pals.filter(([, v]) => v <= -0.4).map(([id]) => name(id));
   const family = [w.partnerId ? 'partner of ' + name(w.partnerId) : null, friends.length ? 'friends with ' + friends.join(', ') : null, rivals.length ? 'rivals with ' + rivals.join(', ') : null, w.parents.length ? 'child of ' + w.parents.map(name).join(' & ') : null,
     kids.length ? kids.length + (kids.length === 1 ? ' child' : ' children') : null].filter(Boolean).join(' · ');
+  const takes = got.length ? h('p', { class: 'takes' }, 'Takes after: ' + got.map(g => g.text).join(', ')) : '';
   const hintList = hints.length ? h('div', { class: 'hints' }, h('b', {}, 'Could work out, if they were more...'),
     h('ul', {}, hints.map(x => h('li', {}, `${x.name}: needs ${TRAIT_LABEL[x.trait]} ${stat10(x.need)} (has ${stat10(x.have)})` + (x.here ? '. Everything else is right here!' : '.')))),
     h('p', { class: 'muted' }, 'Bless them for a boost, or raise a Wobblin born with more of it.')) : '';
@@ -159,7 +163,7 @@ export function showWobblinCard(panel, world, w, { onBless, wantText, hints = []
       h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`),
       family ? h('p', { class: 'muted' }, family) : '')),
     wantText ? h('p', { class: 'want-line' }, wantText) : '',
-    h('h3', { class: 'sub' }, 'Stats'), traits,
+    h('h3', { class: 'sub' }, 'Stats'), traits, takes,
     h('h3', { class: 'sub' }, 'Skills'), skills,
     hintList,
     h('p', { class: 'knows' }, h('b', {}, 'Knows: '), knows.length ? knows : 'nothing yet'),
