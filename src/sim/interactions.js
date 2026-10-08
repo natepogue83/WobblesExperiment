@@ -259,6 +259,20 @@ export function lightningOnto(world, target, strikeEvent) {
     for (const s of target.slots || [target.slot]) makeObject(world, { kind: 'stones', slot: s, origin: { event: strikeEvent.id }, state: { count: 2 } });
     return emit(world, { kind: 'interaction', target: target.id, data: { what: 'boulder_split' }, salience: 3, causes });
   }
+  if (target && target.kind === 'stones') {
+    // KABOOM: the pile (or cairn) bursts, stones everywhere, nobody hurt.
+    const was = target.state.stacked ? 'cairn' : 'pile';
+    target.state.stacked = false; target.state.count = 1;
+    for (const x of alive(world).filter(x => x.zone === target.zone)) { x.needs.safety = r3(clamp01(x.needs.safety - 0.1)); if (x.traits.playfulness > 0.6) mood(x, 0.05); }
+    return emit(world, { kind: 'interaction', target: target.id, data: { what: 'stones_burst', was, zone: target.zone }, salience: 2, causes });
+  }
+  if (target && (target.kind === 'totem' || target.kind === 'temple')) {
+    // It hums with your power for a day. The devout are sure it means something.
+    target.state.chargedUntil = t + 24;
+    const seen = alive(world).filter(x => x.zone === target.zone || x.traits.piety > 0.6);
+    for (const x of seen) x.faith = r3(clamp(x.faith + 0.04 + 0.06 * x.traits.piety, -1, 1));
+    return emit(world, { kind: 'interaction', actors: seen.slice(0, 6).map(x => x.id), target: target.id, data: { what: 'charged', on: target.kind }, salience: 3, causes });
+  }
   if (target && target.kind === 'hut') {
     target.kind = 'scorch'; target.state.was = 'hut'; target.state.burnedTick = t;
     for (const x of alive(world).filter(x => x.zone === target.zone)) { mood(x, -0.15); x.faith = r3(clamp(x.faith - 0.05, -1, 1)); }
@@ -287,6 +301,15 @@ export function lightningInWater(world, zone, strikeEvent) {
 export function socialStep(world) {
   const live = alive(world);
   const r = rngFor(world.seed, 'social', world.tick);
+  // Still crackling from a zap? Whoever it bumps into gets a static shock.
+  for (const z of live.filter(x => (x.zappedUntil || 0) > world.tick)) {
+    const near = live.filter(x => x !== z && x.zone === z.zone && !((x.zappedUntil || 0) > world.tick));
+    if (!near.length || r() > 0.35) continue;
+    const v = near[Math.floor(r() * near.length)];
+    v.zappedUntil = world.tick + 2;
+    mood(v, v.traits.playfulness > 0.6 ? 0.05 : -0.05);
+    emit(world, { kind: 'interaction', actors: [z.id, v.id], target: v.id, data: { what: 'static_shock' }, salience: 2 });
+  }
   for (let i = 0; i < live.length; i++) for (let j = i + 1; j < live.length; j++) {
     const a = live[i], b = live[j];
     if (a.zone !== b.zone) continue;

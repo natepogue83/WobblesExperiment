@@ -30,7 +30,7 @@ function objectPos(o) {
 }
 
 const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question', level_up: 'levelup' };
-const INTERACTION_BUBBLE = { bonk_idea: 'idea', flower_crown: 'heart', gift_caught: 'heart', squashed: 'smoke', bonked: 'smoke', zapped: 'spark', hug: 'heart', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
+const INTERACTION_BUBBLE = { static_shock: 'spark', charged: 'spark', stones_burst: 'smoke', bonk_idea: 'idea', flower_crown: 'heart', gift_caught: 'heart', squashed: 'smoke', bonked: 'smoke', zapped: 'spark', hug: 'heart', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
 const BUBBLE_RANK = { spark: 5, levelup: 4.5, smoke: 4, ponder: 3, heart: 2, question: 1 };
 
 // Their strongest trait, if it really stands out (it shows in their brows).
@@ -86,7 +86,8 @@ export function wantOf(world, w, lonely) {
 export function renderState(world) {
   const evById = id => world.events[id - 1];
   const objects = world.objects.filter(o => !o.state.gone).map(o => {
-    const st = o.kind === 'mural' && o.state.depicts ? { ...o.state, depictsKind: (evById(o.state.depicts) || { data: {} }).data.power || (evById(o.state.depicts) || { data: {} }).data.nudge || 'gift' } : o.state;
+    let st = o.kind === 'mural' && o.state.depicts ? { ...o.state, depictsKind: (evById(o.state.depicts) || { data: {} }).data.power || (evById(o.state.depicts) || { data: {} }).data.nudge || 'gift' } : o.state;
+    if ((o.state.chargedUntil || 0) > world.tick) st = { ...st, charged: true };
     return {
       id: o.id, kind: o.kind, zone: o.zone, ...objectPos(o),
       layer: o.kind === 'pond' ? 'terrain' : NATURE.has(o.kind) ? 'nature' : 'structures',
@@ -116,7 +117,7 @@ export function renderState(world) {
       id: w.id, name: w.name, stage: w.stage, look: w.look, zone: w.zone, activity: w.activity,
       bubble: bubbles[w.id] || null,
       face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood, title: titleOf(w),
-      flower: (w.flowerUntil || 0) > world.tick, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
+      flower: (w.flowerUntil || 0) > world.tick, bee: (w.flowerUntil || 0) > world.tick, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)

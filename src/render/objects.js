@@ -75,6 +75,10 @@ function hand(x, y, c, rot = 0, s = 1) {
 }
 
 export function objectArt(o, muralIcon = () => '') {
+  const art = objectArtInner(o, muralIcon);
+  return art && o.state && o.state.charged ? `<g class="charged"><ellipse cx="0" cy="-30" rx="34" ry="44" fill="#fff3a0" opacity=".25"/>${art}<path class="spark" d="M-18 -60 l4 6 M20 -54 l-5 5 M-24 -20 l6 1 M24 -26 l-6 2" stroke="#ffe36b" stroke-width="2.4" stroke-linecap="round"/></g>` : art;
+}
+function objectArtInner(o, muralIcon) {
   const id = o.id || 'x';
   switch (o.kind) {
     case 'tree': {

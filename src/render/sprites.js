@@ -97,6 +97,7 @@ function mouth(face, dark) {
 
 const daisy = (x, y, c, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="-3.4" rx="2" ry="3.2" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="1.9" fill="#ffcf3a"/></g>`;
 const FLOWER_CROWN = `<g class="crown"><path d="M-17 -33 Q0 -44 17 -33" stroke="#5e8f3a" stroke-width="2" fill="none"/>${daisy(-14, -35, '#fff')}${daisy(-5, -39.5, '#ffb3c7', 1.1)}${daisy(5, -39.5, '#fff', 1.05)}${daisy(14, -35, '#c9b3ff')}</g>`;
+const BUTTERFLY_FRIEND = '<g class="crown-fly"><g class="wings"><path d="M0 0 Q-5 -6 -7 -1 Q-6 2 0 0 Z" fill="#ffb3d1"/><path d="M0 0 Q5 -6 7 -1 Q6 2 0 0 Z" fill="#ffd27a"/></g></g>';
 const ZAP_FRIZZ = `<g class="zap"><path d="M-20 -26 l-6 -3 l4 -2 l-6 -4 M-15 -36 l-4 -6 l4 0 l-3 -6 M0 -41 l0 -7 l3 2 l1 -7 M15 -36 l4 -6 l-4 0 l3 -6 M20 -26 l6 -3 l-4 -2 l6 -4" stroke="#3a2e28" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="0" cy="-20" rx="20" ry="18" fill="#3a2e28" opacity=".22"/><path class="spark" d="M-24 -44 l4 4 M26 -40 l-4 5 M-28 -16 l5 1 M29 -12 l-5 1" stroke="#ffe36b" stroke-width="2.2" stroke-linecap="round"/></g>`;
 
 // Returns inner SVG markup for a Wobblin standing at the origin (feet at y=0).
@@ -132,7 +133,7 @@ export function wobblinSVG(w, opts = {}) {
       ${brows(w.temper, face, dark)}
       ${elder ? `<path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="#f4f0e6" stroke-width="2.4" fill="none" stroke-linecap="round"/>` : ''}
       ${mouth(face, dark)}
-      ${w.flower ? FLOWER_CROWN : ''}
+      ${w.flower ? FLOWER_CROWN + BUTTERFLY_FRIEND : ''}
       ${w.zapped ? ZAP_FRIZZ : ''}
       ${elder ? CANE : ''}
       ${carriedSVG(w.carry || [])}

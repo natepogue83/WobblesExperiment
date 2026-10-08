@@ -137,6 +137,31 @@ section('Lightning on odd things');
   assert.ok(w.objects.filter(o => o.kind === 'fish' && !o.state.gone).length > before);
   assert.ok(last(w, 'fish_stunned'));
   ok('lightning in the river stuns fish up to the surface');
+
+  const cairn = makeObject(w, { kind: 'stones', slot: 'hill.3', origin: { natural: true }, state: { count: 3, stacked: true } });
+  const totem = makeObject(w, { kind: 'totem', slot: 'hill.4', origin: { natural: true } });
+  for (let i = 0; i < 8; i++) tick(w);
+  applyAction(w, { seq: 4, t: w.tick, type: 'power', power: 'lightning', slot: 'hill.3' });
+  assert.ok(last(w, 'stones_burst') && !cairn.state.stacked && cairn.state.count === 1);
+  for (let i = 0; i < 8; i++) tick(w);
+  applyAction(w, { seq: 5, t: w.tick, type: 'power', power: 'lightning', slot: 'hill.4' });
+  assert.ok(last(w, 'charged') && totem.state.chargedUntil > w.tick);
+  ok('lightning bursts a cairn apart, and makes a totem hum with power');
+}
+
+section('Static shock');
+{
+  const w = createWorld(29, { barren: true });
+  const [a, b] = w.wobblins;
+  let shocks = 0;
+  for (let i = 0; i < 40; i++) {
+    for (const x of w.wobblins) { x.zone = 'meadow'; Object.assign(x.needs, { food: 1, warmth: 1, rest: 1 }); }
+    a.zappedUntil = w.tick + 3;
+    tick(w);
+    if (w.events.some(e => e.t === w.tick - 1 && e.kind === 'interaction' && e.data.what === 'static_shock')) shocks++;
+  }
+  assert.ok(shocks > 5, 'shocks ' + shocks);
+  ok(`a still-crackling Wobblin shocks whoever it bumps into (${shocks} of 40 days)`);
 }
 
 section('Shake the Valley');
