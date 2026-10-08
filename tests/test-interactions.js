@@ -249,6 +249,17 @@ section('Shake the Valley');
   for (let i = 0; i < 10; i++) tick(live);
   assert.equal(stateHash(replay(parseSave(serializeSave(save)), 10)), stateHash(live));
   ok('locked until belief 26 in a new game; packs into the save and replays');
+
+  let rolled = 0;
+  for (let seed = 1; seed <= 20; seed++) {
+    const q = createWorld(seed, { barren: true });
+    applyAction(q, { seq: 1, t: 0, type: 'power', power: 'stone', slot: 'hill.1', variant: 'boulder' });
+    const bo = q.objects.find(o => o.kind === 'boulder');
+    applyAction(q, { seq: 2, t: 0, type: 'power', power: 'quake' });
+    if (bo.zone !== 'hill') { rolled++; assert.ok(['meadow', 'hollow'].includes(bo.zone) && bo.slots.length === 2); assert.ok(last(q, 'boulder_rolled')); }
+  }
+  assert.ok(rolled >= 5 && rolled <= 15, 'rolled ' + rolled);
+  ok(`a quake sends a hill boulder rolling down into the valley about half the time (${rolled}/20)`);
 }
 
 section('Snowmen');

@@ -48,7 +48,7 @@ All of these replay exactly and never teach the Wobblins anything.
   - the daily gift: they catch it
 - **Lightning on things:** it splits boulders into stones, blows cairns apart, makes a totem hum (the devout take it as a sign), stuns fish in the river, and cracks a frozen pond under anyone skating on it.
 - **Cold snaps** freeze the pond. Add rain and you get snow, and the playful ones build snowmen.
-- **New power, Shake the Valley** (unlocks at belief 26): berries rain down, cairns topple, old walls fall, the screen shakes, and timid Wobblins never forget it.
+- **New power, Shake the Valley** (unlocks at belief 26): berries rain down, cairns topple, old walls fall, a boulder on the hill may come rolling down into the valley (everyone dives out of the way), the screen shakes, and timid Wobblins never forget it.
 - **Room to play:** the valley has 35 open spots instead of 30. It also tidies itself: keepsakes get taken home and spare stones get used. Stones dropped on a small pile make the pile bigger.
 
 ## 4. A reason to play

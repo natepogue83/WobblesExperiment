@@ -248,6 +248,23 @@ export function quake(world, ev) {
     } else if (o.kind === 'wall' && r() < 0.25) { o.kind = 'ruin'; o.state.was = 'wall'; o.builtTick = t; out.walls++; }
   }
   if (r() < 0.7) { makeObject(world, { kind: 'fish', slot: null, zone: 'riverbank', origin: { event: ev.id }, state: { until: t + 8 } }); out.fish++; }
+  // A boulder on the hill may break loose and roll down into the meadow or the
+  // hollow, scattering anyone in the way.
+  out.rolled = 0;
+  for (const b of liveObjects(world).filter(o => o.kind === 'boulder' && o.zone === 'hill')) {
+    if (r() > 0.5) continue;
+    const dest = ['meadow', 'hollow'][r() < 0.5 ? 0 : 1];
+    const ids = slotIds(dest);
+    const taken = s => liveObjects(world).some(o => o.slot === s || (o.slots && o.slots.includes(s)));
+    let pair = null;
+    for (let i = 0; i + 1 < ids.length && !pair; i++) if (!taken(ids[i]) && !taken(ids[i + 1])) pair = [ids[i], ids[i + 1]];
+    if (!pair) continue;
+    b.slot = pair[0]; b.slots = pair; b.zone = dest;
+    out.rolled++;
+    const dodged = live.filter(w => w.zone === dest);
+    for (const w of dodged) { w.needs.safety = r3(clamp01(w.needs.safety - 0.15)); w.heldUntil = Math.max(w.heldUntil || 0, t + 1); }
+    emit(world, { kind: 'interaction', actors: dodged.slice(0, 4).map(w => w.id), target: b.id, data: { what: 'boulder_rolled', zone: dest, dodged: dodged.length }, salience: 3, causes });
+  }
   for (const w of live) {
     w.heldUntil = Math.max(w.heldUntil || 0, t + 1);
     if (w.activity === 'rest') w.needs.rest = r3(clamp01(w.needs.rest - 0.15));   // rudely woken
