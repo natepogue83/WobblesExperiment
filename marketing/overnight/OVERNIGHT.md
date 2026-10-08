@@ -14,6 +14,7 @@ Sound plays after your first tap; the speaker button (top left) mutes it. The **
 - **The valley is painted on a canvas.** It has alpine mountains with sunlit faces, snow and gullies, shaded clouds that change colour with the time of day, haze, and grass. Tall grass sways in the foreground, and rain splashes ripple on the ground.
 - **Light falls on everything.** At night the Wobblins and huts dim with the moonlight while doorways and fires glow warm; dusk turns everything rosy. A cold snap paints the ground snowy.
 - **New art for every object.** Huts, the totem and the temple are drawn at Wobblin scale, so a hut looks big enough to live in. The temple looks Wobblin-built: stacked stones, carved posts, a leaf-thatch roof, prayer flags and a sun disc. Murals are painted slabs with handprints.
+- **More life in the valley:** fish leap out of the river now and then.
 - **The world shows its history.** Dirt paths wear in wherever the Wobblins walk most, and grass grows back over paths they stop using. Chimney smoke appears once they know Hearth. Bunting goes up for a festival, notes float over a song, and a glowing ring marks a fire or rain dance.
 - **Wobblins look more individual.** Each has its own body build. Their brows show temperament (worried, determined, one brow raised, calm), elders carry a cane, and keepsakes are worn as charms. Happy ones keep their eyes open, big and shiny, and their eyes follow your hand.
 - **A painted icon for each of the 30 discoveries,** in the Discovery Book and on the eureka card. Undiscovered pages show only a faint silhouette.
@@ -66,6 +67,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 ## 4. A reason to play
 
+- **Devotion is shown next to belief** once you have some, and a Miracle tile says how much it costs.
 - **You can see belief grow:** every act that delights them floats a "+1.6 belief" up from where it happened, and the belief bar flashes (scaring them shows a red minus).
 - **Ages and 15 milestones** (the Goals button). Examples: tame fire, welcome a baby, three generations, a temple. Claiming one gives belief, and belief unlocks powers.
 - **A fast start:** while you watch a new colony, its first 12 days pass at 20 seconds each, then slow to a day a minute. The first discoveries, asks and unlocks arrive within a few minutes.
