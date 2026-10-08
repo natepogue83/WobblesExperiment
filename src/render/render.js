@@ -204,6 +204,7 @@ export function drawSVG(svg, rs, opts = {}) {
   const L = {};
   for (const name of LAYERS) L[name] = el('g', { id: 'layer-' + name }, svg);
   const hour = opts.hour ?? 12;
+  svg.setAttribute('class', 'tod-' + timeOfDay(hour));   // CSS dims the foreground after dark
 
   // A painted valley when the browser has made one; vector fallback otherwise.
   L.sky.innerHTML = opts.backdrop
@@ -261,6 +262,15 @@ export function drawSVG(svg, rs, opts = {}) {
   const light = el('g', { class: 'light', 'pointer-events': 'none' }, L.effects);
   light.innerHTML = '<defs><radialGradient id="fireglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb35a" stop-opacity="0"/></radialGradient></defs>' +
     lightSVG(rs.seed, { hour, season: rs.climate.season, painted: !!opts.backdrop });
+
+  // After dark: fires and hut doorways glow warm through the night tint.
+  if (timeOfDay(hour) === 'night' || timeOfDay(hour) === 'dusk') {
+    let glow = '';
+    for (const f of rs.objects.filter(o => o.kind === 'fire' || o.kind === 'hearth')) glow += `<circle cx="${f.x}" cy="${f.y - 14}" r="120" fill="url(#nightglow)"/>`;
+    for (const h of rs.objects.filter(o => o.kind === 'hut')) glow += `<ellipse cx="${h.x}" cy="${h.y - 8}" rx="34" ry="22" fill="url(#nightglow)" opacity=".7"/>`;
+    const g = el('g', { class: 'nightglow', 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, L.effects);
+    g.innerHTML = '<defs><radialGradient id="nightglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".55"/><stop offset=".5" stop-color="#ff9a3a" stop-opacity=".18"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient></defs>' + glow;
+  }
 
   for (const id of opts.highlight || []) {
     const t = rs.objects.find(o => o.id === id) || rs.wobblins.find(w => w.id === id);

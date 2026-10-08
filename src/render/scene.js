@@ -179,7 +179,9 @@ export function lightSVG(seed, { hour = 12, season = 'mild', painted = false } =
   const P = TIMES[tod];
   const r = rngFor(seed, 'light');
   // The painting already carries its own colour grade and vignette.
-  let s = painted ? `<rect width="${W}" height="${H}" fill="${tod === 'night' ? 'rgba(20,30,80,0.18)' : 'rgba(0,0,0,0)'}" pointer-events="none"/>` : `<rect width="${W}" height="${H}" fill="${P.tint}" pointer-events="none"/>`;
+  // Over the painting, the light falls on the Wobblins and their things too.
+  const GRADE = { night: 'rgba(22,30,78,0.16)', dusk: 'rgba(255,120,80,0.10)', dawn: 'rgba(255,160,110,0.08)', day: 'rgba(0,0,0,0)' };
+  let s = painted ? `<rect width="${W}" height="${H}" fill="${GRADE[tod] || GRADE.day}" style="mix-blend-mode:multiply" pointer-events="none"/>` : `<rect width="${W}" height="${H}" fill="${P.tint}" pointer-events="none"/>`;
   if (tod === 'night') {
     for (let i = 0; i < 18; i++) s += `<circle class="firefly" style="animation-delay:-${(r() * 6).toFixed(1)}s" cx="${(r() * W).toFixed(0)}" cy="${(300 + r() * 300).toFixed(0)}" r="2.2" fill="#fff59a"/>`;
   }

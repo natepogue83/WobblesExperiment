@@ -518,3 +518,9 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .obj.movable { cursor: grab; }
 .obj.movable:hover { filter: brightness(1.06) drop-shadow(0 0 4px rgba(255, 240, 180, .8)); }
 .obj.held { cursor: grabbing; filter: drop-shadow(0 14px 6px rgba(0,0,0,.28)); }
+
+/* Time of day on the foreground (the painted backdrop carries its own light). */
+#world.tod-night #layer-wobblins, #world.tod-night #layer-structures, #world.tod-night #layer-nature, #world.tod-night #layer-terrain { filter: brightness(.66) saturate(.78) hue-rotate(-8deg); }
+#world.tod-dusk #layer-wobblins, #world.tod-dusk #layer-structures, #world.tod-dusk #layer-nature { filter: brightness(.9) sepia(.12) saturate(1.05); }
+#world.tod-dawn #layer-wobblins, #world.tod-dawn #layer-structures, #world.tod-dawn #layer-nature { filter: brightness(.95) sepia(.08); }
+#world.tod-night .wobblin .bubble, #world.tod-night .wobblin .emote, #world.tod-night .wobblin .chat { filter: brightness(1.4); }
