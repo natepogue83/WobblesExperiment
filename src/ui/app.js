@@ -11,6 +11,7 @@ import { buildRecap, buildRecapInput } from '../sim/recap.js';
 import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panels.js';
 import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 import { trayItems, ICONS, zoneAt } from './inventory.js';
+import { RIVER } from '../sim/geometry.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
 
 const params = new URLSearchParams(location.search);
@@ -242,7 +243,7 @@ function wireWobblins(svg) {
   for (const w of lastRS.wobblins) {
     const g = svg.querySelector('#' + w.id);
     if (!g) continue;
-    let base = null;
+    let base = null, trail = [];
     press(g, {
       onTap: ev => {
         if (armed) { dropItem(armed, toSvgPoint(svg, ev.clientX, ev.clientY)); return; }
@@ -252,6 +253,7 @@ function wireWobblins(svg) {
       onStart: () => {
         dragging = true;
         base = g.getAttribute('transform');
+        trail = [];
         g.classList.add('held');
         g.parentNode.append(g);           // lift above the others
         document.body.classList.add('is-dragging');
@@ -260,6 +262,8 @@ function wireWobblins(svg) {
       },
       onMove: ev => {
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
+        trail.push({ x: p.x, y: p.y, t: performance.now() });
+        if (trail.length > 8) trail.shift();
         const s = w.stage === 'baby' ? 0.93 : 1.6;
         g.setAttribute('transform', `translate(${p.x},${p.y + 30}) scale(${s})`);
         const z = zoneAt(p);
@@ -272,9 +276,12 @@ function wireWobblins(svg) {
         clearHint(svg);
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
         if (!overSvg(svg, ev.clientX, ev.clientY)) { g.setAttribute('transform', base); g.classList.remove('held'); return; }
-        const zone = zoneAt(p);
+        const v = releaseVelocity(trail);
+        if (Math.hypot(v.x, v.y) > FLING_SPEED) { fling(svg, g, w, { x: p.x, y: p.y + 30 }, v); return; }
+        const water = waterAt(p.x, p.y + 30);
+        const zone = water || zoneAt(p);
         dropped[w.id] = { x: Math.round(p.x), y: Math.round(p.y + 30), at: Date.now() };
-        act({ type: 'nudge', nudge: 'carry', target: w.id, zone });
+        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}) });
       },
       onCancel: () => {
         dragging = false;
@@ -285,6 +292,101 @@ function wireWobblins(svg) {
         g.classList.remove('held');
       }
     });
+  }
+}
+
+// ------------------------------------------------------------ flinging
+// Let go while moving and a Wobblin flies: it arcs, tumbles, bounces once and
+// lands where physics puts it (in the river, it splashes). Purely visual until
+// it lands; then the landing becomes an ordinary carry action.
+const FLING_SPEED = 0.55;      // SVG units per ms
+const GRAVITY = 0.0032;        // SVG units per ms^2
+const fx = [];                 // short-lived splash / dust effects: { kind, x, y, at }
+
+// requestAnimationFrame, with a timer fallback for background tabs, so a
+// thrown Wobblin always lands.
+function nextFrame(cb) {
+  let done = false;
+  const go = () => { if (!done) { done = true; cb(performance.now()); } };
+  requestAnimationFrame(go);
+  setTimeout(go, 50);
+}
+
+function releaseVelocity(trail) {
+  const now = performance.now();
+  const recent = trail.filter(p => now - p.t < 90);
+  if (recent.length < 2) return { x: 0, y: 0 };
+  const a = recent[0], b = recent[recent.length - 1];
+  const dt = Math.max(8, b.t - a.t);
+  const clamp = v => Math.max(-3, Math.min(3, v));
+  return { x: clamp((b.x - a.x) / dt), y: clamp((b.y - a.y) / dt) };
+}
+
+function riverYAt(x) {
+  for (let i = 1; i < RIVER.length; i++) {
+    const [x0, y0] = RIVER[i - 1], [x1, y1] = RIVER[i];
+    if (x >= x0 && x <= x1) return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+  }
+  return RIVER[RIVER.length - 1][1];
+}
+
+// 'riverbank' or 'pondsite' if (x, y) is in the water, else null.
+function waterAt(x, y) {
+  if (Math.abs(y - riverYAt(x)) < 20) return 'riverbank';
+  if (hasPond(world) && ((x - 915) / 62) ** 2 + ((y - 437) / 22) ** 2 < 1) return 'pondsite';
+  return null;
+}
+
+function fling(svg, g, w, start, v) {
+  dragging = true;
+  g.classList.add('flying');
+  const s = w.stage === 'baby' ? 0.93 : 1.6;
+  // Thrown downward, it lands further down the valley (maybe in the river).
+  const ground = Math.max(300, Math.min(640, start.y + 25 + Math.max(0, v.y) * 140));
+  let x = start.x, y = start.y, vx = v.x, vy = v.y, spin = 0, bounces = 0, last = performance.now();
+  const t0 = last;
+  const step = now => {
+    const dt = Math.min(32, now - last); last = now;
+    vy += GRAVITY * dt;
+    x += vx * dt; y += vy * dt;
+    spin += vx * dt * 0.9;
+    if (x < 20 || x > 1180) { vx = -vx * 0.6; x = Math.max(20, Math.min(1180, x)); }
+    const wet = vy > 0 && waterAt(x, y);
+    if (wet || (vy > 0 && y >= ground)) {
+      if (!wet && bounces === 0 && vy > 0.35) {
+        bounces++; y = ground; vy = -vy * 0.35; vx *= 0.55;
+        fx.push({ kind: 'dust', x, y, at: Date.now() });
+      } else return land(svg, g, w, x, Math.min(y, ground), wet);
+    }
+    if (now - t0 > 2200) return land(svg, g, w, x, ground, waterAt(x, ground));
+    g.setAttribute('transform', `translate(${x},${y}) rotate(${spin}) scale(${s})`);
+    nextFrame(step);
+  };
+  nextFrame(step);
+}
+
+function land(svg, g, w, x, y, water) {
+  dragging = false;
+  g.classList.remove('flying');
+  const zone = water || zoneAt({ x, y: y - 30 });
+  fx.push({ kind: water ? 'splash' : 'dust', x, y, at: Date.now() });
+  dropped[w.id] = { x: Math.round(x), y: Math.round(y), at: Date.now(), dizzy: true };
+  if (water) toast(world.wobblins.find(o => o.id === w.id).name + ' went SPLASH. Brr.');
+  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}) });
+}
+
+function drawFx(svg) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const now = Date.now();
+  for (let i = fx.length - 1; i >= 0; i--) if (now - fx[i].at > 1200) fx.splice(i, 1);
+  for (const e of fx) {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'fx fx-' + e.kind);
+    g.setAttribute('transform', `translate(${e.x},${e.y})`);
+    g.innerHTML = e.kind === 'splash'
+      ? '<ellipse class="ring" rx="10" ry="4"/><ellipse class="ring r2" rx="10" ry="4"/><path class="drops" d="M-8 -4 q-6 -16 -12 -6 M0 -6 q0 -20 4 -22 M8 -4 q8 -14 12 -4"/>'
+      : '<circle class="puff" cx="-10" r="6"/><circle class="puff" cx="10" r="5"/><circle class="puff" cy="-4" r="5"/>';
+    svg.append(g);
   }
 }
 
@@ -306,12 +408,21 @@ function draw() {
     const d = dropped[w.id];
     if (!d) continue;
     const fresh = Date.now() - d.at < 60_000 && world.wobblins.find(x => x.id === w.id).heldUntil > world.tick;
-    if (fresh) { w.x = d.x; w.y = d.y; w.landed = Date.now() - d.at < 900; } else delete dropped[w.id];
+    if (fresh) { w.x = d.x; w.y = d.y; w.landed = Date.now() - d.at < (d.dizzy ? 2600 : 900); } else delete dropped[w.id];
   }
   lastRS = rs;
   const svg = $('#world');
   drawSVG(svg, rs, { hour: localHour(Date.now()), highlight });
-  for (const w of rs.wobblins) if (w.landed) svg.querySelector('#' + w.id)?.classList.add('landed');
+  for (const w of rs.wobblins) {
+    const el = w.landed && svg.querySelector('#' + w.id);
+    if (!el) continue;
+    el.classList.add('landed');
+    if (dropped[w.id]?.dizzy) {
+      el.classList.add('dizzy');
+      el.insertAdjacentHTML('beforeend', '<g class="stars" transform="translate(0,-44)"><g class="orbit"><path d="M10 0 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z"/><path d="M-12 2 l1.5 3 3 .7 -2 2 .6 3 -3 -1.4 -3 1.4 .6 -3 -2 -2 3 -.7 Z"/></g></g>');
+    }
+  }
+  drawFx(svg);
   wireWobblins(svg);
   drawHud();
   drawTray();

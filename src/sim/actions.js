@@ -135,6 +135,7 @@ export function validateAction(world, a) {
         const w = findWobblin(world, a.target);
         if (!w || !w.alive) return bad('target');
         if (!ZONE_IDS.includes(a.zone)) return bad('zone');
+        if (a.splash && a.zone !== 'riverbank' && a.zone !== 'pondsite') return bad('splash');
         return { ok: true };
       }
     }
@@ -269,7 +270,17 @@ export function applyAction(world, a) {
       // Playful ones love the ride; timid ones find it a bit much.
       w.needs.mood = r3(clamp(w.needs.mood + 0.06 * w.traits.playfulness, 0, 1));
       w.needs.safety = r3(clamp(w.needs.safety - 0.08 * (1 - w.traits.boldness), 0, 1));
-      emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id, data: { nudge: 'carry', from, zone: a.zone }, salience: 1, causes });
+      if (a.thrown) {
+        // Flung through the air: playful ones whoop, timid ones are a bit shaken,
+        // and everyone trusts the sky-hand slightly less. Never hurt.
+        w.needs.mood = r3(clamp(w.needs.mood + 0.12 * (w.traits.playfulness - 0.4), 0, 1));
+        w.needs.safety = r3(clamp(w.needs.safety - 0.15 * (1 - w.traits.boldness), 0, 1));
+        w.faith = r3(clamp(w.faith - 0.02, -1, 1));
+      }
+      if (a.splash) w.needs.warmth = r3(clamp(w.needs.warmth - 0.15, 0, 1));   // a dunk in the river is chilly
+      emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id,
+        data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}) },
+        salience: a.thrown ? 2 : 1, causes });
     } else if (a.nudge === 'miracle') {
       world.miracleUntil = t + POWER.miracleTicks;
       faithAll(world, 0.15);

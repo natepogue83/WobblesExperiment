@@ -138,7 +138,12 @@ section('Pick up and drop a Wobblin');
   assert.equal(applyAction(w, { seq: 4, t: 0, type: 'nudge', nudge: 'carry', target: 'w2', zone: 'hill' }).ok, true, 'no cooldown');
   tick(w); tick(w);
   assert.equal(w.wobblins[0].zone, 'hill', 'stays where it was put for a while');
+  rejects(w, { seq: 5, t: w.tick, type: 'nudge', nudge: 'carry', target: 'w3', zone: 'hill', splash: true }, 'splash');
+  const w3 = w.wobblins[2], warm = w3.needs.warmth, faith = w3.faith;
+  assert.equal(applyAction(w, { seq: 6, t: w.tick, type: 'nudge', nudge: 'carry', target: 'w3', zone: 'riverbank', thrown: true, splash: true }).ok, true);
+  assert.ok(w3.needs.warmth < warm && w3.faith < faith && w3.alive && w3.injuries === 0);
   ok('carry moves a living Wobblin to a zone, has no cooldown, and they stay put for a few ticks');
+  ok('flinging one into the river chills it and shakes its faith a little, but never hurts it');
 }
 
 section('Offerings');

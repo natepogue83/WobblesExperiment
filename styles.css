@@ -166,3 +166,19 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
   .bar { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; }
   .tile { width: 70px; flex: none; }
 }
+
+/* ---- Flinging ---- */
+.wobblin.flying .wobble { animation: none !important; }
+.wobblin.dizzy .wobble { animation: wobbly 0.35s ease-in-out 6 !important; }
+@keyframes wobbly { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+.stars { pointer-events: none; animation: fadeout 2.6s ease-in forwards; }
+.stars .orbit { fill: #ffe36b; stroke: #c9a23a; stroke-width: .8; animation: orbit .7s linear infinite; transform-box: view-box; transform-origin: 0 0; }
+@keyframes orbit { to { transform: rotate(360deg); } }
+@keyframes fadeout { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
+.fx { pointer-events: none; }
+.fx-splash .ring { fill: none; stroke: #e8f6ff; stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: ripple 1.1s ease-out forwards; }
+.fx-splash .ring.r2 { animation-delay: .2s; opacity: 0; }
+.fx-splash .drops { fill: none; stroke: #bfe0f5; stroke-width: 3; stroke-linecap: round; animation: fadeout 0.9s ease-out forwards; }
+@keyframes ripple { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(5); opacity: 0; } }
+.fx-dust .puff { fill: rgba(240,230,210,.8); transform-box: fill-box; transform-origin: center; animation: puff .8s ease-out forwards; }
+@keyframes puff { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(1.8) translateY(-6px); opacity: 0; } }
