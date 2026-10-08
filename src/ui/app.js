@@ -425,7 +425,9 @@ function wireWobblins(svg) {
       onTap: ev => {
         if (armed) { dropItem(armed, toSvgPoint(svg, ev.clientX, ev.clientY)); return; }
         poke(g);
-        showWobblin(world.wobblins.find(x => x.id === w.id));
+        // First tap opens their card; more taps while it's open are just pokes.
+        const panel = $('#panel');
+        if (panel.hidden || panel.dataset.who !== w.id) showWobblin(world.wobblins.find(x => x.id === w.id));
       },
       onStart: () => {
         dragging = true;
@@ -623,12 +625,19 @@ function drawFx(svg) {
 const ZONE_LABEL = { hill: 'the hill', grove: 'the grove', meadow: 'the meadow', hollow: 'the hollow', pondsite: 'the pond', riverbank: 'the river' };
 function zoneLabel(z) { return ZONE_LABEL[z] || z; }
 
+// Poke once and they giggle; keep poking and they get cross, then run off.
+const pokes = {};
 function poke(g) {
-  // A poke gets a little reaction of its own (just for show).
   const w = world.wobblins.find(x => x.id === g.id);
+  const now = Date.now();
+  const list = (pokes[g.id] = (pokes[g.id] || []).filter(t => now - t < 3500));
+  list.push(now);
+  let emote = w && (w.traits.playfulness > 0.5 ? 'love' : w.traits.boldness < 0.3 ? 'scared' : 'like'), sound = 'giggle';
+  if (list.length >= 5) { emote = 'scared'; sound = 'uhoh'; puppets.flee(g.id); pokes[g.id] = []; if (w) toast(w.name + ' has had quite enough of being poked!'); }
+  else if (list.length >= 3) { emote = 'upset'; sound = 'bonk'; }
   g.querySelector('.emote')?.remove();
-  if (w) g.insertAdjacentHTML('beforeend', emoteSVG(w.traits.playfulness > 0.5 ? 'love' : w.traits.boldness < 0.3 ? 'scared' : 'like'));
-  play('giggle');
+  if (w) g.insertAdjacentHTML('beforeend', emoteSVG(emote));
+  play(sound);
   g.classList.remove('poked');
   void g.getBBox();       // restart the animation
   g.classList.add('poked');
@@ -705,8 +714,8 @@ function drawHud() {
   const needLine = document.createElement('div'); needLine.className = 'needs';
   needLine.textContent = needs || 'Everyone is doing fine.';
   const row = document.createElement('div'); row.className = 'hud-buttons';
-  const btn = (label, fn, cls = '', short = null) => { const b = document.createElement('button'); if (short) b.innerHTML = `<span class="full">${label}</span><span class="short">${short}</span>`; else b.textContent = label; b.className = cls; b.onclick = fn; row.append(b); };
-  btn('Chronicle', () => showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }));
+  const btn = (label, fn, cls = '', short = null) => { const b = document.createElement('button'); if (short) b.innerHTML = `<span class="full">${label}</span><span class="short">${short}</span>`; else b.textContent = label; b.className = cls; b.onclick = () => { document.querySelector('#panel').dataset.who = ''; fn(); }; row.append(b); };
+  btn('Chronicle', () => { $('#panel').dataset.who = ''; showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }); });
   btn('Discovery Book', () => showBook($('#panel'), world), '', 'Book');
   btn('Goals', () => openGoals());
   btn('Family', () => showFamily($('#panel'), world, { onPick: w => showWobblin(w) }));
@@ -804,6 +813,7 @@ const WANT_TEXT = {
 const ITEM_WORD = { fire: 'fire', stones: 'stones', tree: 'trees', berry: 'berries', water: 'water', rain: 'rain', gift: 'something shiny', idea: 'an idea' };
 
 function showWobblin(w) {
+  $('#panel').dataset.who = w.id;
   const lonely = !world.wobblins.some(o => o !== w && o.alive && o.zone === w.zone);
   const want = wantOf(world, w, lonely);
   const wantText = want ? WANT_TEXT[want.kind](w.name, ITEM_WORD[want.item] || want.item) : w.name + ' is happy right now.';

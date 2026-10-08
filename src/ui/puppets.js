@@ -53,6 +53,18 @@ export class Puppets {
 
   pin(id, on) { const p = this.p.get(id); if (p) p.pinned = on; }
 
+  // Scurry off a little way (UI only: poked one time too many).
+  flee(id) {
+    const p = this.p.get(id);
+    if (!p) return;
+    const z = ZONES[p.zone] || ZONES.meadow;
+    const dir = p.x < z.cx ? 1 : -1;
+    p.tx = Math.max(z.cx - z.rx * 0.8, Math.min(z.cx + z.rx * 0.8, p.x + dir * rand(90, 150)));
+    p.ty = Math.max(z.cy - z.ry * 0.5, Math.min(z.cy + z.ry * 0.6, p.y + rand(-20, 20)));
+    p.ax = p.tx; p.ay = p.ty; p.arrived = false; p.idleUntil = performance.now() + 6000;
+    p.face = dir;
+  }
+
   // The Keeper put it down at (x, y).
   place(id, x, y) {
     const p = this.p.get(id);
