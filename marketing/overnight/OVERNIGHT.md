@@ -54,6 +54,7 @@ All of these replay exactly and never teach the Wobblins anything.
 ## 4. A reason to play
 
 - **Ages and 15 milestones** (the Goals button). Examples: tame fire, welcome a baby, three generations, a temple. Claiming one gives belief, and belief unlocks powers.
+- **A fast start:** while you watch a new colony, its first 12 days pass at 20 seconds each, then slow to a day a minute. The first discoveries, asks and unlocks now arrive within a few minutes.
 - **A first-time coach** gives four pointers: drag stones in, pick a Wobblin up, watch them think, claim a goal. Then it gets out of the way.
 - **Big moments get their own card:** a discovery card with confetti and what it means, and a baby card showing who the baby takes after. Pop-ups queue one at a time.
 - **Coming back after a while,** the recap now shows who each line is about and includes friendships and squabbles. In 85-97% of 8-hour absences there are now 3 or more changes, up from 63-93%.

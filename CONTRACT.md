@@ -252,6 +252,9 @@ mode: "watch"|"away", beatMs }` (`src/ui/clock.js`); a heartbeat means a crashed
 tab is never counted as watched. Saves without `clock` use createdAt at the away
 rate. The sim only ever sees the integer tick.
 
+Fast start (UI only): while watching, ticks below 12 pass every 20 s, then every 60 s
+(`FAST_START_TICKS`, `FAST_TICK_MS` in clock.js). Away is always an hour a tick.
+
 ## 9a. Belief unlocks powers
 
 New games are created with `save.progression = true`: the world starts with
