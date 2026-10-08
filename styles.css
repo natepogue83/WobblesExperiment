@@ -434,3 +434,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .takes { margin: -2px 0 8px; font-size: 13px; color: #8a5a3a; }
 .moment.birth { box-shadow: 0 0 0 3px #ffb3c7, 0 18px 50px rgba(60, 10, 30, .35); background: linear-gradient(160deg, #fffafc, #ffe6ee); }
 .moment.birth .what small { color: #c0607e; }
+.voice { position: relative; margin: 6px 0 10px; padding: 8px 12px; border-radius: 14px; background: #fff; box-shadow: 0 2px 0 #e6dcc6; font: 500 15px/1.35 var(--display); color: #4a3a2a; }
+.voice::before { content: ''; position: absolute; left: 24px; top: -7px; border: 7px solid transparent; border-top: 0; border-bottom-color: #fff; }
+.chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 9px; border-radius: 11px; background: #efe3c8; color: #5b3f26; font: 600 12px/1.5 var(--display); white-space: nowrap; }
+.knows { line-height: 1.9; }
+#panel { overflow-x: hidden; }

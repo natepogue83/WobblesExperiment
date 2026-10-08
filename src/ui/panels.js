@@ -2,6 +2,7 @@
 // Read-only views of the world; they never change it.
 import { DISCOVERIES, BY_ID } from '../sim/discoveries.js';
 import { inheritance } from './moments.js';
+import { voiceLine } from './voice.js';
 import { describeEvent, keeperCause, actionName } from '../sim/recap.js';
 import { wobblinSVG } from '../render/sprites.js';
 import { temperOf } from '../render/render.js';
@@ -156,13 +157,14 @@ export function showWobblinCard(panel, world, w, { onBless, wantText, hints = []
     kids.length ? kids.length + (kids.length === 1 ? ' child' : ' children') : null].filter(Boolean).join(' · ');
   const takes = got.length ? h('p', { class: 'takes' }, 'Takes after: ' + got.map(g => g.text).join(', ')) : '';
   const hintList = hints.length ? h('div', { class: 'hints' }, h('b', {}, 'Could work out, if they were more...'),
-    h('ul', {}, hints.map(x => h('li', {}, `${x.name}: needs ${TRAIT_LABEL[x.trait]} ${stat10(x.need)} (has ${stat10(x.have)})` + (x.here ? '. Everything else is right here!' : '.')))),
+    h('ul', {}, hints.map(x => h('li', {}, (stat10(x.have) >= stat10(x.need) ? `${x.name}: needs just a little more ${TRAIT_LABEL[x.trait]}` : `${x.name}: needs ${TRAIT_LABEL[x.trait]} ${stat10(x.need)} (has ${stat10(x.have)})`) + (x.here ? '. Everything else is right here!' : '.')))),
     h('p', { class: 'muted' }, 'Bless them for a boost, or raise a Wobblin born with more of it.')) : '';
   panel.replaceChildren(
     h('div', { class: 'card-head' }, portrait(w, 72), h('div', {},
       h('h2', {}, w.name + ' ', h('span', { class: 'title' }, titleOf(w))),
       h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`),
       family ? h('p', { class: 'muted' }, family) : '')),
+    (() => { const v = voiceLine(world, w); return v ? h('p', { class: 'voice' }, '“' + v + '”') : ''; })(),
     wantText ? h('p', { class: 'want-line' }, wantText) : '',
     h('h3', { class: 'sub' }, 'Stats'), traits, takes,
     h('h3', { class: 'sub' }, 'Skills'), skills,
