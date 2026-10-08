@@ -1,5 +1,5 @@
 // app.js — clock, input, panels. The only place real time and the DOM meet the sim.
-import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld, GEO } from '../sim/index.js';
+import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld, GEO, openAsk } from '../sim/index.js';
 import { unlockedCurios, hasPond } from '../sim/actions.js';
 import { experimentPreview, temperamentHints } from '../sim/experiment.js';
 import { renderState, drawSVG, OBJECT_SCALE } from '../render/render.js';
@@ -666,7 +666,7 @@ const INTERACTION_TOAST = {
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
   king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',
   bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
-  zapped: 'ZAP! Frizzy.', cradled: 'Shh. Fast asleep in your hand.', shaken: 'Shaken like a snow globe!', snowman_smashed: 'POOF. Snow everywhere.', snowman_zapped: 'Snowman to puddle in one zap.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
+  zapped: 'ZAP! Frizzy.', ask_granted: 'You answered! They glow with belief.', cradled: 'Shh. Fast asleep in your hand.', shaken: 'Shaken like a snow globe!', snowman_smashed: 'POOF. Snow everywhere.', snowman_zapped: 'Snowman to puddle in one zap.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
 };
 const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
 function ontoLabel(id) {
@@ -781,7 +781,9 @@ function drawHud() {
   const prev = [...UNLOCKS].reverse().find(u => world.unlocked.includes(u.key));
   const frac = nu ? Math.max(0, Math.min(1, (world.belief - (prev ? prev.at : 0)) / Math.max(1, nu.at - (prev ? prev.at : 0)))) : 1;
   belief.innerHTML = `<span class="label">Belief ${Math.floor(world.belief)}</span><span class="bar"><i style="width:${(frac * 100).toFixed(0)}%"></i></span><span class="next">${nu ? 'next: ' + nu.name + ' at ' + nu.at : 'all powers unlocked'}</span>`;
-  const needs = colonyNeeds();
+  const ask = openAsk(world);
+  const asker = ask && world.wobblins.find(x => x.id === ask.by);
+  const needs = (asker ? `${asker.name} is asking for ${ASK_TEXT[ask.want]}` + (colonyNeeds() ? ' · ' : '') : '') + colonyNeeds();
   const needLine = document.createElement('div'); needLine.className = 'needs';
   needLine.textContent = needs || 'Everyone is doing fine.';
   const row = document.createElement('div'); row.className = 'hud-buttons';
@@ -852,6 +854,7 @@ function openGoals() {
   showGoals($('#panel'), world, { states: goalStates(world, prog), age: ageOf(world, prog), onClaim: claimGoal, feedback: WAITLIST_URL ? { url: WAITLIST_URL, label: FEEDBACK_LABEL } : null });
 }
 
+const ASK_TEXT = { berries: 'berries (plant a berry seed)', stones: 'stones nearby', rain: 'rain', company: 'a friend (carry one over)', flowers: 'flowers (a seed on their head?)' };
 const WANT_WORD = { hungry: 'hungry', cold: 'cold', scared: 'scared', tired: 'worn out', idea: 'missing something', sad: 'sad', lonely: 'lonely' };
 function colonyNeeds() {
   const c = {};

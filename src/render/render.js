@@ -6,7 +6,7 @@ import { VIEW, ZONES, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
 import { BY_ID } from '../sim/discoveries.js';
 import { titleOf } from '../sim/growth.js';
-import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG } from './sprites.js';
+import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG, askSVG } from './sprites.js';
 import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG, ambientSVG } from './scene.js';
 import { ART_DEFS } from './objects.js';
 
@@ -145,7 +145,8 @@ export function renderState(world) {
       id: w.id, name: w.name, stage: w.stage, look: w.look, zone: w.zone, activity: w.activity,
       bubble: bubbles[w.id] || null,
       face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood, title: titleOf(w),
-      flower: (w.flowerUntil || 0) > world.tick, charm: charmOf(world, w), zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
+      flower: (w.flowerUntil || 0) > world.tick, charm: charmOf(world, w),
+      ask: ((world.asks || []).find(a => !a.done && a.by === w.id) || {}).want || null, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)
@@ -191,7 +192,7 @@ function backdrop(rs, hour) {
 // bubble > what it wants).
 export function wobblinMarkup(w, { emote = null, lookDx = 0 } = {}) {
   const face = emote === 'love' || emote === 'like' ? 'happy' : emote === 'scared' ? 'scared' : emote === 'upset' ? 'sad' : w.face;
-  const over = emote ? emoteSVG(emote) : w.bubble ? bubbleSVG(w.bubble) : wantSVG(w.want);
+  const over = emote ? emoteSVG(emote) : w.bubble ? bubbleSVG(w.bubble) : w.ask ? askSVG(w.ask) : wantSVG(w.want);
   return `<title>${w.name} ${w.title || ''}</title>` + wobblinSVG({ ...w, face }, { lookDx }) + over;
 }
 

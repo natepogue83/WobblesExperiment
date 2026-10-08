@@ -149,6 +149,7 @@ export function createWorld(seed, opts = {}) {
     lastFestival: null,
     lastKeeperEvent: null,
     goalsClaimed: [],             // goals.js ids the Keeper has claimed
+    asks: [],                     // asks.js: { id, by, want, t, until, event, done }
     trails: {},                   // 'zoneA|zoneB' -> trips; worn paths (grass regrows 10% every 2 days)
     unlocked: initialUnlocks(!!opts.progression),   // tray keys you can use (belief.js)
     belief: 0,                    // lifetime belief: unlocks powers        // id of the latest salient Keeper event (murals)

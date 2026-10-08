@@ -7,7 +7,7 @@ Nothing here needs you to act. If you only have a minute, open the game and star
 - `http://localhost:8137/?debug=1&fresh=1` starts a brand-new colony (the new-player flow).
 - `http://localhost:8137/?debug=1&devload=/_dev_save.json` loads a 300-day village with every power unlocked.
 
-Sound plays after your first tap; the speaker button (top left) mutes it. Everything is committed in the local git repo, and all 12 test files pass.
+Sound plays after your first tap; the speaker button (top left) mutes it. Everything is committed in the local git repo, and all 13 test files pass.
 
 ## 1. Art
 
@@ -70,6 +70,7 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Poke a Wobblin over and over** and it giggles, then gets cross, then runs off.
 - **Portraits show flower crowns, frizz and charms.** The zap is easier to see from across the valley.
 - **Smoother redraws:** the Wobblins no longer twitch when a new day starts.
+- **Wobblins ask you for things,** from day one: berries when they're hungry, a friend when they're lonely, rain in a dry spell, stones to stack, flowers. A golden bubble shows what they want, and the top of the screen says how to help. Granting an ask makes them glow and gives belief. If you ignore it, they give up after a while.
 - **Hold a Wobblin still** for a couple of seconds and it dozes off in your hand. **Shake it back and forth** and it wobbles like jelly and stays rattled.
 - **Pick things up:** press and drag stones, gifts, curios, sprouts or clay to set them down somewhere else.
 - **Night falls on everything,** not only the sky. The Wobblins and huts dim with the light, and doorways and fires glow warm. Dusk turns everything rosy.

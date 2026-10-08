@@ -6,6 +6,7 @@ import { experimentStep, teachingStep } from './experiment.js';
 import { lifeEventsStep } from './life.js';
 import { growthStep } from './growth.js';
 import { socialStep, iceStep } from './interactions.js';
+import { asksStep } from './asks.js';
 
 export function tick(world) {
   environmentStep(world);
@@ -13,6 +14,7 @@ export function tick(world) {
   growthStep(world);
   socialStep(world);
   iceStep(world);
+  asksStep(world);
   experimentStep(world);
   teachingStep(world);
   lifeEventsStep(world);

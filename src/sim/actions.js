@@ -13,6 +13,7 @@ import { grantWishes } from './culture.js';
 import { landOnto, powerOnto, quake } from './interactions.js';
 import { reactToAction } from './reactions.js';
 import { GOAL_BY_ID, progressOf } from './goals.js';
+import { grantAsks } from './asks.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season', 'quake'];
@@ -224,6 +225,7 @@ export function applyAction(world, a) {
   const firstEvent = world.nextIds.e;
   const res = applyActionEffects(world, a);
   if (!res.ok || a.type === 'claim') return res;   // claiming a goal is bookkeeping: nobody reacts
+  grantAsks(world, a);
   let ev = null;
   for (let i = world.events.length - 1; i >= 0 && world.events[i].id >= firstEvent; i--) {
     if (KEEPER_EVENT.has(world.events[i].kind)) ev = world.events[i];   // the earliest one this action made

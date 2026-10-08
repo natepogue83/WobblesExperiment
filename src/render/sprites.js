@@ -260,6 +260,7 @@ export const ITEM_ICONS = {
   rain: '<path d="M-6 0 Q-7 -6 -1 -6 Q2 -9 5 -5 Q8 -5 7 0 Z" fill="#cfd8e6"/><path d="M-3 3 l-1 3 M1 3 l-1 3 M5 3 l-1 3" stroke="#5aa3d6" stroke-width="1.4" stroke-linecap="round"/>',
   friend: '<circle cx="-3" cy="-1" r="3" fill="#f2b04a"/><circle cx="3" cy="-1" r="3" fill="#7ac0e8"/><path d="M-6 5 Q0 1 6 5" stroke="#555" stroke-width="1.4" fill="none"/>',
   gift: '<rect x="-5" y="-3" width="10" height="8" rx="1.5" fill="#e0864a"/><path d="M0 -3 V5 M-5 0 H5" stroke="#ffe28a" stroke-width="1.6"/>',
+  flower: '<g fill="#ff9fb2"><circle cx="0" cy="-4" r="2.6"/><circle cx="3.8" cy="-1.2" r="2.6"/><circle cx="2.4" cy="3.2" r="2.6"/><circle cx="-2.4" cy="3.2" r="2.6"/><circle cx="-3.8" cy="-1.2" r="2.6"/></g><circle r="2" fill="#ffd24a"/>',
   idea: '<path d="M0 -7 Q5 -7 5 -2 Q5 1 2 3 V5 H-2 V3 Q-5 1 -5 -2 Q-5 -7 0 -7 Z" fill="#ffe36b" stroke="#c9a23a"/>'
 };
 
@@ -281,6 +282,13 @@ export function bubbleSVG(kind) {
 }
 
 // What a Wobblin wants right now, shown as a small persistent bubble.
+// A Wobblin asking the Keeper for something: a golden bubble that bobs.
+const ASK_ICON = { berries: 'berry', stones: 'stones', rain: 'rain', company: 'friend', flowers: 'flower' };
+export function askSVG(want) {
+  const icon = ITEM_ICONS[ASK_ICON[want]] || ITEM_ICONS.idea;
+  return `<g class="ask ask-${want}" transform="translate(18 -72)"><circle cx="-12" cy="16" r="2.6" fill="#ffe9a8"/><circle cx="-7" cy="10" r="3.6" fill="#ffe9a8"/><circle r="13" fill="#fff7d6" stroke="#f0b93a" stroke-width="2"/><g transform="translate(0 .5) scale(1.15)">${icon}</g><circle cx="10" cy="-10" r="5.5" fill="#f0b93a"/><path d="M8.2 -12 q1.8 -2.6 3.6 0 q0 1.6 -1.8 2.2 v1" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="10" cy="-6.6" r=".7" fill="#fff"/></g>`;
+}
+
 export function wantSVG(want) {
   if (!want) return '';
   const icon = ITEM_ICONS[want.item || want.kind] || ITEM_ICONS.idea;

@@ -122,7 +122,7 @@ export function play(name) {
 // Sounds for things that happen in the world on their own (a new tick's events).
 const EVENT_SOUND = {
   discovery: 'eureka', rediscovery: 'chime', birth: 'coo', death: 'sad', level_up: 'levelup', power_unlocked: 'fanfare',
-  friends: 'hug', built: 'thud', fire_started: 'crunch', festival: 'fanfare', wish_granted: 'chime'
+  friends: 'hug', ask_granted: 'chime', ask: 'heart', built: 'thud', fire_started: 'crunch', festival: 'fanfare', wish_granted: 'chime'
 };
 const INTERACTION_SOUND = {
   hug: 'hug', bonk: 'bonk', bowled_over: 'bonk', bush_squashed: 'crunch', snack: 'pop', stuck_in_tree: 'boing', singed: 'uhoh',
@@ -132,7 +132,7 @@ const INTERACTION_SOUND = {
 };
 export function soundForEvents(events) {
   // One sound per batch, the most notable first.
-  const order = ['power_unlocked', 'discovery', 'birth', 'death', 'level_up', 'friends', 'wish_granted', 'festival', 'rediscovery', 'interaction', 'built', 'fire_started'];
+  const order = ['power_unlocked', 'discovery', 'birth', 'death', 'ask_granted', 'level_up', 'friends', 'wish_granted', 'ask', 'festival', 'rediscovery', 'interaction', 'built', 'fire_started'];
   for (const k of order) {
     const e = events.find(x => x.kind === k);
     if (!e) continue;

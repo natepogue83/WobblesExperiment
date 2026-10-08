@@ -70,8 +70,11 @@ const IDLE = {
   none: ['Nice day for it.', 'Hmm-hmm-hmm.', 'I like it here.']
 };
 
+const ASK_LINE = { berries: 'Could you grow us some berries? Please?', stones: 'I would love some stones to stack. Right here?', rain: 'It is so dry. Could it rain, just a little?', company: 'It is lonely over here. Could someone come and sit with me?', flowers: 'Flowers! I want flowers. On my head, maybe?' };
 export function voiceLine(world, w) {
   if (!w.alive) return null;
+  const ask = (world.asks || []).find(a => !a.done && a.by === w.id);
+  if (ask) return ASK_LINE[ask.want];
   const need = fromNeeds(w);
   if (need) return need;
   // The most notable thing that happened to them in the last two colony days.

@@ -535,3 +535,7 @@ h2 { font-weight: 600; letter-spacing: .2px; }
   .hud-buttons::-webkit-scrollbar { display: none; }
   .hud-buttons button { flex: none; }
 }
+
+/* Asking the Keeper: a golden bubble that bobs */
+.wobblin .ask { animation: ask-bob 1.6s ease-in-out infinite; }
+@keyframes ask-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }

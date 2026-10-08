@@ -269,6 +269,14 @@ the largest the colony ever was). The age is named by the highest tier reached
 a belief reward; a reached goal is claimed with a `claim` action, which emits
 `goal_reached` and calls `addBelief`. `world.goalsClaimed` lists claimed ids.
 
+## 9d. Asks
+
+`src/sim/asks.js`: from day one, when no ask is open, a 5% chance per tick that an adult
+asks for berries, company, rain, stones or flowers (chosen from its needs and nature).
+An ask lasts 12 ticks (`world.asks`; events `ask`, `ask_granted`, `ask_expired`). After every
+valid act, `grantAsks` checks for the matching act (plant a bush; stones in its zone or on its
+head; rain; carry someone to it; a seed on its head or nearby) and grants +2 belief.
+
 ## 9b. Old clock text
 
 `TICK_MS = 3_600_000` (1 tick = 1 real hour = 1 colony day). `?debug=1`

@@ -12,6 +12,7 @@ const BATCHED = new Set(['taught', 'experiment_failed', 'offering', 'healed', 'g
 // ---- names ----------------------------------------------------------------
 function wob(world, id) { const w = world.wobblins.find(x => x.id === id); return w ? w.name : 'a Wobblin'; }
 function disc(id) { return BY_ID[id] ? BY_ID[id].name : id; }
+const ASK_WORD = { berries: 'berries', stones: 'stones', rain: 'rain', company: 'a friend', flowers: 'flowers' };
 function item(id) { return String(id || 'something').replace(/_/g, ' '); }
 const ZONE_NAMES = { hill: 'the hill', grove: 'the grove', meadow: 'the meadow', hollow: 'the hollow', pondsite: 'the pond', riverbank: 'the river' };
 function zone(z) { return ZONE_NAMES[z] || 'the valley'; }
@@ -264,6 +265,8 @@ function templates(world, e, ctx) {
     case 'keepsake': return d.item === 'stones'
       ? [`${name} carried off an old pile of stones to build with.`, `${name} put some spare stones to use.`, `The old stones are gone: ${name} took them.`]
       : [`${name} took the ${item(d.item)} home as a keepsake.`, `${name} kept the ${item(d.item)}.`, `The ${item(d.item)} went home with ${name}.`];
+    case 'ask': return [`${name} looked up at the sky and asked for ${ASK_WORD[e.target] || 'something'}.`, `${name} asked you for ${ASK_WORD[e.target] || 'something'}.`, `"Please?" ${name} would love ${ASK_WORD[e.target] || 'something'}.`];
+    case 'ask_granted': return [`You gave ${name} the ${ASK_WORD[e.target] || 'thing'} they asked for. They glowed.`, `${name} asked, and you answered.`, `${name} got the ${ASK_WORD[e.target] || 'thing'} they wished for.`];
     case 'goal_reached': return [`Milestone: ${d.text}. Their belief in you grew.`, `You reached a milestone: ${d.text}.`, `${d.text}: done.`];
     case 'friends': return [`${name} and ${wob(world, e.actors[1])} are best friends now.`, `${name} and ${wob(world, e.actors[1])} are inseparable.`, `A friendship: ${name} and ${wob(world, e.actors[1])}.`];
     case 'rivals': return [`${name} and ${wob(world, e.actors[1])} can't stand each other.`, `A rivalry has started between ${name} and ${wob(world, e.actors[1])}.`, `${name} and ${wob(world, e.actors[1])} are rivals now.`];

@@ -6,5 +6,6 @@ export { replay, sortActions } from './replay.js';
 export { stateHash, stableStringify } from './util.js';
 export { eventsBetween } from './events.js';
 export { GOALS, AGES, goalStates, ageOf, progressOf } from './goals.js';
+export { openAsk } from './asks.js';
 export * as GEO from './geometry.js';
 export * as CONST from './constants.js';
