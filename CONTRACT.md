@@ -217,7 +217,8 @@ Chronicle, murals and the week-2 AI.
   lands in `slot`; stones and seeds may omit `slot` when the valley is full (they land
   on the head and nothing is placed). Stones dropped on a pile of fewer than 4 top it up (`state.count`).
 - `quake` (Shake the Valley, cooldown 16, unlocks at belief 26): berries fall, cairns
-  topple, a wall may fall to a ruin, seeds sprout, fish leap, timid Wobblins are shaken.
+  topple, a wall may fall to a ruin, a hill boulder may roll into the meadow or hollow,
+  seeds sprout, fish leap, timid Wobblins are shaken.
 - Actions apply at tick `t`, in `seq` order, BEFORE that tick's `tick()` runs.
 - Timed state (`until`, `readyAt`) means: by the time `world.tick === until`
   the effect is over. A 24-tick season placed at t covers ticks t..t+23.
