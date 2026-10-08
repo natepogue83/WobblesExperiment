@@ -160,6 +160,8 @@ function act(action) {
     storeSave(save);
     actionSound(a, world.events.slice(seen));
     momentsFor(world, world.events.slice(seen));
+    const ie = world.events.slice(seen).find(e => e.kind === 'interaction' && interactionToast(e));
+    if (ie) toast(interactionToast(ie));
     // Show how everyone felt about it for a few seconds.
     for (let i = world.events.length - 1; i >= 0 && world.events[i].t === world.tick; i--) {
       if (world.events[i].data.reactions) { emoteEvent = world.events[i].id; break; }
