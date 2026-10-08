@@ -14,7 +14,7 @@ Node runs the same files for tests (`package.json` has `"type": "module"`).
 | Path            | Owns                                              | May import          |
 |-----------------|---------------------------------------------------|---------------------|
 | `src/sim/`      | All world state and rules. Pure and deterministic. | only `src/sim/`     |
-| `src/render/`   | `renderState(world)` (pure) and `drawSVG(svg, rs)` | `src/sim/` read-only|
+| `src/render/`   | `renderState(world)` (pure), `drawSVG(svg, rs, opts)`, the canvas painter (`painter.js`, browser only, cached image) | `src/sim/` read-only|
 | `src/ui/`       | Clock, input, panels, saving to localStorage      | sim, render, ai     |
 | `src/ai/`       | Narration (stub in week 1)                        | sim read-only       |
 | `tests/`        | Node tests, run with `npm test`                   | anything            |
@@ -125,7 +125,11 @@ world = {
 
 wobblin = {
   id, name, look: { hue, pattern, ears, eyeSize, tail, wobble },
-  traits: { curiosity, boldness, sociability, patience, playfulness, piety }, // 0..1
+  traits: { curiosity, boldness, sociability, patience, playfulness, piety, caution }, // 0..1
+                                  // caution comes from rngFor(seed, 'caution', n) so older seeds keep their other traits
+  skills: { foraging, building, crafting, social, explore }, // XP; level = levelOf(xp). Card shows crafting as Tinkering, social as Storytelling, explore as Exploring
+  bonds: { [wobblinId]: -1..1 },  // friends at >= 0.5, rivals at <= -0.4 (interactions.js)
+  heldUntil?,                     // set down or knocked over: stays in this zone until then
   hobby, bornTick, stage: "baby"|"adult"|"elder", lifespan,
   activity: "forage"|"warm"|"rest"|"inspect"|"hobby"|"play", seen: [objectId] /* last 8 inspected */,
   hungry, freezing /* consecutive ticks at 0 food / 0 warmth */, lastBirth,
@@ -141,6 +145,10 @@ object = { id, kind, zone, slot, hp, builtTick, by: [wobblinId],
            origin: { action: seq } | { event: id } | { natural: true },
            state: {} }
 ```
+
+Object state flags added overnight: `pond.state.frozen` (cold season), `fish.state.stunned`
+(lightning in water), `scorch.state.wrecked` (a Wobblin flung through the roof),
+`stones.state.stacked` (a cairn).
 
 Object kinds: boulder, stones, tree, bush, sprout, fire, pond, reeds, clay,
 fish, curio, gift, hearth, hut, wall, garden, raft, totem, temple, mural,
@@ -164,7 +172,11 @@ rediscovery taught learned_from_structure pondering forgotten superstition`;
 World `lightning built burned ruin fire_started fire_out flood pond_formed tree_grown
 prowler lost rain cold_snap`; Life `paired birth grew_up became_elder injured healed
 death seed_pod_hatched stranger_arrived`; Faith `offering wish wish_granted
-wish_expired faith_shift festival ritual mural_painted`.
+wish_expired faith_shift festival ritual mural_painted`; Growth `level_up`;
+Social `friends rivals interaction` (`data.what` names it: hug, bonk, bowled_over,
+bush_squashed, snack, stuck_in_tree, fire_walk, singed, caught_fish, scared_fish,
+through_the_roof, made_a_cairn, treasure, king_of_the_hill, remembers, boulder_split,
+fish_stunned, squabble, pond_froze, pond_thawed, skating, slipped).
 
 Events are append-only and are the single source of truth for the recap,
 Chronicle, murals and the week-2 AI.
@@ -176,8 +188,11 @@ Chronicle, murals and the week-2 AI.
   slot?, zone?, variant? }        // stone: "stones"|"boulder"; plant: "tree"|"bush";
                                   // season: "cold"|"warm"
 { seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry",
-  target?, trait?, curio?, targets?, zone? }   // carry: pick a Wobblin up, set it down in zone
-                                             // (no cooldown; it stays put 3 ticks; never adds knowledge)
+  target?, trait?, curio?, targets?, zone?,     // carry: pick a Wobblin up, set it down in zone
+  thrown?, splash?, onto? }                    // (no cooldown; it stays put 3 ticks; never adds knowledge)
+                                             // thrown: flung, not placed; splash: landed in water
+                                             // onto: the Wobblin or object it landed on (must exist,
+                                             // be alive / not gone, and not be itself) -> landOnto()
 { seq, t, type: "gift", day, giftId, slot? }   // slot: where it was dropped (else first free meadow slot)
 { seq, t, type: "collect_offerings" }
 ```
@@ -283,6 +298,27 @@ offset only changes `nowTick` in the UI.
 - Misfire weights: nothing 40, funny 35 (plan: 55/20), for more story per absence.
 - Pondering is checked every other tick.
 - Teaching rolls use one stream per learner per tick: rngFor(seed, "teach", t, id).
+
+## 12a. Growth, temperament and bonds
+
+- Skills (`growth.js`): doing things earns XP (foraging while foraging and snacking,
+  explore while inspecting, crafting on every experiment, building on discoveries
+  that build things and on cairns, social when teaching, hobbies feed their own skill). Levels 0..10 give small bonuses (foraging food,
+  experiment odds, teaching odds) and emit `level_up`. Traits drift slowly with
+  what happens to a Wobblin (`shapeTrait`): injuries raise caution, successes raise
+  boldness, and so on.
+- Temperament gates (`discoveries.js` `TEMPERAMENT`): some discoveries need a
+  minimum trait in the inventor (e.g. huts and walls need caution, the totem
+  and temple need piety, fire needs boldness, stone stacking a little patience).
+  `temperamentHints` lists what a Wobblin could work out if it had more of a trait;
+  the card shows these. Blessings (all 7 traits) and breeding are how a player
+  gets there: children inherit a blend of both parents' traits plus mutation.
+- Bonds (`interactions.js`): time in the same zone builds friendship (more for
+  sociable pairs); clashing temperaments and hungry foragers grate. Friends
+  gravitate together; rivals squabble.
+- Interactions: `landOnto` (Keeper drop or fling onto something),
+  `lightningOnto` (boulders split into stones, huts burn), `lightningInWater`
+  (stunned fish), `iceStep` (the pond freezes in a cold season). None adds knowledge.
 
 ## 12b. Reactions
 

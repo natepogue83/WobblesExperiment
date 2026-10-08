@@ -2,9 +2,10 @@
 import { LIFE, SOCIAL, POP_CAP } from './constants.js';
 import { rngFor, chance } from './rng.js';
 import { emit } from './events.js';
-import { makeObject, makeWobblin, TRAITS } from './world.js';
+import { makeObject, makeWobblin, ALL_TRAITS } from './world.js';
 import { trait } from './creatures.js';
 import { buildStructure } from './effects.js';
+import { addBond } from './interactions.js';
 import { cultureStep } from './culture.js';
 import { alive, liveObjects, findWobblin, idNum, r3 } from './util.js';
 
@@ -64,8 +65,10 @@ function pairingStep(world) {
       if (a.parents.includes(b.id) || b.parents.includes(a.id) ||
           (a.parents.length && a.parents.some(p => b.parents.includes(p)))) continue;
       const r = rngFor(world.seed, 'pair', world.tick, a.id, b.id);
-      if (!chance(r, SOCIAL.pairChance)) continue;
+      const matched = a.heldUntil > world.tick || b.heldUntil > world.tick;
+      if (!chance(r, SOCIAL.pairChance * (matched ? 4 : 1))) continue;
       a.partnerId = b.id; b.partnerId = a.id;
+      addBond(world, a, b, 0.3);
       emit(world, { kind: 'paired', actors: [a.id, b.id], data: { zone: a.zone }, salience: 3 });
       if (pairCount(world) >= hutCapacity(world)) return;
     }
@@ -82,13 +85,19 @@ function birthStep(world) {
     const r = rngFor(world.seed, 'birth', world.tick, a.id);
     if (!chance(r, SOCIAL.birthChance)) continue;
     const traits = {};
-    for (const k of TRAITS) traits[k] = (a.traits[k] + b.traits[k]) / 2;
+    const rm = rngFor(world.seed, 'mutate', world.tick, a.id);
+    for (const k of ALL_TRAITS) {
+      traits[k] = (a.traits[k] + b.traits[k]) / 2;
+      if (rm() < 0.08) traits[k] += rm() < 0.5 ? -0.25 : 0.25;   // a surprising child
+    }
     const baby = makeWobblin(world, { bornTick: world.tick, parents: [a.id, b.id], traits, zone: a.zone });
     a.lastBirth = b.lastBirth = world.tick;
     // Babies inherit what their parents believe; knowledge comes by teaching.
     baby.beliefs = [...new Set([...a.beliefs, ...b.beliefs])].sort();
     baby.faith = r3((a.faith + b.faith) / 2);
-    emit(world, { kind: 'birth', actors: [baby.id, a.id, b.id], data: { zone: a.zone }, salience: 4 });
+    // Keep the genetics on record: the parents' average and what the baby got.
+    const mid = {}; for (const k of ALL_TRAITS) mid[k] = r3((a.traits[k] + b.traits[k]) / 2);
+    emit(world, { kind: 'birth', actors: [baby.id, a.id, b.id], data: { zone: a.zone, mid, born: { ...baby.traits } }, salience: 4 });
   }
 }
 

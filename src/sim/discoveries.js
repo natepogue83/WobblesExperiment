@@ -80,6 +80,20 @@ export const DISCOVERIES = [
   T('herb_healing', 'Herb Healing', 4, ['garden', 'lore'], [{ anyOf: ['garden', 'bush'] }, { condition: 'injured' }], { sociability: 1, patience: 1 }, {}, { rate: 2 })
 ];
 
+// Temperament: someone has to be like this (blessings count) to work it out.
+// On top of these, harder tiers need more curiosity (CURIOSITY_BY_TIER).
+export const TEMPERAMENT = {
+  fire_warmth: { boldness: 0.3 }, wading: { boldness: 0.25 }, stone_stacking: { patience: 0.2 }, rhythm: { playfulness: 0.3 },
+  shiny_keeping: { playfulness: 0.25 },
+  fire_carrying: { boldness: 0.45 }, sharp_stone: { patience: 0.4 }, wall: { caution: 0.4 }, planting: { patience: 0.35 },
+  fishing: { patience: 0.35 }, clay_shaping: { playfulness: 0.35 }, song: { sociability: 0.4 }, weaving: { patience: 0.4 },
+  hearth: { caution: 0.35 }, hut: { caution: 0.42 }, cooking: { curiosity: 0.45 }, pottery: { patience: 0.48 }, garden: { patience: 0.45 },
+  raft: { boldness: 0.55 }, ritual: { piety: 0.45 }, paint: { playfulness: 0.45 },
+  lore: { sociability: 0.5 }, festival: { sociability: 0.45 }, totem: { piety: 0.5 }, temple: { piety: 0.55 },
+  star_watching: { curiosity: 0.6 }, herb_healing: { caution: 0.4 }
+};
+export const CURIOSITY_BY_TIER = { 1: 0.12, 2: 0.3, 3: 0.38, 4: 0.45 };
+
 // Sorted driver keys, computed once (hot path).
 for (const d of DISCOVERIES) {
   d.traitKeys = Object.keys(d.drivers.traits).sort();

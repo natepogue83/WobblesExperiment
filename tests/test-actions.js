@@ -32,7 +32,7 @@ section('Validation');
   rejects(w, { seq: 8, t: 2, type: 'power', power: 'plant', slot: 'riverbank.1', variant: 'tree' }, 'slot');
   rejects(w, { seq: 9, t: 2, type: 'power', power: 'teleport' }, 'unknown_power');
   rejects(w, { seq: 10, t: 2, type: 'nudge', nudge: 'bless', target: 'w99', trait: 'curiosity' }, 'target');
-  rejects(w, { seq: 11, t: 2, type: 'nudge', nudge: 'bless', target: 'w1', trait: 'piety' }, 'trait');
+  rejects(w, { seq: 11, t: 2, type: 'nudge', nudge: 'bless', target: 'w1', trait: 'wisdom' }, 'trait');
   rejects(w, { seq: 12, t: 2, type: 'collect_offerings' }, 'nothing');
   rejects(w, { seq: 13, t: 2, type: 'dance' }, 'unknown_type');
   ok('cooldown, occupied, bad slot, bad variant, wrong tick, unknown, bad target and empty collect are rejected with no events and no state change');

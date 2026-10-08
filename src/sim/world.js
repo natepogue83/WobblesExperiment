@@ -5,6 +5,7 @@ import { slotIds, slotInfo } from './geometry.js';
 import { r3, clamp01 } from './util.js';
 import { emit } from './events.js';
 import { initialUnlocks } from './belief.js';
+import { newSkills } from './growth.js';
 
 const SYL_A = ['Bi', 'Mi', 'To', 'Pu', 'Ny', 'Ze', 'Lo', 'Fi', 'Wu', 'Ka', 'Ro', 'Sa', 'Di', 'Hu', 'Qe', 'Ji'];
 const SYL_B = ['x', 'p', 'k', 'bble', 'mo', 'ri', 'n', 'zz', 'lo', 'sh', 'ff', 'ndle', 'ti', 'mp', 'v', 'ro'];
@@ -16,6 +17,8 @@ export const HOBBIES = [
   'watching clouds', 'chasing bugs', 'poking puddles', 'sniffing flowers'
 ];
 export const TRAITS = ['curiosity', 'boldness', 'sociability', 'patience', 'playfulness', 'piety'];
+// Caution (how much they worry) came later, so it is drawn from its own stream.
+export const ALL_TRAITS = [...TRAITS, 'caution'];
 const PATTERNS = ['plain', 'spots', 'stripes', 'freckles', 'patch'];
 const EARS = ['nubs', 'droopy', 'pointy', 'tufts', 'none'];
 const TAILS = ['none', 'stub', 'curl', 'fluff'];
@@ -44,6 +47,11 @@ export function makeWobblin(world, spec) {
     const base = spec.traits ? spec.traits[k] + range(r, -0.15, 0.15) : range(r, 0.1, 0.9);
     traits[k] = r3(clamp01(base));
   }
+  {
+    const rc = rngFor(world.seed, 'caution', n);
+    const base = spec.traits && spec.traits.caution !== undefined ? spec.traits.caution + range(rc, -0.15, 0.15) : range(rc, 0.1, 0.9);
+    traits.caution = r3(clamp01(base));
+  }
   const lifespan = randInt(r, LIFE.lifespanMin, LIFE.lifespanMax);
   const age = world.tick - spec.bornTick;
   const w = {
@@ -66,6 +74,8 @@ export function makeWobblin(world, spec) {
     activity: 'hobby',            // awake and pottering about when you first meet them
     seen: [],
     knows: {},
+    skills: newSkills(),          // XP per skill (growth.js); levels come from XP
+    bonds: {},                    // wobblinId -> -1..1 (friends > 0.5, rivals < -0.4)
     temp: {},
     partnerId: null,
     parents: spec.parents || [],

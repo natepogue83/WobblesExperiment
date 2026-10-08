@@ -8,7 +8,9 @@ import { EXPERIMENT, TEACH } from './constants.js';
 import { rngFor, weightedPick } from './rng.js';
 import { ADJACENT } from './geometry.js';
 import { alive, liveObjects, sortedKeys, r3, clamp } from './util.js';
-import { DISCOVERIES, BY_ID, prereqsMet } from './discoveries.js';
+import { DISCOVERIES, BY_ID, prereqsMet, TEMPERAMENT, CURIOSITY_BY_TIER } from './discoveries.js';
+import { practice, skillLevel, shapeTrait } from './growth.js';
+import { addBond } from './interactions.js';
 import { trait } from './creatures.js';
 import { isWet } from './nature.js';
 import { applyDiscoveryEffect, embodimentIndex, embodimentsFrom } from './effects.js';
@@ -147,6 +149,17 @@ function primaryTrait(w, d, tick) {
   return d.primaryTrait ? trait(w, d.primaryTrait, tick) : 0.5;
 }
 
+// Which temperament (if any) stops this Wobblin from working d out.
+export function temperamentGap(w, d, tick) {
+  const need = { ...(TEMPERAMENT[d.id] || {}) };
+  need.curiosity = Math.max(need.curiosity || 0, CURIOSITY_BY_TIER[d.tier]);
+  for (const t of Object.keys(need).sort()) {
+    const have = trait(w, t, tick);
+    if (have < need[t]) return { trait: t, need: need[t], have: r3(have) };
+  }
+  return null;
+}
+
 function eligible(w) { return w.alive && w.injuries < 2; }
 
 // Score every candidate for one Wobblin. Pure: no rolls, no writes.
@@ -157,6 +170,7 @@ export function scoreCandidates(ctx, w) {
   for (const d of ctx.open) {
     if (w.knows[d.id] || ctx.knownByLiving.has(d.id)) continue;   // spreads by teaching instead
     if (w.tabooUntil > t && FIRE_DISCOVERIES.has(d.id)) continue;  // Fire Taboo
+    if (temperamentGap(w, d, t)) continue;                            // not the type to figure this out
     if (baby && d.tier > 1) continue;
     if (!prereqsMet(d, w.knows)) continue;
     const m = stimulusMatch(ctx, w, d);
@@ -173,7 +187,7 @@ export function scoreCandidates(ctx, w) {
     if (m.contrib.some(o => o.kind === 'gift')) nudge *= 1.5;
     let social = 1;
     if (d.social) social = 1 + 0.15 * Math.max(0, (ctx.wobZone[w.zone] || []).length - 2);
-    let score = EXPERIMENT.base[d.tier] * d.rate * traitFactor(w, d, t) * stim * needFactor(w, d) * nudge * social;
+    let score = EXPERIMENT.base[d.tier] * d.rate * traitFactor(w, d, t) * stim * needFactor(w, d) * nudge * social * (1 + 0.03 * skillLevel(w, 'explore'));
     if (baby) score *= EXPERIMENT.babyRate;
     if (w.stage === 'elder') score *= 0.6;
     if (w.activity === 'rest') score *= 0.5;     // dozing, half awake
@@ -275,7 +289,8 @@ export function experimentStep(world) {
     if (r() >= pAttemptOf(cands)) continue;
     attempts++;
     const c = weightedPick(r, cands, x => x.score);
-    const pSuccess = EXPERIMENT.successBase[c.d.tier] * (0.5 + 0.5 * primaryTrait(w, c.d, t)) * (w.luckyCharm ? 1.1 : 1);
+    const skill = 1 + 0.03 * skillLevel(w, 'crafting') + (c.d.build ? 0.03 * skillLevel(w, 'building') : 0);
+    const pSuccess = EXPERIMENT.successBase[c.d.tier] * (0.5 + 0.5 * primaryTrait(w, c.d, t)) * (w.luckyCharm ? 1.1 : 1) * skill;
     if (r() < pSuccess) {
       const causes = buildCauses(world, w, c.d, c.match);
       const ev = recordDiscovery(world, w, c.d.id, causes, 'experiment');
@@ -288,8 +303,12 @@ export function experimentStep(world) {
       }
       if (world.pondering[w.id]) delete world.pondering[w.id][c.d.id];
       onExperimentSucceeded(world, w, c.d, r);
+      practice(world, w, 'crafting', 5);
+      if (c.d.build) practice(world, w, 'building', 4);
+      shapeTrait(w, 'curiosity', 0.02);   // success makes them bolder thinkers
     } else {
       onExperimentFailed(world, w, c.d, c.match, r);
+      practice(world, w, 'crafting', 1.5);   // learning from mistakes
     }
   }
 }
@@ -353,12 +372,15 @@ export function teachingStep(world) {
         if (L.knows[d] || !BY_ID[d]) continue;
         const tier = BY_ID[d].tier;
         if (L.stage === 'baby' && tier > 2) continue;
-        let p = TEACH.base[tier] * (0.5 + K.traits.sociability) * (0.5 + L.traits.curiosity) * loreMult(K);
+        let p = TEACH.base[tier] * (0.5 + K.traits.sociability) * (0.5 + L.traits.curiosity) * loreMult(K) * (1 + 0.05 * skillLevel(K, 'social'));
         if (L.parents.includes(K.id)) p *= 2;
         if (nearDeath(K)) p *= 4;
         if (K.stage === 'elder') p *= 1.3;
         if (r() < p) {
           learn(world, L, d, K.id);
+          practice(world, K, 'social', 2);
+          addBond(world, K, L, 0.05);
+          practice(world, L, 'explore', 1);
           emit(world, { kind: 'taught', actors: [K.id, L.id], target: d, data: { zone: L.zone }, salience: 1 }, KNOWLEDGE);
           learned = true;
           break;
@@ -432,4 +454,18 @@ function forgettingStep(world, live) {
 function deathEventOf(world, id) {
   const e = world.events.find(x => x.kind === 'death' && x.actors[0] === id);
   return e ? e.id : undefined;
+}
+
+// For the Keeper: what this Wobblin could work out, if only it were more
+// curious / careful / brave... (prereqs known; stimuli present first). Pure.
+export function temperamentHints(world, w) {
+  const ctx = makeContext(world);
+  const out = [];
+  for (const d of ctx.open) {
+    if (w.knows[d.id] || !prereqsMet(d, w.knows)) continue;
+    const gap = temperamentGap(w, d, world.tick);
+    if (!gap) continue;
+    out.push({ id: d.id, name: d.name, ...gap, here: !!stimulusMatch(ctx, w, d) });
+  }
+  return out.sort((a, b) => (b.here - a.here) || (a.need - a.have) - (b.need - b.have)).slice(0, 3);
 }

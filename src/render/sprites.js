@@ -231,6 +231,7 @@ export function bubbleSVG(kind) {
     case 'smoke': return bubble('<g fill="#9a9a9a"><circle cx="-3" cy="1" r="4"/><circle cx="3" cy="-2" r="4"/><circle cx="1" cy="3" r="3"/></g>');
     case 'ponder': return bubble('<g fill="#777"><circle cx="-4" cy="0" r="1.6"/><circle cx="0" cy="0" r="1.6"/><circle cx="4" cy="0" r="1.6"/></g>');
     case 'heart': return bubble('<path d="M0 5 L-6 -1 Q-7 -6 -3 -6 Q0 -6 0 -3 Q0 -6 3 -6 Q7 -6 6 -1 Z" fill="#d8566a"/>');
+    case 'levelup': return bubble('<path d="M0 -8 l2.4 5 5.4 .8 -3.9 3.8 .9 5.4 -4.8 -2.6 -4.8 2.6 .9 -5.4 -3.9 -3.8 5.4 -.8 Z" fill="#ffd24a" stroke="#c9a23a"/><path d="M0 3 v-5 m-2.5 2.5 l2.5 -2.5 2.5 2.5" stroke="#8a5a10" stroke-width="1.4" fill="none"/>', 'pop');
   }
   return '';
 }

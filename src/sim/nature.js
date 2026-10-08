@@ -6,6 +6,7 @@ import { rngFor, chance, randInt, pick } from './rng.js';
 import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { slotIds, slotInfo } from './geometry.js';
+import { lightningOnto, lightningInWater } from './interactions.js';
 import { alive, liveObjects, objectAtSlot, r3, clamp01, clamp } from './util.js';
 
 // Triangle wave, period 1, range [-1, 1]. Add/mul/abs only (bit identical).
@@ -24,7 +25,10 @@ export function strike(world, slot, causes, data) {
   const target = objectAtSlot(world, slot);
   const ev = emit(world, { kind: data.natural ? 'lightning' : 'keeper_power', target: target ? target.id : null,
     data: { ...data, slot }, salience: data.natural ? 2 : 2, causes });
+  const zoneHit = slotInfo(slot).zone;
   if (target && burnableAt(world, slot)) igniteObject(world, target, ev.id).state.byKeeper = !data.natural;
+  else if (target) lightningOnto(world, target, ev);
+  else if (zoneHit === 'riverbank' || (zoneHit === 'pondsite' && liveObjects(world).some(o => o.kind === 'pond'))) lightningInWater(world, zoneHit, ev);
   else if (!target && !isWet(world) && slotInfo(slot).zone !== 'riverbank' && slotInfo(slot).zone !== 'pondsite') {
     // Dry grass catches: a small fire that burns out fast.
     const fire = makeObject(world, { kind: 'fire', slot, origin: { event: ev.id }, state: { until: world.tick + 4, fuel: 'grass', byKeeper: !data.natural } });

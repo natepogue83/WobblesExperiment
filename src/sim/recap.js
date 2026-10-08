@@ -212,6 +212,38 @@ function templates(world, e, ctx) {
     case 'became_elder': return [`${name} is an elder now.`, `${name} has grown old and wise.`, `${name} has started telling long stories.`];
     case 'learned_from_structure': return [`${name} worked out ${disc(e.target)} just by studying what was left behind.`, `${name} figured out ${disc(e.target)} from an old structure.`, `${name} learned ${disc(e.target)} by watching how it was built.`];
     case 'ruin': return [`The ${item(d.was)} has fallen into ruin.`, `Nobody remembers how to keep the ${item(d.was)} up. It is a ruin now.`, `The old ${item(d.was)} is crumbling.`];
+    case 'interaction': {
+      const other = e.actors[1] ? wob(world, e.actors[1]) : null;
+      const T = {
+        hug: [`You set ${name} down next to ${other}. Big hug.`, `${name} and ${other} had a cuddle.`, `${name} landed right in ${other}'s arms.`],
+        bonk: [`${name} bumped into ${other}. Neither was pleased.`, `Bonk! ${name} and ${other} are not speaking.`, `${name} landed on ${other}. Oops.`],
+        bowled_over: [`You flung ${name} straight into ${other}. Both went down like skittles.`, `${name} bowled ${other} over. There are hard feelings.`, `STRIKE! ${name} knocked ${other} flat.`],
+        bush_squashed: [`${name} landed in a berry bush and squashed every berry.`, `A flying ${name} flattened the berry bush.`, `${name} is now covered in berry juice. The bush is not.`],
+        snack: [`${name} landed by the berries and helped themselves.`, `Snack time for ${name}.`, `${name} found a berry where you put them.`],
+        stuck_in_tree: [`${name} got stuck in a tree.` + (d.sprouted ? ' A seed shook loose and sprouted.' : ''), `You flung ${name} into the branches. They are still up there.`, `${name} spent a while hanging from a tree.`],
+        fire_walk: [`${name} strolled across the fire without a care. Everyone stared.`, `${name} is fireproof, apparently.`, `${name} sat in the flames and just smiled.`],
+        singed: [`${name} landed in the fire and ran screaming into the river.`, `Hot! ${name} got a singed bottom and a dip in the river.`, `${name} will not be going near that fire again.`],
+        caught_fish: [`${name} came up out of the water with a fish!`, `Splash, grab, fish. Well done, ${name}.`, `${name} caught dinner.`],
+        scared_fish: [`${name} splashed down and scared all the fish away.`, `The fish fled from the flying ${name}.`, `No more fish here, thanks to ${name}'s cannonball.`],
+        through_the_roof: [`You flung ${name} through a hut roof. It needs rebuilding.`, `${name} crashed through the roof. Everyone is upset.`, `There is a ${name}-shaped hole in a hut now.`],
+        made_a_cairn: [`${name} tidied the stones into a little tower.`, `${name} stacked the stones where you set them down.`, `A neat cairn, by ${name}.`],
+        treasure: [`${name} found the ${item(d.item)} and won't let go of it.`, `${name} has a new lucky charm: the ${item(d.item)}.`, `${name} picked up the ${item(d.item)}.`],
+        king_of_the_hill: [`${name} climbed up on the ${item(d.on)} and surveyed the valley.`, `${name} is king of the ${item(d.on)}.`, `${name} sat on top of the ${item(d.on)} looking pleased.`],
+        remembers: [`${name} sat quietly by ${d.of || 'a'}'s grave.`, `${name} visited the graves.`, `${name} remembered ${d.of || 'an old friend'}.`],
+        boulder_split: [`Lightning cracked the boulder into stones.`, `Your lightning split the boulder clean in two.`, `The boulder is a pile of stones now.`],
+        fish_stunned: [`Lightning hit the water and stunned fish floated up.`, `Free fish! Your lightning stunned a few.`, `The river glowed, and then there were fish everywhere.`],
+        squabble: [`${name} and ${other} had a squabble.`, `${name} and ${other} are bickering again.`, `There was shouting between ${name} and ${other}.`],
+        slipped: [`${name} slipped on the ice and sat down hard.`, `${name} did not enjoy the frozen pond.`, `Whoops: ${name} went flat on the ice.`],
+        pond_froze: [`The pond froze solid.`, `The cold snap turned the pond to ice.`, `Ice on the pond!`],
+        pond_thawed: [`The pond thawed.`, `The ice on the pond melted.`, `The pond is water again.`],
+        skating: [`${name} went skating on the frozen pond.`, `${name} slid across the ice, squealing.`, `The pond froze and ${name} discovered sliding.`]
+      }[d.what];
+      return T || null;
+    }
+    case 'friends': return [`${name} and ${wob(world, e.actors[1])} are best friends now.`, `${name} and ${wob(world, e.actors[1])} are inseparable.`, `A friendship: ${name} and ${wob(world, e.actors[1])}.`];
+    case 'rivals': return [`${name} and ${wob(world, e.actors[1])} can't stand each other.`, `A rivalry has started between ${name} and ${wob(world, e.actors[1])}.`, `${name} and ${wob(world, e.actors[1])} are rivals now.`];
+    case 'level_up': { const S = { foraging: 'foraging', building: 'building', crafting: 'tinkering', social: 'storytelling', explore: 'exploring' }[d.skill] || d.skill;
+      return [`${name} got better at ${S} (level ${d.level}).`, `Practice pays: ${name} is now level ${d.level} at ${S}.`, `${name} levelled up in ${S}.`]; }
     case 'lightning': return [`Lightning struck in the night.`, `A dry storm cracked over the valley.`, `Lightning hit something.`];
   }
   return null;

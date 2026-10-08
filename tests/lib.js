@@ -70,7 +70,7 @@ export function generousActions(world, scriptSeed = 1) {
     out.push({ type: 'power', power: 'season', variant: r() < 0.6 ? 'cold' : 'warm' });
   }
   if (ready('bless') && live.length) {
-    out.push({ type: 'nudge', nudge: 'bless', target: live[t % live.length].id, trait: BLESS_TRAITS[(t >> 2) % 4] });
+    out.push({ type: 'nudge', nudge: 'bless', target: live[t % live.length].id, trait: BLESS_TRAITS[(t >> 2) % BLESS_TRAITS.length] });
   }
   const curios = Object.keys(CURIOS).filter(c => CURIOS[c].some(k => world.noticed[k] !== undefined));
   if (ready('curio') && curios.length && live.length >= 2) {

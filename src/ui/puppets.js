@@ -133,7 +133,9 @@ export class Puppets {
     for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) {
       const a = ps[i], b = ps[j];
       const dx = b.x - a.x, dy = (b.y - a.y) * 1.6, d = Math.hypot(dx, dy) || 0.01;
-      const want = a.act === 'huddle' || b.act === 'huddle' ? 26 : 38;
+      // Sized to the drawn bodies, so they touch when huddling but never overlap.
+      const size = (a.w ? wobblinScale(a.w) : 1.7) + (b.w ? wobblinScale(b.w) : 1.7);
+      const want = size * (a.act === 'huddle' || b.act === 'huddle' ? 13 : 17);
       if (d >= want) continue;
       const push = (want - d) * Math.min(1, dt * 4) / 2;
       a.x -= dx / d * push; b.x += dx / d * push;

@@ -114,7 +114,7 @@ export function objectArt(o, muralIcon = () => '') {
         (o.state.pots ? `<g transform="translate(26 -4)"><path d="M-6 -10 Q-9 -10 -9 -4 Q-9 2 0 2 Q9 2 9 -4 Q9 -10 6 -10 Z" fill="${G('clay')}"/><rect x="-6" y="-12" width="12" height="3" rx="1.5" fill="#7d4430"/></g>` : '');
     case 'pond':
       return `<ellipse cx="0" cy="3" rx="70" ry="25" fill="#c8b386"/><ellipse cx="0" cy="1" rx="64" ry="21" fill="#7d6a4a" opacity="0.6"/>` +
-        `<ellipse cx="0" cy="0" rx="60" ry="19" fill="${G('water')}"/>` +
+        (o.state.frozen ? `<ellipse cx="0" cy="0" rx="60" ry="19" fill="#d8eef8"/><path d="M-30 -4 L-10 2 M6 -8 L22 4 M-40 6 L-24 0" stroke="#fff" stroke-width="1.6" opacity=".8"/>` : `<ellipse cx="0" cy="0" rx="60" ry="19" fill="${G('water')}"/>`) +
         `<ellipse cx="-14" cy="-5" rx="28" ry="5" fill="#d8f0ff" opacity="0.45"/>` +
         `<ellipse class="ripple" cx="16" cy="3" rx="8" ry="2.5" fill="none" stroke="#e8f6ff" stroke-width="1.4"/>` +
         `<g><ellipse cx="34" cy="4" rx="9" ry="3.5" fill="#4f9a45"/><path d="M34 4 L43 2" stroke="${'#3b7d3c'}" stroke-width="1"/><circle cx="31" cy="1" r="2.6" fill="#ffd6e6"/><circle cx="31" cy="1" r="1" fill="#f2b632"/></g>` +

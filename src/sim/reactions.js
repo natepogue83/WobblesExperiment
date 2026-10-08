@@ -6,6 +6,7 @@ import { rngFor } from './rng.js';
 import { ADJACENT, slotInfo } from './geometry.js';
 import { alive, r3, clamp } from './util.js';
 import { addBelief, BELIEF } from './belief.js';
+import { shapeTrait } from './growth.js';
 
 export const EMOTES = ['love', 'like', 'curious', 'scared', 'upset'];
 const EFFECT = {
@@ -77,6 +78,8 @@ export function reactToAction(world, a, event) {
   for (const w of witnesses(world, a, here)) {
     const e = feel(world, w, a, here, r);
     out[w.id] = e;
+    if (e === 'scared') shapeTrait(w, 'caution', 0.01);
+    if (e === 'love') shapeTrait(w, 'piety', 0.005);
     w.needs.mood = r3(clamp(w.needs.mood + EFFECT[e].mood, 0, 1));
     w.faith = r3(clamp(w.faith + EFFECT[e].faith, -1, 1));
   }

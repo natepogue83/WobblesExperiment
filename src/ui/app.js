@@ -1,7 +1,7 @@
 // app.js — clock, input, panels. The only place real time and the DOM meet the sim.
-import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST } from '../sim/index.js';
+import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld } from '../sim/index.js';
 import { unlockedCurios, hasPond } from '../sim/actions.js';
-import { experimentPreview } from '../sim/experiment.js';
+import { experimentPreview, temperamentHints } from '../sim/experiment.js';
 import { renderState, drawSVG } from '../render/render.js';
 import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clearSave,
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
@@ -17,7 +17,7 @@ import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panel
 import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 import { trayItems, ICONS, zoneAt } from './inventory.js';
 import { RIVER } from '../sim/geometry.js';
-import { emoteSVG } from '../render/sprites.js';
+import { emoteSVG, wobblinSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
 
 const params = new URLSearchParams(location.search);
@@ -38,7 +38,7 @@ const camera = new Camera();
 let lastFrame = 0;
 let shownUnlock = null;
 let wiping = false;         // erasing the save: never write it back on the way out
-function wipe() { wiping = true; clearSave(); location.href = location.pathname + location.search.replace(/[?&]fresh=1/, ''); }     // last power_unlocked event already celebrated
+function wipe() { wiping = true; clearSave(); const q = new URLSearchParams(location.search); q.delete('fresh'); location.href = location.pathname + (q.toString() ? '?' + q : ''); }     // last power_unlocked event already celebrated
 const UNLOCK_OF = { stones: 'stone', boulder: 'stone', bush: 'plant', tree: 'plant', rain: 'rain', lightning: 'lightning', water: 'water',
   cold: 'season', warm: 'season', bless: 'bless', curio: 'curio', gift: 'gift', miracle: 'miracle' };
 
@@ -102,11 +102,21 @@ function frame(now) {
 }
 
 function showNewColony() {
+  // The valley they will wake up in, at dawn, with its three Wobblins still asleep.
+  const seed = randomSeed();
+  const stage = $('#stage');
+  stage.classList.add('title');
+  valleyImage(seed, { hour: 6.5, season: 'mild' }).then(url => { if (!world) stage.style.setProperty('--title-bg', `url(${url})`); });
+  $('#napping').innerHTML = createWorld(seed).wobblins.map((w, i) =>
+    `<svg viewBox="-30 -52 60 58" width="84" height="80" aria-hidden="true" style="--i:${i}">${wobblinSVG({ ...w, face: 'sleep', carry: [] })}</svg>`).join('') +
+    '<span class="zz">z<b>z</b><i>Z</i></span>';
   $('#newColony').hidden = false;
   $('#newColonyForm').onsubmit = ev => {
     ev.preventDefault();
+    stage.classList.remove('title');
+    stage.style.removeProperty('--title-bg');
     save = newSave({
-      seed: randomSeed(), createdAt: Date.now(),
+      seed, createdAt: Date.now(),
       colonyName: $('#colonyName').value.trim() || undefined,
       keeperName: $('#keeperName').value.trim() || undefined,
       progression: true
@@ -399,7 +409,8 @@ function wireWobblins(svg) {
         const s = w.stage === 'baby' ? 1.05 : 1.8;
         g.setAttribute('transform', `translate(${p.x},${p.y + 30}) scale(${s})`);
         const z = zoneAt(p);
-        drawHint(svg, { x: p.x, y: p.y + 34, r: 30, ok: true, label: zoneLabel(z) });
+        const onto = landingTarget(w.id, p.x, p.y + 30);
+        drawHint(svg, { x: p.x, y: p.y + 34, r: 30, ok: true, label: onto ? ontoLabel(onto) : zoneLabel(z) });
       },
       onDrop: ev => {
         dragging = false;
@@ -412,9 +423,12 @@ function wireWobblins(svg) {
         if (Math.hypot(v.x, v.y) > FLING_SPEED) { fling(svg, g, w, { x: p.x, y: p.y + 30 }, v); return; }
         const water = waterAt(p.x, p.y + 30);
         const zone = water || zoneAt(p);
+        const onto = landingTarget(w.id, p.x, p.y + 30);
         dropped[w.id] = { at: Date.now() };
         puppets.place(w.id, p.x, p.y + 30);
-        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}) });
+        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}) });
+        const last = world.events[world.events.length - 1];
+        if (last && last.kind === 'interaction' && interactionToast(last)) toast(interactionToast(last));
       },
       onCancel: () => {
         dragging = false;
@@ -507,8 +521,46 @@ function land(svg, g, w, x, y, water) {
   dropped[w.id] = { at: Date.now(), dizzy: true };
   puppets.place(w.id, x, y);
   if (water) toast(world.wobblins.find(o => o.id === w.id).name + ' went SPLASH. Brr.');
-  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}) });
+  const onto = landingTarget(w.id, x, y);
+  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}) });
+  const ev = world.events[world.events.length - 1];
+  if (ev && ev.kind === 'interaction') toast(interactionToast(ev));
 }
+
+// What a dropped or flung Wobblin lands on: another Wobblin first, then a thing.
+function landingTarget(id, x, y) {
+  let best = null, bd = 42;
+  for (const w of lastRS.wobblins) {
+    if (w.id === id) continue;
+    const p = puppets.position(w.id) || w;
+    const d = Math.hypot(p.x - x, (p.y - y) * 1.3);
+    if (d < bd) { bd = d; best = w.id; }
+  }
+  if (best) return best;
+  bd = 40;
+  for (const o of lastRS.objects) {
+    if (o.kind === 'grave' && Math.hypot(o.x - x, o.y - y) > 14) continue;
+    const r = o.kind === 'boulder' || o.kind === 'temple' || o.kind === 'pond' ? 60 : o.kind === 'hut' ? 40 : 32;
+    const d = Math.hypot(o.x - x, (o.y - 12 - y) * 1.2);
+    if (d < Math.min(bd, r)) { bd = d; best = o.id; }
+  }
+  return best;
+}
+
+const INTERACTION_TOAST = {
+  hug: 'Aww, a hug.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
+  stuck_in_tree: 'Stuck in a tree!', fire_walk: 'Walked right through the fire...', singed: 'HOT HOT HOT! Off to the river.', caught_fish: 'Caught a fish!',
+  scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
+  king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.'
+};
+const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
+function ontoLabel(id) {
+  const w = lastRS.wobblins.find(x => x.id === id);
+  if (w) return 'next to ' + w.name;
+  const o = lastRS.objects.find(x => x.id === id);
+  return (o && ONTO_LABEL[o.kind]) || '';
+}
+function interactionToast(e) { return INTERACTION_TOAST[e.data.what] || ''; }
 
 function drawFx(svg) {
   const NS = 'http://www.w3.org/2000/svg';
@@ -652,7 +704,7 @@ function showWobblin(w) {
   const lonely = !world.wobblins.some(o => o !== w && o.alive && o.zone === w.zone);
   const want = wantOf(world, w, lonely);
   const wantText = want ? WANT_TEXT[want.kind](w.name, ITEM_WORD[want.item] || want.item) : w.name + ' is happy right now.';
-  showWobblinCard($('#panel'), world, w, { wantText, onBless: ww => { $('#panel').hidden = true; if (isUnlocked(world, 'bless')) blessMenu(ww.id); else toast('Bless unlocks when their belief in you grows.'); } });
+  showWobblinCard($('#panel'), world, w, { wantText, hints: temperamentHints(world, w), onBless: ww => { $('#panel').hidden = true; if (isUnlocked(world, 'bless')) blessMenu(ww.id); else toast('Bless unlocks when their belief in you grows.'); } });
 }
 
 // Tapping a recap or Chronicle line haloes its subject.

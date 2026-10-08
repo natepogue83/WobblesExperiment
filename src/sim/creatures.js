@@ -7,6 +7,7 @@ import { rngFor, weightedPick } from './rng.js';
 import { ZONE_IDS, isAdjacent } from './geometry.js';
 import { alive, liveObjects, sortedKeys, r3, clamp01 } from './util.js';
 import { emit } from './events.js';
+import { skillLevel } from './growth.js';
 
 export function stageFor(w, tick) {
   const age = tick - w.bornTick;
@@ -69,7 +70,7 @@ function updateNeeds(world, w, objs, live) {
   // Food: decays; foraging (activity) refills, scaled by the zone.
   // Pottery: stored food goes further.
   n.food -= NEEDS.foodDecay * (knows(w, 'pottery') && objs.some(o => o.kind === 'hearth' && o.state.pots) ? 0.7 : 1);
-  if (w.activity === 'forage') n.food += foodIn(objs, w.zone, w);
+  if (w.activity === 'forage') n.food += foodIn(objs, w.zone, w) * (1 + 0.04 * skillLevel(w, 'foraging'));
   // Warmth: drifts up on mild days; cold nights, cold snaps and rain chill.
   const others = live.filter(o => o !== w && o.zone === w.zone).length;
   n.warmth += NEEDS.warmthDrift + c.drift + c.tempMod;
@@ -137,6 +138,7 @@ function chooseActivity(world, w, objs, live) {
     let wgt = h.zones.includes(z) ? 0.4 : 0.05;
     wgt += zoneObjects(objs, z).filter(o => h.kinds.includes(o.kind)).length * 0.3;
     if (w.hobby === 'humming') wgt += (objs.stats[z].wobs - (w.zone === z ? 1 : 0)) * 0.2;
+    if (w.bonds) for (const o of live) if (o !== w && o.zone === z && w.bonds[o.id]) wgt += w.bonds[o.id] * 0.35;
     add('hobby', z, wgt * (0.5 + w.traits.playfulness), 'hobby');
   }
   // A Keeper curio pulls its two chosen Wobblins over for a while.

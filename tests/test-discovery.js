@@ -218,9 +218,11 @@ section('Forgetting and rediscovery');
   for (const x of [b, c]) x.zone = 'riverbank';
   for (let i = 0; i < 60; i++) { for (const x of [b, c]) x.zone = 'riverbank'; tick(w); }
   for (const d of ['digging', 'clay_shaping', 'paint']) {
-    assert.equal(w.discoveries[d].forgotten, true, d + ' forgotten');
-    assert.ok(w.events.some(e => e.kind === 'forgotten' && e.target === d));
-    assert.ok(!w.wobblins.some(x => x.alive && x.knows[d]));
+    const f = w.events.find(e => e.kind === 'forgotten' && e.target === d);
+    assert.ok(f, d + ' forgotten');
+    // Either still forgotten (nobody knows it), or someone has since worked it out anew.
+    const again = w.events.find(e => e.kind === 'rediscovery' && e.target === d && e.t >= f.t);
+    if (!again) { assert.equal(w.discoveries[d].forgotten, true); assert.ok(!w.wobblins.some(x => x.alive && x.knows[d])); }
   }
   assert.equal(mural.kind, 'ruin');
   assert.equal(mural.state.ruinOf, 'mural');

@@ -10,12 +10,13 @@ import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
+import { landOnto } from './interactions.js';
 import { reactToAction } from './reactions.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
 export const NUDGES = ['bless', 'curio', 'miracle', 'carry'];
-export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience'];
+export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience', 'caution', 'playfulness', 'piety'];
 // Each curio unlocks once a Wobblin has noticed its material.
 export const CURIOS = {
   hollow_log: ['tree'],
@@ -139,6 +140,10 @@ export function validateAction(world, a) {
         if (!w || !w.alive) return bad('target');
         if (!ZONE_IDS.includes(a.zone)) return bad('zone');
         if (a.splash && a.zone !== 'riverbank' && a.zone !== 'pondsite') return bad('splash');
+        if (a.onto !== undefined) {
+          const o = findWobblin(world, a.onto) || world.objects.find(x => x.id === a.onto);
+          if (!o || o.alive === false || (o.state && o.state.gone) || a.onto === a.target) return bad('onto');
+        }
         return { ok: true };
       }
     }
@@ -300,6 +305,7 @@ function applyActionEffects(world, a) {
       emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id,
         data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}) },
         salience: a.thrown ? 2 : 1, causes });
+      if (a.onto !== undefined) landOnto(world, w, a, causes);
     } else if (a.nudge === 'miracle') {
       world.miracleUntil = t + POWER.miracleTicks;
       faithAll(world, 0.15);

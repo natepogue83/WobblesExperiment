@@ -4,6 +4,7 @@ import { emit } from './events.js';
 import { alive, liveObjects, r3, clamp01 } from './util.js';
 import { ADJACENT } from './geometry.js';
 import { weightedPick } from './rng.js';
+import { shapeTrait } from './growth.js';
 
 export const FIRE_DISCOVERIES = new Set(['fire_warmth', 'fire_carrying', 'hearth', 'cooking', 'pottery', 'ritual']);
 const WATER_DISCOVERIES = new Set(['wading', 'fishing', 'raft']);
@@ -93,6 +94,7 @@ export function onExperimentFailed(world, w, d, match, r) {
     case 'injury': {
       w.injuries++;
       w.needs.mood = r3(clamp01(w.needs.mood - 0.15));
+      shapeTrait(w, 'caution', 0.03); shapeTrait(w, 'boldness', -0.02);
       const watchers = alive(world).filter(x => x !== w && x.zone === w.zone);
       for (const x of watchers) x.traits.boldness = r3(clamp01(x.traits.boldness - 0.05));
       const ev = emit(world, { ...base, kind: 'misfire', data: { flavor: 'hurt_themselves', zone: w.zone }, salience: 2 });

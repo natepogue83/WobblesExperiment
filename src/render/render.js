@@ -5,6 +5,7 @@
 import { VIEW, ZONES, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
 import { BY_ID } from '../sim/discoveries.js';
+import { titleOf } from '../sim/growth.js';
 import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG } from './sprites.js';
 import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG, ambientSVG } from './scene.js';
 import { ART_DEFS } from './objects.js';
@@ -28,8 +29,9 @@ function objectPos(o) {
   return s2 ? { x: (s.x + s2.x) / 2, y: (s.y + s2.y) / 2 } : { x: s.x, y: s.y };
 }
 
-const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question' };
-const BUBBLE_RANK = { spark: 5, smoke: 4, ponder: 3, heart: 2, question: 1 };
+const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question', level_up: 'levelup' };
+const INTERACTION_BUBBLE = { hug: 'heart', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
+const BUBBLE_RANK = { spark: 5, levelup: 4.5, smoke: 4, ponder: 3, heart: 2, question: 1 };
 
 // The face follows how they feel right now.
 export function faceOf(w) {
@@ -82,7 +84,7 @@ export function renderState(world) {
   const bubbles = {};
   for (let i = world.events.length - 1; i >= 0 && world.events[i].t >= world.tick - 1; i--) {
     const e = world.events[i];
-    const b = BUBBLE[e.kind];
+    const b = e.kind === 'interaction' ? INTERACTION_BUBBLE[e.data.what] : BUBBLE[e.kind];
     if (!b || !e.actors.length) continue;
     const who = e.kind === 'taught' ? e.actors[1] : e.actors[0];
     if (!bubbles[who] || BUBBLE_RANK[b] > BUBBLE_RANK[bubbles[who]]) bubbles[who] = b;
@@ -100,7 +102,7 @@ export function renderState(world) {
     return {
       id: w.id, name: w.name, stage: w.stage, look: w.look, zone: w.zone, activity: w.activity,
       bubble: bubbles[w.id] || null,
-      face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood,
+      face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood, title: titleOf(w),
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)
@@ -146,7 +148,7 @@ function backdrop(rs, hour) {
 export function wobblinMarkup(w, { emote = null, lookDx = 0 } = {}) {
   const face = emote === 'love' || emote === 'like' ? 'happy' : emote === 'scared' ? 'scared' : emote === 'upset' ? 'sad' : w.face;
   const over = emote ? emoteSVG(emote) : w.bubble ? bubbleSVG(w.bubble) : wantSVG(w.want);
-  return wobblinSVG({ ...w, face }, { lookDx }) + over;
+  return `<title>${w.name} ${w.title || ''}</title>` + wobblinSVG({ ...w, face }, { lookDx }) + over;
 }
 
 export function wobblinScale(w) { return 1.7 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1); }

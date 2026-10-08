@@ -3,6 +3,7 @@
 import { DISCOVERIES, BY_ID } from '../sim/discoveries.js';
 import { describeEvent, keeperCause, actionName } from '../sim/recap.js';
 import { wobblinSVG } from '../render/sprites.js';
+import { SKILLS, SKILL_NAMES, levelOf, xpForLevel, MAX_LEVEL, titleOf } from '../sim/growth.js';
 
 const h = (tag, props = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -104,21 +105,48 @@ export function showBook(panel, world) {
 }
 
 // ---- wobblin card -------------------------------------------------------------
-export function showWobblinCard(panel, world, w, { onBless, wantText }) {
+const TRAIT_LABEL = { curiosity: 'Curiosity', boldness: 'Bravery', sociability: 'Friendliness', patience: 'Patience', playfulness: 'Playfulness', piety: 'Faith in you', caution: 'Caution' };
+const TRAIT_HELP = { curiosity: 'tries new things', boldness: 'brave around fire, water, danger', sociability: 'teaches, sings, pairs up', patience: 'fiddly work: tools, weaving, gardens',
+  playfulness: 'music, shiny things, paint', piety: 'rituals, totems, the temple', caution: 'worries enough to build walls and huts' };
+const stat10 = v => Math.max(1, Math.round(v * 10));
+
+export function showWobblinCard(panel, world, w, { onBless, wantText, hints = [] }) {
   const age = world.tick - w.bornTick;
   const pct = v => Math.round(v * 100);
-  const traits = h('ul', { class: 'traits' }, Object.entries(w.traits).map(([k, v]) =>
-    h('li', {}, h('span', {}, k), h('span', { class: 'bar' }, h('i', { style: `width:${pct(v)}%` })))));
-  const knows = Object.keys(w.knows).filter(k => BY_ID[k]).map(k => BY_ID[k].name);
+  const blessed = k => w.temp[k] && w.temp[k].until > world.tick;
+  const traits = h('ul', { class: 'traits stats' }, Object.keys(TRAIT_LABEL).filter(k => w.traits[k] !== undefined).map(k => {
+    const v = w.traits[k] + (blessed(k) ? w.temp[k].add : 0);
+    return h('li', { title: TRAIT_HELP[k] }, h('span', { class: 'tl' }, TRAIT_LABEL[k]),
+      h('span', { class: 'bar' + (blessed(k) ? ' blessed' : '') }, h('i', { style: `width:${Math.min(100, pct(v))}%` })),
+      h('b', { class: 'num' }, String(Math.min(10, stat10(v))) + (blessed(k) ? '★' : '')));
+  }));
+  const skills = h('ul', { class: 'traits skills' }, SKILLS.map(k => {
+    const xp = (w.skills || {})[k] || 0, lvl = levelOf(xp);
+    const into = lvl >= MAX_LEVEL ? 1 : (xp - xpForLevel(lvl)) / (xpForLevel(lvl + 1) - xpForLevel(lvl));
+    return h('li', {}, h('span', { class: 'tl' }, SKILL_NAMES[k]), h('span', { class: 'bar xp' }, h('i', { style: `width:${pct(into)}%` })), h('b', { class: 'num' }, 'Lv ' + lvl));
+  }));
+  const knows = Object.keys(w.knows).filter(k => BY_ID[k]).map(k => h('span', { class: 'chip' }, BY_ID[k].name));
   const faithWord = w.faith > 0.5 ? 'devoted to you' : w.faith > 0.2 ? 'trusts you' : w.faith < -0.3 ? 'afraid of you' : w.faith < 0 ? 'wary of you' : 'unsure about you';
   const memories = w.memories.slice(-4).reverse().map(id => world.events[id - 1]).filter(Boolean).map(e => h('li', {}, describeEvent(world, e)));
+  const name = id => (world.wobblins.find(x => x.id === id) || {}).name;
+  const kids = world.wobblins.filter(x => x.parents.includes(w.id));
+  const pals = Object.entries(w.bonds || {}).filter(([id]) => world.wobblins.some(x => x.id === id && x.alive));
+  const friends = pals.filter(([, v]) => v >= 0.5).map(([id]) => name(id)), rivals = pals.filter(([, v]) => v <= -0.4).map(([id]) => name(id));
+  const family = [w.partnerId ? 'partner of ' + name(w.partnerId) : null, friends.length ? 'friends with ' + friends.join(', ') : null, rivals.length ? 'rivals with ' + rivals.join(', ') : null, w.parents.length ? 'child of ' + w.parents.map(name).join(' & ') : null,
+    kids.length ? kids.length + (kids.length === 1 ? ' child' : ' children') : null].filter(Boolean).join(' · ');
+  const hintList = hints.length ? h('div', { class: 'hints' }, h('b', {}, 'Could work out, if they were more...'),
+    h('ul', {}, hints.map(x => h('li', {}, `${x.name}: needs ${TRAIT_LABEL[x.trait]} ${stat10(x.need)} (has ${stat10(x.have)})` + (x.here ? '. Everything else is right here!' : '.')))),
+    h('p', { class: 'muted' }, 'Bless them for a boost, or raise a Wobblin born with more of it.')) : '';
   panel.replaceChildren(
-    h('div', { class: 'card-head' }, portrait(w, 64), h('div', {},
-      h('h2', {}, w.name),
-      h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`))),
+    h('div', { class: 'card-head' }, portrait(w, 72), h('div', {},
+      h('h2', {}, w.name + ' ', h('span', { class: 'title' }, titleOf(w))),
+      h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`),
+      family ? h('p', { class: 'muted' }, family) : '')),
     wantText ? h('p', { class: 'want-line' }, wantText) : '',
-    traits,
-    h('p', {}, h('b', {}, 'Knows: '), knows.length ? knows.join(', ') : 'nothing yet'),
+    h('h3', { class: 'sub' }, 'Stats'), traits,
+    h('h3', { class: 'sub' }, 'Skills'), skills,
+    hintList,
+    h('p', { class: 'knows' }, h('b', {}, 'Knows: '), knows.length ? knows : 'nothing yet'),
     w.beliefs.length ? h('p', {}, h('b', {}, 'Believes: '), w.beliefs.map(b => b.replace(/_/g, ' ')).join(', ')) : '',
     memories.length ? h('div', {}, h('b', {}, 'Remembers'), h('ul', { class: 'memories' }, memories)) : '',
     h('button', { onclick: () => onBless(w) }, 'Bless ' + w.name),
