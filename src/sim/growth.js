@@ -31,7 +31,7 @@ export function practice(world, w, skill, xp) {
   if (after > before) {
     const t = SKILL_TRAIT[skill];
     w.traits[t] = r3(clamp01(w.traits[t] + 0.02 * (after - before)));
-    emit(world, { kind: 'level_up', actors: [w.id], target: skill, data: { skill, level: after, trait: t }, salience: after % 3 === 0 ? 3 : 2 });
+    emit(world, { kind: 'level_up', actors: [w.id], target: skill, data: { skill, level: after, trait: t }, salience: after < 3 ? 1 : after % 3 === 0 ? 3 : 2 });
   }
 }
 

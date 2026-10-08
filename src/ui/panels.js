@@ -34,7 +34,9 @@ export function showRecapCard(panel, world, narrated, { onPick, onClose }) {
   panel.replaceChildren(h('h2', {}, narrated.header));
   const list = h('ul', { class: 'recap-lines' });
   for (const line of narrated.lines) {
-    const li = h('li', { tabindex: 0 }, line.text);
+    const ev = line.eventIds.map(id => world.events[id - 1]).find(e => e && e.actors && e.actors.length);
+    const who = ev && world.wobblins.find(w => w.id === ev.actors[0]);
+    const li = h('li', { tabindex: 0 }, who ? portrait(who, 30) : h('span', { class: 'dot' }), h('span', {}, line.text));
     li.onclick = () => {
       for (const x of list.children) x.classList.remove('on');
       li.classList.add('on');

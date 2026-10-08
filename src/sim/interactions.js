@@ -315,11 +315,14 @@ export function socialStep(world) {
     if (a.zone !== b.zone) continue;
     const b0 = bond(a, b.id);
     // Opposites grate: a wild one and a worrier rub each other the wrong way.
-    const clash = Math.max(0, Math.abs(a.traits.playfulness - b.traits.playfulness) + Math.abs((a.traits.caution || 0.5) - (b.traits.caution || 0.5)) - 0.55);
-    addBond(world, a, b, 0.012 * (a.traits.sociability + b.traits.sociability) - 0.05 * clash);
+    const clash = Math.max(0, Math.abs(a.traits.playfulness - b.traits.playfulness) + Math.abs((a.traits.caution || 0.5) - (b.traits.caution || 0.5)) - 0.45);
+    // Two bold ones always want to be top Wobblin; a bad mood makes anyone prickly.
+    const pride = a.traits.boldness > 0.7 && b.traits.boldness > 0.7 ? 0.012 : 0;
+    const grumpy = (a.needs.mood < 0.3 ? 0.008 : 0) + (b.needs.mood < 0.3 ? 0.008 : 0);
+    addBond(world, a, b, 0.016 * (a.traits.sociability + b.traits.sociability) - 0.08 * clash - pride - grumpy);
     // Two hungry Wobblins after the same few berries get on each other's nerves.
     if (a.needs.food < 0.3 && b.needs.food < 0.3 && a.activity === 'forage' && b.activity === 'forage') addBond(world, a, b, -0.05 - 0.04 * (1 - (a.traits.sociability + b.traits.sociability) / 2));
-    if (b0 < -0.2 && a.needs.mood < 0.5 && b.needs.mood < 0.5 && r() < 0.08) {
+    if (b0 < -0.15 && r() < 0.04 + (a.needs.mood < 0.5 || b.needs.mood < 0.5 ? 0.06 : 0)) {
       mood(a, -0.05); mood(b, -0.05);
       emit(world, { kind: 'interaction', actors: [a.id, b.id], data: { what: 'squabble' }, salience: 2 });
     }

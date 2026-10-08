@@ -233,7 +233,7 @@ section('Friends and rivals form over time');
     squabbles += w.events.filter(e => e.kind === 'interaction' && e.data.what === 'squabble').length;
     rivals += w.events.filter(e => e.kind === 'rivals').length;
   }
-  assert.ok(friends > 0);
+  assert.ok(friends > 20 && rivals > 5 && squabbles > 5, `${friends} / ${rivals} / ${squabbles}`);
   ok(`30 colonies x 300 days: ${friends} friendships formed (${rivals} rivalries, ${squabbles} squabbles without any Keeper help)`);
 }
 

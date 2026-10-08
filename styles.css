@@ -485,3 +485,7 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @media (max-width: 700px) { .hud-buttons a.waitlist { display: none; } }
 .goals-foot { margin: 6px 0 0; font-size: 13px; }
 .goals-foot a { color: #b5602a; font-weight: 700; }
+
+.recap-lines li { display: flex; align-items: center; gap: 10px; }
+.recap-lines li .portrait { flex: none; }
+.recap-lines li .dot { flex: none; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, #ffd86b 0 30%, #ffe9b0 31% 60%, transparent 61%); }
