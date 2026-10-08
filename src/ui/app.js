@@ -20,7 +20,7 @@ import { trayItems, ICONS, zoneAt } from './inventory.js';
 import { RIVER } from '../sim/geometry.js';
 import { emoteSVG, wobblinSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
-import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted } from './sound.js';
+import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted, startAmbience } from './sound.js';
 import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
 
@@ -91,6 +91,8 @@ function startWatching() {
   draw();
   setInterval(() => advance(false), 1000);
   requestAnimationFrame(frame);
+  startAmbience(() => world && { hour: localHour(Date.now()), rain: world.climate.rain > 0, cold: world.climate.season === 'cold',
+    mood: (() => { const l = world.wobblins.filter(w => w.alive); return l.length ? l.reduce((m, w) => m + w.needs.mood, 0) / l.length : 0; })() });
   document.addEventListener('visibilitychange', () => {
     if (!save || !world) return;
     if (wiping) return;

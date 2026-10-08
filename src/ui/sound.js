@@ -147,3 +147,62 @@ export function soundForReaction(reactions) {
   const good = vals.filter(v => v === 'love' || v === 'like').length, bad = vals.filter(v => v === 'scared' || v === 'upset').length;
   setTimeout(() => play(good >= bad ? 'heart' : 'uhoh'), 260);
 }
+
+// ---- ambience: birds by day, crickets by night, rain on the leaves, a slow
+// music-box note now and then when the colony is happy. Very quiet.
+let amb = null;
+export function startAmbience(getState) {
+  if (amb) return;
+  amb = { timer: null, rain: null };
+  const loop = () => {
+    amb.timer = setTimeout(loop, 1400 + Math.random() * 2600);
+    if (muted || !ctx || ctx.state !== 'running' || document.hidden) return;
+    const s = getState();
+    if (!s) return;
+    setRain(s.rain);
+    const night = s.hour < 6 || s.hour >= 20;
+    if (night) { if (Math.random() < 0.6) cricket(); }
+    else if (!s.rain && Math.random() < (s.cold ? 0.15 : 0.45)) bird();
+    if (s.mood > 0.6 && Math.random() < 0.35) musicNote(night);
+  };
+  amb.timer = setTimeout(loop, 2500);
+}
+
+function setRain(on) {
+  if (on && !amb.rain) {
+    const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = noiseBuf; src.loop = true; f.type = 'bandpass'; f.frequency.value = 3800; f.Q.value = 0.5;
+    g.gain.value = 0.0001; src.connect(f); f.connect(g); g.connect(master); src.start();
+    g.gain.exponentialRampToValueAtTime(0.07, ctx.currentTime + 2);
+    amb.rain = { src, g };
+  } else if (!on && amb.rain) {
+    const { src, g } = amb.rain;
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 2);
+    src.stop(ctx.currentTime + 2.1);
+    amb.rain = null;
+  }
+}
+
+function bird() {
+  const base = 2200 + Math.random() * 1400, n = 2 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < n; i++) tone(base * (0.9 + Math.random() * 0.25), 0.07, { at: i * 0.11, to: base * (1.25 + Math.random() * 0.3), vol: 0.035, attack: 0.004 });
+}
+function cricket() {
+  const f = 4300 + Math.random() * 500;
+  for (let i = 0; i < 3; i++) tone(f, 0.05, { at: i * 0.07, vol: 0.018, type: 'triangle', attack: 0.003 });
+}
+const PENTA = [523, 587, 659, 784, 880, 1047, 1175];
+function musicNote(night) {
+  const f = PENTA[Math.floor(Math.random() * PENTA.length)] * (night ? 0.5 : 1);
+  tone(f, 1.6, { vol: 0.045, type: 'sine', attack: 0.01 });
+  tone(f * 2, 0.9, { vol: 0.012, type: 'sine', attack: 0.01 });
+}
+
+// Dev check: run every sound once and report any that throw.
+export function checkSounds() {
+  if (!ready()) return ['no audio'];
+  const bad = [];
+  for (const [k, f] of Object.entries(SOUNDS)) { try { f(); } catch (e) { bad.push(k + ': ' + e.message); } }
+  try { bird(); cricket(); musicNote(false); } catch (e) { bad.push('ambience: ' + e.message); }
+  return bad;
+}
