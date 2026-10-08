@@ -9,6 +9,14 @@ Nothing here needs you to act. If you only have a minute, open the game and star
 
 Sound plays after your first tap; the speaker button (top left) mutes it. The **?** button explains every gesture. Everything is committed in the local git repo, and all 14 test files pass. Screenshots 1-18 are in this folder.
 
+**Five things to try in the first minute** (in the 300-day village):
+
+1. Hover lightning over a group of Wobblins without letting go. The timid brace, the bold bounce.
+2. Drop a boulder on one that has a close friend nearby, and watch the friend run over.
+3. Fling one into the river, a mural or the garden.
+4. Fling one up and click it in mid-air, then throw it again: juggling.
+5. Open Goals and scroll to "Tricks to try".
+
 ## 1. Art
 
 - **The valley is painted on a canvas.** It has alpine mountains with sunlit faces, snow and gullies, shaded clouds that change colour with the time of day, haze, and grass. Tall grass sways in the foreground, and rain splashes ripple on the ground.
