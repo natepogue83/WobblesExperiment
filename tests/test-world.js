@@ -94,4 +94,17 @@ section('Wishes once the Temple exists');
   ok('no Temple, no wishes');
 }
 
+section('Names');
+{
+  const bad = new Set(['Jizz', 'Dik', 'Kak', 'Hump', 'Hun', 'Fish', 'Pump', 'Dip', 'Fix', 'Top', 'Zero', 'Push']);
+  let n = 0;
+  for (let seed = 1; seed <= 400; seed++) {
+    const w = createWorld(seed);
+    for (let i = 0; i < 60; i++) tick(w);
+    for (const x of w.wobblins) { n++; assert.ok(!bad.has(x.name), seed + ': ' + x.name); }
+    assert.equal(new Set(w.wobblins.map(x => x.name)).size, w.wobblins.length);
+  }
+  ok(`${n} Wobblins in 400 colonies: no rude or confusing names, and no two alike in a colony`);
+}
+
 console.log('\ntest-world: all passed');

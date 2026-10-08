@@ -28,13 +28,16 @@ export function wobblinName(seed, n) {
   return pick(r, SYL_A) + pick(r, SYL_B);
 }
 
+// Syllable pairs that spell something rude, or a thing in the valley ("Fish went SPLASH").
+const BLOCKED_NAMES = new Set(['Jizz', 'Dik', 'Kak', 'Hump', 'Hun', 'Fish', 'Pump', 'Dip', 'Fix', 'Top', 'Zero', 'Push']);
+
 function uniqueName(world, n) {
   const used = new Set(world.wobblins.map(w => w.name));
   for (let k = 0; k < 20; k++) {
     const name = wobblinName(world.seed, n * 31 + k);
-    if (!used.has(name)) return name;
+    if (!used.has(name) && !BLOCKED_NAMES.has(name)) return name;
   }
-  return wobblinName(world.seed, n) + n;
+  return 'Wob' + n;
 }
 
 // makeWobblin(world, { bornTick, parents?, traits?, zone? }) -> wobblin (pushed)
