@@ -23,6 +23,7 @@ Sound plays after your first tap; the speaker button (top left) mutes it. The **
 
 - **Seven stats out of 10,** including a new one, Caution. Every Wobblin starts different, and the stats drift with what happens to them.
 - **Five skills that level up:** foraging, building, tinkering, exploring and storytelling.
+- **You can watch stats change.** When a Wobblin gets braver, warier or better at something, it says so over its head ("Bravery 7 ▲", "Foraging 4!"). A boulder on the head, for example, shows "Caution 5 ▲".
 - **Discoveries need the right temperament.** Huts and walls need a Wobblin who worries enough, fire needs a brave one, and the temple needs a devout one. Each Wobblin's card lists what it could work out if it had more of a trait.
 - **Breeding works.** A baby takes after one parent or the other in each trait, with an occasional surprise, and a card shows what it inherited. To breed for a trait, drop one Wobblin onto another for a hug: they stay together, and close friends pair up far sooner (in a test, the first pair formed after 11 days instead of 25).
 - **Friends, rivals and squabbles** form on their own. The Family panel shows every generation.
@@ -51,6 +52,7 @@ All of these replay exactly and never teach the Wobblins anything.
   - a seed: a flower crown, with a butterfly
   - lightning: frizzy fur, and sometimes a bright idea. The static shock spreads to anyone they bump into.
   - the daily gift: they catch it
+- **The others react to who it hit.** A close friend winces and runs over to hug them better; a rival enjoys the show; playful ones laugh.
 - **Lightning on things:** it splits boulders into stones, blows cairns apart, makes a totem hum (the devout take it as a sign), stuns fish in the river, and cracks a frozen pond under anyone skating on it.
 - **Cold snaps** freeze the pond. Add rain and you get snow, and the playful ones build snowmen.
 - **New power, Shake the Valley** (unlocks at belief 26): berries rain down, cairns topple, old walls fall, a boulder on the hill may come rolling down into the valley (everyone dives out of the way), the screen shakes, and timid Wobblins never forget it.
@@ -62,6 +64,7 @@ All of these replay exactly and never teach the Wobblins anything.
 - **You can see belief grow:** every act that delights them floats a "+1.6 belief" up from where it happened, and the belief bar flashes (scaring them shows a red minus).
 - **Ages and 15 milestones** (the Goals button). Examples: tame fire, welcome a baby, three generations, a temple. Claiming one gives belief, and belief unlocks powers.
 - **A fast start:** while you watch a new colony, its first 12 days pass at 20 seconds each, then slow to a day a minute. The first discoveries, asks and unlocks arrive within a few minutes.
+- **Each new power gets a banner** with its icon when belief unlocks it, and its tray tile glows until you try it.
 - **A first-time coach** gives four pointers (drag stones in, pick a Wobblin up, watch them think, claim a goal), then gets out of the way.
 - **Big moments get their own card:** a discovery with confetti and what it means, a baby and who it takes after, a goodbye. They queue one at a time. A live ticker in the corner shows the day's most interesting happening.
 - **Coming back after a while,** the recap shows who each line is about and includes friendships and squabbles. In 85-97% of 8-hour absences there are now 3 or more changes, up from 63-93%. The Chronicle has a "Their story" tab with a face on every line.
@@ -69,8 +72,9 @@ All of these replay exactly and never teach the Wobblins anything.
 ## 5. Feel
 
 - **Synthesized sound** for every action: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime, plus quiet ambience (birds by day, crickets at night, rain, a music-box note when they're happy) and a mute button.
+- **A new colony opens with the three Wobblins asleep.** They pop awake one by one after you tap Wake them up.
 - **Juice:** sparkles where seeds, gifts and blessings land; a big dust puff and a screen thump for boulders; happy Wobblins play tag now and then; at night by your clock, idle ones curl up to sleep by a hut.
-- **Smoother:** no twitch when a new day starts; the phone HUD scrolls instead of clipping; tray tiles have hover tips; Esc closes a panel; the recap also appears after a laptop slept with the game open.
+- **Smoother:** no twitch when a new day starts; on a phone every tray tile now fits on screen (half the powers used to be out of reach) and the HUD is slimmer; tray tiles have hover tips; Esc closes a panel; the recap also appears after a laptop slept with the game open.
 
 ## Under the hood
 
