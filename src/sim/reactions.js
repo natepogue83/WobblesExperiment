@@ -70,11 +70,12 @@ function feel(world, w, a, here, r) {
     case 'gift': s = 0.3 + 0.5 * T.playfulness; break;
     case 'collect_offerings': s = w.faith > 0.3 ? 0.5 : 0.1; break;
     case 'carry':
-      if (w.id !== a.target) { s = 0.1 + 0.3 * T.playfulness; break; }
+      if (w.id !== a.target) { s = 0.1 + 0.3 * T.playfulness + (a.juggled ? 0.25 * T.playfulness : 0); break; }
       fear = true;
       s = a.thrown ? -0.4 + 1.1 * T.playfulness + 0.4 * T.boldness : 0.1 + 0.5 * T.playfulness + 0.2 * T.boldness;
       if (a.cradled) s = 0.45 + 0.5 * T.sociability;
       if (a.shaken) s = -0.7 + 0.6 * T.playfulness;
+      if (a.juggled) s = -0.5 + 1.3 * T.playfulness;
       if (a.splash) s -= 0.4 - 0.3 * T.boldness;
       break;
   }

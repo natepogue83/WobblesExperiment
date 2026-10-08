@@ -174,6 +174,7 @@ export function validateAction(world, a) {
         if (!ZONE_IDS.includes(a.zone)) return bad('zone');
         if (a.splash && a.zone !== 'riverbank' && a.zone !== 'pondsite') return bad('splash');
         if (a.shaken && a.cradled) return bad('carry');
+        if (a.juggled !== undefined && !(Number.isInteger(a.juggled) && a.juggled >= 2 && a.juggled <= 50)) return bad('carry');
         if (a.onto !== undefined) {
           const o = findWobblin(world, a.onto) || world.objects.find(x => x.id === a.onto);
           if (!o || o.alive === false || (o.state && o.state.gone) || a.onto === a.target) return bad('onto');
@@ -394,10 +395,17 @@ function applyActionEffects(world, a) {
         w.heldUntil = t + 1;
       }
       emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id,
-        data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}), ...(a.cradled ? { cradled: true } : {}), ...(a.shaken ? { shaken: true } : {}) },
+        data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}), ...(a.cradled ? { cradled: true } : {}), ...(a.shaken ? { shaken: true } : {}), ...(a.juggled ? { juggled: a.juggled } : {}) },
         salience: a.thrown ? 2 : 1, causes });
       if (a.cradled) emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'cradled' }, salience: 2, causes });
       if (a.shaken) emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'shaken' }, salience: 2, causes });
+      if (a.juggled) {
+        // Tossed up and caught again and again: the playful shriek with joy, the rest go green.
+        const loved = w.traits.playfulness > 0.55;
+        w.needs.mood = r3(clamp(w.needs.mood + (loved ? 0.04 + 0.01 * Math.min(a.juggled, 8) : -0.03 - 0.01 * Math.min(a.juggled, 8)), 0, 1));
+        if (!loved) w.needs.safety = r3(clamp(w.needs.safety - 0.08, 0, 1));
+        emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'juggled', n: a.juggled, loved }, salience: a.juggled >= 5 ? 3 : 2, causes });
+      }
       if (a.onto !== undefined) landOnto(world, w, a, causes);
       else if (a.splash && a.zone === 'riverbank') riverDunk(world, w, a, causes);
     } else if (a.nudge === 'move') {

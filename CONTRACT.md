@@ -187,7 +187,7 @@ Social `friends rivals interaction keepsake goal_reached` (`data.what` names it:
 bush_squashed, snack, stuck_in_tree, fire_walk, singed, caught_fish, scared_fish,
 through_the_roof, made_a_cairn, treasure, king_of_the_hill, remembers, boulder_split,
 fish_stunned, squabble, pond_froze, pond_thawed, skating, slipped, ice_cracked, quake,
-bonked, bonk_idea, squashed, flower_crown, zapped, gift_caught, comforted, swam, rescued,
+bonked, bonk_idea, squashed, flower_crown, zapped, gift_caught, comforted, swam, rescued, juggled,
 swept_downstream, paint_splat, repainted, trampled, weeded, cradled, shaken, snowman_smashed,
 snowman_zapped, stones_burst, charged, static_shock, boulder_rolled, tucked_in).
 
@@ -202,7 +202,7 @@ Chronicle, murals and the week-2 AI.
                                   // season: "cold"|"warm"
 { seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry"|"rename"|"move",
   target?, trait?, curio?, targets?, zone?,     // carry: pick a Wobblin up, set it down in zone
-  thrown?, splash?, onto?, cradled?, shaken?,  // (no cooldown; it stays put 3 ticks; never adds knowledge)
+  thrown?, splash?, onto?, cradled?, shaken?, juggled?,  // juggled: catches in mid-air, 2-50 (no cooldown; it stays put 3 ticks; never adds knowledge)
   name?, slot? }                               // rename: target + name (/^[A-Za-z][A-Za-z' -]{0,13}$/);
                                              // move: target object (stones, gift, curio, sprout, clay) to a free slot
                                              // cradled: held still (rest up); shaken: shaken about (rattled)

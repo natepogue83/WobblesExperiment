@@ -32,7 +32,7 @@ function fromMemory(world, w, e) {
       return null;
     case 'interaction': {
       const T = {
-        hug: `${nameOf(world, other)} gives the best hugs.`, swam: 'The river is the best! Throw me in again!', rescued: me ? `${nameOf(world, other)} fell in the river, so I jumped in after them.` : `I nearly floated away. ${nameOf(world, other)} saved me.`,
+        hug: `${nameOf(world, other)} gives the best hugs.`, juggled: d.loved ? 'Up and down and up and down! Again!' : 'Up, down, up, down. My tummy is still up there.', swam: 'The river is the best! Throw me in again!', rescued: me ? `${nameOf(world, other)} fell in the river, so I jumped in after them.` : `I nearly floated away. ${nameOf(world, other)} saved me.`,
         swept_downstream: d.fish ? 'The river carried me off. I came back with a fish, though.' : 'The river carried me ever so far. I am still damp.',
         paint_splat: w.traits.playfulness > 0.5 ? 'I flew into the painting! Look at all my colours!' : 'I am covered in paint. It will not come off.',
         trampled: 'I landed in the garden. Everyone shouted at me.', repainted: 'Someone smudged my mural. I fixed it.',

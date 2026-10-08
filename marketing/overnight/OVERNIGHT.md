@@ -48,6 +48,7 @@ All of these replay exactly and never teach the Wobblins anything.
   - into the river: bold ones swim it, a friend on the bank wades in to the rescue, and everyone else is swept downstream (sometimes coming out with a fish). They drip and shiver for a while.
   - into a mural: covered in paint, with a Wobblin-shaped smudge on the mural; the artist is cross and repaints it later
   - into the garden: the crops are flattened for a while and the gardeners are cross
+- **Catch a flung Wobblin in mid-air** and throw it again to juggle it. The playful shriek with joy; the rest go green.
 - **Hold one still** and it dozes off in your hand. **Shake it** and it wobbles like jelly and stays rattled. **Poke it over and over** and it giggles, gets cross, then runs off.
 - **Drop powers on a Wobblin's head:**
   - stones: a bonk, which sometimes knocks an idea loose

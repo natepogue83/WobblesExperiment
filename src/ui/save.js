@@ -48,7 +48,7 @@ const CODES = {
   bl: ['nudge', 'bless', ['target', 'trait']],
   cu: ['nudge', 'curio', ['curio', 'targets']],
   mi: ['nudge', 'miracle', []],
-  ca: ['nudge', 'carry', ['target', 'zone', 'thrown', 'splash', 'onto', 'cradled', 'shaken']],
+  ca: ['nudge', 'carry', ['target', 'zone', 'thrown', 'splash', 'onto', 'cradled', 'shaken', 'juggled']],
   rn: ['nudge', 'rename', ['target', 'name']],
   mv: ['nudge', 'move', ['target', 'slot']],
   gi: ['gift', null, ['day', 'giftId', 'slot', 'onto']],

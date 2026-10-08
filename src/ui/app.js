@@ -107,7 +107,9 @@ function startWatching() {
 }
 
 // Their eyes follow the pointer over the valley.
+let lastHand = { x: 0, y: 0 };
 window.addEventListener('pointermove', ev => {
+  lastHand = { x: ev.clientX, y: ev.clientY };
   const svg = document.getElementById('world');
   if (!world || !svg || !overSvg(svg, ev.clientX, ev.clientY)) return;
   const p = toSvgPoint(svg, ev.clientX, ev.clientY);
@@ -574,13 +576,26 @@ function slotXY(s) { const q = GEO.slotInfo(s); return { x: q.x, y: q.y }; }
 // ------------------------------------------------------------ Wobblins in hand
 let held = null, heldTimer = null;
 const heldFlags = {};
+// A flung Wobblin can be caught in mid-air and thrown again: juggling.
+const flights = {}, juggles = {}, caughtMid = {};
+const juggledFlag = id => { const n = juggles[id] || 0; juggles[id] = 0; return n >= 2 ? { juggled: Math.min(n, 50) } : {}; };
 function wireWobblins(svg) {
   for (const w of lastRS.wobblins) {
     const g = svg.querySelector('#' + w.id);
     if (!g) continue;
     let base = null, trail = [];
+    g.addEventListener('pointerdown', () => {
+      const f = flights[w.id];
+      if (!f || f.caught) return;
+      f.caught = true; caughtMid[w.id] = true;
+      juggles[w.id] = (juggles[w.id] || 0) + 1;
+      g.classList.remove('flying');
+      play('pop');
+      if (juggles[w.id] >= 2) toast('Juggling! ' + juggles[w.id] + ' catches');
+    }, true);
     press(g, {
       onTap: ev => {
+        if (caughtMid[w.id]) { delete caughtMid[w.id]; dropHeld(ev); return; }
         if (armed) { dropItem(armed, toSvgPoint(svg, ev.clientX, ev.clientY)); return; }
         poke(g);
         // First tap opens their card; more taps while it's open are just pokes.
@@ -637,7 +652,15 @@ function wireWobblins(svg) {
         const onto = landingTarget(w.id, p.x, p.y + 30);
         drawHint(svg, { x: p.x, y: p.y + 34, r: 30, ok: true, label: onto ? ontoLabel(onto) : zoneLabel(z) });
       },
-      onDrop: ev => {
+      onDrop: ev => dropHeld(ev),
+      onCancel: () => {
+        delete caughtMid[w.id];
+        if (flights[w.id]) { delete flights[w.id]; dropHeld(null); return; }
+        cancelHeld();
+      }
+    });
+    function dropHeld(ev) {
+        delete caughtMid[w.id]; delete flights[w.id];
         clearInterval(heldTimer);
         const flags = held ? { ...(held.shaken ? { shaken: true } : held.cradled ? { cradled: true } : {}) } : {};
         held = null;
@@ -647,9 +670,10 @@ function wireWobblins(svg) {
         document.body.classList.remove('is-dragging');
         svg.classList.remove('watching');
         clearHint(svg);
-        const p = toSvgPoint(svg, ev.clientX, ev.clientY);
-        if (!overSvg(svg, ev.clientX, ev.clientY)) { g.setAttribute('transform', base); g.classList.remove('held'); puppets.pin(w.id, false); return; }
-        const v = releaseVelocity(trail);
+        const pt = ev ? { x: ev.clientX, y: ev.clientY } : lastHand;
+        const p = toSvgPoint(svg, pt.x, pt.y);
+        if (!overSvg(svg, pt.x, pt.y)) { juggles[w.id] = 0; g.setAttribute('transform', base); g.classList.remove('held'); puppets.pin(w.id, false); return; }
+        const v = ev ? releaseVelocity(trail) : { x: 0, y: 0 };
         if (Math.hypot(v.x, v.y) > FLING_SPEED) { fling(svg, g, w, { x: p.x, y: p.y + 30 }, v); return; }
         const water = waterAt(p.x, p.y + 30);
         const zone = water || zoneAt(p);
@@ -657,12 +681,12 @@ function wireWobblins(svg) {
         dropped[w.id] = { at: Date.now() };
         puppets.place(w.id, p.x, p.y + 30);
         play(water ? 'splash' : 'drop');
-        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...flags });
+        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...flags, ...juggledFlag(w.id) });
         const last = world.events[world.events.length - 1];
         if (last && last.kind === 'interaction' && interactionToast(last)) toast(interactionToast(last));
         riverAfter(w, p.x, water);
-      },
-      onCancel: () => {
+    }
+    function cancelHeld() {
         dragging = false;
         document.body.classList.remove('is-dragging');
         svg.classList.remove('watching');
@@ -670,8 +694,7 @@ function wireWobblins(svg) {
         g.setAttribute('transform', base);
         g.classList.remove('held');
         puppets.pin(w.id, false);
-      }
-    });
+    }
   }
 }
 
@@ -726,7 +749,9 @@ function fling(svg, g, w, start, v) {
   const ground = Math.max(300, Math.min(640, start.y + 25 + Math.max(0, v.y) * 140));
   let x = start.x, y = start.y, vx = v.x, vy = v.y, spin = 0, bounces = 0, last = performance.now();
   const t0 = last;
+  const flight = flights[w.id] = { caught: false };
   const step = now => {
+    if (flight.caught) { g.setAttribute('transform', `translate(${x},${y}) scale(${s})`); return; }   // caught in mid-air
     const dt = Math.min(32, now - last); last = now;
     vy += GRAVITY * dt;
     x += vx * dt; y += vy * dt;
@@ -748,6 +773,7 @@ function fling(svg, g, w, start, v) {
 }
 
 function land(svg, g, w, x, y, water) {
+  delete flights[w.id];
   dragging = false;
   g.classList.remove('flying');
   const zone = water || zoneAt({ x, y: y - 30 });
@@ -757,7 +783,7 @@ function land(svg, g, w, x, y, water) {
   puppets.place(w.id, x, y);
   if (water) toast(world.wobblins.find(o => o.id === w.id).name + ' went SPLASH. Brr.');
   const onto = landingTarget(w.id, x, y);
-  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...(heldFlags[w.id] && heldFlags[w.id].shaken ? { shaken: true } : {}) });
+  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...(heldFlags[w.id] && heldFlags[w.id].shaken ? { shaken: true } : {}), ...juggledFlag(w.id) });
   const ev = world.events[world.events.length - 1];
   if (ev && ev.kind === 'interaction') toast(interactionToast(ev));
   riverAfter(w, x, water);
@@ -811,6 +837,7 @@ function landingTarget(id, x, y) {
 const INTERACTION_TOAST = {
   swam: 'Cannonball! And a happy paddle back.', rescued: 'A friend wades in to the rescue!', swept_downstream: 'Whoosh! Off down the river...',
   paint_splat: 'SPLAT. A Wobblin-shaped smudge.', trampled: 'Squish. Right in the vegetable patch.',
+  juggled: 'Up, down, up, down!',
   hug: 'Aww, a hug.', comforted: 'A friend rushes over to help.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
   stuck_in_tree: 'Stuck in a tree!', fire_walk: 'Walked right through the fire...', singed: 'HOT HOT HOT! Off to the river.', caught_fish: 'Caught a fish!',
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',

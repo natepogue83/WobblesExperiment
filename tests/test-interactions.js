@@ -243,6 +243,24 @@ section('Cradled or shaken');
   for (let i = 0; i < 4; i++) tick(live);
   assert.equal(stateHash(replay(parseSave(serializeSave(save)), 4)), stateHash(live));
   ok('held still, a Wobblin dozes off in your hand; shaken, it is rattled; both replay');
+
+  // Caught in mid-air and thrown again: juggling.
+  const j = createWorld(42, { barren: true });
+  const [p, q] = j.wobblins;
+  p.traits.playfulness = 0.9; q.traits.playfulness = 0.2;
+  assert.equal(applyAction(j, { seq: 1, t: 0, type: 'nudge', nudge: 'carry', target: p.id, zone: 'meadow', thrown: true, juggled: 1 }).ok, false);
+  assert.equal(applyAction(j, { seq: 2, t: 0, type: 'nudge', nudge: 'carry', target: p.id, zone: 'meadow', thrown: true, juggled: 4 }).ok, true);
+  const jp = last(j, 'juggled');
+  assert.ok(jp && jp.data.n === 4 && jp.data.loved === true);
+  assert.equal(applyAction(j, { seq: 3, t: 0, type: 'nudge', nudge: 'carry', target: q.id, zone: 'meadow', thrown: true, juggled: 3 }).ok, true);
+  assert.equal(last(j, 'juggled').data.loved, false);
+  const save2 = newSave({ seed: 42, createdAt: 0 });
+  const live2 = createWorld(42);
+  applyAction(live2, appendAction(save2, 0, { type: 'nudge', nudge: 'carry', target: 'w1', zone: 'hill', thrown: true, juggled: 6 }));
+  for (let i = 0; i < 4; i++) tick(live2);
+  assert.ok(serializeSave(save2).includes(',6]'));
+  assert.equal(stateHash(replay(parseSave(serializeSave(save2)), 4)), stateHash(live2));
+  ok('juggled (caught in mid-air 2+ times): the playful love it, the rest go green; it packs into the save and replays');
 }
 
 section('Lightning on odd things');
