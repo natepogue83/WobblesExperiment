@@ -250,6 +250,7 @@ export function objectSVG(o) {
 
 // Little item icons (used in wants and pondering: "something's missing").
 export const ITEM_ICONS = {
+  heart: '<path d="M0 5.5 C-7 1 -7 -5.5 -3.4 -5.5 C-1.6 -5.5 -0.6 -4.4 0 -3.2 C0.6 -4.4 1.6 -5.5 3.4 -5.5 C7 -5.5 7 1 0 5.5 Z" fill="#e8507a"/><circle cx="-3" cy="-3" r="1.1" fill="#fff" opacity=".7"/>',
   berry: '<circle cx="-2" cy="1" r="3.4" fill="#d23c5e"/><circle cx="3" cy="2" r="3" fill="#b8304f"/><path d="M0 -2 q2 -5 6 -4" stroke="#4f8a3a" stroke-width="1.6" fill="none"/>',
   cold: '<g stroke="#5aa8e0" stroke-width="2" stroke-linecap="round"><path d="M0 -6 L0 6"/><path d="M-5.2 -3 L5.2 3"/><path d="M-5.2 3 L5.2 -3"/></g>',
   tired: '<path d="M-4 -4 h6 l-6 7 h6" stroke="#6b6fb0" stroke-width="1.8" fill="none" stroke-linejoin="round"/>',
