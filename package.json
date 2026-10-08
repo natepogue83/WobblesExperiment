@@ -1,0 +1,11 @@
+{
+  "name": "wobblins",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A tiny never-resetting world of curious Wobblins.",
+  "scripts": {
+    "test": "node tests/run-all.js",
+    "start": "node server.js"
+  }
+}

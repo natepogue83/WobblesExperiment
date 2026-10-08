@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Wobblins</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="stage">
+    <svg id="world" role="img" aria-label="The Wobblins' valley"></svg>
+    <div id="hud"></div>
+    <div id="toast" hidden></div>
+    <section id="recap" class="card" hidden></section>
+    <section id="giftCard" class="card" hidden></section>
+    <section id="newColony" class="card" hidden>
+      <h2>A new colony</h2>
+      <p>Three small Wobblins are waking up in an empty valley. You can't build anything for them. You can only shape their world, and see what they figure out.</p>
+      <form id="newColonyForm">
+        <label>Colony name <input id="colonyName" placeholder="leave blank for a surprise" maxlength="30"></label>
+        <label>Your name, Keeper <input id="keeperName" placeholder="Keeper" maxlength="30"></label>
+        <button type="submit">Wake them up</button>
+      </form>
+    </section>
+    <aside id="debug" hidden></aside>
+  </main>
+  <nav id="bars">
+    <div id="powers" class="bar"></div>
+    <div id="nudges" class="bar"></div>
+  </nav>
+  <script type="module" src="src/ui/app.js"></script>
+</body>
+</html>

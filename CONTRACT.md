@@ -1,0 +1,216 @@
+# Wobblins — Integration Contract (v1)
+
+This is the binding spec. Every module builds against THIS document and
+`src/sim/geometry.js`. If code and contract disagree, fix one of them in the
+same change; never leave them out of step. Modeled on the ISO contract
+(`C:\Users\ignit\iso\CONTRACT.md`), which this project reuses patterns from
+but never modifies.
+
+## 1. Module boundaries
+
+Plain browser JavaScript as ES modules, no build step, no external libraries.
+Node runs the same files for tests (`package.json` has `"type": "module"`).
+
+| Path            | Owns                                              | May import          |
+|-----------------|---------------------------------------------------|---------------------|
+| `src/sim/`      | All world state and rules. Pure and deterministic. | only `src/sim/`     |
+| `src/render/`   | `renderState(world)` (pure) and `drawSVG(svg, rs)` | `src/sim/` read-only|
+| `src/ui/`       | Clock, input, panels, saving to localStorage      | sim, render, ai     |
+| `src/ai/`       | Narration (stub in week 1)                        | sim read-only       |
+| `tests/`        | Node tests, run with `npm test`                   | anything            |
+
+- `src/sim/` never touches the DOM, `localStorage`, `fetch`, the wall clock,
+  or `Math.random`. Render and UI never mutate a world.
+- The only way to change a world is `applyAction(world, action)` and
+  `tick(world)`. Replay is those two calls in a fixed order, nothing else.
+
+### Public sim API (`src/sim/index.js`)
+
+```js
+createWorld(seed /* uint32 */, opts /* { barren?, colonyName?, keeperName? } */) -> world
+tick(world) -> world                    // advances world.tick by exactly 1
+validateAction(world, action) -> { ok: true } | { ok: false, reason }
+applyAction(world, action) -> { ok, reason? }   // invalid = no change, no events
+replay(save, nowTick) -> world          // world.tick === nowTick
+stateHash(world) -> string              // 16 hex chars, stable across engines
+```
+
+## 2. Determinism (hard rule)
+
+1. No `Math.random`, no `Date`, no `performance`, no wall clock in `src/sim/`.
+   A test greps for these. Time enters the sim only as the integer tick.
+2. All randomness comes from mulberry32 (ported verbatim from ISO) through
+   derived sub-streams: `rngFor(seed, "experiment", tick, wobblinId)`. Every
+   system draws from its own stream keyed by what it is deciding, so adding a
+   system or a roll never shifts unrelated rolls. Never share one stream
+   across systems or keep a stream alive across ticks.
+3. Iterate creatures and objects sorted by id (`byId`, numeric suffix order:
+   `w2` before `w10`). Never iterate object keys in insertion or unknown
+   order when the order can affect an outcome; use `sortedKeys`.
+4. Stored floats are rounded to 3 decimals (`r3`) whenever written to state.
+5. `stateHash(world)` = cyrb53 of a stable stringify (keys sorted). Same
+   seed + same action list = same hash, byte for byte, on every engine.
+6. `applyAction` validates deterministically from world state alone:
+   cooldowns, Devotion, gift once per day, valid targets. An invalid action is
+   ignored with no events and no state change, identically on replay.
+7. Real time exists only in the UI: `nowTick = floor((now - save.createdAt) /
+   TICK_MS)` plus the debug offset. The sky's time of day is render-only and
+   never feeds back into the sim.
+
+## 3. Rule zero: player actions never create discoveries
+
+- Only `src/sim/experiment.js` (experiments, teaching and rediscovery inside
+  it) may add to `world.discoveries` or any `wobblin.knows`.
+- Actions only create objects, conditions, or temporary trait modifiers.
+- Events of kind `discovery`, `rediscovery`, `taught`,
+  `learned_from_structure` and `forgotten` can only be emitted with the
+  internal `KNOWLEDGE` emitter tag (`src/sim/events.js`). `emit` throws
+  otherwise. Only `experiment.js` may import that tag (a test greps for it).
+- Every `discovery` / `rediscovery` event carries `data.source` of
+  `"experiment"` or `"rediscovery"`.
+- The player never crafts or combines anything. No recipes are ever shown.
+
+## 4. Ids
+
+| Thing     | Format                 | Allocated from     |
+|-----------|------------------------|--------------------|
+| Wobblin   | `"w1"`, `"w2"`, ...    | `world.nextIds.w`  |
+| Object    | `"o1"`, `"o2"`, ...    | `world.nextIds.o`  |
+| Event     | integer `1, 2, ...`    | `world.nextIds.e`  |
+| Action    | integer `seq`, from 1  | the save's list    |
+| Zone      | `"meadow"` etc.        | `geometry.js`      |
+| Slot      | `"meadow.2"` (1-based) | `geometry.js`      |
+| Discovery | `"fire_warmth"` etc.   | `discoveries.js`   |
+
+Ids are never reused, even after death or destruction.
+
+## 5. State schema (world, version 2)
+
+```js
+world = {
+  version: 2, seed, tick, colonyName, keeperName,
+  climate: { season: "mild"|"cold"|"warm", tempMod, until: tick|null, drought,
+             rain: ticksLeft, wetUntil: tick, cold: bool /* tonight */ },
+  wobblins: [ wobblin ],          // dead ones stay, alive:false
+  objects:  [ object ],           // destroyed ones stay, hp 0, state.gone:true
+  discoveries: { [id]: { inventor, tick, causes, forgotten } },
+  devotion: 0,
+  offerings: 0,                   // waiting at the shrine, collected by action
+  cooldowns: { stone, plant, rain, lightning, water, season, bless, curio, miracle },
+                                  // each value = first tick the power is usable
+  seasonUses: 0,                  // Season is free the first time
+  giftsByDay: { [dayIndex]: giftId },
+  pondering: { [wobblinId]: { [discoveryId]: sinceTick } },
+  events: [ event ],              // append-only
+  nextIds: { w, o, e }
+}
+
+wobblin = {
+  id, name, look: { hue, pattern, ears, eyeSize, tail, wobble },
+  traits: { curiosity, boldness, sociability, patience, playfulness, piety }, // 0..1
+  hobby, bornTick, stage: "baby"|"adult"|"elder", lifespan,
+  needs: { food, warmth, rest, mood, safety },            // 0..1
+  zone, knows: { [discoveryId]: { since, from: "self"|wobblinId } },
+  temp: { [trait]: { add, until } },
+  partnerId, parents: [], faith, beliefs: [], memories: [eventId],
+  injuries, alive, deathTick, deathCause
+}
+
+object = { id, kind, zone, slot, hp, builtTick, by: [wobblinId],
+           origin: { action: seq } | { event: id } | { natural: true },
+           state: {} }
+```
+
+Object kinds: boulder, stones, tree, bush, sprout, fire, pond, reeds, clay,
+fish, curio, gift, hearth, hut, wall, garden, raft, totem, temple, mural,
+grave, ruin, scorch. Zone features that are not objects: `river`
+(riverbank), `shrine` (hill).
+
+## 6. Event schema
+
+```js
+event = { id, t, kind, actors: [wobblinId] /* inventor first */,
+          target: discoveryId | objectId | wobblinId | null,
+          data: { ... }, salience: 1..5,
+          causes: [ { action: seq } | { event: id } | { object: id } |
+                    { condition: name, action?: seq, event?: id } ] }
+```
+
+Kinds (week 1): Keeper `colony_founded keeper_power keeper_nudge keeper_gift
+offerings_collected`; Discovery `experiment_failed misfire discovery
+rediscovery taught learned_from_structure pondering forgotten superstition`;
+World `built burned ruin fire_started fire_out flood pond_formed tree_grown
+prowler lost rain cold_snap`; Life `paired birth grew_up became_elder injured healed
+death seed_pod_hatched stranger_arrived`; Faith `offering wish wish_granted
+wish_expired faith_shift festival ritual mural_painted`.
+
+Events are append-only and are the single source of truth for the recap,
+Chronicle, murals and the week-2 AI.
+
+## 7. Action schema (the save's `actions` list)
+
+```js
+{ seq, t, type: "power", power: "stone"|"plant"|"rain"|"lightning"|"water"|"season",
+  slot?, zone?, variant? }        // stone: "stones"|"boulder"; plant: "tree"|"bush";
+                                  // season: "cold"|"warm"
+{ seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle",
+  target?, trait?, curio?, targets? }
+{ seq, t, type: "gift", day, giftId }
+{ seq, t, type: "collect_offerings" }
+```
+
+- Actions apply at tick `t`, in `seq` order, BEFORE that tick's `tick()` runs.
+- `replay(save, nowTick)`: start from `createWorld(save.seed, save)`; for
+  `t = 0..nowTick`, apply actions with that `t` in seq order, then call
+  `tick()` if `t < nowTick`. Result has `world.tick === nowTick`.
+- Live play must equal replay: the UI applies an action to the live world at
+  the current tick and appends it to the save with that same `t`.
+
+## 8. Save (`localStorage["wobblins.save.v1"]`)
+
+```js
+{ v: 1, seed, createdAt /* ms, UI only */, colonyName, keeperName,
+  actions: [ action ], lastSeenTick }
+```
+
+Seed comes from `crypto.getRandomValues` in the UI only. Target under 20 KB
+after 500 actions, so on disk (localStorage and the base64 export string) the
+action list is packed by `src/ui/save.js` into tuples under key `a`:
+`[code, dt, ...fields]`, seq implied by position, t as a delta. Any action
+that does not fit a tuple is stored as its full object. In memory a save
+always holds full action objects.
+
+## 9. Clock
+
+`TICK_MS = 3_600_000` (1 tick = 1 real hour = 1 colony day). `?debug=1`
+shows a time-warp panel (+1h, +12h, +3d) that adds to a stored offset; the
+offset only changes `nowTick` in the UI.
+
+## 10. Grounding rule for AI text (week 2, binding now)
+
+- AI text may mention only Wobblins, objects, discoveries, beliefs and events
+  present in its `recapInput`. No invented events, outcomes, numbers or
+  characters.
+- A causal claim ("after your lightning storm") is allowed only where the
+  input contains that cause link.
+- Tone and feeling are fine; new facts are not.
+- Output is JSON lines, each listing its `eventIds`. A validator rejects lines
+  that name unknown entities, claim unlisted causes, cite no valid event, or
+  fail the content filter; rejected lines fall back to the template.
+- At most 7 lines, at most 280 characters each. Topics stay inside the
+  colony; never the player's real life or health.
+- No free-form chat with Wobblins, ever.
+
+## 11. Naming and look
+
+- Always "Wobblins" (one is a "Wobblin"). Never the name "Thronglets" or that
+  game's creature look.
+- Creatures are original soft blobs: not egg-shaped roly-poly toys, not
+  yellow jelly people.
+
+## 12. Testing
+
+`npm test` runs every `tests/test-*.js` with plain node and `assert`.
+Day 1 tests: determinism (2,160 ticks, same hash), purity (grep), replay
+equivalence (live incremental == fresh replay, hash for hash), action
+validation basics, and the knowledge-emitter guard.
