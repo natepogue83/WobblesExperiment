@@ -104,6 +104,75 @@ function softBlob(ctx, x, y, r, color, alpha) {
   ctx.globalAlpha = 1;
 }
 
+// A mountain range: a jagged ridgeline (tent-shaped peaks plus fractal
+// noise), a top-lit gradient, sunlit faces, gully strokes, snowcaps and haze.
+function paintRange(ctx, r, base, hMin, hMax, col, P, sunX, snowFrac) {
+  const peaks = [];
+  for (let x = -60; x < W + 120; ) { const w = 150 + r() * 190; peaks.push({ px: x + w * 0.5, w, h: hMin + r() * (hMax - hMin) }); x += w * (0.45 + r() * 0.35); }
+  const ph = [r() * 9, r() * 9, r() * 9];
+  const heightAt = x => {
+    let y = 0;
+    for (const p of peaks) y = Math.max(y, p.h * Math.pow(Math.max(0, 1 - Math.abs(x - p.px) / (p.w * 0.5)), 0.85));
+    const n = Math.sin(x * 0.045 + ph[0]) * 4 + Math.sin(x * 0.11 + ph[1]) * 2.2 + Math.sin(x * 0.27 + ph[2]) * 1.1;
+    return Math.max(0, y + n * (0.4 + y / hMax));
+  };
+  const pts = [];
+  for (let x = -40; x <= W + 40; x += 4) pts.push([x, base - heightAt(x)]);
+  const outline = () => { ctx.beginPath(); ctx.moveTo(-40, H); for (const [x, y] of pts) ctx.lineTo(x, y); ctx.lineTo(W + 40, H); ctx.closePath(); };
+  // Body: lighter up top, sinking into haze.
+  const top = base - hMax - 10;
+  let g = ctx.createLinearGradient(0, top, 0, base + 20);
+  g.addColorStop(0, mix(col, P.mtnLight, 0.25)); g.addColorStop(0.6, col); g.addColorStop(1, mix(col, P.skyBot, 0.35));
+  ctx.fillStyle = g; outline(); ctx.fill();
+  ctx.save(); outline(); ctx.clip();
+  for (const p of peaks) {
+    const py = base - heightAt(p.px), side = sunX > p.px ? 1 : -1;
+    // Sunlit face: from the peak down the sun-side slope.
+    ctx.globalAlpha = 0.38; ctx.fillStyle = P.mtnLight;
+    ctx.beginPath(); ctx.moveTo(p.px, py);
+    for (let k = 1; k <= 10; k++) { const x = p.px + side * p.w * 0.5 * (k / 10); ctx.lineTo(x, base - heightAt(x) + 2); }
+    ctx.lineTo(p.px + side * p.w * 0.16, base + 10); ctx.lineTo(p.px + side * 4, base + 10); ctx.closePath(); ctx.fill();
+    // Shadowed face, softly.
+    ctx.globalAlpha = 0.16; ctx.fillStyle = mix(col, '#1a2238', 0.5);
+    ctx.beginPath(); ctx.moveTo(p.px, py);
+    for (let k = 1; k <= 10; k++) { const x = p.px - side * p.w * 0.5 * (k / 10); ctx.lineTo(x, base - heightAt(x) + 2); }
+    ctx.lineTo(p.px - side * p.w * 0.1, base + 10); ctx.closePath(); ctx.fill();
+    // Gullies: thin strokes running down from the ridge.
+    ctx.globalAlpha = 0.22; ctx.strokeStyle = mix(col, '#1a2238', 0.35); ctx.lineWidth = 1.4;
+    for (let k = 0; k < 5; k++) {
+      const x0 = p.px + (r() - 0.5) * p.w * 0.55, y0 = base - heightAt(x0) + 4;
+      ctx.beginPath(); ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo(x0 + (r() - 0.5) * 18, y0 + 20 + r() * 20, x0 + (r() - 0.5) * 30, y0 + 40 + r() * 40); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // Snow on the tall ones: follows the ridge, ragged at the bottom.
+    if (p.h > hMax * (1 - snowFrac)) {
+      const depth = 16 + (p.h - hMax * (1 - snowFrac)) * 0.35;
+      ctx.fillStyle = P.snow; ctx.globalAlpha = 0.95;
+      ctx.beginPath();
+      const xs = []; for (let x = p.px - p.w * 0.22; x <= p.px + p.w * 0.22; x += 4) xs.push(x);
+      ctx.moveTo(xs[0], base - heightAt(xs[0]));
+      for (const x of xs) ctx.lineTo(x, base - heightAt(x) - 1);
+      for (let i = xs.length - 1; i >= 0; i--) {
+        const x = xs[i], edge = 1 - Math.abs(x - p.px) / (p.w * 0.22);
+        ctx.lineTo(x, base - heightAt(x) + depth * edge * (0.55 + 0.45 * Math.abs(Math.sin(x * 0.35 + ph[0]))));
+      }
+      ctx.closePath(); ctx.fill();
+      // A shadow tint on the snow's far side.
+      ctx.globalAlpha = 0.18; ctx.fillStyle = '#7f93b8';
+      ctx.beginPath(); ctx.moveTo(p.px, base - heightAt(p.px));
+      for (let k = 0; k <= 8; k++) { const x = p.px - side * p.w * 0.22 * (k / 8); ctx.lineTo(x, base - heightAt(x) + depth * (1 - k / 8) * 0.8); }
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+  ctx.restore();
+  // Haze settling at the foot of the range.
+  g = ctx.createLinearGradient(0, base - 120, 0, base + 30);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, P.haze);
+  ctx.fillStyle = g; ctx.fillRect(0, base - 120, W, 160);
+}
+
 // A painterly ridge: fill below a wobbly line, with brush texture on top.
 function ridge(ctx, r, y0, amp, freq, fill, opts = {}) {
   const pts = [];
@@ -210,29 +279,10 @@ export function paintValley(canvas, seed, { hour = 12, season = 'mild', wet = fa
     for (let k = 0; k < 18; k++) blob(ctx, cx + (k / 18 - 0.5) * len, cy + Math.sin(k) * 4, 26 + r() * 22, 6 + r() * 6, tod === 'night' ? '#6a75a0' : '#ffffff', 0.08);
   }
 
-  // Far mountains with haze, lit on the sun side.
-  for (const [layer, base, col] of [[0, 220, P.mtnFar], [1, 238, P.mtnNear]]) {
-    const peaks = [];
-    let x = -60;
-    while (x < W + 60) { const w = 110 + r() * 140; peaks.push([x + w / 2, base - 70 - r() * (layer ? 60 : 90), w]); x += w * (0.7 + r() * 0.3); }
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.moveTo(-60, H);
-    for (const [px, py, w] of peaks) { ctx.lineTo(px - w / 2, base - r() * 14); ctx.lineTo(px, py); }
-    ctx.lineTo(W + 60, base); ctx.lineTo(W + 60, H); ctx.closePath(); ctx.fill();
-    for (const [px, py, w] of peaks) {
-      const side = sunX > px ? 1 : -1;
-      ctx.fillStyle = P.mtnLight; ctx.globalAlpha = 0.45;
-      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + side * w * 0.5, base); ctx.lineTo(px + side * w * 0.12, base); ctx.closePath(); ctx.fill();
-      ctx.globalAlpha = 1;
-      if (base - py > 110) {
-        ctx.fillStyle = P.snow;
-        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - 18, py + 24); ctx.lineTo(px - 6, py + 18); ctx.lineTo(px + 2, py + 27); ctx.lineTo(px + 10, py + 17); ctx.lineTo(px + 18, py + 24); ctx.closePath(); ctx.fill();
-      }
-    }
-    g = ctx.createLinearGradient(0, base - 160, 0, base + 30);
-    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, P.haze);
-    ctx.fillStyle = g; ctx.fillRect(0, base - 160, W, 200);
-  }
+  // Far mountains with haze: jagged ridges, sunlit faces, snow and gullies.
+  const rm = rngFor(seed, 'mountains');
+  paintRange(ctx, rm, 222, 70, 165, P.mtnFar, P, sunX, 0.55);
+  paintRange(ctx, rm, 242, 55, 120, P.mtnNear, P, sunX, 0.25);
 
   // Rolling far hills and a dense forest behind the grove.
   ridge(ctx, r, 252, 14, 0.006, P.hillFar);

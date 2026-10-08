@@ -27,13 +27,18 @@ function sunPos(hour) {
   return { x: 80 + f * 1040, y: 175 - Math.sin(f * Math.PI) * 125 };
 }
 
-function cloud(r, x, y, s) {
-  const puffs = [];
+// Soft, shaded clouds: a tinted underside, a lit body, a bright top edge.
+const CLOUD_TINT = { day: ['#ffffff', '#d7e3f1', '#b9cbe0'], dawn: ['#fff6ee', '#f6cdbd', '#dba596'], dusk: ['#fff0e6', '#eeb1a6', '#c98480'], night: ['#9aa5c8', '#6c789f', '#4c5880'] };
+function cloud(r, x, y, s, tod = 'day') {
+  const [top, under, shade] = CLOUD_TINT[tod] || CLOUD_TINT.day;
   const n = 3 + Math.floor(r() * 3);
-  for (let i = 0; i < n; i++) {
-    puffs.push(`<ellipse cx="${(i - n / 2) * 26 * s}" cy="${-r() * 14 * s}" rx="${(22 + r() * 16) * s}" ry="${(14 + r() * 8) * s}"/>`);
-  }
-  return `<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)})"><g class="cloud" style="animation-duration:${(90 + r() * 80).toFixed(0)}s;animation-delay:-${(r() * 90).toFixed(0)}s"><g fill="#fff" opacity="0.85">${puffs.join('')}<rect x="${-n * 13 * s}" y="-6" width="${n * 26 * s}" height="${14 * s}" rx="${7 * s}"/></g></g></g>`;
+  const puffs = [];
+  for (let i = 0; i < n; i++) puffs.push([(i - n / 2 + 0.5) * 26 * s, -r() * 14 * s, (22 + r() * 16) * s, (14 + r() * 8) * s]);
+  const body = (dx, dy, k, fill, op) => `<g fill="${fill}" opacity="${op}">${puffs.map(([cx, cy, rx, ry]) => `<ellipse cx="${(cx + dx).toFixed(1)}" cy="${(cy + dy).toFixed(1)}" rx="${(rx * k).toFixed(1)}" ry="${(ry * k).toFixed(1)}"/>`).join('')}<rect x="${(-n * 13 * s + dx).toFixed(1)}" y="${(-6 + dy).toFixed(1)}" width="${(n * 26 * s).toFixed(1)}" height="${(14 * s).toFixed(1)}" rx="${(7 * s).toFixed(1)}"/></g>`;
+  const gid = 'cg' + tod;
+  return `<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)})"><g class="cloud" style="animation-duration:${(90 + r() * 80).toFixed(0)}s;animation-delay:-${(r() * 90).toFixed(0)}s">` +
+    `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0.25" stop-color="${top}"/><stop offset="1" stop-color="${under}"/></linearGradient></defs>` +
+    body(4 * s, 7 * s, 0.96, shade, 0.35) + body(0, 0, 1, `url(#${gid})`, 0.92) + body(-5 * s, -6 * s, 0.55, top, 0.7) + '</g></g>';
 }
 
 function mountains(r, color) {
@@ -131,7 +136,7 @@ export function sceneSVG(seed, { hour = 12, season = 'mild', wet = false } = {})
   } else {
     parts.push(`<circle cx="${sun.x.toFixed(0)}" cy="${sun.y.toFixed(0)}" r="90" fill="url(#sunglow)"/><circle cx="${sun.x.toFixed(0)}" cy="${sun.y.toFixed(0)}" r="30" fill="${tod === 'day' ? '#fff3b0' : '#ffd38a'}"/>`);
   }
-  for (let i = 0; i < 5; i++) parts.push(cloud(r, r() * W, 40 + r() * 110, 0.7 + r() * 0.6));
+  for (let i = 0; i < 5; i++) parts.push(cloud(r, r() * W, 40 + r() * 110, 0.7 + r() * 0.6, tod));
   // Far mountains, then rolling hills with a tree line behind the grove.
   parts.push(mountains(r));
   parts.push(`<path d="M0 260 C180 200 330 215 470 245 C620 275 760 205 940 215 C1060 222 1140 240 ${W} 232 L${W} ${H} L0 ${H} Z" fill="url(#hillfar)"/>`);
@@ -195,7 +200,7 @@ export function sceneOverlaySVG(seed, { hour = 12 } = {}) {
   if (tod === 'night') {
     for (let i = 0; i < 30; i++) parts.push(`<circle class="star" style="animation-delay:-${(r() * 4).toFixed(1)}s" cx="${(r() * W).toFixed(0)}" cy="${(r() * 200).toFixed(0)}" r="${(r() * 1.3 + 0.6).toFixed(1)}" fill="#fff"/>`);
   }
-  for (let i = 0; i < 5; i++) parts.push(cloud(r, r() * W, 40 + r() * 110, 0.7 + r() * 0.6));
+  for (let i = 0; i < 5; i++) parts.push(cloud(r, r() * W, 40 + r() * 110, 0.7 + r() * 0.6, tod));
   const rp = riverPath();
   parts.push(`<path class="shimmer" d="${rp}" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-dasharray="14 46" opacity="0.6" transform="translate(0 -4)"/>`);
   parts.push(`<path class="shimmer slow" d="${rp}" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="6 70" opacity="0.45" transform="translate(0 8)"/>`);
