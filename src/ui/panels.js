@@ -168,7 +168,7 @@ export function showHelp(panel) {
   const rows = [
     ['Drag from your tray', 'Stones, seeds, rain, lightning and the rest go wherever you drop them. Drop one right on a Wobblin\'s head and see what happens.'],
     ['Pick a Wobblin up', 'Set it down somewhere new, or let go while moving to fling it. Whatever it lands on reacts: a friend, a bush, the fire, a hut roof, the river, a mural, the garden...'],
-    ['Hover your hand', 'Their eyes follow it. The ones who trust you wave hello; the ones you've scared cover their heads.'],
+    ['Hover your hand', 'Their eyes follow it. The ones who trust you wave hello; the ones you have scared cover their heads.'],
     ['Hold still, or shake', 'Hold one still and it dozes off in your hand. Shake it and it gets rattled.'],
     ['Tap a Wobblin', 'Its card shows its stats, skills, what it could work out and its own words. Tap the name to rename it. Keep tapping and it gets cross.'],
     ['Move small things', 'Drag stones, gifts, curios, sprouts and clay to a new spot.'],
