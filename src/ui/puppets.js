@@ -120,7 +120,7 @@ export class Puppets {
       if (p.pinned) continue;
       const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy);
       if (d > 2) {
-        const v = (d > 220 ? RUN : WALK) * dt;
+        const v = (d > 220 || p.chase ? RUN * 0.8 : WALK) * dt;
         p.x += dx / d * Math.min(v, d); p.y += dy / d * Math.min(v, d);
         if (Math.abs(dx) > 1) p.face = dx > 0 ? 1 : -1;
         p.walking = true;
@@ -137,6 +137,7 @@ export class Puppets {
     }
     this.separate(dt);
     this.chatter(now);
+    this.play(now);
   }
 
   // Soft personal space, so a crowd spreads out instead of stacking up.
@@ -155,6 +156,23 @@ export class Puppets {
       if (a.arrived) { a.tx = a.x; a.ty = a.y; }
       if (b.arrived) { b.tx = b.x; b.ty = b.y; }
     }
+  }
+
+  // Happy, playful ones sometimes play tag: one dashes after another, who scampers off.
+  play(now) {
+    for (const p of this.p.values()) if (p.chase && now > p.chase.until) { p.chase = null; p.arrived = false; p.tx = p.ax; p.ty = p.ay; }
+    if (Math.random() > 0.0015) return;   // now and then, not all the time
+    const ps = [...this.p.values()].filter(p => !p.pinned && !p.chase && p.w && p.w.stage !== 'elder' && (p.w.mood || 0) > 0.65 && p.act !== 'sleep');
+    if (ps.length < 2) return;
+    const a = ps[Math.floor(Math.random() * ps.length)];
+    const b = ps.filter(q => q !== a && Math.hypot(q.x - a.x, q.y - a.y) < 220).sort((x, y) => Math.hypot(x.x - a.x, x.y - a.y) - Math.hypot(y.x - a.x, y.y - a.y))[0];
+    if (!b) return;
+    const z = ZONES[b.zone] || ZONES.meadow;
+    const away = b.x < a.x ? -1 : 1;
+    b.chase = { until: now + 2600 }; a.chase = { until: now + 2600 };
+    b.tx = Math.max(z.cx - z.rx * 0.85, Math.min(z.cx + z.rx * 0.85, b.x + away * rand(80, 140))); b.ty = b.y + rand(-15, 15); b.arrived = false; b.face = away;
+    a.tx = b.tx - away * 30; a.ty = b.ty; a.arrived = false; a.face = away;
+    a.chat = { icon: 'heart', until: now + 1400 };
   }
 
   // Friends nearby chat in little picture bubbles; teachers "explain" ideas.
