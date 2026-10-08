@@ -62,6 +62,16 @@ All of these replay exactly and never teach the Wobblins anything.
 
 - **Synthesized sound** for every action: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime. There's quiet ambience too (birds by day, crickets at night, rain, a music-box note when they're happy), and a mute button.
 
+## Added after the summary
+
+- **A painted icon for each of the 30 discoveries,** shown in the Discovery Book and on the eureka card.
+- **The Chronicle has a "Their story" tab** that leaves out your own acts and routine level-ups, and every line shows a face or an icon.
+- **A live ticker** in the bottom-left corner shows the day's most interesting happening while you watch.
+- **Poke a Wobblin over and over** and it giggles, then gets cross, then runs off.
+- **Portraits show flower crowns, frizz and charms.** The zap is easier to see from across the valley.
+- **Smoother redraws:** the Wobblins no longer twitch when a new day starts.
+- **A chaos test** throws 8,700 random acts at 16 colonies. Nothing crashes, no number goes out of range, and every save replays exactly.
+
 ## Decisions you might want to change
 
 - Boulders and lightning can injure a Wobblin but can never kill one.
