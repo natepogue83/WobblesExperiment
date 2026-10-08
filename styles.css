@@ -677,3 +677,5 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 .antic-mark .twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle .7s ease-in-out infinite alternate; }
 .antic-mark .twinkle.t2 { animation-delay: .35s; }
 @keyframes twinkle { from { transform: scale(.6) rotate(0); opacity: .6; } to { transform: scale(1.15) rotate(25deg); opacity: 1; } }
+
+.belief .devotion { margin-left: 10px; padding: 1px 8px; border-radius: 9px; background: rgba(185, 160, 240, .28); color: #ece4ff; font: 600 12px var(--display); }

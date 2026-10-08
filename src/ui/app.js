@@ -370,7 +370,7 @@ function itemState(item) {
   const poor = item.cost && world.devotion < item.cost && !(item.id === 'cold' || item.id === 'warm');
   const seasonPoor = (item.id === 'cold' || item.id === 'warm') && world.seasonUses > 0 && world.devotion < 10;
   return { ready: left === 0 && !poor && !seasonPoor, left, frac: left / (CONST.COOLDOWN[item.cd] || 1),
-    note: left ? timeLeft(left) : (poor || seasonPoor) ? 'needs Devotion' : '' };
+    note: left ? timeLeft(left) : (poor || seasonPoor) ? (poor ? item.cost : 10) + ' Devotion' : '' };
 }
 
 // Cooldowns are in colony days; show the real time left at the current speed.
@@ -437,7 +437,7 @@ function wireTile(tile, item) {
       const st = itemState(item);
       freshTiles.delete(item.id);
       if (st.locked) { toast(item.label + ' unlocks when their belief in you reaches ' + st.note.split(' ')[1] + '. Do things they love.'); return; }
-      if (!st.ready) { toast(item.label + ': ' + (st.note === 'tomorrow' ? 'one gift a day.' : st.note === 'needs Devotion' ? 'you need more Devotion.' : 'ready in ' + st.note + '.')); return; }
+      if (!st.ready) { toast(item.label + ': ' + (st.note === 'tomorrow' ? 'one gift a day.' : st.note.endsWith('Devotion') ? 'it costs ' + st.note + ' and you have ' + Math.floor(world.devotion) + '. Collect their offerings to earn it.' : 'ready in ' + st.note + '.')); return; }
       armed = armed === item ? null : item;
       if (armed) toast('Drag ' + item.label.toLowerCase() + ' onto the valley, or tap where it should go.');
       drawTray();
@@ -1011,7 +1011,8 @@ function drawHud() {
   const nu = nextUnlock(world);
   const prev = [...UNLOCKS].reverse().find(u => world.unlocked.includes(u.key));
   const frac = nu ? Math.max(0, Math.min(1, (world.belief - (prev ? prev.at : 0)) / Math.max(1, nu.at - (prev ? prev.at : 0)))) : 1;
-  belief.innerHTML = `<span class="label">Belief ${Math.floor(world.belief)}</span><span class="bar"><i style="width:${(frac * 100).toFixed(0)}%"></i></span><span class="next">${nu ? 'next: ' + nu.name + ' at ' + nu.at : 'all powers unlocked'}</span>`;
+  belief.innerHTML = `<span class="label">Belief ${Math.floor(world.belief)}</span><span class="bar"><i style="width:${(frac * 100).toFixed(0)}%"></i></span><span class="next">${nu ? 'next: ' + nu.name + ' at ' + nu.at : 'all powers unlocked'}</span>` +
+    (world.devotion >= 1 || isUnlocked(world, 'miracle') ? `<span class="devotion" title="Collected offerings. Miracles and extra seasons cost Devotion.">Devotion ${Math.floor(world.devotion)}</span>` : '');
   const ask = openAsk(world);
   const asker = ask && world.wobblins.find(x => x.id === ask.by);
   const needs = (asker ? `${asker.name} is asking for ${ASK_TEXT[ask.want]}` + (colonyNeeds() ? ' · ' : '') : '') + colonyNeeds();
