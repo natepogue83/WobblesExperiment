@@ -29,7 +29,7 @@ Sound plays after your first tap; the speaker button (top left) mutes it. The **
 - **Friends, rivals and squabbles** form on their own. The Family panel shows every generation.
 - **Each Wobblin talks.** Its card shows one line in its own voice, drawn from its real memories ("A boulder squashed me flat. I'm fine. Mostly."), and it babbles the line in a little made-up voice. This is a placeholder for the AI layer and follows the same grounding rule.
 - **They ask you for things,** from day one: berries when they're hungry, a friend when they're lonely, rain in a dry spell, stones to stack, flowers. A golden bubble shows what they want and the top of the screen says how to help. Granting an ask gives belief; ignore it and they give up after a while.
-- **They remember how you treat them.** One that trusts you snuggles into your hand; one you've scared or flung around struggles. They also give you a name from what you do most (the Rainmaker, the Thrower, the Gentle Hand...), said fondly or nervously.
+- **They remember how you treat them.** One that trusts you snuggles into your hand and waves hello when your hand passes over; one you've scared or flung around struggles, or covers its head. They also give you a name from what you do most (the Rainmaker, the Thrower, the Gentle Hand...), said fondly or nervously.
 - **Tap a Wobblin's name to rename it.** When one dies, a quiet goodbye card says what it knew and who will miss it.
 
 ## 3. Freedom and funny chain reactions
@@ -45,6 +45,9 @@ All of these replay exactly and never teach the Wobblins anything.
   - through a hut roof: the hut needs rebuilding
   - onto the frozen pond: skating
   - into a snowman: poof
+  - into the river: bold ones swim it, a friend on the bank wades in to the rescue, and everyone else is swept downstream (sometimes coming out with a fish). They drip and shiver for a while.
+  - into a mural: covered in paint, with a Wobblin-shaped smudge on the mural; the artist is cross and repaints it later
+  - into the garden: the crops are flattened for a while and the gardeners are cross
 - **Hold one still** and it dozes off in your hand. **Shake it** and it wobbles like jelly and stays rattled. **Poke it over and over** and it giggles, gets cross, then runs off.
 - **Drop powers on a Wobblin's head:**
   - stones: a bonk, which sometimes knocks an idea loose
@@ -74,7 +77,7 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Synthesized sound** for every action: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime, plus quiet ambience (birds by day, crickets at night, rain, a music-box note when they're happy) and a mute button.
 - **A new colony opens with the three Wobblins asleep.** They pop awake one by one after you tap Wake them up.
 - **Juice:** sparkles where seeds, gifts and blessings land; a big dust puff and a screen thump for boulders; happy Wobblins play tag now and then; at night by your clock, idle ones curl up to sleep by a hut.
-- **Smoother:** no twitch when a new day starts; on a phone every tray tile now fits on screen (half the powers used to be out of reach) and the HUD is slimmer; tray tiles have hover tips; Esc closes a panel; the recap also appears after a laptop slept with the game open.
+- **Smoother:** no twitch when a new day starts; on a phone every tray tile now fits on screen (half the powers used to be out of reach) and the HUD is slimmer; small laptop windows and phones on their side get a compact HUD and one row of tiles; tray tiles have hover tips; Esc closes a panel; the recap also appears after a laptop slept with the game open.
 
 ## Under the hood
 
