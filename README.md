@@ -16,10 +16,11 @@ experiment overlay, replay verification and save export/import).
 ## How to play
 
 - **Drag from the tray** onto the valley: stones, a boulder, seeds, rain, lightning, water, seasons, Shake, a blessing, a curio, the daily gift, a miracle. Drop one on a Wobblin's head for a reaction.
-- **Pick a Wobblin up** and set it down, or **fling** it (let go while moving). Things it lands on react.
+- **Pick a Wobblin up** and set it down, or **fling** it (let go while moving). Things it lands on react: friends, bushes, trees, the fire, hut roofs, the river, murals, the garden, the frozen pond, snowmen. **Catch a flung one in mid-air** to juggle it.
 - **Hold it still** in your hand and it dozes off. **Shake it** and it gets rattled.
 - **Tap a Wobblin** for its card (stats, skills, what it could work out, its own words). Tap the name to rename it. Keep tapping and it gets cross.
 - **Drag small things** (stones, gifts, curios, sprouts, clay) to move them.
+- **Hover your hand or a power over them.** The trusting wave hello and the wary cover their heads; with lightning or a boulder overhead, the timid brace and the bold bounce.
 - **A golden bubble** means a Wobblin is asking you for something; grant it for belief. **Drop one Wobblin on another** for a hug: close friends pair up sooner, which is how you breed for a trait.
 - **Goals** lists milestones; claiming one adds belief, and belief unlocks powers. **Family** shows every generation; **Chronicle** is their story.
 - Dev: `?debug=1&fresh=1` starts over, `?debug=1&devload=/_dev_save.json` loads a prepared village (`node tests/_mkdev.mjs <seed> <ticks>` makes one).
