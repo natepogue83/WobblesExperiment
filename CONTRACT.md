@@ -59,7 +59,11 @@ stateHash(world) -> string              // 16 hex chars, stable across engines
 
 ## 3. Rule zero: player actions never create discoveries
 
-The engine is `src/sim/experiment.js`; the graph is data in
+The engine is `src/sim/experiment.js`; failures go to `src/sim/misfires.js`
+(misfire table and superstitions); what discoveries and beliefs do afterwards
+(songs, rituals, festivals, rebuilding, healing, wishes) is `src/sim/culture.js`.
+Neither of those two may add knowledge.
+Also: the graph is data in
 `src/sim/discoveries.js`; world changes are `src/sim/effects.js` (called only
 from experiment.js); cause chains are `src/sim/causes.js` (`keeperRoot`).
 
@@ -113,6 +117,8 @@ world = {
   rainUses: [tick],               // recent Keeper rains; 3 within 6 ticks = flood
   miracleUntil, riverBend: slot|null, lastKeeperTick,
   noticed: { [objectKind]: tick },// first tick a Wobblin was near a material (unlocks curios)
+  wishes: [ { id, by, want: "rain"|"stones_on_hill"|"warmth", t, until, event, done: null|"granted"|"expired" } ],
+  lastFestival: tick|null
   events: [ event ],              // append-only
   nextIds: { w, o, e }
 }
@@ -127,7 +133,8 @@ wobblin = {
   zone, knows: { [discoveryId]: { since, from: "self"|wobblinId } },
   temp: { [trait]: { add, until } },
   partnerId, parents: [], faith, beliefs: [], memories: [eventId],
-  injuries, alive, deathTick, deathCause
+  injuries, alive, deathTick, deathCause,
+  witnessed /* saw a blessing or miracle */, tabooUntil? /* Fire Taboo */, luckyCharm? /* object id */
 }
 
 object = { id, kind, zone, slot, hp, builtTick, by: [wobblinId],
@@ -246,6 +253,11 @@ offset only changes `nowTick` in the UI.
 - Lightning on empty dry ground starts a small grass fire (4 ticks), so
   Lightning alone can lead to Fire Warmth in the barren valley.
 - Base rates are tuned up from the plan for tiers 2-4 (see constants.js).
+- Big structures appear at once when discovered (no multi-tick build jobs
+  yet). A temple is built on a hill boulder when there is one ("the temple
+  stands on the boulder you dropped": the built event cites it).
+- Herb Healing counts an injured Wobblin anywhere in the colony; Fire
+  Carrying takes sticks from trees, bushes or reeds.
 - Teaching rolls use one stream per learner per tick: rngFor(seed, "teach", t, id).
 
 ## 13. Testing
