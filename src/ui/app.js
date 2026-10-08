@@ -21,7 +21,7 @@ import { RIVER } from '../sim/geometry.js';
 import { emoteSVG, wobblinSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
 import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted } from './sound.js';
-import { momentsFor } from './moments.js';
+import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
 
 const params = new URLSearchParams(location.search);
@@ -722,7 +722,7 @@ function drawHud() {
 // Point the coach bubble at the tray tile, a Wobblin, or the goal line.
 function placeCoach() {
   const step = coachStep(save, world);
-  if (!step) { drawCoach(null); return; }
+  if (!step || momentShowing()) { drawCoach(null); return; }   // never on top of a big moment
   let rect = null;
   if (step.anchor.startsWith('tile:')) {
     const label = { stones: 'Stones' }[step.anchor.slice(5)];
@@ -779,13 +779,7 @@ function celebrateUnlocks() {
   }
 }
 
-function banner(title, sub) {
-  const b = document.createElement('div');
-  b.className = 'banner';
-  b.innerHTML = `<b>${title}</b><span>${sub}</span>`;
-  document.body.append(b);
-  setTimeout(() => b.remove(), 4200);
-}
+function banner(title, sub) { queueBanner(title, sub); }
 
 const WANT_TEXT = {
   hungry: n => `${n} is hungry. Berry bushes nearby would help (or carry them to some).`,
