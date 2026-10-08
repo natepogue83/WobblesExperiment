@@ -69,7 +69,7 @@ export function drawHint(svg, hint) {
   let g = svg.querySelector('#drag-hint');
   if (!g) { g = document.createElementNS(NS, 'g'); g.id = 'drag-hint'; svg.append(g); }
   g.replaceChildren();
-  if (!hint) return;
+  if (!hint || !Number.isFinite(hint.x) || !Number.isFinite(hint.y)) return;
   const c = document.createElementNS(NS, 'circle');
   c.setAttribute('cx', hint.x); c.setAttribute('cy', hint.y); c.setAttribute('r', hint.r || 24);
   c.setAttribute('class', 'drop-ring' + (hint.ok ? '' : ' bad'));

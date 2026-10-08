@@ -30,6 +30,20 @@ export function addBond(world, a, b, d) {
 function mood(w, d) { w.needs.mood = r3(clamp01(w.needs.mood + d)); }
 function witnessesOf(world, zone, except) { return alive(world).filter(x => x.zone === zone && !except.includes(x.id)); }
 
+// After a hard knock, the closest friend nearby comes over and hugs them better.
+function comfort(world, w, causes) {
+  let best = null, bb = 0.3;
+  for (const x of witnessesOf(world, w.zone, [w.id])) {
+    const b = bond(x, w.id);
+    if (x.stage !== 'baby' && b >= bb && (b > bb || !best || x.id < best.id)) { bb = b; best = x; }
+  }
+  if (!best) return null;
+  mood(w, 0.1); mood(best, 0.03);
+  addBond(world, best, w, 0.05);
+  best.heldUntil = Math.max(best.heldUntil || 0, world.tick + 1);
+  return emit(world, { kind: 'interaction', actors: [best.id, w.id], target: w.id, data: { what: 'comforted' }, salience: 3, causes });
+}
+
 function freeSlotIn(world, zone) {
   for (const s of slotIds(zone)) if (!liveObjects(world).some(o => o.slot === s || (o.slots && o.slots.includes(s)))) return s;
   return null;
@@ -204,7 +218,9 @@ export function powerOnto(world, w, a, ev) {
         mood(w, -0.2); faith(-0.08); w.heldUntil = t + 3;
         shapeTrait(w, 'caution', 0.04);
         for (const x of witnessesOf(world, w.zone, [w.id])) x.needs.safety = r3(clamp01(x.needs.safety - 0.1));
-        return say('squashed', { hurt: hurtNow }, 4);
+        const ev2 = say('squashed', { hurt: hurtNow }, 4);
+        comfort(world, w, [{ event: ev2.id }]);
+        return ev2;
       }
       mood(w, -0.06); faith(-0.02); w.heldUntil = t + 1;
       laugh();
@@ -222,7 +238,9 @@ export function powerOnto(world, w, a, ev) {
       else { mood(w, -0.12); shapeTrait(w, 'caution', 0.03); faith(-0.06); }
       const bright = r() < 0.5;
       if (bright) idea(0.2, 4);
-      return say('zapped', { bold, idea: bright, hurt: !!hurtNow });
+      const ev2 = say('zapped', { bold, idea: bright, hurt: !!hurtNow });
+      if (hurtNow) comfort(world, w, [{ event: ev2.id }]);
+      return ev2;
     }
   }
   return null;

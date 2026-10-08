@@ -25,6 +25,7 @@ import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
 import { tickerFor } from './ticker.js';
 import { keeperTitle } from './keeper.js';
+import { SKILLS, SKILL_NAMES, skillLevel } from '../sim/growth.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -155,20 +156,21 @@ function advance(returning = false) {
   heartbeat(save, Date.now());
   const now = nowTick();
   if (now <= world.tick) { if (Date.now() % 5000 < 1000) storeSave(save); drawHud(); drawTray(); return; }
-  const from = world.tick, seen = world.events.length;
+  const from = world.tick, seen = world.events.length, stats0 = returning ? null : statSnapshot();
   while (world.tick < now) tick(world);
   if (!returning) { soundForEvents(world.events.slice(seen)); momentsFor(world, world.events.slice(seen)); tickerFor(world, world.events.slice(seen)); }
   save.lastSeenTick = now;
   storeSave(save);
   if ((returning && now - from >= 2) || now - from >= 6) showRecap(from, now);   // also after a sleeping laptop
   draw();
+  if (stats0 && now - from < 6) statPops(stats0);
 }
 
 // ------------------------------------------------------------ actions
 function act(action) {
   advance();
   const a = appendAction(save, world.tick, action);
-  const seen = world.events.length, belief0 = world.belief || 0;
+  const seen = world.events.length, belief0 = world.belief || 0, stats0 = statSnapshot();
   const res = applyAction(world, a);
   if (!res.ok) { popAction(save); toast(whyNot(res.reason)); play('uhoh'); }
   else {
@@ -176,6 +178,7 @@ function act(action) {
     beliefPop((world.belief || 0) - belief0, a);
     actionSound(a, world.events.slice(seen));
     momentsFor(world, world.events.slice(seen));
+    for (const e of world.events.slice(seen)) if (e.kind === 'interaction' && e.data.what === 'comforted') setTimeout(() => puppets.rushTo(e.actors[0], e.actors[1]), 700);
     const ie = world.events.slice(seen).find(e => e.kind === 'interaction' && interactionToast(e));
     if (ie) toast(interactionToast(ie));
     // Show how everyone felt about it for a few seconds.
@@ -188,6 +191,7 @@ function act(action) {
   }
   armed = null;
   draw();
+  if (res.ok) statPops(stats0, 500);
   return res.ok;
 }
 
@@ -230,6 +234,41 @@ function beliefPop(delta, a) {
   setTimeout(() => el.remove(), 1600);
   const bar = document.querySelector('.belief');
   if (bar && delta > 0) { bar.classList.remove('gain'); void bar.offsetWidth; bar.classList.add('gain'); }
+}
+
+// Stats you can watch change: when a Wobblin gets braver, warier or better at
+// something, it says so over its head ("Bravery 7 ▲", "Foraging 4!").
+const STAT_WORD = { curiosity: 'Curiosity', boldness: 'Bravery', sociability: 'Friendliness', patience: 'Patience', playfulness: 'Playfulness', piety: 'Faith', caution: 'Caution' };
+const stat10 = v => Math.max(1, Math.round(v * 10));
+function statSnapshot() {
+  const m = new Map();
+  for (const w of world.wobblins) if (w.alive) m.set(w.id, { t: Object.fromEntries(Object.entries(w.traits).map(([k, v]) => [k, stat10(v)])), s: Object.fromEntries(SKILLS.map(k => [k, skillLevel(w, k)])) });
+  return m;
+}
+function statPops(before, delay = 0) {
+  if (document.hidden) return;
+  const pops = [];
+  for (const w of world.wobblins) {
+    const b = w.alive && before.get(w.id);
+    if (!b) continue;
+    let i = 0;
+    for (const k of SKILLS) { const l = skillLevel(w, k); if (l > b.s[k]) pops.push({ id: w.id, i: i++, text: `${SKILL_NAMES[k]} ${l}!`, cls: 'skill' }); }
+    for (const [k, v] of Object.entries(w.traits)) {
+      const n = stat10(v);
+      if (b.t[k] !== undefined && n !== b.t[k] && STAT_WORD[k]) pops.push({ id: w.id, i: i++, text: `${STAT_WORD[k]} ${n} ${n > b.t[k] ? '▲' : '▼'}`, cls: n > b.t[k] ? 'up' : 'down' });
+    }
+  }
+  pops.slice(0, 6).forEach((p, j) => setTimeout(() => {
+    const svg = $('#world'), m = svg.getScreenCTM(), pos = puppets.position(p.id);
+    if (!m || !pos) return;
+    const el = document.createElement('div');
+    el.className = 'stat-pop ' + p.cls;
+    el.textContent = p.text;
+    el.style.left = (m.a * pos.x + m.e) + 'px';
+    el.style.top = (m.d * (pos.y - 96) + m.f) + 'px';
+    document.body.append(el);
+    setTimeout(() => el.remove(), 2200);
+  }, delay + j * 650));
 }
 
 function whyNot(reason) {
@@ -709,7 +748,7 @@ function landingTarget(id, x, y) {
 }
 
 const INTERACTION_TOAST = {
-  hug: 'Aww, a hug.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
+  hug: 'Aww, a hug.', comforted: 'A friend rushes over to help.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
   stuck_in_tree: 'Stuck in a tree!', fire_walk: 'Walked right through the fire...', singed: 'HOT HOT HOT! Off to the river.', caught_fish: 'Caught a fish!',
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
   king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',

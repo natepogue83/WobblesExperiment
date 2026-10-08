@@ -599,3 +599,12 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .banner .bicon { flex: none; width: 52px; height: 52px; border-radius: 14px; background: #fffaf0; box-shadow: 0 2px 0 #e6c98a; display: grid; place-items: center; animation: bicon-pop .6s cubic-bezier(.2, 1.6, .4, 1); }
 .banner .bicon svg { width: 40px; height: 36px; }
 @keyframes bicon-pop { from { transform: scale(.3) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
+
+/* A stat changing, over the Wobblin it happened to */
+.stat-pop { position: fixed; z-index: 54; transform: translate(-50%, -50%); pointer-events: none; font: 700 14px var(--display); white-space: nowrap;
+  padding: 2px 9px 3px; border-radius: 999px; background: rgba(255, 255, 255, .92); color: #3b6a2e; box-shadow: 0 2px 6px rgba(40, 30, 10, .25);
+  animation: stat-up 2.1s ease-out forwards; }
+.stat-pop.down { color: #8a4a3a; }
+.stat-pop.skill { background: linear-gradient(#fff3c2, #ffd86b); color: #6b4410; font-size: 15px; }
+@keyframes stat-up { 0% { opacity: 0; transform: translate(-50%, -20%) scale(.6); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  20% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -190%); } }

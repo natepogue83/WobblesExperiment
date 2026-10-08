@@ -78,6 +78,16 @@ export class Puppets {
 
   position(id) { const p = this.p.get(id); return p ? { x: p.x, y: p.y } : null; }
 
+  // Run to a friend's side (a comforting hug after a hard knock).
+  rushTo(id, toId) {
+    const p = this.p.get(id), q = this.p.get(toId), now = performance.now();
+    if (!p || !q || p.pinned) return;
+    const side = p.x < q.x ? -1 : 1;
+    p.tx = p.ax = q.x + side * 30; p.ty = p.ay = q.y + 2;
+    p.arrived = false; p.chase = { until: now + 2200 }; p.idleUntil = now + 5000;
+    p.chat = { icon: 'heart', until: now + 4000 };
+  }
+
   // Note who taught whom this tick, so they can be seen "talking" about it.
   noteTeaching(pairs) { this.taught = pairs; }
 

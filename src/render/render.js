@@ -30,7 +30,7 @@ function objectPos(o) {
 }
 
 const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question', level_up: 'levelup' };
-const INTERACTION_BUBBLE = { static_shock: 'spark', charged: 'spark', stones_burst: 'smoke', bonk_idea: 'idea', flower_crown: 'heart', gift_caught: 'heart', squashed: 'smoke', bonked: 'smoke', zapped: 'spark', hug: 'heart', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
+const INTERACTION_BUBBLE = { static_shock: 'spark', charged: 'spark', stones_burst: 'smoke', bonk_idea: 'idea', flower_crown: 'heart', gift_caught: 'heart', squashed: 'smoke', bonked: 'smoke', zapped: 'spark', hug: 'heart', comforted: 'heart', snack: 'heart', caught_fish: 'spark', treasure: 'spark', bonk: 'smoke', bowled_over: 'smoke', singed: 'smoke', squabble: 'smoke', stuck_in_tree: 'question', fire_walk: 'spark', made_a_cairn: 'spark' };
 const BUBBLE_RANK = { spark: 5, levelup: 4.5, smoke: 4, ponder: 3, heart: 2, question: 1 };
 
 // Their strongest trait, if it really stands out (it shows in their brows).

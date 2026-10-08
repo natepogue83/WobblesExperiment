@@ -132,6 +132,23 @@ section('Dropped right on their heads');
   assert.equal(stateHash(replay(back, 6)), stateHash(live));
   assert.ok(serializeSave(save).includes('"w1"'));
   ok('on-head drops pack into the save and replay to the same world');
+
+  // Watching a boulder land on someone: a close friend winces, a rival enjoys it.
+  let wince = 0, glee = 0, hugs = 0;
+  for (let seed = 1; seed <= 40; seed++) {
+    const v = createWorld(seed, { barren: true });
+    const [x, f, r] = v.wobblins;
+    for (const y of [x, f, r]) { y.zone = 'meadow'; y.traits.playfulness = 0.5; y.traits.sociability = 0.5; }
+    f.bonds = { [x.id]: 0.8 }; r.bonds = { [x.id]: -0.8 };
+    applyAction(v, { seq: 1, t: 0, type: 'power', power: 'stone', variant: 'boulder', slot: 'meadow.3', onto: x.id });
+    const re = v.events.find(e => e.kind === 'keeper_power').data.reactions;
+    if (re[f.id] === 'upset' || re[f.id] === 'scared') wince++;
+    if (re[r.id] === 'love' || re[r.id] === 'like') glee++;
+    const c = v.events.find(e => e.kind === 'interaction' && e.data.what === 'comforted');
+    if (c && c.actors[0] === f.id && c.actors[1] === x.id) hugs++;
+  }
+  assert.ok(wince >= 36 && glee >= 30 && hugs === 40, `wince ${wince}, glee ${glee}, hugs ${hugs}`);
+  ok(`a boulder on someone: their close friend winced in ${wince}/40, their rival enjoyed it in ${glee}/40, and the friend ran over to hug them better in ${hugs}/40`);
 }
 
 section('Matchmaking');

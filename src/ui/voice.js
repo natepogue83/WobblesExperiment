@@ -32,7 +32,7 @@ function fromMemory(world, w, e) {
       return null;
     case 'interaction': {
       const T = {
-        hug: `${nameOf(world, other)} gives the best hugs.`, bonk: `${nameOf(world, other)} bumped right into me.`,
+        hug: `${nameOf(world, other)} gives the best hugs.`, comforted: me ? `${nameOf(world, other)} got squashed, so I gave them a hug.` : `When it all went wrong, ${nameOf(world, other)} hugged me better.`, bonk: `${nameOf(world, other)} bumped right into me.`,
         bowled_over: me ? `I knocked ${nameOf(world, other)} flat. Not my fault!` : `${nameOf(world, other)} came flying out of nowhere and knocked me over.`,
         bush_squashed: 'I landed in the berries. Sticky.', snack: 'Berries! Right where I landed.',
         stuck_in_tree: 'I was stuck up a tree for ages.', fire_walk: 'The fire didn\'t scare me.', singed: 'My bottom is still warm from that fire.',

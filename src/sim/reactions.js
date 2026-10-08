@@ -41,6 +41,16 @@ function feel(world, w, a, here, r) {
     fear = kind === 'lightning';
     return s > 0.55 ? 'love' : s > 0.2 ? 'like' : s > -0.2 ? 'curious' : fear ? 'scared' : 'upset';
   }
+  if (a.onto && (a.type === 'power' || a.type === 'gift')) {
+    // Watching it land on someone else: friends wince, the playful laugh, a rival enjoys it.
+    const kind = a.type === 'gift' ? 'gift' : a.power === 'stone' ? a.variant : a.power;
+    const b = (w.bonds && w.bonds[a.onto]) || 0;
+    s = { stones: -0.15 + 0.6 * T.playfulness - 0.2 * T.sociability, boulder: -0.3 + 0.8 * T.playfulness - 0.4 * T.sociability,
+      plant: 0.3 + 0.4 * T.sociability, lightning: -0.5 + 0.7 * T.boldness, gift: 0.1 + 0.4 * T.sociability }[kind] + jitter;
+    if (kind !== 'plant' && kind !== 'gift') s += b > 0 ? -0.9 * b : -0.7 * b;
+    fear = kind === 'lightning' || (kind === 'boulder' && T.caution > 0.6);
+    return s > 0.55 ? 'love' : s > 0.2 ? 'like' : s > -0.2 ? 'curious' : fear ? 'scared' : 'upset';
+  }
   switch (a.type === 'power' ? a.power : a.type === 'nudge' ? a.nudge : a.type) {
     case 'stone': case 'plant':
       s = 0.1 + 0.5 * T.curiosity + (a.variant === 'boulder' ? 0.2 * T.boldness - 0.15 * (1 - T.boldness) : 0); break;

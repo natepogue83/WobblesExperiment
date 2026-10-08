@@ -221,6 +221,7 @@ function templates(world, e, ctx) {
       const other = e.actors[1] ? wob(world, e.actors[1]) : null;
       const T = {
         hug: [`You set ${name} down next to ${other}. Big hug.`, `${name} and ${other} had a cuddle.`, `${name} landed right in ${other}'s arms.`],
+        comforted: [`${name} ran over and hugged ${other} better.`, `${name} looked after ${other} until the dizziness passed.`, `${other} was hurting, so ${name} sat with them.`],
         bonk: [`${name} bumped into ${other}. Neither was pleased.`, `Bonk! ${name} and ${other} are not speaking.`, `${name} landed on ${other}. Oops.`],
         bowled_over: [`You flung ${name} straight into ${other}. Both went down like skittles.`, `${name} bowled ${other} over. There are hard feelings.`, `STRIKE! ${name} knocked ${other} flat.`],
         bush_squashed: [`${name} landed in a berry bush and squashed every berry.`, `A flying ${name} flattened the berry bush.`, `${name} is now covered in berry juice. The bush is not.`],
