@@ -30,7 +30,7 @@ experiment overlay, replay verification and save export/import).
 npm test
 ```
 
-Twelve test files, about three minutes. The long ones are `test-world.js` (200 seeds
+Fourteen test files, about three minutes. The long ones are `test-world.js` (200 seeds
 x 2,160 ticks) and `test-discovery.js`.
 
 ## Deploy (static, no build step)

@@ -7,7 +7,7 @@ Nothing here needs you to act. If you only have a minute, open the game and star
 - `http://localhost:8137/?debug=1&fresh=1` starts a brand-new colony (the new-player flow).
 - `http://localhost:8137/?debug=1&devload=/_dev_save.json` loads a 300-day village with every power unlocked.
 
-Sound plays after your first tap; the speaker button (top left) mutes it. The **?** button explains every gesture. Everything is committed in the local git repo, and all 13 test files pass.
+Sound plays after your first tap; the speaker button (top left) mutes it. The **?** button explains every gesture. Everything is committed in the local git repo, and all 14 test files pass.
 
 ## 1. Art
 
@@ -83,6 +83,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 - A chaos test throws 8,700 random acts at 16 colonies: nothing crashes, no number goes out of range, and every save replays exactly.
 - Ticks got faster with identical results, so a 90-day replay still runs in about 220 ms against the 250 ms target.
+- A new syntax test parses every module, including the browser-only ones the other tests never load.
 - CONTRACT.md and the README are up to date.
 
 ## Decisions you might want to change
