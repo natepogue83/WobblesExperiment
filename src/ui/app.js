@@ -630,6 +630,7 @@ const heldFlags = {};
 // A flung Wobblin can be caught in mid-air and thrown again: juggling.
 const flights = {}, juggles = {}, caughtMid = {};
 // Still something in the air or in hand? Then keep redraws paused.
+const endFlight = id => { if (flights[id]) { flights[id].shadow?.remove(); delete flights[id]; } };
 const busyElsewhere = () => !!held || Object.keys(flights).length > 0;
 const juggledFlag = id => { const n = juggles[id] || 0; juggles[id] = 0; return n >= 2 ? { juggled: Math.min(n, 50) } : {}; };
 function wireWobblins(svg) {
@@ -714,12 +715,12 @@ function wireWobblins(svg) {
       onDrop: ev => dropHeld(ev),
       onCancel: () => {
         delete caughtMid[w.id];
-        if (flights[w.id]) { delete flights[w.id]; dropHeld(null); return; }
+        if (flights[w.id]) { endFlight(w.id); dropHeld(null); return; }
         cancelHeld();
       }
     });
     function dropHeld(ev) {
-        delete caughtMid[w.id]; delete flights[w.id];
+        delete caughtMid[w.id]; endFlight(w.id);
         clearInterval(heldTimer);
         const mine = held && held.id === w.id ? held : null;
         const flags = mine ? { ...(mine.shaken ? { shaken: true } : mine.cradled ? { cradled: true } : {}) } : {};
@@ -812,9 +813,13 @@ function fling(svg, g, w, start, v) {
   const ground = Math.max(300, Math.min(640, start.y + 25 + Math.max(0, v.y) * 140));
   let x = start.x, y = start.y, vx = v.x, vy = v.y, spin = 0, bounces = 0, last = performance.now();
   const t0 = last;
-  const flight = flights[w.id] = { caught: false };
+  // A shadow on the ground under it sells the height: small and faint up high.
+  const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+  shadow.setAttribute('fill', 'rgba(40, 28, 14, .3)');
+  g.parentNode.insertBefore(shadow, g);
+  const flight = flights[w.id] = { caught: false, shadow };
   const step = now => {
-    if (flight.caught) { g.setAttribute('transform', `translate(${x},${y}) scale(${s})`); return; }   // caught in mid-air
+    if (flight.caught) { shadow.remove(); g.setAttribute('transform', `translate(${x},${y}) scale(${s})`); return; }   // caught in mid-air
     const dt = Math.min(32, now - last); last = now;
     vy += GRAVITY * dt;
     x += vx * dt; y += vy * dt;
@@ -830,13 +835,16 @@ function fling(svg, g, w, start, v) {
     }
     if (now - t0 > 2200) return land(svg, g, w, x, ground, waterAt(x, ground));
     g.setAttribute('transform', `translate(${x},${y}) rotate(${spin}) scale(${s})`);
+    const k = Math.max(0.35, 1 - Math.max(0, ground - y) / 320);
+    shadow.setAttribute('cx', x.toFixed(1)); shadow.setAttribute('cy', (ground + 2).toFixed(1));
+    shadow.setAttribute('rx', (24 * k).toFixed(1)); shadow.setAttribute('ry', (6 * k).toFixed(1)); shadow.setAttribute('opacity', k.toFixed(2));
     nextFrame(step);
   };
   nextFrame(step);
 }
 
 function land(svg, g, w, x, y, water) {
-  delete flights[w.id];
+  endFlight(w.id);
   dragging = busyElsewhere();
   g.classList.remove('flying');
   const zone = water || zoneAt({ x, y: y - 30 });
