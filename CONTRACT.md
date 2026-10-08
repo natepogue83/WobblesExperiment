@@ -274,6 +274,9 @@ the largest the colony ever was). The age is named by the highest tier reached
 (The First Days, Pebble, Ember, Village, Age of Wonders). Fifteen goals each have
 a belief reward; a reached goal is claimed with a `claim` action, which emits
 `goal_reached` and calls `addBelief`. `world.goalsClaimed` lists claimed ids.
+Twelve tricks (`TRICKS`, ids `trick_*`, 1 belief each) are claimed the same way; each is
+reached by one `interaction` of a given `data.what` (hug, juggled, rescued, ...), and its
+`goal_reached` carries `data.trick: true`.
 
 ## 9d. Asks
 
