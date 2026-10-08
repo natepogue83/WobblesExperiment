@@ -30,7 +30,7 @@ function chaos(world, r) {
     () => ({ type: 'nudge', nudge: 'bless', target: any(), trait: pick(r, BLESS_TRAITS) }),
     () => ({ type: 'nudge', nudge: 'curio', curio: pick(r, Object.keys(CURIOS)), targets: [any(), any()] }),
     () => ({ type: 'nudge', nudge: 'miracle' }),
-    () => ({ type: 'nudge', nudge: 'carry', target: any(), zone: pick(r, ZONE_IDS), ...(r() < 0.5 ? { thrown: true } : {}), ...(r() < 0.5 ? { onto: r() < 0.5 ? any() : thing() } : {}), ...(r() < 0.2 ? { cradled: true } : r() < 0.2 ? { shaken: true } : {}), ...(r() < 0.2 ? { zone: 'riverbank', splash: true } : {}) }),
+    () => ({ type: 'nudge', nudge: 'carry', target: any(), zone: pick(r, ZONE_IDS), ...(r() < 0.5 ? { thrown: true } : {}), ...(r() < 0.5 ? { onto: r() < 0.5 ? any() : thing() } : {}), ...(r() < 0.2 ? { cradled: true } : r() < 0.2 ? { shaken: true } : {}), ...(r() < 0.2 ? { zone: 'riverbank', splash: true } : {}), ...(r() < 0.1 ? { thrown: true, juggled: 2 + Math.floor(r() * 5) } : {}) }),
     () => ({ type: 'nudge', nudge: 'rename', target: any(), name: pick(r, ['Bo', 'Pip', 'Sir Wob', "O'Dell", 'Mo-Mo']) }),
     () => { const day = 20000 + Math.floor(world.tick / 24); return { type: 'gift', day, giftId: pick(r, giftOptions(world.seed, day)), ...(r() < 0.5 ? { onto: any() } : {}) }; },
     () => ({ type: 'nudge', nudge: 'move', target: thing(), slot: pick(r, ALL_SLOTS) }),
