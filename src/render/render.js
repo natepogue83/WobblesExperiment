@@ -7,7 +7,7 @@ import { rngFor } from '../sim/rng.js';
 import { BY_ID } from '../sim/discoveries.js';
 import { titleOf } from '../sim/growth.js';
 import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG, askSVG } from './sprites.js';
-import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG, ambientSVG } from './scene.js';
+import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG, ambientSVG, foregroundSVG, rainSplashSVG } from './scene.js';
 import { ART_DEFS } from './objects.js';
 
 export const LAYERS = ['sky', 'hills', 'terrain', 'nature', 'structures', 'wobblins', 'effects', 'halos'];
@@ -247,6 +247,7 @@ export function drawSVG(svg, rs, opts = {}) {
       drops += `<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x - 7).toFixed(0)}" y2="${(y + 20).toFixed(0)}" style="animation-delay:-${(r()).toFixed(2)}s"/>`;
     }
     el('g', { class: 'rainfall' }, L.effects).innerHTML = drops;
+    el('g', { class: 'rain-splashes', 'pointer-events': 'none' }, L.terrain).innerHTML = rainSplashSVG(rs.seed, rs.tick);
     el('rect', { width: VIEW.w, height: VIEW.h, fill: '#46566e', opacity: 0.18, 'pointer-events': 'none' }, L.effects);
   }
   if (rs.reaction && rs.reaction.kind === 'lightning') {
@@ -272,6 +273,9 @@ export function drawSVG(svg, rs, opts = {}) {
     const g = el('g', { class: 'nightglow', 'pointer-events': 'none', style: 'mix-blend-mode:screen' }, L.effects);
     g.innerHTML = '<defs><radialGradient id="nightglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".55"/><stop offset=".5" stop-color="#ff9a3a" stop-opacity=".18"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient></defs>' + glow;
   }
+
+  // The tall grass in front, last, so it frames the valley.
+  el('g', { class: 'fg-grass', 'pointer-events': 'none' }, L.effects).innerHTML = foregroundSVG(rs.seed, { hour, season: rs.climate.season });
 
   for (const id of opts.highlight || []) {
     const t = rs.objects.find(o => o.id === id) || rs.wobblins.find(w => w.id === id);

@@ -209,6 +209,31 @@ export function sceneOverlaySVG(seed, { hour = 12 } = {}) {
   return parts.join('');
 }
 
+// Tall grass at the very front, swaying in the wind (in front of everything).
+export function foregroundSVG(seed, { hour = 12, season = 'mild' } = {}) {
+  const tod = timeOfDay(hour);
+  const r = rngFor(seed, 'fg-grass');
+  const cols = tod === 'night' ? ['#1f3b2c', '#264634', '#2d523c'] : season === 'cold' ? ['#8eaa9c', '#a3bdb0', '#b8cfc4'] : ['#3f7a3a', '#4f8f45', '#62a352', '#76b45e'];
+  let s = '';
+  for (let i = 0; i < 70; i++) {
+    const x = r() * W, h = 26 + r() * 46, lean = (r() - 0.5) * 18, base = H + 4;
+    const c = cols[Math.floor(r() * cols.length)];
+    s += `<path class="blade" style="animation-delay:-${(r() * 4).toFixed(2)}s;animation-duration:${(3 + r() * 2.5).toFixed(1)}s" d="M${(x - 3).toFixed(0)} ${base} Q${(x + lean * 0.4).toFixed(0)} ${(base - h * 0.6).toFixed(0)} ${(x + lean).toFixed(0)} ${(base - h).toFixed(0)} Q${(x + lean * 0.4 + 2).toFixed(0)} ${(base - h * 0.55).toFixed(0)} ${(x + 3).toFixed(0)} ${base} Z" fill="${c}"/>`;
+  }
+  return s;
+}
+
+// Rain splashing on the ground: little rings that bloom and fade.
+export function rainSplashSVG(seed, tick) {
+  const r = rngFor(seed, 'splash', tick);
+  let s = '';
+  for (let i = 0; i < 40; i++) {
+    const x = r() * W, y = 300 + r() * 330;
+    s += `<ellipse class="rsplash" style="animation-delay:-${(r() * 1.2).toFixed(2)}s" cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="5" ry="1.8"/>`;
+  }
+  return s;
+}
+
 // Ambient life: butterflies and pollen by day, birds overhead, leaves
 // drifting down from the grove. CSS-animated, never touches the sim.
 export function ambientSVG(seed, { hour = 12, season = 'mild', rain = false } = {}) {
