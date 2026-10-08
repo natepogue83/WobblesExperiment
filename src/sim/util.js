@@ -35,7 +35,17 @@ export function stateHash(world) {
 
 // world.wobblins and world.objects are append-only and ids are allocated in
 // increasing order, so both arrays are always in id order. Filtering keeps it.
-export function alive(world) { return world.wobblins.filter(w => w.alive); }
+// Inside one tick() the living are looked up dozens of times; remember the list
+// until someone is born or dies (kill/makeWobblin invalidate it). Outside a tick
+// it is always computed fresh. The list is shared, so callers must not mutate it.
+let aliveCache = null;
+export function beginTickCache(world) { aliveCache = { world, list: null }; }
+export function endTickCache() { aliveCache = null; }
+export function invalidateAlive() { if (aliveCache) aliveCache.list = null; }
+export function alive(world) {
+  if (aliveCache && aliveCache.world === world) return aliveCache.list || (aliveCache.list = world.wobblins.filter(w => w.alive));
+  return world.wobblins.filter(w => w.alive);
+}
 export function liveObjects(world) { return world.objects.filter(o => !o.state.gone); }
 export function findWobblin(world, id) { return world.wobblins.find(w => w.id === id) || null; }
 export function findObject(world, id) { return world.objects.find(o => o.id === id) || null; }

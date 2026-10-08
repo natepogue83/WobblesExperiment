@@ -7,7 +7,7 @@ import { trait } from './creatures.js';
 import { buildStructure } from './effects.js';
 import { addBond, bond } from './interactions.js';
 import { cultureStep } from './culture.js';
-import { alive, liveObjects, findWobblin, idNum, r3 } from './util.js';
+import { alive, liveObjects, findWobblin, idNum, r3, invalidateAlive } from './util.js';
 
 // Huts are built only by the Hut discovery (Day 5). Each intact hut houses
 // one pair, so pairing is gated on huts existing and having room.
@@ -18,6 +18,7 @@ function pairCount(world) { return alive(world).filter(w => w.partnerId).length 
 
 export function kill(world, w, cause, causes = []) {
   w.alive = false;
+  invalidateAlive();
   w.deathTick = world.tick;
   w.deathCause = cause;
   if (w.partnerId) {

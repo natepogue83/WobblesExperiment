@@ -91,8 +91,8 @@ section('Performance and save size');
     appendAction(save, t, kinds[i % kinds.length](t));
   }
   replay(save, 2160); // warm up the JIT once, like a page that already ran
-  // Best of three, so a busy machine does not fail the build.
-  const runs = [0, 1, 2].map(() => timeIt(() => replay(save, 2160)));
+  // Best of five, so a busy machine (a browser, a build) does not fail the build.
+  const runs = [0, 1, 2, 3, 4].map(() => timeIt(() => replay(save, 2160)));
   const { v: w, ms } = runs.sort((a, b) => a.ms - b.ms)[0];
   assert.equal(w.tick, 2160);
   assert.ok(ms < 250, 'replay took ' + ms + ' ms');

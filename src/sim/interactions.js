@@ -344,16 +344,18 @@ export function socialStep(world) {
 }
 
 // Snowmen: a cold snap plus wet weather means snow, and playful ones build.
-function snowStep(world) {
+function snowStep(world, objs) {
   const t = world.tick;
-  for (const s of liveObjects(world).filter(o => o.kind === 'snowman')) {
+  const snowmen = objs.filter(o => o.kind === 'snowman');
+  if (!snowmen.length && world.climate.season !== 'cold') return;   // nothing to build or melt
+  for (const s of snowmen) {
     if (world.climate.season !== 'cold' || t >= s.state.meltAt) {
       s.state.gone = true; s.hp = 0;
       emit(world, { kind: 'interaction', target: s.id, data: { what: 'snowman_melted', by: s.state.by }, salience: 1, causes: [{ object: s.id }] });
     }
   }
   const snowy = world.climate.season === 'cold' && world.climate.wetUntil >= t;
-  if (snowy && liveObjects(world).filter(o => o.kind === 'snowman').length < 3) {
+  if (snowy && snowmen.filter(o => !o.state.gone).length < 3) {
     const rs = rngFor(world.seed, 'snowman', t);
     const builder = alive(world).find(w => w.stage !== 'baby' && w.traits.playfulness > 0.5 && ['meadow', 'hill', 'grove'].includes(w.zone) && rs() < 0.18);
     const slot = builder && freeSlotIn(world, builder.zone);
@@ -368,8 +370,9 @@ function snowStep(world) {
 
 // A cold snap freezes the pond: playful Wobblins go skating, careful ones slip.
 export function iceStep(world) {
-  snowStep(world);
-  const pond = liveObjects(world).find(o => o.kind === 'pond');
+  const objs = liveObjects(world);
+  snowStep(world, objs);
+  const pond = objs.find(o => o.kind === 'pond');
   if (!pond) return;
   const frozen = world.climate.season === 'cold' && !(pond.state.crackedTick !== undefined && world.tick - pond.state.crackedTick < 6);
   if (frozen !== !!pond.state.frozen) {

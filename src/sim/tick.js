@@ -7,8 +7,11 @@ import { lifeEventsStep } from './life.js';
 import { growthStep } from './growth.js';
 import { socialStep, iceStep } from './interactions.js';
 import { asksStep } from './asks.js';
+import { beginTickCache, endTickCache } from './util.js';
 
 export function tick(world) {
+  beginTickCache(world);
+  try {
   environmentStep(world);
   creaturesStep(world);
   growthStep(world);
@@ -18,6 +21,7 @@ export function tick(world) {
   experimentStep(world);
   teachingStep(world);
   lifeEventsStep(world);
+  } finally { endTickCache(); }
   world.tick++;
   return world;
 }

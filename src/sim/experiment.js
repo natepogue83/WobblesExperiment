@@ -368,6 +368,12 @@ export function teachingStep(world) {
   const eIdx = embodimentIndex(objs);
   for (const d of DISCOVERIES) if (d.embodiedBy.length && world.discoveries[d.id]) embodied.set(d.id, embodimentsFrom(eIdx, d));
   const embodiedZones = new Set([...embodied.values()].flat().map(o => o.zone));
+  const factors = new Map();
+  const teacherFactors = K => {
+    let f = factors.get(K);
+    if (!f) { f = { soc: 0.5 + K.traits.sociability, lore: loreMult(K), skill: 1 + 0.05 * skillLevel(K, 'social') }; factors.set(K, f); }
+    return f;
+  };
   for (const L of live) {
     let learned = false;
     const r = rngFor(world.seed, 'teach', t, L.id);   // one stream per learner per tick
@@ -381,13 +387,15 @@ export function teachingStep(world) {
         if (L.knows[d] || !BY_ID[d]) continue;
         const tier = BY_ID[d].tier;
         if (L.stage === 'baby' && tier > 2) continue;
-        let p = TEACH.base[tier] * (0.5 + K.traits.sociability) * (0.5 + L.traits.curiosity) * loreMult(K) * (1 + 0.05 * skillLevel(K, 'social'));
+        const kf = teacherFactors(K);
+        let p = TEACH.base[tier] * kf.soc * (0.5 + L.traits.curiosity) * kf.lore * kf.skill;
         if (L.parents.includes(K.id)) p *= 2;
         if (nearDeath(K)) p *= 4;
         if (K.stage === 'elder') p *= 1.3;
         if (r() < p) {
           learn(world, L, d, K.id);
           practice(world, K, 'social', 2);
+          factors.delete(K);   // their storytelling may have levelled up
           addBond(world, K, L, 0.05);
           practice(world, L, 'explore', 1);
           emit(world, { kind: 'taught', actors: [K.id, L.id], target: d, data: { zone: L.zone }, salience: 1 }, KNOWLEDGE);
@@ -403,15 +411,15 @@ export function teachingStep(world) {
         if (L.knows[d.id] || !d.embodiedBy.length) continue;
         const rec = world.discoveries[d.id];
         if (!rec) continue;
+        const h0 = (embodied.get(d.id) || []).find(o => o.zone === L.zone);   // cheap check first
+        if (!h0) continue;
         if (!prereqsMet(d, L.knows)) continue;
-        const here = (embodied.get(d.id) || []).filter(o => o.zone === L.zone);
-        if (!here.length) continue;
         if (r() < STRUCTURE_LEARN * (rec.orphanSince !== null && rec.orphanSince !== undefined ? 2 : 1)) {
           learn(world, L, d.id, 'structure');
           rec.orphanSince = null;
           if (rec.forgotten) rec.forgotten = false;
-          emit(world, { kind: 'learned_from_structure', actors: [L.id], target: d.id, data: { object: here[0].id }, salience: 3,
-            causes: [{ object: here[0].id }] }, KNOWLEDGE);
+          emit(world, { kind: 'learned_from_structure', actors: [L.id], target: d.id, data: { object: h0.id }, salience: 3,
+            causes: [{ object: h0.id }] }, KNOWLEDGE);
           break;
         }
       }

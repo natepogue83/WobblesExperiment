@@ -2,7 +2,7 @@
 import { rngFor, randInt, pick, range, chance } from './rng.js';
 import { WORLD_VERSION, START_WOBBLINS, LIFE, COOLDOWN } from './constants.js';
 import { slotIds, slotInfo } from './geometry.js';
-import { r3, clamp01 } from './util.js';
+import { r3, clamp01, invalidateAlive } from './util.js';
 import { emit } from './events.js';
 import { initialUnlocks } from './belief.js';
 import { newSkills } from './growth.js';
@@ -92,6 +92,7 @@ export function makeWobblin(world, spec) {
     deathCause: null
   };
   world.wobblins.push(w);
+  invalidateAlive();
   return w;
 }
 

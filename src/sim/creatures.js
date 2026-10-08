@@ -69,7 +69,7 @@ function updateNeeds(world, w, objs, live) {
   const n = w.needs, c = world.climate;
   // Food: decays; foraging (activity) refills, scaled by the zone.
   // Pottery: stored food goes further.
-  n.food -= NEEDS.foodDecay * (knows(w, 'pottery') && objs.some(o => o.kind === 'hearth' && o.state.pots) ? 0.7 : 1);
+  n.food -= NEEDS.foodDecay * (knows(w, 'pottery') && (objs.potHearth !== undefined ? objs.potHearth : objs.some(o => o.kind === 'hearth' && o.state.pots)) ? 0.7 : 1);
   if (w.activity === 'forage') n.food += foodIn(objs, w.zone, w) * (1 + 0.04 * skillLevel(w, 'foraging'));
   // Warmth: drifts up on mild days; cold nights, cold snaps and rain chill.
   const others = live.filter(o => o !== w && o.zone === w.zone).length;
@@ -81,7 +81,7 @@ function updateNeeds(world, w, objs, live) {
   if (w.activity === 'warm' || w.activity === 'rest') {
     n.warmth += NEEDS.huddle * Math.min(3, others) + (w.zone === 'hollow' ? NEEDS.shelter : 0);
     if (knows(w, 'leaf_bed')) n.warmth += 0.06;
-    if (objs.some(o => o.kind === 'hut' && o.zone === w.zone)) n.warmth += knows(w, 'hut') ? 0.25 : 0.15;
+    if (zoneObjects(objs, w.zone).some(o => o.kind === 'hut')) n.warmth += knows(w, 'hut') ? 0.25 : 0.15;
   }
   const fires = warmthSources(objs, w.zone);
   if (fires) n.warmth += knows(w, 'fire_warmth') ? 0.4 : NEEDS.fireWarm;
@@ -134,11 +134,19 @@ function chooseActivity(world, w, objs, live) {
   for (const o of novel) add('inspect', o.zone, (1.5 * w.traits.curiosity + 0.3) * comfort, o.id);
   // Hobby.
   const h = HOBBY_ZONES[w.hobby];
+  // Per tick, per hobby: how many things of interest are in each zone.
+  objs.hobbyCount ||= {};
+  let hobbyCounts = objs.hobbyCount[w.hobby];
+  if (!hobbyCounts) { hobbyCounts = {}; for (const z of ZONE_IDS) hobbyCounts[z] = zoneObjects(objs, z).filter(o => h.kinds.includes(o.kind)).length; objs.hobbyCount[w.hobby] = hobbyCounts; }
+  // Friends pull and rivals push, added in the same order as before (zone by zone).
+  const pulls = {};
+  if (w.bonds) for (const o of live) if (o !== w && w.bonds[o.id]) (pulls[o.zone] ||= []).push(w.bonds[o.id] * 0.35);
   for (const z of ZONE_IDS) {
     let wgt = h.zones.includes(z) ? 0.4 : 0.05;
-    wgt += zoneObjects(objs, z).filter(o => h.kinds.includes(o.kind)).length * 0.3;
+    wgt += hobbyCounts[z] * 0.3;
     if (w.hobby === 'humming') wgt += (objs.stats[z].wobs - (w.zone === z ? 1 : 0)) * 0.2;
-    if (w.bonds) for (const o of live) if (o !== w && o.zone === z && w.bonds[o.id]) wgt += w.bonds[o.id] * 0.35;
+    const pz = pulls[z];
+    if (pz) for (const v of pz) wgt += v;
     add('hobby', z, wgt * (0.5 + w.traits.playfulness), 'hobby');
   }
   // A Keeper curio pulls its two chosen Wobblins over for a while.
@@ -172,6 +180,8 @@ export function creaturesStep(world) {
   objs.novel = objs.filter(o => (o.origin.action !== undefined || o.state.byKeeper) && world.tick - o.builtTick <= SOCIAL.curiosityPull)
     .sort((a, b) => b.builtTick - a.builtTick);
   objs.curios = objs.filter(o => o.kind === 'curio' && !o.state.pullDone);
+  objs.hobbyCount = {};
+  objs.potHearth = objs.some(o => o.kind === 'hearth' && o.state.pots);
   for (const w of live) {
     for (const k of sortedKeys(w.temp)) {
       if (w.temp[k].until <= world.tick) delete w.temp[k];
@@ -204,8 +214,8 @@ export function creaturesStep(world) {
   for (const w of live) updateNeeds(world, w, objs, live);
   // Materials a Wobblin has been near (unlocks curios).
   for (const w of live) {
-    for (const o of objs) {
-      if (o.zone === w.zone && world.noticed[o.kind] === undefined) world.noticed[o.kind] = world.tick;
+    for (const o of zoneObjects(objs, w.zone)) {
+      if (world.noticed[o.kind] === undefined) world.noticed[o.kind] = world.tick;
     }
   }
 }
