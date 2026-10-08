@@ -158,6 +158,24 @@ export function showFamily(panel, world, { onPick }) {
   panel.hidden = false;
 }
 
+// ---- how to play ----------------------------------------------------------------
+export function showHelp(panel) {
+  const rows = [
+    ['Drag from your tray', 'Stones, seeds, rain, lightning and the rest go wherever you drop them. Drop one right on a Wobblin\'s head and see what happens.'],
+    ['Pick a Wobblin up', 'Set it down somewhere new, or let go while moving to fling it. Whatever it lands on reacts.'],
+    ['Hold still, or shake', 'Hold one still and it dozes off in your hand. Shake it and it gets rattled.'],
+    ['Tap a Wobblin', 'Its card shows its stats, skills, what it could work out and its own words. Tap the name to rename it. Keep tapping and it gets cross.'],
+    ['Move small things', 'Drag stones, gifts, curios, sprouts and clay to a new spot.'],
+    ['Help when they ask', 'A golden bubble means a Wobblin is asking you for something. Grant it for belief.'],
+    ['Belief and goals', 'They believe in you when you do things they love. Belief unlocks new powers. Goals are milestones worth extra belief.'],
+    ['You can\'t build for them', 'Every discovery is theirs. You only set the stage, and some ideas need the right temperament. Breed for it.']
+  ];
+  panel.replaceChildren(h('h2', {}, 'How to be a Keeper'),
+    h('ul', { class: 'help' }, rows.map(([b, t]) => h('li', {}, h('b', {}, b), h('span', {}, t)))),
+    closeButton(panel));
+  panel.hidden = false;
+}
+
 // ---- the Keeper's path: ages and goals ----------------------------------------
 export function showGoals(panel, world, { states, age, onClaim, feedback }) {
   const nextOpen = states.find(g => g.state === 'open');

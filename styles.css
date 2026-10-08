@@ -553,3 +553,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .moment.farewell .what small { color: #6a7896; }
 .moment.farewell .what b { color: #3a4560; }
 .moment.farewell .who { filter: grayscale(.35) drop-shadow(0 6px 6px rgba(0,0,0,.15)); animation: none; }
+
+.help { list-style: none; padding: 0; margin: 6px 0 12px; }
+.help li { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid #ece2cc; font-size: 14px; }
+.help li b { font: 600 14px var(--display); color: #5a3412; }
+@media (max-width: 700px) { .help li { grid-template-columns: 1fr; gap: 2px; } }

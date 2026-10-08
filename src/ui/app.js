@@ -13,7 +13,7 @@ import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
 import { wantOf } from '../render/render.js';
 import { narrateRecap } from '../ai/narrate.js';
 import { buildRecap, buildRecapInput } from '../sim/recap.js';
-import { showRecapCard, showChronicle, showBook, showWobblinCard, showGoals, showFamily } from './panels.js';
+import { showRecapCard, showChronicle, showBook, showWobblinCard, showGoals, showFamily, showHelp } from './panels.js';
 import { goalStates, ageOf, progressOf } from '../sim/goals.js';
 import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 import { trayItems, ICONS, zoneAt } from './inventory.js';
@@ -812,6 +812,7 @@ function drawHud() {
   btn('Discovery Book', () => showBook($('#panel'), world), '', 'Book');
   btn('Goals', () => openGoals());
   btn('Family', () => showFamily($('#panel'), world, { onPick: w => showWobblin(w) }));
+  btn('How to play', () => showHelp($('#panel')), 'help', '?');
   if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.innerHTML = `<span class="full">${FEEDBACK_LABEL}</span><span class="short">Feedback</span>`; row.append(a); }
   if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow', 'Collect ' + Math.floor(world.offerings));
   const snd = document.createElement('button');
