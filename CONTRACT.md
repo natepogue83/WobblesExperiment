@@ -129,6 +129,7 @@ wobblin = {
                                   // caution comes from rngFor(seed, 'caution', n) so older seeds keep their other traits
   skills: { foraging, building, crafting, social, explore }, // XP; level = levelOf(xp). Card shows crafting as Tinkering, social as Storytelling, explore as Exploring
   bonds: { [wobblinId]: -1..1 },  // friends at >= 0.5, rivals at <= -0.4 (interactions.js)
+  flowerUntil?, zappedUntil?,     // cosmetic: flower crown, frizz (render only reads them)
   heldUntil?,                     // set down or knocked over: stays in this zone until then
   hobby, bornTick, stage: "baby"|"adult"|"elder", lifespan,
   activity: "forage"|"warm"|"rest"|"inspect"|"hobby"|"play", seen: [objectId] /* last 8 inspected */,
@@ -145,6 +146,11 @@ object = { id, kind, zone, slot, hp, builtTick, by: [wobblinId],
            origin: { action: seq } | { event: id } | { natural: true },
            state: {} }
 ```
+
+The valley tidies itself (`nature.js` `tidyStep`, constants `TIDY`): curios (after
+their pull) and gifts older than 48 ticks are taken home as keepsakes (`keepsake`
+event, maybe a `luckyCharm`); stone piles beyond the newest 3 go after 72 ticks
+(cairns after 144); scorch marks fade after 48 and ruins after 240.
 
 Object state flags added overnight: `pond.state.frozen` (cold season), `fish.state.stunned`
 (lightning in water), `scorch.state.wrecked` (a Wobblin flung through the roof),
@@ -173,10 +179,11 @@ World `lightning built burned ruin fire_started fire_out flood pond_formed tree_
 prowler lost rain cold_snap`; Life `paired birth grew_up became_elder injured healed
 death seed_pod_hatched stranger_arrived`; Faith `offering wish wish_granted
 wish_expired faith_shift festival ritual mural_painted`; Growth `level_up`;
-Social `friends rivals interaction` (`data.what` names it: hug, bonk, bowled_over,
+Social `friends rivals interaction keepsake goal_reached` (`data.what` names it: hug, bonk, bowled_over,
 bush_squashed, snack, stuck_in_tree, fire_walk, singed, caught_fish, scared_fish,
 through_the_roof, made_a_cairn, treasure, king_of_the_hill, remembers, boulder_split,
-fish_stunned, squabble, pond_froze, pond_thawed, skating, slipped).
+fish_stunned, squabble, pond_froze, pond_thawed, skating, slipped, ice_cracked, quake,
+bonked, bonk_idea, squashed, flower_crown, zapped, gift_caught).
 
 Events are append-only and are the single source of truth for the recap,
 Chronicle, murals and the week-2 AI.
@@ -184,7 +191,7 @@ Chronicle, murals and the week-2 AI.
 ## 7. Action schema (the save's `actions` list)
 
 ```js
-{ seq, t, type: "power", power: "stone"|"plant"|"rain"|"lightning"|"water"|"season",
+{ seq, t, type: "power", power: "stone"|"plant"|"rain"|"lightning"|"water"|"season"|"quake",
   slot?, zone?, variant? }        // stone: "stones"|"boulder"; plant: "tree"|"bush";
                                   // season: "cold"|"warm"
 { seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry",
@@ -193,10 +200,16 @@ Chronicle, murals and the week-2 AI.
                                              // thrown: flung, not placed; splash: landed in water
                                              // onto: the Wobblin or object it landed on (must exist,
                                              // be alive / not gone, and not be itself) -> landOnto()
-{ seq, t, type: "gift", day, giftId, slot? }   // slot: where it was dropped (else first free meadow slot)
+{ seq, t, type: "gift", day, giftId, slot?, onto? }   // slot: where it was dropped (else first free meadow slot)
 { seq, t, type: "collect_offerings" }
+{ seq, t, type: "claim", goal }               // claim a reached milestone (goals.js): adds belief, nobody reacts
 ```
 
+- `onto` on stone, plant, lightning and gift: the living Wobblin it was dropped on
+  (`powerOnto`: bonk, squash, flower crown, zap, caught gift). The object itself still
+  lands in `slot`. Stones dropped on a pile of fewer than 4 top it up (`state.count`).
+- `quake` (Shake the Valley, cooldown 16, unlocks at belief 26): berries fall, cairns
+  topple, a wall may fall to a ruin, seeds sprout, fish leap, timid Wobblins are shaken.
 - Actions apply at tick `t`, in `seq` order, BEFORE that tick's `tick()` runs.
 - Timed state (`until`, `readyAt`) means: by the time `world.tick === until`
   the effect is over. A 24-tick season placed at t covers ticks t..t+23.
@@ -235,9 +248,18 @@ rate. The sim only ever sees the integer tick.
 New games are created with `save.progression = true`: the world starts with
 `unlocked = [carry, stone, plant, gift]`, and lifetime `world.belief` (from
 reactions, Keeper-rooted discoveries and collected offerings, `src/sim/belief.js`)
-unlocks rain 3, bless 6, lightning 10, water 16, curio 22, season 30, miracle 40,
+unlocks rain 3, bless 6, lightning 10, water 16, curio 22, quake 26, season 30, miracle 40,
 each with a `power_unlocked` event. Locked actions are rejected (`locked_power`).
 Worlds without progression (old saves, tests) have every power.
+
+## 9c. Ages and milestones
+
+`src/sim/goals.js`: `progressOf(world)` reads discoveries and the event log once
+(discovery count, highest tier, friendships, births, grandchildren, festivals, and
+the largest the colony ever was). The age is named by the highest tier reached
+(The First Days, Pebble, Ember, Village, Age of Wonders). Fifteen goals each have
+a belief reward; a reached goal is claimed with a `claim` action, which emits
+`goal_reached` and calls `addBelief`. `world.goalsClaimed` lists claimed ids.
 
 ## 9b. Old clock text
 
@@ -313,6 +335,9 @@ offset only changes `nowTick` in the UI.
   `temperamentHints` lists what a Wobblin could work out if it had more of a trait;
   the card shows these. Blessings (all 7 traits) and breeding are how a player
   gets there: children inherit a blend of both parents' traits plus mutation.
+- Inheritance (`life.js`): each trait leans toward one parent (lean 0.15..0.85) with
+  +-0.04 noise and an 8% surprise of +-0.25. The birth event records `pa`, `pb`, `mid`,
+  `born` and `from` (which parent each trait came from, "both" or "surprise").
 - Bonds (`interactions.js`): time in the same zone builds friendship (more for
   sociable pairs); clashing temperaments and hungry foragers grate. Friends
   gravitate together; rivals squabble.
