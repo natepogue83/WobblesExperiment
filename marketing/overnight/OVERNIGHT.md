@@ -70,6 +70,10 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Poke a Wobblin over and over** and it giggles, then gets cross, then runs off.
 - **Portraits show flower crowns, frizz and charms.** The zap is easier to see from across the valley.
 - **Smoother redraws:** the Wobblins no longer twitch when a new day starts.
+- **Hold a Wobblin still** for a couple of seconds and it dozes off in your hand. **Shake it back and forth** and it wobbles like jelly and stays rattled.
+- **Pick things up:** press and drag stones, gifts, curios, sprouts or clay to set them down somewhere else.
+- **Night falls on everything,** not only the sky. The Wobblins and huts dim with the light, and doorways and fires glow warm. Dusk turns everything rosy.
+- **The temple looks Wobblin-built** now: stacked stones, carved posts, a leaf-thatch roof, prayer flags and a sun disc. It used to be white marble.
 - **A chaos test** throws 8,700 random acts at 16 colonies. Nothing crashes, no number goes out of range, and every save replays exactly.
 
 ## Decisions you might want to change

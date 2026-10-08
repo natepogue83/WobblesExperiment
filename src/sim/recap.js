@@ -251,6 +251,8 @@ function templates(world, e, ctx) {
         snowman_smashed: [`You flung ${name} straight through a snowman. Poof.`, `${name} demolished a snowman. ${d.by && d.by !== e.actors[0] ? wob(world, d.by) + ' is not happy.' : ''}`, `Snow everywhere: ${name} hit the snowman.`],
         snowman_zapped: ['Your lightning turned a snowman into a puddle.', 'ZAP. The snowman is a puddle now.', 'A snowman was struck by lightning. Steam everywhere.'],
         snowman_melted: ['The snowman melted.', 'Only a carrot is left of the snowman.', 'The snowman is gone. Spring, of a sort.'],
+        cradled: [`${name} fell asleep in your hand.`, `You held ${name} still until they dozed off.`, `${name} had a little nap in the Keeper's palm.`],
+        shaken: [`You shook ${name} like a snow globe.`, `${name} got a thorough shaking and is still dizzy.`, `${name} has been shaken. Not stirred.`],
         quake: [`You shook the whole valley.` + (d.berries ? ' Berries rained down everywhere.' : '') + (d.walls ? ' A wall fell down.' : ''), `The ground shook! ` + (d.toppled ? 'The stone towers toppled. ' : '') + 'Everyone held on tight.', `A great rumble went through the valley.` + (d.sprouts ? ' Seeds shook loose from the trees.' : '')],
         ice_cracked: [d.dunked ? `Your lightning cracked the ice and ${name} fell in. Brrr!` : 'Your lightning cracked the ice on the pond.', 'CRACK! The frozen pond split open.' + (d.dunked ? ` ${name} went in.` : ''), d.dunked ? `${name} was skating when the ice broke.` : 'The ice broke into floating pieces.'],
         pond_froze: [`The pond froze solid.`, `The cold snap turned the pond to ice.`, `Ice on the pond!`],

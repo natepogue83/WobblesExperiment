@@ -134,6 +134,26 @@ section('Dropped right on their heads');
   ok('on-head drops pack into the save and replay to the same world');
 }
 
+section('Cradled or shaken');
+{
+  const w = createWorld(41, { barren: true });
+  const [a, b] = w.wobblins;
+  a.needs.rest = 0.2; b.needs.safety = 0.8;
+  const r0 = a.needs.rest, s0 = b.needs.safety;
+  assert.equal(applyAction(w, { seq: 1, t: 0, type: 'nudge', nudge: 'carry', target: a.id, zone: 'meadow', cradled: true }).ok, true);
+  assert.ok(a.needs.rest > r0 && last(w, 'cradled'));
+  assert.equal(applyAction(w, { seq: 2, t: 0, type: 'nudge', nudge: 'carry', target: b.id, zone: 'meadow', shaken: true }).ok, true);
+  assert.ok(b.needs.safety < s0 && last(w, 'shaken'));
+  assert.equal(applyAction(w, { seq: 3, t: 0, type: 'nudge', nudge: 'carry', target: b.id, zone: 'meadow', shaken: true, cradled: true }).ok, false);
+  const save = newSave({ seed: 41, createdAt: 0 });
+  const live = createWorld(41);
+  applyAction(live, appendAction(save, 0, { type: 'nudge', nudge: 'carry', target: 'w1', zone: 'hill', cradled: true }));
+  applyAction(live, appendAction(save, 0, { type: 'nudge', nudge: 'carry', target: 'w2', zone: 'hill', shaken: true, thrown: true }));
+  for (let i = 0; i < 4; i++) tick(live);
+  assert.equal(stateHash(replay(parseSave(serializeSave(save)), 4)), stateHash(live));
+  ok('held still, a Wobblin dozes off in your hand; shaken, it is rattled; both replay');
+}
+
 section('Lightning on odd things');
 {
   const w = createWorld(13, { barren: true });

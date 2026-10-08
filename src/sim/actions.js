@@ -172,6 +172,7 @@ export function validateAction(world, a) {
         if (!w || !w.alive) return bad('target');
         if (!ZONE_IDS.includes(a.zone)) return bad('zone');
         if (a.splash && a.zone !== 'riverbank' && a.zone !== 'pondsite') return bad('splash');
+        if (a.shaken && a.cradled) return bad('carry');
         if (a.onto !== undefined) {
           const o = findWobblin(world, a.onto) || world.objects.find(x => x.id === a.onto);
           if (!o || o.alive === false || (o.state && o.state.gone) || a.onto === a.target) return bad('onto');
@@ -378,9 +379,23 @@ function applyActionEffects(world, a) {
         w.faith = r3(clamp(w.faith - 0.02, -1, 1));
       }
       if (a.splash) w.needs.warmth = r3(clamp(w.needs.warmth - 0.15, 0, 1));   // a dunk in the river is chilly
+      // Held very still, they doze off in your hand; shaken about, they never forget it.
+      if (a.cradled) {
+        w.needs.rest = r3(clamp(w.needs.rest + 0.25, 0, 1));
+        w.needs.mood = r3(clamp(w.needs.mood + 0.05 + 0.06 * w.traits.sociability, 0, 1));
+        w.faith = r3(clamp(w.faith + 0.02, -1, 1));
+      }
+      if (a.shaken) {
+        w.needs.mood = r3(clamp(w.needs.mood - 0.1 + 0.08 * w.traits.playfulness, 0, 1));
+        w.needs.safety = r3(clamp(w.needs.safety - 0.12, 0, 1));
+        w.faith = r3(clamp(w.faith - 0.03, -1, 1));
+        w.heldUntil = t + 1;
+      }
       emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id,
-        data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}) },
+        data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}), ...(a.cradled ? { cradled: true } : {}), ...(a.shaken ? { shaken: true } : {}) },
         salience: a.thrown ? 2 : 1, causes });
+      if (a.cradled) emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'cradled' }, salience: 2, causes });
+      if (a.shaken) emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what: 'shaken' }, salience: 2, causes });
       if (a.onto !== undefined) landOnto(world, w, a, causes);
     } else if (a.nudge === 'move') {
       // Picked up and set down somewhere else. Moving it doesn't make it new.

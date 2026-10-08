@@ -63,6 +63,8 @@ function feel(world, w, a, here, r) {
       if (w.id !== a.target) { s = 0.1 + 0.3 * T.playfulness; break; }
       fear = true;
       s = a.thrown ? -0.4 + 1.1 * T.playfulness + 0.4 * T.boldness : 0.1 + 0.5 * T.playfulness + 0.2 * T.boldness;
+      if (a.cradled) s = 0.45 + 0.5 * T.sociability;
+      if (a.shaken) s = -0.7 + 0.6 * T.playfulness;
       if (a.splash) s -= 0.4 - 0.3 * T.boldness;
       break;
   }

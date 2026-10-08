@@ -524,3 +524,9 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 #world.tod-dusk #layer-wobblins, #world.tod-dusk #layer-structures, #world.tod-dusk #layer-nature { filter: brightness(.9) sepia(.12) saturate(1.05); }
 #world.tod-dawn #layer-wobblins, #world.tod-dawn #layer-structures, #world.tod-dawn #layer-nature { filter: brightness(.95) sepia(.08); }
 #world.tod-night .wobblin .bubble, #world.tod-night .wobblin .emote, #world.tod-night .wobblin .chat { filter: brightness(1.4); }
+
+/* Held still: dozing. Shaken: wobbling like jelly. */
+.wobblin.held.cradled .wobble { animation: cradle 2.6s ease-in-out infinite !important; }
+@keyframes cradle { 0%, 100% { transform: rotate(-4deg) scaleY(1.02); } 50% { transform: rotate(4deg) scaleY(.98); } }
+.wobblin.held.shook .wobble { animation: jelly .18s linear infinite !important; }
+@keyframes jelly { 0%, 100% { transform: scale(1.08, .92) rotate(-6deg); } 50% { transform: scale(.92, 1.08) rotate(6deg); } }

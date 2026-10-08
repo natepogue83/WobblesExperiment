@@ -459,6 +459,8 @@ function nearestFree(p, o) {
 function slotXY(s) { const q = GEO.slotInfo(s); return { x: q.x, y: q.y }; }
 
 // ------------------------------------------------------------ Wobblins in hand
+let held = null, heldTimer = null;
+const heldFlags = {};
 function wireWobblins(svg) {
   for (const w of lastRS.wobblins) {
     const g = svg.querySelector('#' + w.id);
@@ -474,6 +476,14 @@ function wireWobblins(svg) {
       },
       onStart: () => {
         dragging = true;
+        held = { still: performance.now(), lx: null, ly: null, dir: 0, flips: [], cradled: false, shaken: false };
+        clearInterval(heldTimer);
+        heldTimer = setInterval(() => {
+          if (!held || held.shaken || held.cradled || performance.now() - held.still < 2600) return;
+          held.cradled = true; g.classList.add('cradled');
+          g.insertAdjacentHTML('beforeend', '<g class="zzz held-z" transform="translate(16 -52)"><text x="0" y="0">z</text><text x="7" y="-9">z</text></g>');
+          play('coo');
+        }, 250);
         puppets.pin(w.id, true);
         base = g.getAttribute('transform');
         trail = [];
@@ -488,6 +498,18 @@ function wireWobblins(svg) {
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
         trail.push({ x: p.x, y: p.y, t: performance.now() });
         if (trail.length > 8) trail.shift();
+        if (held) {
+          const now = performance.now();
+          if (held.lx === null || Math.hypot(p.x - held.lx, p.y - held.ly) > 8) {
+            // Moving wakes a cradled one; quick reversals count as shaking.
+            const dx = held.lx === null ? 0 : p.x - held.lx;
+            const dir = Math.abs(dx) > 6 ? Math.sign(dx) : held.dir;
+            if (held.dir && dir && dir !== held.dir) held.flips = held.flips.filter(t => now - t < 1400).concat([now]);
+            held.dir = dir; held.lx = p.x; held.ly = p.y; held.still = now;
+            if (held.cradled) { held.cradled = false; g.classList.remove('cradled'); g.querySelector('.held-z')?.remove(); }
+            if (!held.shaken && held.flips.length >= 5) { held.shaken = true; g.classList.add('shook'); play('boing'); }
+          }
+        }
         const s = w.stage === 'baby' ? 1.05 : 1.8;
         g.setAttribute('transform', `translate(${p.x},${p.y + 30}) scale(${s})`);
         const z = zoneAt(p);
@@ -495,6 +517,11 @@ function wireWobblins(svg) {
         drawHint(svg, { x: p.x, y: p.y + 34, r: 30, ok: true, label: onto ? ontoLabel(onto) : zoneLabel(z) });
       },
       onDrop: ev => {
+        clearInterval(heldTimer);
+        const flags = held ? { ...(held.shaken ? { shaken: true } : held.cradled ? { cradled: true } : {}) } : {};
+        held = null;
+        heldFlags[w.id] = flags;
+        g.classList.remove('cradled', 'shook'); g.querySelector('.held-z')?.remove();
         dragging = false;
         document.body.classList.remove('is-dragging');
         svg.classList.remove('watching');
@@ -509,7 +536,7 @@ function wireWobblins(svg) {
         dropped[w.id] = { at: Date.now() };
         puppets.place(w.id, p.x, p.y + 30);
         play(water ? 'splash' : 'drop');
-        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}) });
+        act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...flags });
         const last = world.events[world.events.length - 1];
         if (last && last.kind === 'interaction' && interactionToast(last)) toast(interactionToast(last));
       },
@@ -608,7 +635,7 @@ function land(svg, g, w, x, y, water) {
   puppets.place(w.id, x, y);
   if (water) toast(world.wobblins.find(o => o.id === w.id).name + ' went SPLASH. Brr.');
   const onto = landingTarget(w.id, x, y);
-  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}) });
+  act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...(heldFlags[w.id] && heldFlags[w.id].shaken ? { shaken: true } : {}) });
   const ev = world.events[world.events.length - 1];
   if (ev && ev.kind === 'interaction') toast(interactionToast(ev));
 }
@@ -639,7 +666,7 @@ const INTERACTION_TOAST = {
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
   king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',
   bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
-  zapped: 'ZAP! Frizzy.', snowman_smashed: 'POOF. Snow everywhere.', snowman_zapped: 'Snowman to puddle in one zap.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
+  zapped: 'ZAP! Frizzy.', cradled: 'Shh. Fast asleep in your hand.', shaken: 'Shaken like a snow globe!', snowman_smashed: 'POOF. Snow everywhere.', snowman_zapped: 'Snowman to puddle in one zap.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
 };
 const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
 function ontoLabel(id) {

@@ -40,6 +40,8 @@ function fromMemory(world, w, e) {
         flower_crown: 'Do you like my flowers? They grew on my head!', zapped: d.bold ? 'ZAP! That was amazing!' : 'The sky bit me. My fur is all fuzzy.',
         gift_caught: `Look what fell into my arms! My ${item(d.item)}!`, treasure: `This ${item(d.item)} is mine now.`,
         quake: w.traits.playfulness > 0.6 ? 'The whole ground wobbled! Do it again!' : 'The ground shook. Did we do something wrong?',
+        cradled: 'I had the nicest nap in a giant warm hand.',
+        shaken: w.traits.playfulness > 0.6 ? 'Everything was spinning! It was great!' : 'The sky shook me. My insides are still wobbly.',
         skating: 'The pond is all slidey! Wheee!', slipped: 'The pond went hard and slippery. I fell.', squabble: `${nameOf(world, other)} started it.`,
         king_of_the_hill: `I can see everything from up on the ${item(d.on)}.`, remembers: `I miss ${d.of || 'them'}.`, made_a_cairn: 'I made a little tower of stones.'
       };
