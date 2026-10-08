@@ -73,6 +73,7 @@ export function makeWobblin(world, spec) {
     memories: [],
     injuries: 0,
     hungry: 0, freezing: 0, lastBirth: null,
+    witnessed: false,             // has seen a Keeper blessing or miracle (Totem)
     alive: true,
     deathTick: null,
     deathCause: null
@@ -125,6 +126,7 @@ export function createWorld(seed, opts = {}) {
     seasonUses: 0,
     giftsByDay: {},
     pondering: {},
+    pondered: {},                 // discoveryId -> tick its pondering hint was shown
     seedPod: null,
     rainUses: [],                 // ticks of recent Keeper rain (flood check)
     miracleUntil: -1,
@@ -152,7 +154,7 @@ export function createWorld(seed, opts = {}) {
 
   for (let i = 0; i < START_WOBBLINS; i++) {
     const rr = rngFor(seed, 'founder', i);
-    makeWobblin(world, { bornTick: -randInt(rr, 20, 50), zone: 'meadow' });
+    makeWobblin(world, { bornTick: -randInt(rr, 12, 30), zone: 'meadow' });
   }
 
   emit(world, {

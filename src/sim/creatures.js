@@ -23,6 +23,7 @@ export function trait(w, name, tick) {
 }
 
 export function knows(w, d) { return !!w.knows[d]; }
+const NEED_KEYS = ['food', 'mood', 'rest', 'safety', 'warmth'];
 
 // Where each hobby likes to be, and what object kinds it is drawn to.
 const HOBBY_ZONES = {
@@ -36,16 +37,30 @@ const HOBBY_ZONES = {
   'sniffing flowers': { kinds: ['bush', 'sprout'], zones: ['meadow', 'grove'] }
 };
 
-function zoneObjects(objs, zone) { return objs.filter(o => o.zone === zone); }
+// Per-tick index of live objects by zone (objs.byZone), built in creaturesStep.
+function zoneObjects(objs, zone) { return objs.byZone ? objs.byZone[zone] || [] : objs.filter(o => o.zone === zone); }
 
 function warmthSources(objs, zone) {
   return objs.filter(o => (o.kind === 'fire' || o.kind === 'hearth') && isAdjacent(zone, o.zone)).length;
 }
 
+function zoneFood(objs, zone) {
+  if (objs.stats && objs.stats[zone].food) return objs.stats[zone].food;
+  const here = zoneObjects(objs, zone);
+  const s = { bushes: here.filter(o => o.kind === 'bush').length, fish: here.some(o => o.kind === 'fish'),
+    garden: here.some(o => o.kind === 'garden'), hearth: here.some(o => o.kind === 'hearth') };
+  if (objs.stats) objs.stats[zone].food = s;
+  return s;
+}
+
 function foodIn(objs, zone, w) {
   let f = NEEDS.forage[zone];
-  const bushes = zoneObjects(objs, zone).filter(o => o.kind === 'bush').length;
+  const s = zoneFood(objs, zone);
+  const bushes = s.bushes;
   f += bushes * NEEDS.bushFood * (knows(w, 'foraging') ? 2 : 1);
+  if (s.fish && knows(w, 'fishing')) f += 0.2;
+  if (s.garden) f += knows(w, 'garden') ? 0.3 : 0.1;
+  if (s.hearth && knows(w, 'cooking')) f += 0.15;
   return f;
 }
 
@@ -61,12 +76,14 @@ function updateNeeds(world, w, objs, live) {
   if (c.rain > 0) n.warmth -= NEEDS.rainChill;
   if (w.activity === 'warm' || w.activity === 'rest') {
     n.warmth += NEEDS.huddle * Math.min(3, others) + (w.zone === 'hollow' ? NEEDS.shelter : 0);
+    if (knows(w, 'leaf_bed')) n.warmth += 0.06;
+    if (objs.some(o => o.kind === 'hut' && o.zone === w.zone)) n.warmth += knows(w, 'hut') ? 0.25 : 0.15;
   }
   const fires = warmthSources(objs, w.zone);
   if (fires) n.warmth += knows(w, 'fire_warmth') ? 0.4 : NEEDS.fireWarm;
   n.warmth = Math.min(n.warmth, 0.75 + (fires ? 0.25 : 0));
   // Rest.
-  n.rest += w.activity === 'rest' ? NEEDS.restGain : -NEEDS.restDecay;
+  n.rest += w.activity === 'rest' ? NEEDS.restGain + (knows(w, 'leaf_bed') ? 0.1 : 0) : -NEEDS.restDecay;
   // Mood: drifts toward 0.6, hobby and company help, hardship hurts.
   n.mood += (0.6 - n.mood) * NEEDS.moodDrift;
   if (w.activity === 'hobby') n.mood += NEEDS.hobbyMood;
@@ -76,7 +93,7 @@ function updateNeeds(world, w, objs, live) {
   // Safety recovers toward 0.85.
   n.safety += (0.85 - n.safety) * NEEDS.safetyDrift;
 
-  for (const k of sortedKeys(n)) n[k] = r3(clamp01(n[k]));
+  for (const k of NEED_KEYS) n[k] = r3(clamp01(n[k]));
   w.hungry = n.food <= 0 ? w.hungry + 1 : 0;
   w.freezing = n.warmth <= 0 ? w.freezing + 1 : 0;
 }
@@ -94,31 +111,34 @@ function chooseActivity(world, w, objs, live) {
   // Cold: fire if there is one, else huddle where others are.
   const cold = Math.max(0, 1 - n.warmth / NEEDS.cold);
   for (const z of ZONE_IDS) {
-    const heat = warmthSources(objs, z);
-    const company = live.filter(o => o !== w && o.zone === z).length;
-    add('warm', z, cold * (0.2 + heat * (1 + w.traits.boldness) * 2 + company * 0.4 + (z === 'hollow' ? 0.3 : 0)), 'warmth');
+    const st = objs.stats[z];
+    const heat = st.heat;
+    const company = st.wobs - (w.zone === z ? 1 : 0);
+    const huts = st.huts;
+    add('warm', z, cold * (0.2 + heat * (1 + w.traits.boldness) * 2 + company * 0.4 + (z === 'hollow' ? 0.3 : 0) + huts * 0.8), 'warmth');
   }
   // Tired: rest where you are, or in the hollow.
   const tired = Math.max(0, 1 - n.rest / NEEDS.tired);
   add('rest', w.zone, 0.2 + 4 * tired, 'rest');
   add('rest', 'hollow', 0.1 + 1.5 * tired, 'rest');
   // Curiosity pull: new Keeper objects from the last 24 ticks.
-  for (const o of objs) {
-    if (!o.origin.action || world.tick - o.builtTick > SOCIAL.curiosityPull) continue;
-    if (w.seen.includes(o.id)) continue;
-    add('inspect', o.zone, 1.5 * w.traits.curiosity + 0.3, o.id);
-  }
+  // Only the two newest unseen things pull, and a hungry, cold or tired
+  // Wobblin is much less curious.
+  const comfort = Math.max(0.1, 1 - Math.max(hunger, cold, tired));
+  const novel = objs.novel.filter(o => !w.seen.includes(o.id)).slice(0, 2);
+  for (const o of novel) add('inspect', o.zone, (1.5 * w.traits.curiosity + 0.3) * comfort, o.id);
   // Hobby.
   const h = HOBBY_ZONES[w.hobby];
   for (const z of ZONE_IDS) {
     let wgt = h.zones.includes(z) ? 0.4 : 0.05;
     wgt += zoneObjects(objs, z).filter(o => h.kinds.includes(o.kind)).length * 0.3;
-    if (w.hobby === 'humming') wgt += live.filter(o => o !== w && o.zone === z).length * 0.2;
+    if (w.hobby === 'humming') wgt += (objs.stats[z].wobs - (w.zone === z ? 1 : 0)) * 0.2;
     add('hobby', z, wgt * (0.5 + w.traits.playfulness), 'hobby');
   }
   // A Keeper curio pulls its two chosen Wobblins over for a while.
-  const curio = objs.find(o => o.kind === 'curio' && !o.state.pullDone && o.state.targets.includes(w.id));
-  if (curio && w.stage !== 'baby') return { activity: 'inspect', zone: curio.zone, why: curio.id };
+  // It is a strong pull, but needs still come first.
+  const curio = objs.curios.find(o => o.state.targets.includes(w.id));
+  if (curio && w.stage !== 'baby') add('inspect', curio.zone, 6 * comfort, curio.id);
   // Babies stay near a parent.
   if (w.stage === 'baby') {
     const parent = live.find(p => w.parents.includes(p.id));
@@ -131,6 +151,17 @@ function chooseActivity(world, w, objs, live) {
 export function creaturesStep(world) {
   const live = alive(world);
   const objs = liveObjects(world);
+  objs.byZone = {};
+  for (const o of objs) (objs.byZone[o.zone] ||= []).push(o);
+  // Per-zone facts every Wobblin's choice reads (same snapshot for all).
+  objs.stats = {};
+  for (const z of ZONE_IDS) {
+    objs.stats[z] = { heat: warmthSources(objs, z), huts: zoneObjects(objs, z).filter(o => o.kind === 'hut').length,
+      wobs: live.filter(w => w.zone === z).length };
+  }
+  objs.novel = objs.filter(o => (o.origin.action !== undefined || o.state.byKeeper) && world.tick - o.builtTick <= SOCIAL.curiosityPull)
+    .sort((a, b) => b.builtTick - a.builtTick);
+  objs.curios = objs.filter(o => o.kind === 'curio' && !o.state.pullDone);
   for (const w of live) {
     for (const k of sortedKeys(w.temp)) {
       if (w.temp[k].until <= world.tick) delete w.temp[k];

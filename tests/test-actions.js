@@ -166,13 +166,14 @@ section('Player never creates discoveries (actions half)');
     { type: 'collect_offerings' }
   ];
   let seq = 1;
+  const firstEvent = w.events.length;
   for (const a of actions) {
     const before = knowledge(w);
     const res = applyAction(w, { seq: seq++, t: w.tick, ...a });
     assert.equal(res.ok, true, (a.power || a.nudge || a.type) + ' ' + res.reason);
     assert.equal(knowledge(w), before, 'action changed knowledge');
   }
-  assert.ok(!w.events.some(e => ['discovery', 'rediscovery', 'taught', 'learned_from_structure'].includes(e.kind)));
+  assert.ok(!w.events.slice(firstEvent).some(e => ['discovery', 'rediscovery', 'taught', 'learned_from_structure'].includes(e.kind)));
   ok('all 11 action types leave world.discoveries and every knows unchanged, and emit no knowledge events');
 }
 

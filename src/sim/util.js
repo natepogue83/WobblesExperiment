@@ -33,8 +33,10 @@ export function stateHash(world) {
   return a.toString(16).padStart(14, '0').slice(-8) + b.toString(16).padStart(14, '0').slice(-8);
 }
 
-export function alive(world) { return byId(world.wobblins.filter(w => w.alive)); }
-export function liveObjects(world) { return byId(world.objects.filter(o => !o.state.gone)); }
+// world.wobblins and world.objects are append-only and ids are allocated in
+// increasing order, so both arrays are always in id order. Filtering keeps it.
+export function alive(world) { return world.wobblins.filter(w => w.alive); }
+export function liveObjects(world) { return world.objects.filter(o => !o.state.gone); }
 export function findWobblin(world, id) { return world.wobblins.find(w => w.id === id) || null; }
 export function findObject(world, id) { return world.objects.find(o => o.id === id) || null; }
 export function objectAtSlot(world, slot) {

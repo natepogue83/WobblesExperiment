@@ -224,7 +224,7 @@ export function applyAction(world, a) {
         world.seasonUses++;
         const c = world.climate;
         c.season = a.variant;
-        c.tempMod = a.variant === 'cold' ? -0.15 : 0.08;
+        c.tempMod = a.variant === 'cold' ? -0.06 : 0.05;
         c.until = t + POWER.seasonTicks;
         power({ power: 'season', variant: a.variant, ticks: POWER.seasonTicks }, null, 3);
         break;
@@ -239,6 +239,7 @@ export function applyAction(world, a) {
       w.temp[a.trait] = { add: POWER.blessAdd, until: t + POWER.blessTicks };
       w.faith = r3(clamp(w.faith + 0.1, -1, 1));
       const seen = witnesses(world, w.zone, w.id);
+      for (const id of [w.id, ...seen]) findWobblin(world, id).witnessed = true;
       emit(world, { kind: 'keeper_nudge', actors: [w.id, ...seen], target: w.id,
         data: { nudge: 'bless', trait: a.trait, witnesses: seen }, salience: 2, causes });
     } else if (a.nudge === 'curio') {
@@ -252,6 +253,7 @@ export function applyAction(world, a) {
       world.miracleUntil = t + POWER.miracleTicks;
       faithAll(world, 0.15);
       const seen = alive(world).map(w => w.id);
+      for (const x of alive(world)) x.witnessed = true;
       emit(world, { kind: 'keeper_nudge', actors: seen, data: { nudge: 'miracle', ticks: POWER.miracleTicks, witnesses: seen },
         salience: 4, causes });
     }

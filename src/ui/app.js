@@ -1,6 +1,7 @@
 // app.js — clock, input, panels. The only place real time and the DOM meet the sim.
 import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST } from '../sim/index.js';
 import { unlockedCurios, hasPond } from '../sim/actions.js';
+import { experimentPreview } from '../sim/experiment.js';
 import { renderState, drawSVG } from '../render/render.js';
 import { ZONES, ZONE_IDS, slotIds, slotInfo } from '../sim/geometry.js';
 import { objectAtSlot } from '../sim/util.js';
@@ -355,7 +356,12 @@ function drawDebug() {
   const reset = document.createElement('button'); reset.textContent = 'New colony';
   reset.onclick = () => { if (window.confirm('Erase this colony and start over?')) { clearSave(); location.reload(); } };
   tools.append(ex, im, verify, reset);
-  p.append(title, row, infoEl, tools, log);
+  const exp = document.createElement('div'); exp.className = 'dbg-exp';
+  exp.textContent = 'experiments (p attempt · top candidates score/pSuccess):\n' + experimentPreview(world).map(x =>
+    `${x.name} @${x.zone}/${x.activity} p=${x.pAttempt}  ` + x.top.map(c => `${c.id} ${c.score}/${c.pSuccess}`).join(', ')).join('\n');
+  const known = document.createElement('div'); known.className = 'dbg-exp';
+  known.textContent = 'known: ' + Object.entries(world.discoveries).map(([k, v]) => k + (v.forgotten ? ' (forgotten)' : '')).join(', ');
+  p.append(title, row, infoEl, tools, exp, known, log);
 }
 
 function info(h) {

@@ -4,6 +4,7 @@ import { rngFor, chance } from './rng.js';
 import { emit } from './events.js';
 import { makeObject, makeWobblin, TRAITS } from './world.js';
 import { trait } from './creatures.js';
+import { buildStructure } from './effects.js';
 import { alive, liveObjects, findWobblin, idNum, r3 } from './util.js';
 
 // Huts are built only by the Hut discovery (Day 5). Each intact hut houses
@@ -51,7 +52,7 @@ function healStep(world) {
 function pairingStep(world) {
   const live = alive(world);
   if (pairCount(world) >= hutCapacity(world)) return;
-  const single = live.filter(w => !w.partnerId && w.stage === 'adult' &&
+  const single = live.filter(w => !w.partnerId && w.stage !== 'baby' &&
     trait(w, 'sociability', world.tick) > SOCIAL.pairSociabilityMin && w.needs.mood > SOCIAL.pairMood);
   for (let i = 0; i < single.length; i++) {
     for (let j = i + 1; j < single.length; j++) {
@@ -88,6 +89,28 @@ function birthStep(world) {
     baby.faith = r3((a.faith + b.faith) / 2);
     emit(world, { kind: 'birth', actors: [baby.id, a.id, b.id], data: { zone: a.zone }, salience: 4 });
   }
+}
+
+// Huts let a small colony take in a wanderer now and then, so a family of
+// siblings is not a dead end.
+function strangerStep(world) {
+  const live = alive(world);
+  if (!live.length || live.length >= 6 || hutCapacity(world) === 0) return;
+  const r = rngFor(world.seed, 'stranger', world.tick);
+  if (!chance(r, SOCIAL.strangerChance)) return;
+  const w = makeWobblin(world, { bornTick: world.tick - LIFE.babyUntil - 8, zone: 'riverbank' });
+  emit(world, { kind: 'stranger_arrived', actors: [w.id], data: { zone: 'riverbank', by: 'road' }, salience: 4 });
+}
+
+// Wobblins who know Hut build more as the colony grows (one per pair).
+function hutBuildingStep(world) {
+  const live = alive(world);
+  const builders = live.filter(w => w.knows.hut && w.stage !== 'baby' && w.zone === 'hollow');
+  if (!builders.length || hutCapacity(world) >= Math.ceil(live.length / 2) + 1) return;
+  const r = rngFor(world.seed, 'hut-build', world.tick);
+  if (!chance(r, SOCIAL.hutBuildChance)) return;
+  const disc = world.events.filter(e => (e.kind === 'discovery' || e.kind === 'rediscovery') && e.target === 'hut').pop();
+  if (disc) buildStructure(world, 'hut', builders[0], disc);
 }
 
 function seedPodStep(world) {
@@ -132,6 +155,8 @@ export function lifeEventsStep(world) {
   faithStep(world);
   deathsStep(world);
   healStep(world);
+  hutBuildingStep(world);
+  strangerStep(world);
   pairingStep(world);
   birthStep(world);
   seedPodStep(world);

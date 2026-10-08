@@ -24,7 +24,12 @@ export function strike(world, slot, causes, data) {
   const target = objectAtSlot(world, slot);
   const ev = emit(world, { kind: data.natural ? 'lightning' : 'keeper_power', target: target ? target.id : null,
     data: { ...data, slot }, salience: data.natural ? 2 : 2, causes });
-  if (target && burnableAt(world, slot)) igniteObject(world, target, ev.id);
+  if (target && burnableAt(world, slot)) igniteObject(world, target, ev.id).state.byKeeper = !data.natural;
+  else if (!target && !isWet(world) && slotInfo(slot).zone !== 'riverbank' && slotInfo(slot).zone !== 'pondsite') {
+    // Dry grass catches: a small fire that burns out fast.
+    const fire = makeObject(world, { kind: 'fire', slot, origin: { event: ev.id }, state: { until: world.tick + 4, fuel: 'grass', byKeeper: !data.natural } });
+    emit(world, { kind: 'fire_started', target: fire.id, data: { zone: fire.zone, fuel: 'grass' }, salience: 3, causes: [{ event: ev.id }] });
+  }
   // Everyone nearby flinches; someone standing right there may get hurt.
   const zone = slotInfo(slot).zone;
   const r = rngFor(world.seed, 'strike', world.tick, slot);
@@ -183,7 +188,7 @@ export function environmentStep(world) {
     rainEffects(world, r, c.rainEvent);
   }
 
-  const coldP = NATURE.coldNightChance + (c.season === 'cold' ? 0.5 : c.season === 'warm' ? -0.2 : 0) - c.drift;
+  const coldP = NATURE.coldNightChance + (c.season === 'cold' ? 0.25 : c.season === 'warm' ? -0.2 : 0) - c.drift;
   c.cold = chance(r, coldP);
 
   if (c.rain === 0 && chance(r, NATURE.dryLightningChance)) {

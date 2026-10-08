@@ -59,6 +59,11 @@ stateHash(world) -> string              // 16 hex chars, stable across engines
 
 ## 3. Rule zero: player actions never create discoveries
 
+The engine is `src/sim/experiment.js`; the graph is data in
+`src/sim/discoveries.js`; world changes are `src/sim/effects.js` (called only
+from experiment.js); cause chains are `src/sim/causes.js` (`keeperRoot`).
+
+
 - Only `src/sim/experiment.js` (experiments, teaching and rediscovery inside
   it) may add to `world.discoveries` or any `wobblin.knows`.
 - Actions only create objects, conditions, or temporary trait modifiers.
@@ -94,7 +99,8 @@ world = {
              rainEvent: eventId /* cause of the current rain */ },
   wobblins: [ wobblin ],          // dead ones stay, alive:false
   objects:  [ object ],           // destroyed ones stay, hp 0, state.gone:true
-  discoveries: { [id]: { inventor, tick, causes, forgotten } },
+  discoveries: { [id]: { inventor, tick, causes, forgotten, orphanSince, forgottenTick? } },
+                                  // orphanSince: tick the last knower died (a structure may still hold it)
   devotion: 0,
   offerings: 0,                   // waiting at the shrine, collected by action
   cooldowns: { stone, plant, rain, lightning, water, season, bless, curio, miracle },
@@ -102,6 +108,7 @@ world = {
   seasonUses: 0,                  // Season is free the first time
   giftsByDay: { [dayIndex]: giftId },
   pondering: { [wobblinId]: { [discoveryId]: sinceTick } },
+  pondered: { [discoveryId]: tick },  // the pondering hint is shown once per discovery
   seedPod: null | { at: tick },   // set when the valley empties; hatches 2 Wobblins
   rainUses: [tick],               // recent Keeper rains; 3 within 6 ticks = flood
   miracleUntil, riverBend: slot|null, lastKeeperTick,
@@ -227,6 +234,19 @@ offset only changes `nowTick` in the UI.
   > 0.25 and the pair's average > 0.4 (blessings count). Each intact hut
   houses one pair.
 - Saves are packed on disk (section 8) to meet the 20 KB target.
+- Hut: the plan says "in the hollow"; the Wobblin may be in the hollow or next
+  to it, and bushes count as building material. Otherwise first-generation
+  Huts were too rare and colonies cycled through seed pods forever.
+- Resting Wobblins can still experiment at half rate (dozing ideas).
+- Huts grow with the colony: a Wobblin who knows Hut and is in the hollow may
+  build another (one per pair, +1). A colony under 6 with a Hut sometimes
+  takes in a stranger from the road (siblings never pair).
+- A structure holds its knowledge for 36 ticks after the last knower dies
+  (the plan says 24), so a seed pod (24 ticks) can still learn from it.
+- Lightning on empty dry ground starts a small grass fire (4 ticks), so
+  Lightning alone can lead to Fire Warmth in the barren valley.
+- Base rates are tuned up from the plan for tiers 2-4 (see constants.js).
+- Teaching rolls use one stream per learner per tick: rngFor(seed, "teach", t, id).
 
 ## 13. Testing
 
