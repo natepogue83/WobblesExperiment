@@ -119,6 +119,7 @@ world = {
   noticed: { [objectKind]: tick },// first tick a Wobblin was near a material (unlocks curios)
   wishes: [ { id, by, want: "rain"|"stones_on_hill"|"warmth", t, until, event, done: null|"granted"|"expired" } ],
   lastFestival: tick|null, lastSong: tick|null, lastKeeperEvent: eventId|null
+  goalsClaimed: [goalId], trails: { "zoneA|zoneB": trips }   // goals.js; worn paths (regrow 10% every 2 days)
   events: [ event ],              // append-only
   nextIds: { w, o, e }
 }
@@ -156,7 +157,10 @@ Object state flags added overnight: `pond.state.frozen` (cold season), `fish.sta
 (lightning in water), `scorch.state.wrecked` (a Wobblin flung through the roof),
 `stones.state.stacked` (a cairn).
 
-Object kinds: boulder, stones, tree, bush, sprout, fire, pond, reeds, clay,
+Snowmen (`snowman`, built by playful Wobblins when it is cold and wet) melt when the
+cold passes; flinging a Wobblin into one or lightning on it destroys it.
+
+Object kinds: snowman, boulder, stones, tree, bush, sprout, fire, pond, reeds, clay,
 fish, curio, gift, hearth, hut, wall, garden, raft, totem, temple, mural,
 grave, ruin, scorch. Graves have `slot: null` and line up in
 `GEO.GRAVEYARD`; a boulder also has `slots: [a, b]`. Zone features that are not objects: `river`
@@ -194,9 +198,12 @@ Chronicle, murals and the week-2 AI.
 { seq, t, type: "power", power: "stone"|"plant"|"rain"|"lightning"|"water"|"season"|"quake",
   slot?, zone?, variant? }        // stone: "stones"|"boulder"; plant: "tree"|"bush";
                                   // season: "cold"|"warm"
-{ seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry",
+{ seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry"|"rename"|"move",
   target?, trait?, curio?, targets?, zone?,     // carry: pick a Wobblin up, set it down in zone
-  thrown?, splash?, onto? }                    // (no cooldown; it stays put 3 ticks; never adds knowledge)
+  thrown?, splash?, onto?, cradled?, shaken?,  // (no cooldown; it stays put 3 ticks; never adds knowledge)
+  name?, slot? }                               // rename: target + name (/^[A-Za-z][A-Za-z' -]{0,13}$/);
+                                             // move: target object (stones, gift, curio, sprout, clay) to a free slot
+                                             // cradled: held still (rest up); shaken: shaken about (rattled)
                                              // thrown: flung, not placed; splash: landed in water
                                              // onto: the Wobblin or object it landed on (must exist,
                                              // be alive / not gone, and not be itself) -> landOnto()
@@ -207,7 +214,8 @@ Chronicle, murals and the week-2 AI.
 
 - `onto` on stone, plant, lightning and gift: the living Wobblin it was dropped on
   (`powerOnto`: bonk, squash, flower crown, zap, caught gift). The object itself still
-  lands in `slot`. Stones dropped on a pile of fewer than 4 top it up (`state.count`).
+  lands in `slot`; stones and seeds may omit `slot` when the valley is full (they land
+  on the head and nothing is placed). Stones dropped on a pile of fewer than 4 top it up (`state.count`).
 - `quake` (Shake the Valley, cooldown 16, unlocks at belief 26): berries fall, cairns
   topple, a wall may fall to a ruin, seeds sprout, fish leap, timid Wobblins are shaken.
 - Actions apply at tick `t`, in `seq` order, BEFORE that tick's `tick()` runs.
