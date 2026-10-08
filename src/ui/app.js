@@ -660,6 +660,10 @@ function draw() {
   drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null, offerings: world.offerings >= 1, backdrop: backdropURL });
   camera.last = ''; camera.apply(svg, 0);   // keep the camera where it was
   puppets.sync(rs);
+  puppets.apply(svg, performance.now());     // poses and facing back at once, no one-frame flicker
+  // Keep every wobble in phase across redraws, so a new day doesn't make them all twitch.
+  const phase = performance.now() / 1000;
+  for (const el of svg.querySelectorAll('.wobblin .wobble')) { const d = parseFloat(el.style.animationDuration) || 2.4; el.style.animationDelay = (-(phase % d)).toFixed(2) + 's'; }
   puppets.noteTeaching(world.events.filter(e => e.kind === 'taught' && e.t >= world.tick - 1).map(e => e.actors));
   celebrateUnlocks();
   for (const w of rs.wobblins) {
