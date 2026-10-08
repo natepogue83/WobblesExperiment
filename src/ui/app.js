@@ -94,6 +94,7 @@ function startWatching() {
   requestAnimationFrame(frame);
   startAmbience(() => world && { hour: localHour(Date.now()), rain: world.climate.rain > 0, cold: world.climate.season === 'cold',
     mood: (() => { const l = world.wobblins.filter(w => w.alive); return l.length ? l.reduce((m, w) => m + w.needs.mood, 0) / l.length : 0; })() });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { const p = document.getElementById('panel'); if (p && !p.hidden) p.hidden = true; } });
   document.addEventListener('visibilitychange', () => {
     if (!save || !world) return;
     if (wiping) return;
@@ -323,6 +324,7 @@ function drawTray() {
       tile.innerHTML = `<span class="icon">${ICONS[item.id]}</span><span class="name">${item.label}</span>` +
         (st.note ? `<span class="note">${st.note}</span>` : '');
       tile.setAttribute('aria-label', item.label + (st.note ? ', ' + st.note : ''));
+      tile.title = TILE_TIP[item.id] || item.label;
       wireTile(tile, item);
       bar.append(tile);
     }
@@ -883,6 +885,23 @@ function openGoals() {
   showGoals($('#panel'), world, { states: goalStates(world, prog), age: ageOf(world, prog), onClaim: claimGoal, feedback: WAITLIST_URL ? { url: WAITLIST_URL, label: FEEDBACK_LABEL } : null });
 }
 
+// Hover tips for the tray (desktop).
+const TILE_TIP = {
+  stones: 'Stones: something new to puzzle over. Drop on a small pile to make it bigger, or on a head for a bonk.',
+  boulder: 'A boulder: big, heavy, good to climb. Dropped on a head, it squashes.',
+  bush: 'Berry seed: grows into a berry bush. On a head, a flower crown.',
+  tree: 'Tree seed: grows into a tree. Trees shelter, burn, and drop seeds.',
+  rain: 'Rain: wets the ground, puts out fires. Three in a row floods the river.',
+  lightning: 'Lightning: strikes where you drop it. Fire, frizz, split boulders, stunned fish...',
+  water: 'Water: dig a pond, or bend the river for more fish.',
+  quake: 'Shake the Valley: berries fall, towers topple, everyone holds on.',
+  cold: 'Cold snap: freezes the pond. With rain, it snows.',
+  warm: 'Warm spell: everyone warms up. Berries love it.',
+  bless: 'Bless: drop on a Wobblin to boost one trait for a while.',
+  curio: 'Curio: a strange object that pulls two Wobblins together to study it.',
+  gift: 'Daily gift: one a day. Drop it on a Wobblin and they catch it.',
+  miracle: 'Miracle: a rainbow. Everyone sees it, everyone remembers it.'
+};
 const ASK_TEXT = { berries: 'berries (plant a berry seed)', stones: 'stones nearby', rain: 'rain', company: 'a friend (carry one over)', flowers: 'flowers (a seed on their head?)' };
 const WANT_WORD = { hungry: 'hungry', cold: 'cold', scared: 'scared', tired: 'worn out', idea: 'missing something', sad: 'sad', lonely: 'lonely' };
 function colonyNeeds() {
