@@ -59,6 +59,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 ## 4. A reason to play
 
+- **You can see belief grow:** every act that delights them floats a "+1.6 belief" up from where it happened, and the belief bar flashes (scaring them shows a red minus).
 - **Ages and 15 milestones** (the Goals button). Examples: tame fire, welcome a baby, three generations, a temple. Claiming one gives belief, and belief unlocks powers.
 - **A fast start:** while you watch a new colony, its first 12 days pass at 20 seconds each, then slow to a day a minute. The first discoveries, asks and unlocks arrive within a few minutes.
 - **A first-time coach** gives four pointers (drag stones in, pick a Wobblin up, watch them think, claim a goal), then gets out of the way.

@@ -168,11 +168,12 @@ function advance(returning = false) {
 function act(action) {
   advance();
   const a = appendAction(save, world.tick, action);
-  const seen = world.events.length;
+  const seen = world.events.length, belief0 = world.belief || 0;
   const res = applyAction(world, a);
   if (!res.ok) { popAction(save); toast(whyNot(res.reason)); play('uhoh'); }
   else {
     storeSave(save);
+    beliefPop((world.belief || 0) - belief0, a);
     actionSound(a, world.events.slice(seen));
     momentsFor(world, world.events.slice(seen));
     const ie = world.events.slice(seen).find(e => e.kind === 'interaction' && interactionToast(e));
@@ -209,6 +210,26 @@ function actionSound(a, events) {
   if (follow.length) setTimeout(() => soundForEvents(follow), ACTION_SOUND[key] ? 160 : 0);
   const k = events.find(e => e.data && e.data.reactions);
   if (k) soundForReaction(k.data.reactions);
+}
+
+// Belief is the point: show what an act earned (or cost) right where it happened.
+function beliefPop(delta, a) {
+  if (!world.unlocked || Math.abs(delta) < 0.25) return;
+  const at = a.slot && GEO.slotInfo(a.slot);
+  const tgt = (a.onto || a.target) && lastRS && (lastRS.wobblins.find(x => x.id === (a.onto || a.target)) || lastRS.objects.find(x => x.id === a.target));
+  const pos = at ? { x: at.x, y: at.y - 40 } : tgt ? { x: (puppets.position(tgt.id) || tgt).x, y: (puppets.position(tgt.id) || tgt).y - 90 } : { x: 600, y: 300 };
+  const svg = $('#world');
+  const m = svg.getScreenCTM();
+  if (!m) return;
+  const el = document.createElement('div');
+  el.className = 'belief-pop' + (delta < 0 ? ' minus' : '');
+  el.textContent = (delta > 0 ? '+' : '') + (Math.abs(delta) >= 10 ? Math.round(delta) : delta.toFixed(1).replace(/\.0$/, '')) + ' belief';
+  el.style.left = (m.a * pos.x + m.e) + 'px';
+  el.style.top = (m.d * pos.y + m.f) + 'px';
+  document.body.append(el);
+  setTimeout(() => el.remove(), 1600);
+  const bar = document.querySelector('.belief');
+  if (bar && delta > 0) { bar.classList.remove('gain'); void bar.offsetWidth; bar.classList.add('gain'); }
 }
 
 function whyNot(reason) {
