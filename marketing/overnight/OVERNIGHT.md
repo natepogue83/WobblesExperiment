@@ -42,7 +42,7 @@ All of these replay exactly and never teach the Wobblins anything.
   - into a snowman: poof
 - **Drop powers on a Wobblin's head:**
   - stones: a bonk, which sometimes knocks an idea loose
-  - a boulder: squashed flat. It can hurt them but never kills.
+  - a boulder: squashed flat. It can hurt, but never kills.
   - a seed: a flower crown, with a butterfly
   - lightning: frizzy fur, and sometimes a bright idea. The static shock spreads to anyone they bump into.
   - the daily gift: they catch it
@@ -62,7 +62,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 - **Synthesized sound** for every action: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime. There's quiet ambience too (birds by day, crickets at night, rain, a music-box note when they're happy), and a mute button.
 
-## Added after the summary
+## Also added later in the night
 
 - **A painted icon for each of the 30 discoveries,** shown in the Discovery Book and on the eureka card.
 - **The Chronicle has a "Their story" tab** that leaves out your own acts and routine level-ups, and every line shows a face or an icon.
@@ -80,7 +80,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 ## Decisions you might want to change
 
-- Boulders and lightning can injure a Wobblin but can never kill one.
+- A boulder or lightning dropped right on a Wobblin can hurt it but never kills it. Lightning that only lands nearby can still hurt bystanders, as before.
 - Goals grant belief, which makes powers unlock faster. A busy player can now reach the Age of Wonders in about 90 days.
 - The display font loads from Google Fonts, so it needs internet. Without it the page falls back to system fonts.
 
