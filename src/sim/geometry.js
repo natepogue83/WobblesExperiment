@@ -11,7 +11,7 @@ export const ZONES = {
   hill: {
     name: 'the hill', cx: 230, cy: 290, rx: 170, ry: 70,
     features: ['shrine'], shrine: { x: 230, y: 250 },
-    slots: [[170, 280], [235, 300], [300, 285], [205, 320], [270, 325], [345, 305], [120, 318]]
+    slots: [[170, 280], [235, 300], [300, 285], [205, 320], [270, 325], [345, 305], [392, 268]]
   },
   grove: {
     name: 'the grove', cx: 900, cy: 300, rx: 190, ry: 70,
@@ -70,6 +70,16 @@ export function slotInfo(slotId) {
   const [x, y] = z.slots[n - 1];
   return { zone, index: n - 1, x, y };
 }
+
+// The nearest other slot in the same zone (ties go to the lower index). Two-slot
+// things like boulders take a slot and its neighbour.
+const NEIGHBOUR = {};
+for (const [zone, z] of Object.entries(ZONES)) z.slots.forEach(([x, y], i) => {
+  let best = -1, bd = Infinity;
+  z.slots.forEach(([x2, y2], j) => { const d = Math.hypot(x2 - x, y2 - y); if (j !== i && d < bd) { bd = d; best = j; } });
+  NEIGHBOUR[zone + '.' + (i + 1)] = best < 0 ? null : zone + '.' + (best + 1);
+});
+export function neighbourSlot(slotId) { return NEIGHBOUR[slotId] || null; }
 
 export function slotIds(zone) {
   return ZONES[zone].slots.map((_, i) => zone + '.' + (i + 1));

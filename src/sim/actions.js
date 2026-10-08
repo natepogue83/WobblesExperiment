@@ -4,7 +4,7 @@
 // play rejected, with no events.
 import { COOLDOWN, COST, POWER } from './constants.js';
 import { rngFor } from './rng.js';
-import { slotInfo, ZONES, ZONE_IDS } from './geometry.js';
+import { slotInfo, ZONES, ZONE_IDS, neighbourSlot } from './geometry.js';
 import { r3, clamp, objectAtSlot, findWobblin, alive, liveObjects } from './util.js';
 import { emit } from './events.js';
 import { makeObject } from './world.js';
@@ -57,11 +57,8 @@ function costOf(world, key) {
 function bad(reason) { return { ok: false, reason }; }
 
 function boulderSlots(world, slot) {
-  const info = slotInfo(slot);
-  const n = ZONES[info.zone].slots.length;
-  const next = info.index + 2 <= n ? info.index + 2 : info.index;  // 1-based neighbour
-  const other = info.zone + '.' + next;
-  if (other === slot || objectAtSlot(world, other)) return null;
+  const other = neighbourSlot(slot);
+  if (!other || objectAtSlot(world, other)) return null;
   return [slot, other];
 }
 

@@ -132,7 +132,7 @@ body { background: #2a2016; }
 .goals .goal.ready .tick { background: none; border-color: var(--ochre); color: var(--ochre); animation: nudge 2.4s ease-in-out infinite; }
 .goals .goal.claimed b { text-decoration: line-through; text-decoration-color: rgba(58, 39, 23, .45); text-decoration-thickness: 2px; }
 .goals .goal .reward { font: 15px var(--display); color: #9a6a1a; }
-.tricks-head { font: 26px var(--title); font-weight: 400; color: var(--ink); }
+#panel .tricks-head { font: 26px var(--title); font-weight: 400; color: var(--ink); }
 .recap-lines li, .chronicle li { background: rgba(255, 255, 255, .28); border: 1.5px solid rgba(107, 74, 46, .35); border-radius: var(--r-tag); }
 #panel .kin { background: rgba(255, 255, 255, .3); border: 1.5px solid rgba(107, 74, 46, .4); border-radius: var(--r-tag); }
 .kin b { font: 17px var(--display); }
@@ -194,4 +194,11 @@ body { background: #2a2016; }
 .book .page .art .dicon { filter: url(#inked); }
 .chronicle li { font-size: 15px; }
 .chronicle .why { font-size: 13px; }
-.card .portrait, .moment .who, .kin svg, .recap-lines .portrait, .tick-item .portrait { filter: url(#inked); }
+.moment .who { filter: drop-shadow(2px 3px 0 rgba(58, 39, 23, .25)); }
+
+/* Lines that wobble a little, like they were inked by hand. */
+#world .wobblin .build, .card .portrait .build, .moment .who .build { filter: url(#wobble); }
+.wobblin.held .puddle-splash, .wobblin.flying .puddle-splash { display: none; }
+
+/* Objects, thought bubbles and asks get the same inked outline as the Wobblins. */
+#world .obj:not(.obj-pond):not(.obj-scorch), #world #shrine, #world .wobblin .bubble, #world .wobblin .chat, #world .wobblin .want, #world .wobblin .ask { filter: url(#inked); }

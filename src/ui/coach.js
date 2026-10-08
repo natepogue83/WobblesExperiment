@@ -8,7 +8,7 @@ try { done = localStorage.getItem(DONE_KEY) === '1'; } catch { /* private mode *
 
 export function coachStep(save, world) {
   if (done || !save || !world || !save.progression) return null;
-  if ((world.goalsClaimed || []).length) { finish(); return null; }
+  if ((world.goalsClaimed || []).some(id => !id.startsWith('trick_'))) { finish(); return null; }
   if (world.tick > 72) { finish(); return null; }
   const acts = save.actions;
   const powers = acts.filter(a => a.type === 'power' || a.type === 'gift').length;

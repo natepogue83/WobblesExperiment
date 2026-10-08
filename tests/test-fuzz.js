@@ -2,7 +2,7 @@
 // including drops on heads, flings onto things, quakes and claims. Nothing may
 // throw, no number may go bad, and render, recap, goals and voices must all cope.
 import assert from 'node:assert/strict';
-import { createWorld, tick, applyAction, replay, stateHash, goalStates, GOALS } from '../src/sim/index.js';
+import { createWorld, tick, applyAction, replay, stateHash, goalStates, GOALS, TRICKS } from '../src/sim/index.js';
 import { renderState } from '../src/render/render.js';
 import { buildRecap } from '../src/sim/recap.js';
 import { voiceLine } from '../src/ui/voice.js';
@@ -35,7 +35,7 @@ function chaos(world, r) {
     () => { const day = 20000 + Math.floor(world.tick / 24); return { type: 'gift', day, giftId: pick(r, giftOptions(world.seed, day)), ...(r() < 0.5 ? { onto: any() } : {}) }; },
     () => ({ type: 'nudge', nudge: 'move', target: thing(), slot: pick(r, ALL_SLOTS) }),
     () => ({ type: 'collect_offerings' }),
-    () => ({ type: 'claim', goal: pick(r, GOALS).id })
+    () => ({ type: 'claim', goal: pick(r, [...GOALS, ...TRICKS]).id })
   ];
   return pick(r, kinds)();
 }

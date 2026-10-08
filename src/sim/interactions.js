@@ -7,7 +7,7 @@ import { emit } from './events.js';
 import { rngFor } from './rng.js';
 import { alive, liveObjects, findWobblin, findObject, r3, clamp, clamp01 } from './util.js';
 import { makeObject } from './world.js';
-import { slotIds, ADJACENT } from './geometry.js';
+import { slotIds, ADJACENT, neighbourSlot } from './geometry.js';
 import { practice, shapeTrait } from './growth.js';
 import { SOCIAL } from './constants.js';
 
@@ -327,7 +327,7 @@ export function quake(world, ev) {
     const ids = slotIds(dest);
     const taken = s => liveObjects(world).some(o => o.slot === s || (o.slots && o.slots.includes(s)));
     let pair = null;
-    for (let i = 0; i + 1 < ids.length && !pair; i++) if (!taken(ids[i]) && !taken(ids[i + 1])) pair = [ids[i], ids[i + 1]];
+    for (let i = 0; i < ids.length && !pair; i++) { const nb = neighbourSlot(ids[i]); if (nb && !taken(ids[i]) && !taken(nb)) pair = [ids[i], nb]; }
     if (!pair) continue;
     b.slot = pair[0]; b.slots = pair; b.zone = dest;
     out.rolled++;

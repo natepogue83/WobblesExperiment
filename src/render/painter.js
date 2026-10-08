@@ -414,7 +414,32 @@ export function paintValley(canvas, seed, { hour = 12, season = 'mild', wet = fa
     ctx.fillStyle = r() < 0.5 ? 'rgba(255,255,255,0.035)' : 'rgba(0,0,0,0.035)';
     ctx.fillRect(r() * W, r() * H, 1.4, 1.4);
   }
+  paperPass(ctx, canvas, rngFor(seed, 'paper'));
   return canvas;
+}
+
+// The whole picture sits on warm, slightly blotchy paper with a fine tooth,
+// like gouache on a sketchbook page.
+function paperPass(ctx, canvas, r) {
+  if (!ctx.getImageData) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const img = ctx.getImageData(0, 0, w, h), d = img.data;
+  const cell = 56, gw = Math.ceil(w / cell) + 2;
+  const grid = new Float32Array(gw * (Math.ceil(h / cell) + 2));
+  for (let i = 0; i < grid.length; i++) grid[i] = r();
+  for (let y = 0; y < h; y++) {
+    const gy = y / cell, y0 = gy | 0, fy = gy - y0;
+    for (let x = 0; x < w; x++) {
+      const gx = x / cell, x0 = gx | 0, fx = gx - x0, g0 = y0 * gw + x0, g1 = g0 + gw;
+      const m = (grid[g0] + (grid[g0 + 1] - grid[g0]) * fx) * (1 - fy) + (grid[g1] + (grid[g1 + 1] - grid[g1]) * fx) * fy;
+      const k = 1 - 0.06 * m, n = (r() - 0.5) * 12, i4 = (y * w + x) * 4;
+      d[i4] = d[i4] * k + n + 4; d[i4 + 1] = d[i4 + 1] * k + n + 1.5; d[i4 + 2] = d[i4 + 2] * k + n - 4;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  ctx.restore();
 }
 
 // Paint (or reuse) the valley; resolves to an object URL usable as <image href>.

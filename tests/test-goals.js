@@ -61,6 +61,11 @@ section('Tricks: small things to try with your own hands');
   assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'nudge', nudge: 'carry', target: b.id, zone: 'meadow', thrown: true, juggled: 3 }).ok, true);
   assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'claim', goal: 'trick_juggle' }).ok, true);
   ok('a hug and a juggle each unlock a trick worth 1 belief; claiming never adds knowledge');
+
+  // Skating on their own (no Keeper hand involved) is not your trick.
+  w.events.push({ id: 'e9999', t: w.tick, kind: 'interaction', actors: [a.id], target: a.id, data: { what: 'skating' }, salience: 2, causes: [{ object: 'o1' }] });
+  assert.equal(goalStates(w).find(g => g.id === 'trick_skate').state, 'open');
+  ok('a trick only counts when the Keeper caused it');
 }
 
 section('Population over time is read correctly from the log');

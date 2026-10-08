@@ -18,9 +18,12 @@ export function progressOf(world) {
   const tier = found.reduce((m, id) => Math.max(m, BY_ID[id].tier), 0);
   let friends = 0, births = 0, grandkids = 0, festivals = 0;
   let added = 0;
-  const tricks = {};
+  const tricks = {}, keeperEvents = new Set();
   for (const e of world.events) {
-    if (e.kind === 'interaction') tricks[e.data.what] = (tricks[e.data.what] || 0) + 1;
+    if (e.kind.startsWith('keeper_')) keeperEvents.add(e.id);
+    // A trick only counts when the Keeper's hand caused it (not, say, skating on their own).
+    else if (e.kind === 'interaction' && (e.causes || []).some(c => c.action !== undefined || keeperEvents.has(c.event)))
+      tricks[e.data.what] = (tricks[e.data.what] || 0) + 1;
     if (e.kind === 'friends') friends++;
     else if (e.kind === 'festival') festivals++;
     if (e.kind === 'birth') { births++; added++; }

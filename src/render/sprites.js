@@ -7,18 +7,20 @@ import { objectArt } from './objects.js';
 
 function hsl(h, s, l) { return `hsl(${h} ${s}% ${l}%)`; }
 
+const INK = '#3a2717';
+const LINE = `stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"`;
 const EARS = {
-  nubs: c => `<circle cx="-14" cy="-33" r="4.5" fill="${c}"/><circle cx="14" cy="-33" r="4.5" fill="${c}"/>`,
-  droopy: c => `<path d="M-16 -30 Q-28 -27 -26 -13 Q-20 -22 -13 -27 Z" fill="${c}"/><path d="M16 -30 Q28 -27 26 -13 Q20 -22 13 -27 Z" fill="${c}"/>`,
-  pointy: c => `<path d="M-17 -28 L-15 -46 L-7 -33 Z" fill="${c}"/><path d="M17 -28 L15 -46 L7 -33 Z" fill="${c}"/>`,
-  tufts: c => `<path d="M-12 -34 Q-16 -42 -9 -41 Q-8 -46 -4 -39 Z M12 -34 Q16 -42 9 -41 Q8 -46 4 -39 Z" fill="${c}"/>`,
+  nubs: c => `<circle cx="-14" cy="-33" r="4.5" fill="${c}" ${LINE}/><circle cx="14" cy="-33" r="4.5" fill="${c}" ${LINE}/>`,
+  droopy: c => `<path d="M-16 -30 Q-28 -27 -26 -13 Q-20 -22 -13 -27 Z" fill="${c}" ${LINE}/><path d="M16 -30 Q28 -27 26 -13 Q20 -22 13 -27 Z" fill="${c}" ${LINE}/>`,
+  pointy: c => `<path d="M-17 -28 L-15 -46 L-7 -33 Z" fill="${c}" ${LINE}/><path d="M17 -28 L15 -46 L7 -33 Z" fill="${c}" ${LINE}/>`,
+  tufts: c => `<path d="M-12 -34 Q-16 -42 -9 -41 Q-8 -46 -4 -39 Z M12 -34 Q16 -42 9 -41 Q8 -46 4 -39 Z" fill="${c}" ${LINE}/>`,
   none: () => ''
 };
 const TAILS = {
   none: () => '',
-  stub: c => `<circle cx="22" cy="-7" r="4.5" fill="${c}"/>`,
-  curl: c => `<path d="M20 -8 Q32 -10 30 -19 Q28 -26 22 -21" stroke="${c}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
-  fluff: c => `<circle cx="23" cy="-9" r="6.5" fill="${c}" opacity="0.95"/><circle cx="28" cy="-14" r="4.5" fill="${c}"/>`
+  stub: c => `<circle cx="22" cy="-7" r="4.5" fill="${c}" ${LINE}/>`,
+  curl: c => `<path d="M20 -8 Q32 -10 30 -19 Q28 -26 22 -21" stroke="${INK}" stroke-width="6.4" fill="none" stroke-linecap="round"/><path d="M20 -8 Q32 -10 30 -19 Q28 -26 22 -21" stroke="${c}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
+  fluff: c => `<path d="M18 -12 Q20 -19 26 -18 Q29 -22 33 -18 Q35 -12 30 -9 Q28 -3 22 -4 Q17 -6 18 -12 Z" fill="${c}" ${LINE}/>`
 };
 
 function pattern(kind, c) {
@@ -59,25 +61,28 @@ function eyes(face, e, lookDx, eyelids) {
   const L = -8.5, R = 8.5, Y = -23;
   switch (face) {
     case 'sleep':
-      return `<path d="M${L - 4} ${Y} q4 3 8 0 M${R - 4} ${Y} q4 3 8 0" stroke="#2a2420" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+      return `<path d="M${L - 4} ${Y} q4 3.2 8 0 M${R - 4} ${Y} q4 3.2 8 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
     case 'love':
-      return `<path d="M${L - 4.5} ${Y + 1} q4.5 -6 9 0 M${R - 4.5} ${Y + 1} q4.5 -6 9 0" stroke="#2a2420" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+      return `<path d="M${L - 4.5} ${Y + 1} q4.5 -6 9 0 M${R - 4.5} ${Y + 1} q4.5 -6 9 0" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
   }
-  const pr = face === 'scared' ? 0.32 : face === 'happy' ? 0.62 : 0.56;   // happy: big open, shiny eyes
-  const ry = face === 'scared' ? 1.3 : 1.15;
+  if (face === 'scared') {
+    // Wide white eyes with tiny pupils.
+    return `<g class="blink"><ellipse cx="${L}" cy="${Y}" rx="${e * 0.95}" ry="${e * 1.2}" fill="#fffaf0" stroke="${INK}" stroke-width="1.4"/><ellipse cx="${R}" cy="${Y}" rx="${e * 0.95}" ry="${e * 1.2}" fill="#fffaf0" stroke="${INK}" stroke-width="1.4"/>
+      <g class="pupils"><circle cx="${L + lookDx}" cy="${Y + 0.6}" r="${e * 0.32}" fill="${INK}"/><circle cx="${R + lookDx}" cy="${Y + 0.6}" r="${e * 0.32}" fill="${INK}"/></g></g>`;
+  }
+  const big = face === 'happy' ? 1.1 : 1;
+  const rx = e * 0.6 * big, ry = e * 0.82 * big;
   let lids = '';
-  if (face === 'sad') lids = `<path d="M${L - e} ${Y - e * 0.6} L${L + e} ${Y - e * 1.1} L${L + e} ${Y - e * 1.4} L${L - e} ${Y - e * 1.4} Z M${R + e} ${Y - e * 0.6} L${R - e} ${Y - e * 1.1} L${R - e} ${Y - e * 1.4} L${R + e} ${Y - e * 1.4} Z" fill="${eyelids}"/>`;
-  if (face === 'cold' || face === 'meh') lids = `<rect x="${L - e - 0.5}" y="${Y - e * ry - 0.5}" width="${2 * e + 1}" height="${e * ry * 0.75}" fill="${eyelids}"/><rect x="${R - e - 0.5}" y="${Y - e * ry - 0.5}" width="${2 * e + 1}" height="${e * ry * 0.75}" fill="${eyelids}"/>`;
+  if (face === 'sad') lids = `<path d="M${L - rx - 1} ${Y - ry * 0.2} L${L + rx + 1} ${Y - ry * 0.9} L${L + rx + 1} ${Y - ry - 2} L${L - rx - 1} ${Y - ry - 2} Z M${R + rx + 1} ${Y - ry * 0.2} L${R - rx - 1} ${Y - ry * 0.9} L${R - rx - 1} ${Y - ry - 2} L${R + rx + 1} ${Y - ry - 2} Z" fill="${eyelids}"/>` +
+    `<path d="M${L - rx - 1} ${Y - ry * 0.2} L${L + rx + 1} ${Y - ry * 0.9} M${R + rx + 1} ${Y - ry * 0.2} L${R - rx - 1} ${Y - ry * 0.9}" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`;
+  if (face === 'cold' || face === 'meh') lids = `<rect x="${L - rx - 1}" y="${Y - ry - 1}" width="${2 * rx + 2}" height="${ry * 0.95}" fill="${eyelids}"/><rect x="${R - rx - 1}" y="${Y - ry - 1}" width="${2 * rx + 2}" height="${ry * 0.95}" fill="${eyelids}"/>` +
+    `<path d="M${L - rx - 0.5} ${Y - ry * 0.05} h${2 * rx + 1} M${R - rx - 0.5} ${Y - ry * 0.05} h${2 * rx + 1}" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`;
   return `<g class="blink">
-    <ellipse cx="${L}" cy="${Y}" rx="${e}" ry="${e * ry}" fill="#fff"/>
-    <ellipse cx="${R}" cy="${Y}" rx="${e}" ry="${e * ry}" fill="#fff"/>
     <g class="pupils">
-    <circle cx="${L + 0.6 + lookDx}" cy="${Y + 0.8}" r="${e * pr}" fill="#211b18"/>
-    <circle cx="${R + 0.6 + lookDx}" cy="${Y + 0.8}" r="${e * pr}" fill="#211b18"/>
-    <circle cx="${L + 1.8 + lookDx}" cy="${Y - 1}" r="${e * 0.2}" fill="#fff"/>
-    <circle cx="${R + 1.8 + lookDx}" cy="${Y - 1}" r="${e * 0.2}" fill="#fff"/>
-    <circle cx="${L - 0.8 + lookDx}" cy="${Y + 2}" r="${e * 0.1}" fill="#fff" opacity=".8"/>
-    <circle cx="${R - 0.8 + lookDx}" cy="${Y + 2}" r="${e * 0.1}" fill="#fff" opacity=".8"/>
+    <ellipse cx="${L + lookDx}" cy="${Y}" rx="${rx}" ry="${ry}" fill="${INK}"/>
+    <ellipse cx="${R + lookDx}" cy="${Y}" rx="${rx}" ry="${ry}" fill="${INK}"/>
+    <circle cx="${L + rx * 0.35 + lookDx}" cy="${Y - ry * 0.4}" r="${e * 0.21}" fill="#fffaf0"/>
+    <circle cx="${R + rx * 0.35 + lookDx}" cy="${Y - ry * 0.4}" r="${e * 0.21}" fill="#fffaf0"/>
     </g>
     ${lids}
   </g>`;
@@ -86,11 +91,11 @@ function eyes(face, e, lookDx, eyelids) {
 function mouth(face, dark) {
   const Y = -13;
   switch (face) {
-    case 'love': case 'happy': return `<path d="M-6 ${Y - 1} Q0 ${Y + 7} 6 ${Y - 1} Z" fill="#7a2f35"/><path d="M-3 ${Y + 2.5} Q0 ${Y + 5} 3 ${Y + 2.5}" fill="#ff8f9c"/>`;
+    case 'love': case 'happy': return `<path d="M-6 ${Y - 1} Q0 ${Y + 7} 6 ${Y - 1} Z" fill="#7a2f35" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/><path d="M-3 ${Y + 2.8} Q0 ${Y + 4.8} 3 ${Y + 2.8}" fill="#e88a8f"/>`;
     case 'content': return `<path d="M-4.5 ${Y} Q0 ${Y + 4} 4.5 ${Y}" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
     case 'meh': return `<path d="M-3.5 ${Y + 1} L3.5 ${Y + 1}" stroke="${dark}" stroke-width="1.8" stroke-linecap="round"/>`;
     case 'sad': return `<path d="M-4.5 ${Y + 3} Q0 ${Y - 1} 4.5 ${Y + 3}" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
-    case 'scared': return `<ellipse cx="0" cy="${Y + 1.5}" rx="2.6" ry="3.4" fill="#5a2a2e"/>`;
+    case 'scared': return `<ellipse cx="0" cy="${Y + 1.5}" rx="2.6" ry="3.4" fill="#5a2a2e" stroke="${INK}" stroke-width="1.4"/>`;
     case 'cold': return `<path d="M-5 ${Y + 1} l2.5 -1.5 2.5 1.5 2.5 -1.5 2.5 1.5" stroke="${dark}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
     case 'sleep': return `<ellipse cx="0" cy="${Y + 1}" rx="1.6" ry="1.2" fill="${dark}"/>`;
   }
@@ -152,45 +157,88 @@ function charmSVG(kind) {
 const ZAP_FRIZZ = `<g class="zap"><path d="M-26 -30 l-8 -2 l5 -3 l-8 -5 M-22 -38 l-6 -6 l5 -1 l-5 -7 M-9 -42 l-2 -8 l4 1 l-1 -8 M9 -42 l2 -8 l-4 1 l1 -8 M22 -38 l6 -6 l-5 -1 l5 -7 M26 -30 l8 -2 l-5 -3 l8 -5" stroke="#3a2e28" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path class="bolt-mini" d="M4 -74 L-3 -62 L2 -62 L-2 -52 L8 -66 L3 -66 Z" fill="#ffe36b" stroke="#c9a23a" stroke-width="1"/><path d="M-20 -26 l-6 -3 l4 -2 l-6 -4 M-15 -36 l-4 -6 l4 0 l-3 -6 M0 -41 l0 -7 l3 2 l1 -7 M15 -36 l4 -6 l-4 0 l3 -6 M20 -26 l6 -3 l-4 -2 l6 -4" stroke="#3a2e28" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="0" cy="-20" rx="20" ry="18" fill="#3a2e28" opacity=".22"/><path class="spark" d="M-24 -44 l4 4 M26 -40 l-4 5 M-28 -16 l5 1 M29 -12 l-5 1" stroke="#ffe36b" stroke-width="2.2" stroke-linecap="round"/></g>`;
 
 // Returns inner SVG markup for a Wobblin standing at the origin (feet at y=0).
+// A painter's palette: hand-picked, slightly muted coats placed around the hue
+// wheel. A Wobblin's seeded hue lands between two and blends them, so family
+// members stay close in colour but never come out identical. No bright yellow.
+const COAT_ANCHORS = [
+  [0, '#e3a1a6'],    // dusty rose
+  [25, '#e9ad84'],   // apricot
+  [52, '#d8bc8c'],   // biscuit
+  [85, '#b9c98a'],   // moss
+  [115, '#9dc58e'],  // sage
+  [160, '#8fc4b4'],  // sea green
+  [200, '#97b9d6'],  // slate blue
+  [235, '#a6aadc'],  // periwinkle
+  [275, '#c2a6d6'],  // lavender
+  [320, '#d8a1c3'],  // mauve
+  [360, '#e3a1a6']
+];
+const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const rgbHex = c => '#' + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+const mixHex = (x, y, t) => { const p = hexRGB(x), q = hexRGB(y); return rgbHex(p.map((v, i) => v + (q[i] - v) * t)); };
+const coatCache = new Map();
+export function coatOf(look) {
+  const h = (((look.hue || 0) % 360) + 360) % 360;
+  const key = Math.round(h);
+  if (coatCache.has(key)) return coatCache.get(key);
+  let i = 0;
+  while (COAT_ANCHORS[i + 1][0] < h) i++;
+  const [h0, c0] = COAT_ANCHORS[i], [h1, c1] = COAT_ANCHORS[i + 1];
+  const fill = mixHex(c0, c1, (h - h0) / (h1 - h0));
+  // Shadows lean warm and brown, like paint, rather than just darker.
+  const coat = { fill, shade: mixHex(fill, '#6a4a3a', 0.24), mark: mixHex(fill, '#4a3020', 0.42) };
+  coatCache.set(key, coat);
+  return coat;
+}
+
+// The sprout's colour shows the mood; its leaves are inked too.
+function sproutSVG(face) {
+  const c = SPROUT[face] || SPROUT.content;
+  return `<g class="sprout"><path d="M0 -40 Q-1 -46 1 -50" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>` +
+    `<path d="M1 -49 Q-9 -56 -11 -48 Q-5 -45 1 -49 Z" fill="${c}" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/>` +
+    `<path d="M1 -49 Q9 -58 12 -50 Q6 -46 1 -49 Z" fill="${c}" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/></g>`;
+}
+
+// Returns inner SVG markup for a Wobblin standing at the origin (feet at y=0).
 export function wobblinSVG(w, opts = {}) {
-  const h = w.look.hue;
+  const coat = coatOf(w.look);
   const face = w.face || 'content';
-  const fill = hsl(h, 55, 66), dark = hsl(h, 40, 40), shade = hsl(h, 45, 52), light = hsl(h, 70, 84), belly = hsl(h, 55, 80), mark = hsl((h + 35) % 360, 45, 52);
+  const fill = coat.fill, shade = coat.shade, mark = coat.mark;
   const e = 4.4 * w.look.eyeSize;
   const lookDx = opts.lookDx || 0;
   const elder = w.stage === 'elder';
-  const cheeks = face === 'cold' ? '#bfe3ff' : w.temper === 'sociability' ? '#ff7f9b' : '#ff9fb2';
+  const blush = face === 'cold' ? '#9fcbe8' : w.temper === 'sociability' ? '#e86f7e' : '#ec8f93';
   const blinkDelay = ((w.id ? Number(String(w.id).slice(1)) : 1) * 1.37 % 4).toFixed(2);
-  const gid = 'wb' + h;
+  const ink = `stroke="${INK}" stroke-linejoin="round"`;
   return `<g class="flip">
-    <defs><radialGradient id="${gid}" cx="0.36" cy="0.22" r="0.85"><stop offset="0" stop-color="${hsl(h, 75, 86)}"/><stop offset="0.5" stop-color="${fill}"/><stop offset="1" stop-color="${hsl(h, 45, 44)}"/></radialGradient>
-      <radialGradient id="${gid}b" cx="0.5" cy="0.3" r="0.7"><stop offset="0" stop-color="${hsl(h, 70, 90)}"/><stop offset="1" stop-color="${belly}" stop-opacity="0"/></radialGradient></defs>
     <ellipse class="shadow" cx="0" cy="2" rx="22" ry="5" fill="url(#a-shadow)"/>
+    ${w.rain === 'splash' ? PUDDLE_SPLASH : ''}
     <g class="wobble face-${face}" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s;--blink:${blinkDelay}s"><g class="build" transform="scale(${buildOf(w.look).join(' ')})">
       ${TAILS[w.look.tail](shade)}
       ${EARS[w.look.ears](shade)}
-      <g class="feet"><ellipse class="foot l" cx="-10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/><ellipse class="foot r" cx="10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/></g>
-      <ellipse class="arm l" cx="-22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" transform="rotate(25 -22 -13)"/>
-      <ellipse class="arm r" cx="22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" transform="rotate(-25 22 -13)"/>
-      <path d="${BODY}" fill="url(#${gid})" stroke="${dark}" stroke-width="1.2" stroke-opacity="0.8"/>
-      <ellipse cx="0" cy="-9" rx="13" ry="9" fill="url(#${gid}b)"/>
-      <path d="M-17 -27 Q-9 -38 3 -38" stroke="#fff" stroke-opacity="0.55" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <ellipse cx="-9" cy="-31" rx="5" ry="2.6" fill="#fff" opacity="0.55" transform="rotate(-22 -9 -31)"/>
-      <path d="M14 -4 Q20 -12 20 -22" stroke="${hsl(h, 55, 80)}" stroke-opacity="0.5" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <g class="feet"><ellipse class="foot l" cx="-10" cy="1" rx="6.5" ry="3.6" fill="${mark}" ${ink} stroke-width="1.6"/><ellipse class="foot r" cx="10" cy="1" rx="6.5" ry="3.6" fill="${mark}" ${ink} stroke-width="1.6"/></g>
+      <ellipse class="arm l" cx="-22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" ${ink} stroke-width="1.6" transform="rotate(25 -22 -13)"/>
+      <ellipse class="arm r" cx="22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" ${ink} stroke-width="1.6" transform="rotate(-25 22 -13)"/>
+      <path d="${BODY}" fill="${fill}"/>
+      <path class="paint-shade" d="M9 -37 Q21 -30 23 -15 Q23 -3 13 1.5 Q19 -9 17 -20 Q15 -30 9 -37 Z" fill="${shade}" opacity=".85"/>
+      <path class="paint-belly" d="M-11 -4 Q-12 -14 -3 -16 Q7 -17 10 -9 Q11 -2 0 -1 Q-8 0 -11 -4 Z" fill="#fff6e2" opacity=".32"/>
+      <path d="M-15 -29 Q-11 -35 -4 -36.5" stroke="#fffaf0" stroke-width="2.2" stroke-opacity=".75" fill="none" stroke-linecap="round"/>
       ${pattern(w.look.pattern, mark)}
-      <g class="sprout"><path d="M0 -40 Q-1 -46 1 -50" stroke="#5e8f3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M1 -49 Q-9 -56 -11 -48 Q-5 -45 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}"/><path d="M1 -49 Q9 -58 12 -50 Q6 -46 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}" opacity="0.85"/></g>
-      <ellipse cx="-14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/><ellipse cx="14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/>
+      <path d="${BODY}" fill="none" stroke="${INK}" stroke-width="2.3" stroke-linejoin="round"/>
+      ${sproutSVG(face)}
+      <g class="blush"><ellipse cx="-14.5" cy="-15" rx="4.2" ry="2.5" fill="${blush}" opacity=".45"/><ellipse cx="14.5" cy="-15" rx="4.2" ry="2.5" fill="${blush}" opacity=".45"/>
+        <path d="M-17 -14.5 l1.6 -2 M-14.6 -14 l1.6 -2 M-12.2 -13.6 l1.6 -2 M12.6 -13.6 l1.6 -2 M15 -14 l1.6 -2 M17.4 -14.5 l1.6 -2" stroke="${blush}" stroke-width="1" stroke-linecap="round" opacity=".9"/></g>
       <g class="eyes">${eyes(face, e, lookDx, fill)}</g>
-      ${brows(w.temper, face, dark)}
-      ${elder ? `<path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="#f4f0e6" stroke-width="2.4" fill="none" stroke-linecap="round"/>` : ''}
-      ${mouth(face, dark)}
+      ${brows(w.temper, face, INK)}
+      ${elder ? `<path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="#f4f0e6" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="${INK}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".5"/>` : ''}
+      ${mouth(face, INK)}
       ${w.charm ? charmSVG(w.charm) : ''}
       ${w.flower ? FLOWER_CROWN + BUTTERFLY_FRIEND : ''}
       ${w.zapped ? ZAP_FRIZZ : ''}
       ${w.paint !== null && w.paint !== undefined ? paintSVG(w.paint) : ''}
       ${w.wet ? WET_DRIPS : ''}
       ${w.hat ? KNIT_HAT : ''}
-      ${w.rain === 'leaf' ? LEAF_UMBRELLA : w.rain === 'splash' ? PUDDLE_SPLASH : ''}
+      ${w.rain === 'leaf' ? LEAF_UMBRELLA : ''}
       ${elder ? CANE : ''}
       ${carriedSVG(w.carry || [])}
     </g></g></g>`;

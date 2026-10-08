@@ -445,7 +445,7 @@ function wireTile(tile, item) {
     },
     onStart: ev => {
       if (!itemState(item).ready) { ghost = null; return; }
-      dragging = true;
+      dragging = true; trayDragging = true;
       armed = null;
       ghost = makeGhost(ICONS[item.id], item.label);
       ghost.move(ev.clientX, ev.clientY);
@@ -516,6 +516,7 @@ function anticipate(svg, item, pt) {
 }
 
 function endDrag(ghost) {
+  trayDragging = false;
   anticipate($('#world'), {}, null);
   ghost.remove();
   clearHint($('#world'));
@@ -631,7 +632,8 @@ const heldFlags = {};
 const flights = {}, juggles = {}, caughtMid = {};
 // Still something in the air or in hand? Then keep redraws paused.
 const endFlight = id => { if (flights[id]) { flights[id].shadow?.remove(); delete flights[id]; } };
-const busyElsewhere = () => !!held || Object.keys(flights).length > 0;
+let trayDragging = false;
+const busyElsewhere = () => !!held || trayDragging || Object.keys(flights).length > 0;
 const juggledFlag = id => { const n = juggles[id] || 0; juggles[id] = 0; return n >= 2 ? { juggled: Math.min(n, 50) } : {}; };
 function wireWobblins(svg) {
   for (const w of lastRS.wobblins) {
@@ -815,8 +817,8 @@ function fling(svg, g, w, start, v) {
   const t0 = last;
   // A shadow on the ground under it sells the height: small and faint up high.
   const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-  shadow.setAttribute('fill', 'rgba(40, 28, 14, .3)');
-  g.parentNode.insertBefore(shadow, g);
+  shadow.setAttribute('fill', 'rgba(40, 28, 14, .3)'); shadow.setAttribute('pointer-events', 'none');
+  (g.parentNode || svg.querySelector('#layer-wobblins') || svg).insertBefore(shadow, g.parentNode ? g : null);
   const flight = flights[w.id] = { caught: false, shadow };
   const step = now => {
     if (flight.caught) { shadow.remove(); g.setAttribute('transform', `translate(${x},${y}) scale(${s})`); return; }   // caught in mid-air
@@ -1107,7 +1109,7 @@ function noticeGoals(states) {
   for (const id of ready) if (!readySeen.has(id)) {
     readySeen.add(id);
     const g = states.find(x => x.id === id);
-    if (g.trick) { toast('New trick: ' + g.text + '! Claim it at the top for +1 belief.'); play('chime'); continue; }
+    if (g.trick) { setTimeout(() => toast('New trick: ' + g.text + '! Claim it at the top for +1 belief.'), 1800); setTimeout(() => play('chime'), 400); continue; }
     banner('Milestone reached: ' + g.text + '!', 'Claim it at the top for +' + g.belief + ' belief.');
     play('fanfare');
   }

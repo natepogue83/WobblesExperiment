@@ -92,9 +92,9 @@ section('Validation');
   const boulder = { seq: 18, t: 2, type: 'power', power: 'stone', slot: 'hill.1', variant: 'boulder' };
   assert.equal(applyAction(w, boulder).ok, true);
   const b = w.objects.find(o => o.kind === 'boulder');
-  assert.deepEqual(b.slots, ['hill.1', 'hill.2']);
+  assert.deepEqual(b.slots, ['hill.1', 'hill.4']);   // its nearest neighbour on the hill
   assert.equal(b.origin.action, 18);
-  ok('boulder takes 2 slots and records its action origin');
+  ok('boulder takes 2 slots (a slot and its nearest neighbour) and records its action origin');
 }
 
 section('Every power and nudge');
