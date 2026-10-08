@@ -63,7 +63,7 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Cold snaps** freeze the pond. Add rain and you get snow, and the playful ones build snowmen.
 - **New power, Shake the Valley** (unlocks at belief 26): berries rain down, cairns topple, old walls fall, a boulder on the hill may come rolling down into the valley (everyone dives out of the way), the screen shakes, and timid Wobblins never forget it.
 - **Pick things up:** drag stones, gifts, curios, sprouts or clay to a new spot.
-- **Room to play:** the valley has 35 open spots instead of 30, and it tidies itself (keepsakes get taken home, spare stones get used). Stones dropped on a small pile make it bigger, and stones or seeds still land on a head when the valley is full.
+- **Room to play:** the valley has 45 open spots instead of 30, and it tidies itself (keepsakes get taken home, spare stones get used). Stones dropped on a small pile make it bigger, and stones or seeds still land on a head when the valley is full.
 
 ## 4. A reason to play
 
