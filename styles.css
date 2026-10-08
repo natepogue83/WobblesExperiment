@@ -514,3 +514,7 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .chronicle li > .dot { width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle, #cfe3b8 0 35%, transparent 36%); }
 .chronicle li > .dot.keeper { background: radial-gradient(circle, #ffd86b 0 30%, #ffe9b0 31% 60%, transparent 61%); }
 #panel .tabs button { min-height: 34px; }
+
+.obj.movable { cursor: grab; }
+.obj.movable:hover { filter: brightness(1.06) drop-shadow(0 0 4px rgba(255, 240, 180, .8)); }
+.obj.held { cursor: grabbing; filter: drop-shadow(0 14px 6px rgba(0,0,0,.28)); }

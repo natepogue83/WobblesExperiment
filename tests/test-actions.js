@@ -32,6 +32,23 @@ section('Naming');
   ok('you can name a Wobblin yourself (from the start); odd names are refused; it replays');
 }
 
+section('Moving things');
+{
+  const w = createWorld(11, { barren: true, progression: true });
+  assert.equal(applyAction(w, { seq: 1, t: 0, type: 'power', power: 'stone', slot: 'hill.1', variant: 'stones' }).ok, true);
+  const pile = w.objects.find(o => o.kind === 'stones');
+  const K = knowledge(w);
+  assert.equal(applyAction(w, { seq: 2, t: 0, type: 'nudge', nudge: 'move', target: pile.id, slot: 'meadow.3' }).ok, true);
+  assert.equal(pile.slot, 'meadow.3'); assert.equal(pile.zone, 'meadow');
+  assert.equal(knowledge(w), K);
+  rejects(w, { seq: 3, t: 0, type: 'nudge', nudge: 'move', target: pile.id, slot: 'meadow.3' }, 'slot');
+  applyAction(w, { seq: 4, t: 0, type: 'power', power: 'plant', slot: 'grove.1', variant: 'tree' });
+  rejects(w, { seq: 5, t: 0, type: 'nudge', nudge: 'move', target: pile.id, slot: 'grove.1' }, 'occupied');
+  const sprout = w.objects.find(o => o.kind === 'sprout');
+  rejects(w, { seq: 6, t: 0, type: 'nudge', nudge: 'move', target: sprout.id, slot: 'riverbank.2' }, 'slot');
+  ok('stones, gifts, curios, sprouts and clay can be picked up and set down in an open spot (no knowledge, no cheating trees into the river)');
+}
+
 section('Stones on stones');
 {
   const w = createWorld(11, { barren: true });
@@ -214,7 +231,7 @@ section('Belief unlocks powers (new games)');
   const w = createWorld(8, { progression: true });
   rejects(w, { seq: 1, t: 0, type: 'power', power: 'lightning', slot: 'meadow.1' }, 'locked_power');
   rejects(w, { seq: 2, t: 0, type: 'nudge', nudge: 'miracle' }, 'locked_power');
-  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'plant', 'rename', 'stone']);
+  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'move', 'plant', 'rename', 'stone']);
   // Keep doing things they enjoy until Lightning opens up.
   let seq = 10;
   for (let i = 0; i < 200 && !w.unlocked.includes('lightning'); i++) {

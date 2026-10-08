@@ -1,8 +1,8 @@
 // app.js — clock, input, panels. The only place real time and the DOM meet the sim.
-import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld } from '../sim/index.js';
+import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld, GEO } from '../sim/index.js';
 import { unlockedCurios, hasPond } from '../sim/actions.js';
 import { experimentPreview, temperamentHints } from '../sim/experiment.js';
-import { renderState, drawSVG } from '../render/render.js';
+import { renderState, drawSVG, OBJECT_SCALE } from '../render/render.js';
 import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clearSave,
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
 import { nowTickFor, localDayIndex, localHour, setClockMode, heartbeat, msToNextTick } from './clock.js';
@@ -364,7 +364,7 @@ function wireValley() {
   const pointers = new Map();
   let panning = false, pinch = null, downAt = null, lastTap = 0;
   svg.addEventListener('pointerdown', ev => {
-    if (ev.target.closest('.wobblin')) return;
+    if (ev.target.closest('.wobblin') || ev.target.closest('.obj.movable')) return;
     pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     downAt = { x: ev.clientX, y: ev.clientY, t: performance.now() };
     if (pointers.size === 2) {
@@ -414,6 +414,49 @@ function wireValley() {
     camera.zoomAt(pt.x, pt.y, Math.exp(-ev.deltaY * 0.0015));
   }, { passive: false });
 }
+
+// ------------------------------------------------------------ things in hand
+// Stones, gifts, curios, sprouts and clay can be picked up and set down elsewhere.
+const MOVABLE_UI = new Set(['stones', 'gift', 'curio', 'sprout', 'clay']);
+function wireObjects(svg) {
+  for (const o of lastRS.objects) {
+    if (!MOVABLE_UI.has(o.kind) || !o.slot) continue;
+    const g = svg.querySelector('#' + o.id);
+    if (!g) continue;
+    g.classList.add('movable');
+    let base = null;
+    press(g, {
+      onTap: () => {},
+      onStart: () => { dragging = true; base = g.getAttribute('transform'); g.classList.add('held'); g.parentNode.append(g); document.body.classList.add('is-dragging'); play('lift'); },
+      onMove: ev => {
+        const p = toSvgPoint(svg, ev.clientX, ev.clientY);
+        g.setAttribute('transform', `translate(${p.x},${p.y + 10}) scale(${(OBJECT_SCALE[o.kind] || 1.3) * 1.1})`);
+        const s = nearestFree(p, o);
+        drawHint(svg, s ? { ...slotXY(s), r: 22, ok: true, label: zoneLabel(s.split('.')[0]) } : { x: p.x, y: p.y + 10, r: 22, ok: false, label: 'no room' });
+      },
+      onDrop: ev => {
+        dragging = false; document.body.classList.remove('is-dragging'); clearHint(svg); g.classList.remove('held');
+        const p = toSvgPoint(svg, ev.clientX, ev.clientY);
+        const s = overSvg(svg, ev.clientX, ev.clientY) && nearestFree(p, o);
+        if (!s) { g.setAttribute('transform', base); draw(); return; }
+        play('drop');
+        act({ type: 'nudge', nudge: 'move', target: o.id, slot: s });
+      },
+      onCancel: () => { dragging = false; document.body.classList.remove('is-dragging'); clearHint(svg); g.setAttribute('transform', base); draw(); }
+    });
+  }
+}
+function nearestFree(p, o) {
+  let best = null, bd = 120;
+  for (const s of GEO.ALL_SLOTS) {
+    if (s === o.slot || world.objects.some(x => !x.state.gone && (x.slot === s || (x.slots && x.slots.includes(s))))) continue;
+    if (o.kind === 'sprout' && s.startsWith('riverbank') && o.state.grows === 'tree') continue;
+    const q = GEO.slotInfo(s), d = Math.hypot(q.x - p.x, q.y - p.y);
+    if (d < bd) { bd = d; best = s; }
+  }
+  return best;
+}
+function slotXY(s) { const q = GEO.slotInfo(s); return { x: q.x, y: q.y }; }
 
 // ------------------------------------------------------------ Wobblins in hand
 function wireWobblins(svg) {
@@ -688,6 +731,7 @@ function draw() {
   }
   drawFx(svg);
   wireWobblins(svg);
+  wireObjects(svg);
   drawHud();
   drawTray();
   if (DEBUG) { drawDebug(); window.__wob = { world, rs, svg, puppets }; }   // dev inspection only

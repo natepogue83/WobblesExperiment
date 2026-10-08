@@ -55,6 +55,7 @@ function feel(world, w, a, here, r) {
     case 'bless': s = w.id === a.target ? 0.9 : 0.25 + 0.3 * T.sociability; break;
     case 'curio': s = (a.targets.includes(w.id) ? 0.4 : 0) + 0.5 * T.curiosity; break;
     case 'miracle': s = 0.8; break;
+    case 'move': s = 0.1 + 0.4 * T.curiosity; break;
     case 'rename': s = w.id === a.target ? 0.7 + 0.2 * T.sociability : 0.2 + 0.2 * T.curiosity; break;
     case 'gift': s = 0.3 + 0.5 * T.playfulness; break;
     case 'collect_offerings': s = w.faith > 0.3 ? 0.5 : 0.1; break;

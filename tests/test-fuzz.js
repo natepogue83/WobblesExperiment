@@ -33,6 +33,7 @@ function chaos(world, r) {
     () => ({ type: 'nudge', nudge: 'carry', target: any(), zone: pick(r, ZONE_IDS), ...(r() < 0.5 ? { thrown: true } : {}), ...(r() < 0.5 ? { onto: r() < 0.5 ? any() : thing() } : {}) }),
     () => ({ type: 'nudge', nudge: 'rename', target: any(), name: pick(r, ['Bo', 'Pip', 'Sir Wob', "O'Dell", 'Mo-Mo']) }),
     () => { const day = 20000 + Math.floor(world.tick / 24); return { type: 'gift', day, giftId: pick(r, giftOptions(world.seed, day)), ...(r() < 0.5 ? { onto: any() } : {}) }; },
+    () => ({ type: 'nudge', nudge: 'move', target: thing(), slot: pick(r, ALL_SLOTS) }),
     () => ({ type: 'collect_offerings' }),
     () => ({ type: 'claim', goal: pick(r, GOALS).id })
   ];

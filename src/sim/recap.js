@@ -38,6 +38,7 @@ export function actionName(ev) {
     case 'miracle': return 'rainbow';
     case 'quake': return 'earthquake';
     case 'rename': return 'new name';
+    case 'move': return 'tidy-up';
     case 'carry': return d.thrown ? 'throw' : 'lift';
   }
   return 'touch';

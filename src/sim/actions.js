@@ -16,7 +16,8 @@ import { GOAL_BY_ID, progressOf } from './goals.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season', 'quake'];
-export const NUDGES = ['bless', 'curio', 'miracle', 'carry', 'rename'];
+export const NUDGES = ['bless', 'curio', 'miracle', 'carry', 'rename', 'move'];
+export const MOVABLE = new Set(['stones', 'gift', 'curio', 'sprout', 'clay']);
 export const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,13}$/;
 export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience', 'caution', 'playfulness', 'piety'];
 // Each curio unlocks once a Wobblin has noticed its material.
@@ -151,6 +152,14 @@ export function validateAction(world, a) {
       }
       case 'miracle':
         return { ok: true };
+      case 'move': {
+        const o = world.objects.find(x => x.id === a.target);
+        if (!o || o.state.gone || !MOVABLE.has(o.kind) || !o.slot) return bad('target');
+        if (!slotInfo(a.slot) || a.slot === o.slot) return bad('slot');
+        if (objectAtSlot(world, a.slot)) return bad('occupied');
+        if (o.kind === 'sprout' && slotInfo(a.slot).zone === 'riverbank' && o.state.grows === 'tree') return bad('slot');
+        return { ok: true };
+      }
       case 'rename': {
         const w = findWobblin(world, a.target);
         if (!w || !w.alive) return bad('target');
@@ -373,6 +382,12 @@ function applyActionEffects(world, a) {
         data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}) },
         salience: a.thrown ? 2 : 1, causes });
       if (a.onto !== undefined) landOnto(world, w, a, causes);
+    } else if (a.nudge === 'move') {
+      // Picked up and set down somewhere else. Moving it doesn't make it new.
+      const o = world.objects.find(x => x.id === a.target);
+      const from = o.zone;
+      o.slot = a.slot; o.zone = slotInfo(a.slot).zone;
+      emit(world, { kind: 'keeper_nudge', actors: witnesses(world, o.zone), target: o.id, data: { nudge: 'move', kind: o.kind, from, zone: o.zone, slot: a.slot }, salience: 1, causes });
     } else if (a.nudge === 'rename') {
       // The Keeper gives them a name of your own choosing. They rather like it.
       const w = findWobblin(world, a.target);

@@ -117,7 +117,7 @@ export function renderState(world) {
     if ((o.state.chargedUntil || 0) > world.tick) st = { ...st, charged: true };
     if (o.kind === 'hut' && world.discoveries.hearth) st = { ...st, smoke: true };
     return {
-      id: o.id, kind: o.kind, zone: o.zone, ...objectPos(o),
+      id: o.id, kind: o.kind, zone: o.zone, slot: o.slot || null, ...objectPos(o),
       layer: o.kind === 'pond' ? 'terrain' : NATURE.has(o.kind) ? 'nature' : 'structures',
       state: st, keeper: o.origin.action !== undefined, age: world.tick - o.builtTick
     };
