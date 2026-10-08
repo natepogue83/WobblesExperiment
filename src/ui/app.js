@@ -942,11 +942,12 @@ function celebrateUnlocks() {
   for (const e of ups.filter(e => e.id > shownUnlock)) {
     shownUnlock = e.id;
     for (const [id, key] of Object.entries(UNLOCK_OF)) if (key === e.data.power) freshTiles.add(id);
-    banner('Their belief grows. New power: ' + e.data.name + '!', 'Drag it from your tray.');
+    const tileId = Object.keys(UNLOCK_OF).find(id => UNLOCK_OF[id] === e.data.power);
+    banner('Their belief grows. New power: ' + e.data.name + '!', 'Drag it from your tray.', tileId ? ICONS[tileId] : '');
   }
 }
 
-function banner(title, sub) { queueBanner(title, sub); }
+function banner(title, sub, icon = '') { queueBanner(title, sub, icon); }
 
 const WANT_TEXT = {
   hungry: n => `${n} is hungry. Berry bushes nearby would help (or carry them to some).`,

@@ -56,16 +56,16 @@ export function inheritance(world, e) {
 let queue = [], showing = false, lastWorld = null;
 
 // Banners (unlocks, milestones) wait their turn behind discovery and baby cards.
-export function queueBanner(title, sub) {
-  queue.push({ kind: 'banner', title, sub });
+export function queueBanner(title, sub, icon = '') {
+  queue.push({ kind: 'banner', title, sub, icon });
   if (!showing) next(null);
 }
 export function momentShowing() { return showing; }
 
-function bannerCard(title, sub, done) {
+function bannerCard(title, sub, done, icon = '') {
   const b = document.createElement('div');
-  b.className = 'banner';
-  b.innerHTML = `<b>${title}</b><span>${sub}</span>`;
+  b.className = 'banner' + (icon ? ' with-icon' : '');
+  b.innerHTML = (icon ? `<span class="bicon">${icon}</span>` : '') + `<div><b>${title}</b><span>${sub}</span></div>`;
   document.body.append(b);
   setTimeout(() => { b.remove(); done(); }, 3600);
 }
@@ -86,7 +86,7 @@ function next(world) {
   const m = queue.shift();
   if (!m) { showing = false; return; }
   showing = true;
-  if (m.kind === 'banner') bannerCard(m.title, m.sub, () => next(world));
+  if (m.kind === 'banner') bannerCard(m.title, m.sub, () => next(world), m.icon);
   else if (m.kind === 'discovery') discoveryCard(world, m.e, () => next(world));
   else if (m.kind === 'birth') birthCard(world, m.e, () => next(world));
   else if (m.kind === 'death') farewellCard(world, m.e, () => next(world));
