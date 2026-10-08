@@ -78,4 +78,31 @@ section('Render');
   ok('paint, river water, leaf umbrellas, puddle splashes and knitted hats show on the sprite');
 }
 
+section('Painted art drops in over the vector art');
+{
+  const { setPainted, paintedObject, paintedBackdrop } = await import('../src/render/painted.js');
+  const w = createWorld(3);
+  const vectorHut = objectSVG({ kind: 'hut', state: {} });
+  const vectorBody = wobblinSVG(w.wobblins[0]);
+  setPainted({
+    objects: { hut: { src: 'art/objects/hut.png', w: 80, h: 66, ax: 40, ay: 62, variants: { smoke: 'art/objects/hut-smoke.png' } } },
+    wobblins: { any: { src: 'art/wobblins/body-any.png', w: 68, h: 62, ax: 34, ay: 56 } },
+    backdrop: { day: 'art/valley-day.png', cold: 'art/valley-cold.png' }
+  });
+  const hut = objectSVG({ kind: 'hut', state: {} });
+  assert.ok(hut.includes('<image class="painted" href="art/objects/hut.png"') && hut.includes('x="-40"') && hut.includes('y="-62"'), 'painted hut');
+  assert.ok(objectSVG({ kind: 'hut', state: { smoke: true } }).includes('hut-smoke.png'), 'a variant picks another file');
+  assert.equal(paintedObject({ kind: 'tree', state: {} }), null, 'unpainted kinds stay vector');
+  assert.ok(objectSVG({ kind: 'tree', state: {} }).includes('<'), 'tree still draws');
+  const body = wobblinSVG(w.wobblins[0]);
+  assert.ok(body.includes('body-any.png') && body.includes('class="eyes"') && body.includes('class="sprout"'), 'painted body keeps the game-drawn face and sprout');
+  assert.ok(!body.includes('class="arm l"'), 'the vector body kit is replaced');
+  assert.equal(paintedBackdrop({ tod: 'dusk', season: 'mild', wet: false }), 'art/valley-day.png', 'missing light falls back to day');
+  assert.equal(paintedBackdrop({ tod: 'day', season: 'cold', wet: true }), 'art/valley-cold.png');
+  setPainted(null);
+  assert.equal(objectSVG({ kind: 'hut', state: {} }), vectorHut);
+  assert.equal(wobblinSVG(w.wobblins[0]), vectorBody);
+  ok('a manifest swaps huts, bodies and the valley for paintings, with variants and fallbacks; no manifest, no change');
+}
+
 console.log('\ntest-render: all passed');

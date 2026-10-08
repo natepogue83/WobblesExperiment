@@ -55,6 +55,10 @@ Objects are 60-140 px wide on screen at 1x; paint at 2x.
 
 Paper and ink. Hand-lettered titles. Needed: a paper panel frame (9-slice), a wooden tray shelf, 14 tray tiles (stones, boulder, berry seed, tree seed, rain, lightning, water, shake, cold snap, warm spell, bless, curio, daily gift, miracle), 30 small discovery icons (fire, hut, song, temple...), a hand cursor (open and closed), thought-bubble shapes (idea, question, heart, music note, smoke, zzz).
 
+## How it goes into the game
+
+The game already takes paintings. Drop the PNGs into `art/` and list them in `art/manifest.json` (copy `art/manifest.example.json`): each entry gives the file, its size in the piece's own units and the anchor point that sits on the ground. Anything listed is drawn from the painting; anything not listed is still drawn by the game, so the art can arrive one piece at a time. Faces, moods, blinks and accessories are always drawn by the game on top of a painted body.
+
 ## Delivery
 
 Phase 1, a style test (a week): one Wobblin body kit in two coats with one accessory, one hut, one tree, one slice of the valley at full size, one paper panel. We put it in the game and look at it moving before anything else is painted.

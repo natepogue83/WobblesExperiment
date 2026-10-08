@@ -9,6 +9,8 @@ import { nowTickFor, localDayIndex, localHour, setClockMode, heartbeat, msToNext
 import { Puppets } from './puppets.js';
 import { Camera } from './camera.js';
 import { valleyImage } from '../render/painter.js';
+import { setPainted, paintedBackdrop } from '../render/painted.js';
+import { timeOfDay } from '../render/scene.js';
 import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
 import { wantOf } from '../render/render.js';
 import { narrateRecap } from '../ai/narrate.js';
@@ -88,6 +90,9 @@ function boot() {
 }
 
 // While the page is open a colony day passes every minute; away, every hour.
+// Hand-painted art, when the painter has delivered some (art/manifest.json).
+fetch('art/manifest.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(m => { if (m) { setPainted(m); backdropKey = null; if (world) draw(); } }).catch(() => {});
+
 function startWatching() {
   setClockMode(save, 'watch', Date.now());
   storeSave(save);
@@ -975,6 +980,8 @@ function ensureBackdrop() {
   const key = [world.seed, Math.round(hour * 2), season, wet].join('|');
   if (key === backdropKey) return;
   backdropKey = key;
+  const painting = paintedBackdrop({ tod: timeOfDay(hour), season, wet });
+  if (painting) { backdropURL = painting; return; }
   valleyImage(world.seed, { hour, season, wet }).then(url => { if (backdropKey === key) { backdropURL = url; draw(); } });
 }
 

@@ -1,0 +1,13 @@
+{
+  "objects": {
+    "hut": { "src": "art/objects/hut.png", "w": 84, "h": 76, "ax": 42, "ay": 74, "variants": { "smoke": "art/objects/hut-smoke.png" } },
+    "bush": { "src": "art/objects/bush.png", "w": 44, "h": 40, "ax": 22, "ay": 38, "variants": { "bare": "art/objects/bush-bare.png" } },
+    "stones": { "src": "art/objects/stones-pile1.png", "w": 36, "h": 24, "ax": 18, "ay": 22,
+      "variants": { "pile2": "art/objects/stones-pile2.png", "pile3": "art/objects/stones-pile3.png", "pile4": "art/objects/stones-pile4.png", "stacked": "art/objects/stones-stacked.png" } }
+  },
+  "wobblins": {
+    "sage": { "src": "art/wobblins/body-sage.png", "w": 62, "h": 58, "ax": 31, "ay": 55 },
+    "any": { "src": "art/wobblins/body-any.png", "w": 62, "h": 58, "ax": 31, "ay": 55 }
+  },
+  "backdrop": { "day": "art/valley-day.png", "dusk": "art/valley-dusk.png", "night": "art/valley-night.png", "dawn": "art/valley-dawn.png", "cold": "art/valley-cold.png" }
+}

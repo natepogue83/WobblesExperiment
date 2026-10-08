@@ -1,3 +1,5 @@
 node_modules/
 .DS_Store
 _dev_save.json
+art/_test/
+art/manifest.json

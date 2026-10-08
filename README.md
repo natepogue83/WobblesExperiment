@@ -24,6 +24,7 @@ experiment overlay, replay verification and save export/import).
 - **A golden bubble** means a Wobblin is asking you for something; grant it for belief. **Drop one Wobblin on another** for a hug: close friends pair up sooner, which is how you breed for a trait.
 - **Goals** lists milestones and tricks to try; claiming one adds belief, and belief unlocks powers. **Family** shows every generation; **Chronicle** is their story.
 - Dev: `?debug=1&fresh=1` starts over, `?debug=1&devload=/_dev_save.json` loads a prepared village (`node tests/_mkdev.mjs <seed> <ticks>` makes one).
+- Art: the game draws everything in vector, and swaps in hand-painted PNGs for anything listed in `art/manifest.json` (see `art/manifest.example.json` and `marketing/art-brief.md`). The dev server also accepts `POST /_dev/save?name=x.png` from the page, which saves into `art/_test/`.
 
 ## Test it
 

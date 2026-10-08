@@ -314,6 +314,15 @@ offset only changes `nowTick` in the UI.
 - Creatures are original soft blobs: not egg-shaped roly-poly toys, not
   yellow jelly people.
 
+## 11a. Painted art (UI only)
+
+`src/render/painted.js`: the renderer draws everything in vector, and swaps in a PNG
+for any piece listed in `art/manifest.json` (objects by kind with state variants,
+Wobblin bodies by coat name, the valley by light and weather). The game keeps drawing
+faces, moods, blinks and accessories over a painted body. No manifest means no change.
+Sizes are in the piece's own units with an anchor on the ground point; see
+`art/manifest.example.json` and `marketing/art-brief.md`. The sim never sees any of it.
+
 ## 12. Tuning deviations from the build plan
 
 - Pairing: the plan says both adults need sociability > 0.4. With only 3

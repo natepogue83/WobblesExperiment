@@ -260,6 +260,7 @@ export function drawSVG(svg, rs, opts = {}) {
     const k = OBJECT_SCALE[o.kind] || 1.3;
     const g = el('g', { id: o.id, transform: `translate(${o.x},${o.y}) scale(${k})`, class: 'obj obj-' + o.kind + (o.keeper && o.age < 1 ? ' fresh' : '') }, L[o.layer]);
     g.innerHTML = objectSVG(o);
+    if (g.firstElementChild && g.firstElementChild.classList.contains('painted')) g.classList.add('painted');
   }
 
   // Wobblins glance toward the newest Keeper act (instant reaction).

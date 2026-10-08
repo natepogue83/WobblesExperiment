@@ -1,4 +1,5 @@
 import { objectArt } from './objects.js';
+import { paintedObject, paintedBody } from './painted.js';
 // sprites.js — Wobblin and object SVG generators (pure: data in, SVG string out).
 // Wobblins are original soft "mochi" creatures: a wide, squishy body that sags
 // a little at the base, a leaf sprout on top whose colour shows their mood,
@@ -161,17 +162,17 @@ const ZAP_FRIZZ = `<g class="zap"><path d="M-26 -30 l-8 -2 l5 -3 l-8 -5 M-22 -38
 // wheel. A Wobblin's seeded hue lands between two and blends them, so family
 // members stay close in colour but never come out identical. No bright yellow.
 const COAT_ANCHORS = [
-  [0, '#e3a1a6'],    // dusty rose
-  [25, '#e9ad84'],   // apricot
-  [52, '#d8bc8c'],   // biscuit
-  [85, '#b9c98a'],   // moss
-  [115, '#9dc58e'],  // sage
-  [160, '#8fc4b4'],  // sea green
-  [200, '#97b9d6'],  // slate blue
-  [235, '#a6aadc'],  // periwinkle
-  [275, '#c2a6d6'],  // lavender
-  [320, '#d8a1c3'],  // mauve
-  [360, '#e3a1a6']
+  [0, '#e3a1a6', 'rose'],
+  [25, '#e9ad84', 'apricot'],
+  [52, '#d8bc8c', 'biscuit'],
+  [85, '#b9c98a', 'moss'],
+  [115, '#9dc58e', 'sage'],
+  [160, '#8fc4b4', 'seagreen'],
+  [200, '#97b9d6', 'slate'],
+  [235, '#a6aadc', 'periwinkle'],
+  [275, '#c2a6d6', 'lavender'],
+  [320, '#d8a1c3', 'mauve'],
+  [360, '#e3a1a6', 'rose']
 ];
 const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const rgbHex = c => '#' + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
@@ -183,10 +184,10 @@ export function coatOf(look) {
   if (coatCache.has(key)) return coatCache.get(key);
   let i = 0;
   while (COAT_ANCHORS[i + 1][0] < h) i++;
-  const [h0, c0] = COAT_ANCHORS[i], [h1, c1] = COAT_ANCHORS[i + 1];
-  const fill = mixHex(c0, c1, (h - h0) / (h1 - h0));
+  const [h0, c0, n0] = COAT_ANCHORS[i], [h1, c1, n1] = COAT_ANCHORS[i + 1];
+  const t = (h - h0) / (h1 - h0), fill = mixHex(c0, c1, t);
   // Shadows lean warm and brown, like paint, rather than just darker.
-  const coat = { fill, shade: mixHex(fill, '#6a4a3a', 0.24), mark: mixHex(fill, '#4a3020', 0.42) };
+  const coat = { name: t < 0.5 ? n0 : n1, fill, shade: mixHex(fill, '#6a4a3a', 0.24), mark: mixHex(fill, '#4a3020', 0.42) };
   coatCache.set(key, coat);
   return coat;
 }
@@ -210,11 +211,12 @@ export function wobblinSVG(w, opts = {}) {
   const blush = face === 'cold' ? '#9fcbe8' : w.temper === 'sociability' ? '#e86f7e' : '#ec8f93';
   const blinkDelay = ((w.id ? Number(String(w.id).slice(1)) : 1) * 1.37 % 4).toFixed(2);
   const ink = `stroke="${INK}" stroke-linejoin="round"`;
-  return `<g class="flip">
+  const painting = paintedBody(coat.name);   // a painter's body, if there is one; the face stays ours
+  return `<g class="flip${painting ? ' has-painting' : ''}">
     <ellipse class="shadow" cx="0" cy="2" rx="22" ry="5" fill="url(#a-shadow)"/>
     ${w.rain === 'splash' ? PUDDLE_SPLASH : ''}
     <g class="wobble face-${face}" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s;--blink:${blinkDelay}s"><g class="build" transform="scale(${buildOf(w.look).join(' ')})">
-      ${TAILS[w.look.tail](shade)}
+      ${painting || `${TAILS[w.look.tail](shade)}
       ${EARS[w.look.ears](shade)}
       <g class="feet"><ellipse class="foot l" cx="-10" cy="1" rx="6.5" ry="3.6" fill="${mark}" ${ink} stroke-width="1.6"/><ellipse class="foot r" cx="10" cy="1" rx="6.5" ry="3.6" fill="${mark}" ${ink} stroke-width="1.6"/></g>
       <ellipse class="arm l" cx="-22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" ${ink} stroke-width="1.6" transform="rotate(25 -22 -13)"/>
@@ -224,7 +226,7 @@ export function wobblinSVG(w, opts = {}) {
       <path class="paint-belly" d="M-11 -4 Q-12 -14 -3 -16 Q7 -17 10 -9 Q11 -2 0 -1 Q-8 0 -11 -4 Z" fill="#fff6e2" opacity=".32"/>
       <path d="M-15 -29 Q-11 -35 -4 -36.5" stroke="#fffaf0" stroke-width="2.2" stroke-opacity=".75" fill="none" stroke-linecap="round"/>
       ${pattern(w.look.pattern, mark)}
-      <path d="${BODY}" fill="none" stroke="${INK}" stroke-width="2.3" stroke-linejoin="round"/>
+      <path d="${BODY}" fill="none" stroke="${INK}" stroke-width="2.3" stroke-linejoin="round"/>`}
       ${sproutSVG(face)}
       <g class="blush"><ellipse cx="-14.5" cy="-15" rx="4.2" ry="2.5" fill="${blush}" opacity=".45"/><ellipse cx="14.5" cy="-15" rx="4.2" ry="2.5" fill="${blush}" opacity=".45"/>
         <path d="M-17 -14.5 l1.6 -2 M-14.6 -14 l1.6 -2 M-12.2 -13.6 l1.6 -2 M12.6 -13.6 l1.6 -2 M15 -14 l1.6 -2 M17.4 -14.5 l1.6 -2" stroke="${blush}" stroke-width="1" stroke-linecap="round" opacity=".9"/></g>
@@ -267,6 +269,8 @@ export function carriedSVG(carry) {
 }
 
 export function objectSVG(o) {
+  const painting = paintedObject(o);
+  if (painting) return painting;
   const art = objectArt(o, muralIcon);
   if (art) return art;
   switch (o.kind) {
