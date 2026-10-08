@@ -624,3 +624,7 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
   .hud-buttons button, .hud-buttons a.waitlist { min-height: 34px; padding: 3px 10px; font-size: 12.5px; }
   .hud-buttons button.sound { min-width: 34px; }
 }
+
+/* Waking up in a new colony: a stretchy little hop. */
+.wobblin.woke .wobble { animation: woke .7s cubic-bezier(.3, 1.6, .5, 1) !important; transform-origin: 50% 100%; }
+@keyframes woke { 0% { transform: scale(1.15, .8); } 35% { transform: translateY(-16px) scale(.88, 1.16); } 70% { transform: translateY(0) scale(1.12, .9); } 100% { transform: none; } }

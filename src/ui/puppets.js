@@ -78,6 +78,15 @@ export class Puppets {
 
   position(id) { const p = this.p.get(id); return p ? { x: p.x, y: p.y } : null; }
 
+  // A brand-new colony: they start curled up asleep, then pop awake one by one.
+  wakeUp(gapMs = 700, firstMs = 1500) {
+    const now = performance.now();
+    [...this.p.values()].sort((a, b) => a.x - b.x).forEach((p, i) => {
+      p.act = 'sleep'; p.arrived = true; p.walking = false; p.tx = p.x; p.ty = p.y; p.wanderR = 0;
+      p.idleUntil = now + 1e9; p.wakeAt = now + firstMs + i * gapMs;
+    });
+  }
+
   // Run to a friend's side (a comforting hug after a hard knock).
   rushTo(id, toId) {
     const p = this.p.get(id), q = this.p.get(toId), now = performance.now();
@@ -154,6 +163,11 @@ export class Puppets {
         }
       }
       if (p.chat && now > p.chat.until) p.chat = null;
+      if (p.wakeAt && now > p.wakeAt) {
+        p.wakeAt = 0; p.woke = true;
+        p.chat = { icon: 'heart', until: now + 1800 };
+        this.retarget(p, now, true);
+      }
     }
     this.separate(dt);
     this.chatter(now);
@@ -240,6 +254,7 @@ export class Puppets {
         }
         if (pup.style.transform !== tf) pup.style.transform = tf;
       }
+      if (p.woke) { p.woke = false; g.classList.remove('woke'); void g.getBBox(); g.classList.add('woke'); }
       const doing = p.walking ? 'walking' : p.arrived ? 'doing-' + p.act : '';
       if (g.dataset.doing !== doing) {
         if (g.dataset.doing) g.classList.remove(g.dataset.doing);

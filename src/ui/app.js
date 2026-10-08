@@ -146,6 +146,8 @@ function showNewColony() {
     $('#newColony').hidden = true;
     world = replay(save, nowTick());
     startWatching();
+    puppets.wakeUp();
+    for (let i = 0; i < 3; i++) setTimeout(() => play('boing'), 1500 + i * 700);
     toast('Three Wobblins just woke up. See what they need, and drag things from your tray to help. You can pick them up, too.');
   };
 }
