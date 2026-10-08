@@ -509,7 +509,7 @@ function anticipate(svg, item, pt) {
     g.classList.add(k);
     g.insertAdjacentHTML('beforeend', k === 'brace'
       ? '<g class="antic-mark"><path class="sweat" d="M19 -46 q-3 4.5 0 6.5 q3 -2 0 -6.5 Z" fill="#9fd4f5" stroke="#fff" stroke-width=".8"/><path class="sweat s2" d="M-21 -40 q-2.4 3.6 0 5.2 q2.4 -1.6 0 -5.2 Z" fill="#9fd4f5" stroke="#fff" stroke-width=".8"/></g>'
-      : '<g class="antic-mark"><path class="twinkle" d="M0 -78 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#ffe36b" stroke="#e0a83a" stroke-width=".8"/><path class="twinkle t2" d="M-17 -66 l1.3 3 3 1.3 -3 1.3 -1.3 3 -1.3 -3 -3 -1.3 3 -1.3 Z" fill="#fff3a0"/></g>');
+      : '<g class="antic-mark"><path class="antic-star" d="M0 -78 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#ffe36b" stroke="#e0a83a" stroke-width=".8"/><path class="antic-star t2" d="M-17 -66 l1.3 3 3 1.3 -3 1.3 -1.3 3 -1.3 -3 -3 -1.3 3 -1.3 Z" fill="#fff3a0"/></g>');
     anticIds.add(id);
   }
 }

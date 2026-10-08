@@ -255,6 +255,14 @@ export function ambientSVG(seed, { hour = 12, season = 'mild', rain = false } = 
   for (let i = 0; i < 3; i++) {
     parts.push(`<g transform="translate(0 ${(60 + r() * 90).toFixed(0)})"><g class="bird" style="animation-delay:-${(r() * 40).toFixed(1)}s;animation-duration:${(34 + r() * 20).toFixed(0)}s"><path class="flap" d="M-7 0 Q-3 -4 0 0 Q3 -4 7 0" stroke="#3a3a48" stroke-width="1.6" fill="none" stroke-linecap="round"/></g></g>`);
   }
+  // Now and then a fish leaps out of the river and plops back in.
+  if (season !== 'cold') {
+    for (let i = 0; i < 3; i++) {
+      const x = 140 + i * 360 + r() * 200, y = riverY(x) + 4, dur = (11 + r() * 8).toFixed(1), delay = (r() * 14).toFixed(1);
+      parts.push(`<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)})"><g class="riverfish" style="animation-duration:${dur}s;animation-delay:-${delay}s"><g transform="scale(1.8)"><path d="M-7 0 Q0 -5 7 0 Q0 5 -7 0 Z M7 0 L12 -4 L11 0 L12 4 Z" fill="#9cc0d6" stroke="#5f8aa6" stroke-width=".7"/><path d="M-3 -2.6 Q1 -4 4 -2.4" stroke="#e6f3fa" stroke-width=".8" fill="none"/><circle cx="-4" cy="-1" r=".9" fill="#2a3a48"/></g></g>` +
+        `<ellipse class="river-plop" style="animation-duration:${dur}s;animation-delay:-${delay}s" cx="40" cy="3" rx="10" ry="3" fill="none" stroke="#eaf6ff" stroke-width="1.6"/></g>`);
+    }
+  }
   if (season !== 'cold') {
     for (let i = 0; i < 6; i++) {
       const x = 760 + r() * 400;

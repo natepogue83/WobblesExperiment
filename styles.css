@@ -632,8 +632,8 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 /* Wet from the river: drips, and a little shiver. */
 .drips .drop { animation: drip 1.1s ease-in infinite; }
 @keyframes drip { 0% { opacity: 0; transform: translateY(-2px); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
-.wobblin:has(.drips):not(.landed):not(.held) .wobble { animation: shiver .24s linear infinite !important; }
-@keyframes shiver { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-.7px); } 75% { transform: translateX(.7px); } }
+.wobblin:has(.drips):not(.landed):not(.held) .wobble { animation: wet-shiver .24s linear infinite !important; }
+@keyframes wet-shiver { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-.7px); } 75% { transform: translateX(.7px); } }
 
 /* Your hand overhead: a wave hello from those who trust you, a duck-and-cover from the wary. */
 .wobblin.greet .arm.r, .wobblin.cower .arm { visibility: hidden; }
@@ -674,8 +674,15 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 .antic-mark .sweat { animation: sweat 1s ease-in infinite; }
 .antic-mark .sweat.s2 { animation-delay: .45s; }
 @keyframes sweat { 0% { opacity: 0; transform: translateY(-2px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(10px); } }
-.antic-mark .twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle .7s ease-in-out infinite alternate; }
-.antic-mark .twinkle.t2 { animation-delay: .35s; }
-@keyframes twinkle { from { transform: scale(.6) rotate(0); opacity: .6; } to { transform: scale(1.15) rotate(25deg); opacity: 1; } }
+.antic-mark .antic-star { transform-box: fill-box; transform-origin: center; animation: antic-twinkle .7s ease-in-out infinite alternate; }
+.antic-mark .antic-star.t2 { animation-delay: .35s; }
+@keyframes antic-twinkle { from { transform: scale(.6) rotate(0); opacity: .6; } to { transform: scale(1.15) rotate(25deg); opacity: 1; } }
 
 .belief .devotion { margin-left: 10px; padding: 1px 8px; border-radius: 9px; background: rgba(185, 160, 240, .28); color: #ece4ff; font: 600 12px var(--display); }
+
+/* A fish leaps out of the river now and then. */
+.riverfish { opacity: 0; animation: riverfish linear infinite; }
+@keyframes riverfish { 0% { opacity: 0; transform: translate(0, 0) rotate(-50deg); } 1% { opacity: 1; } 3% { transform: translate(20px, -40px) rotate(0deg); }
+  5.5% { opacity: 1; transform: translate(40px, 0) rotate(55deg); } 6% { opacity: 0; transform: translate(41px, 4px) rotate(60deg); } 100% { opacity: 0; transform: translate(41px, 4px); } }
+.river-plop { opacity: 0; transform-box: fill-box; transform-origin: center; animation: river-plop linear infinite; }
+@keyframes river-plop { 0%, 5.4% { opacity: 0; transform: scale(.4); } 6% { opacity: .9; transform: scale(.6); } 11% { opacity: 0; transform: scale(2.2); } 100% { opacity: 0; transform: scale(2.2); } }
