@@ -20,6 +20,7 @@ experiment overlay, replay verification and save export/import).
 - **Hold it still** in your hand and it dozes off. **Shake it** and it gets rattled.
 - **Tap a Wobblin** for its card (stats, skills, what it could work out, its own words). Tap the name to rename it. Keep tapping and it gets cross.
 - **Drag small things** (stones, gifts, curios, sprouts, clay) to move them.
+- **A golden bubble** means a Wobblin is asking you for something; grant it for belief. **Drop one Wobblin on another** for a hug: close friends pair up sooner, which is how you breed for a trait.
 - **Goals** lists milestones; claiming one adds belief, and belief unlocks powers. **Family** shows every generation; **Chronicle** is their story.
 - Dev: `?debug=1&fresh=1` starts over, `?debug=1&devload=/_dev_save.json` loads a prepared village (`node tests/_mkdev.mjs <seed> <ticks>` makes one).
 
