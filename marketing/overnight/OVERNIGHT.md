@@ -84,6 +84,7 @@ All of these replay exactly and never teach the Wobblins anything.
 - **The temple looks Wobblin-built** now: stacked stones, carved posts, a leaf-thatch roof, prayer flags and a sun disc. It used to be white marble.
 - **Happy Wobblins play tag** now and then: one dashes after another, who scampers off.
 - **On phones** the HUD button row scrolls instead of getting cut off.
+- **Small things:** tray tiles have hover tips, Esc closes a panel, and the recap now also appears when a laptop slept with the game open.
 - **A chaos test** throws 8,700 random acts at 16 colonies. Nothing crashes, no number goes out of range, and every save replays exactly.
 
 ## Decisions you might want to change
