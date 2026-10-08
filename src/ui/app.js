@@ -111,6 +111,7 @@ function showNewColony() {
   const seed = randomSeed();
   const stage = $('#stage');
   stage.classList.add('title');
+  stage.scrollLeft = 0;
   valleyImage(seed, { hour: 6.5, season: 'mild' }).then(url => { if (!world) stage.style.setProperty('--title-bg', `url(${url})`); });
   $('#napping').innerHTML = createWorld(seed).wobblins.map((w, i) =>
     `<svg viewBox="-30 -52 60 58" width="84" height="80" aria-hidden="true" style="--i:${i}">${wobblinSVG({ ...w, face: 'sleep', carry: [] })}</svg>`).join('') +
@@ -120,6 +121,7 @@ function showNewColony() {
     ev.preventDefault();
     stage.classList.remove('title');
     stage.style.removeProperty('--title-bg');
+    setTimeout(centerStage, 30);
     save = newSave({
       seed, createdAt: Date.now(),
       colonyName: $('#colonyName').value.trim() || undefined,

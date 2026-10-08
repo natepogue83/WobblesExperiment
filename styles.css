@@ -469,3 +469,5 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .name-btn:hover { border-bottom-color: #e0864a; }
 .name-input { font: 600 20px var(--display); width: 9em; padding: 2px 6px; border: 2px solid #e0864a; border-radius: 8px; background: #fff; color: var(--ink); }
 #panel .name-btn { background: none; color: inherit; padding: 0 2px; min-height: 0; box-shadow: none; border-radius: 0; font: inherit; font-size: inherit; }
+#stage.title { overflow: hidden !important; }
+#stage.title #world { display: none; }
