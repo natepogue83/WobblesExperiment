@@ -68,6 +68,12 @@ function flames(scale = 1) {
 
 const logs = s => `<g><rect x="${-18 * s}" y="${-5 * s}" width="${36 * s}" height="${7 * s}" rx="${3.5 * s}" fill="${G('wood')}" transform="rotate(-14)"/><rect x="${-18 * s}" y="${-5 * s}" width="${36 * s}" height="${7 * s}" rx="${3.5 * s}" fill="${G('wood')}" transform="rotate(14)"/><circle cx="${-16 * s}" cy="${2 * s}" r="${3 * s}" fill="#e7c58e"/><circle cx="${16 * s}" cy="${2 * s}" r="${3 * s}" fill="#e7c58e"/></g>`;
 
+// A painted handprint (murals).
+function hand(x, y, c, rot = 0, s = 1) {
+  return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})" fill="${c}" opacity=".85"><ellipse cx="0" cy="0" rx="3.6" ry="3.2"/>` +
+    [[-3.2, -4.4, -18], [-1.1, -5.6, -6], [1.2, -5.6, 6], [3.2, -4.6, 18], [4.4, -0.6, 60]].map(([fx, fy, r]) => `<ellipse cx="${fx}" cy="${fy}" rx="0.9" ry="2.1" transform="rotate(${r} ${fx} ${fy})"/>`).join('') + '</g>';
+}
+
 export function objectArt(o, muralIcon = () => '') {
   const id = o.id || 'x';
   switch (o.kind) {
@@ -174,7 +180,13 @@ export function objectArt(o, muralIcon = () => '') {
         `<circle class="orb" cx="0" cy="-62" r="6" fill="${G('gold')}"/>` +
         `<path d="M-58 -52 L-58 -64 L-48 -60 L-58 -58" fill="#c45a3a"/><path d="M58 -52 L58 -64 L48 -60 L58 -58" fill="#3f86c4"/>`;
     case 'mural':
-      return shadow(32, 7) + `<path d="M-32 2 Q-37 -26 -12 -34 Q16 -40 32 -22 Q38 -4 28 2 Z" fill="${G('rock')}"/><path d="M-24 -6 Q-22 -26 -4 -28 Q16 -30 24 -16 Q26 -6 20 -4 Z" fill="#e7dcc6" opacity="0.55"/>` + muralIcon(o.state.depictsKind);
+      return shadow(28, 6) +
+        `<path d="M-26 2 L-28 -36 Q-27 -46 -16 -47 L18 -48 Q28 -47 28 -37 L27 2 Z" fill="${G('rock')}"/>` +
+        `<path d="M-22 -4 L-23 -36 Q-22 -42 -14 -42 L16 -43 Q23 -42 23 -36 L22 -4 Z" fill="#efe3c8" opacity="0.85"/>` +
+        `<circle cx="15" cy="-34" r="4.5" fill="#f2b13a" opacity=".9"/><path d="M15 -41 v-3 M21 -34 h3 M9 -34 h-3 M19 -39 l2 -2" stroke="#f2b13a" stroke-width="1.4"/>` +
+        hand(-15, -12, '#c9563c') + hand(17, -10, '#4a8ac9', -12) + hand(-8, -36, '#5aa86b', 14, 0.7) +
+        `<path d="M-22 -8 q4 3 8 0 q4 -3 8 0" stroke="#c9563c" stroke-width="1.4" fill="none" opacity=".7"/>` +
+        `<g transform="translate(0 4) scale(.9)">${muralIcon(o.state.depictsKind)}</g>`;
     case 'grave':
       return shadow(10, 3) + `<path d="M-7 0 V-13 Q0 -21 7 -13 V0 Z" fill="${G('rock')}"/><path d="M-2 -11 h4 M0 -13 v6" stroke="#6e685e" stroke-width="1.2"/><circle cx="-8" cy="0" r="1.8" fill="#ffd6e6"/><circle cx="8" cy="-1" r="1.6" fill="#fff"/>`;
     case 'ruin':

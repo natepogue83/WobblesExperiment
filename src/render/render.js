@@ -40,6 +40,12 @@ export function temperOf(w) {
   return best;
 }
 
+// Things are drawn a little larger than life so they sit right next to the
+// Wobblins (drawn at 1.7): a hut is big enough to go inside.
+export const OBJECT_SCALE = { hut: 1.75, temple: 1.45, totem: 1.7, wall: 1.45, hearth: 1.35, fire: 1.35, mural: 1.45, raft: 1.35,
+  garden: 1.25, tree: 1.35, bush: 1.3, boulder: 1.15, stones: 1.25, gift: 1.35, curio: 1.35, sprout: 1.3, grave: 1.45,
+  pond: 1, reeds: 1.25, clay: 1.2, fish: 1.2, ruin: 1.4, scorch: 1.35 };
+
 // The face follows how they feel right now.
 export function faceOf(w) {
   const n = w.needs;
@@ -175,12 +181,13 @@ export function drawSVG(svg, rs, opts = {}) {
     : backdrop(rs, hour);
   el('g', { id: 'art-defs' }, L.terrain).innerHTML = ART_DEFS;
   const sh = ZONES.hill.shrine;
-  const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y})`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
+  const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y}) scale(1.5)`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
   shrine.innerHTML = '<ellipse cx="0" cy="2" rx="18" ry="5" fill="rgba(0,0,0,.18)"/><rect x="-12" y="-26" width="24" height="26" rx="3" fill="#d6ccb5" stroke="#8f846f"/><path d="M-16 -26 L0 -38 L16 -26 Z" fill="#b9ab8e" stroke="#8f846f"/><circle cx="0" cy="-14" r="5" fill="#f3d36b"/>' +
     (opts.offerings ? '<circle class="halo-soft" cx="0" cy="-14" r="26" fill="#ffe28a" opacity=".35"/>' : '');
 
   for (const o of rs.objects.slice().sort((a, b) => a.y - b.y)) {
-    const g = el('g', { id: o.id, transform: `translate(${o.x},${o.y})`, class: 'obj obj-' + o.kind + (o.keeper && o.age < 1 ? ' fresh' : '') }, L[o.layer]);
+    const k = OBJECT_SCALE[o.kind] || 1.3;
+    const g = el('g', { id: o.id, transform: `translate(${o.x},${o.y}) scale(${k})`, class: 'obj obj-' + o.kind + (o.keeper && o.age < 1 ? ' fresh' : '') }, L[o.layer]);
     g.innerHTML = objectSVG(o);
   }
 
