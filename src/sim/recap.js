@@ -36,6 +36,9 @@ export function actionName(ev) {
     case 'bless': return 'blessing';
     case 'curio': return item(d.curio);
     case 'miracle': return 'rainbow';
+    case 'quake': return 'earthquake';
+    case 'rename': return 'new name';
+    case 'carry': return d.thrown ? 'throw' : 'lift';
   }
   return 'touch';
 }

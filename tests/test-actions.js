@@ -1,6 +1,7 @@
 // test-actions.js — validation rejects cleanly; actions never add knowledge.
 import assert from 'node:assert/strict';
-import { createWorld, tick, applyAction, stateHash, giftOptions } from '../src/sim/index.js';
+import { createWorld, tick, applyAction, stateHash, giftOptions, replay } from '../src/sim/index.js';
+import { newSave, appendAction, serializeSave, parseSave } from '../src/ui/save.js';
 import { stableStringify } from '../src/sim/util.js';
 import { section, ok, generousActions } from './lib.js';
 
@@ -15,6 +16,20 @@ function rejects(world, action, reason) {
 
 function knowledge(world) {
   return stableStringify({ d: world.discoveries, k: world.wobblins.map(w => [w.id, w.knows]) });
+}
+
+section('Naming');
+{
+  const w = createWorld(11, { progression: true });
+  const a = w.wobblins[0];
+  assert.equal(applyAction(w, { seq: 1, t: 0, type: 'nudge', nudge: 'rename', target: a.id, name: 'Sir Wobbles' }).ok, true);
+  assert.equal(a.name, 'Sir Wobbles');
+  for (const nm of ['', 'x'.repeat(15), '<b>', '9lives', 'Sir Wobbles']) rejects(w, { seq: 2, t: 0, type: 'nudge', nudge: 'rename', target: a.id, name: nm }, 'name');
+  const save = newSave({ seed: 11, createdAt: 0, progression: true });
+  const live = createWorld(11, save);
+  applyAction(live, appendAction(save, 0, { type: 'nudge', nudge: 'rename', target: 'w2', name: "Pip O'Day" }));
+  assert.equal(replay(parseSave(serializeSave(save)), 0).wobblins[1].name, "Pip O'Day");
+  ok('you can name a Wobblin yourself (from the start); odd names are refused; it replays');
 }
 
 section('Stones on stones');
@@ -199,7 +214,7 @@ section('Belief unlocks powers (new games)');
   const w = createWorld(8, { progression: true });
   rejects(w, { seq: 1, t: 0, type: 'power', power: 'lightning', slot: 'meadow.1' }, 'locked_power');
   rejects(w, { seq: 2, t: 0, type: 'nudge', nudge: 'miracle' }, 'locked_power');
-  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'plant', 'stone']);
+  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'plant', 'rename', 'stone']);
   // Keep doing things they enjoy until Lightning opens up.
   let seq = 10;
   for (let i = 0; i < 200 && !w.unlocked.includes('lightning'); i++) {

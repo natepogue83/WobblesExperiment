@@ -46,6 +46,13 @@ export const OBJECT_SCALE = { hut: 1.75, temple: 1.45, totem: 1.7, wall: 1.45, h
   garden: 1.25, tree: 1.35, bush: 1.3, boulder: 1.15, stones: 1.25, gift: 1.35, curio: 1.35, sprout: 1.3, grave: 1.45,
   pond: 1, reeds: 1.25, clay: 1.2, fish: 1.2, ruin: 1.4, scorch: 1.35 };
 
+// The keepsake a Wobblin treasures (its lucky charm), worn where you can see it.
+function charmOf(world, w) {
+  if (!w.luckyCharm) return null;
+  const o = world.objects.find(x => x.id === w.luckyCharm);
+  return o ? (o.state.giftId || o.state.curio || null) : null;
+}
+
 // Worn dirt paths between the places they go back and forth between most.
 function trailsSVG(trails) {
   let s = '';
@@ -134,7 +141,7 @@ export function renderState(world) {
       id: w.id, name: w.name, stage: w.stage, look: w.look, zone: w.zone, activity: w.activity,
       bubble: bubbles[w.id] || null,
       face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood, title: titleOf(w),
-      flower: (w.flowerUntil || 0) > world.tick, bee: (w.flowerUntil || 0) > world.tick, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
+      flower: (w.flowerUntil || 0) > world.tick, charm: charmOf(world, w), zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)

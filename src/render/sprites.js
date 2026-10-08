@@ -98,6 +98,22 @@ function mouth(face, dark) {
 const daisy = (x, y, c, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="-3.4" rx="2" ry="3.2" fill="${c}" transform="rotate(${a})"/>`).join('')}<circle r="1.9" fill="#ffcf3a"/></g>`;
 const FLOWER_CROWN = `<g class="crown"><path d="M-17 -33 Q0 -44 17 -33" stroke="#5e8f3a" stroke-width="2" fill="none"/>${daisy(-14, -35, '#fff')}${daisy(-5, -39.5, '#ffb3c7', 1.1)}${daisy(5, -39.5, '#fff', 1.05)}${daisy(14, -35, '#c9b3ff')}</g>`;
 const BUTTERFLY_FRIEND = '<g class="crown-fly"><g class="wings"><path d="M0 0 Q-5 -6 -7 -1 Q-6 2 0 0 Z" fill="#ffb3d1"/><path d="M0 0 Q5 -6 7 -1 Q6 2 0 0 Z" fill="#ffd27a"/></g></g>';
+// Keepsakes worn on the body: a feather by the sprout, a shell or stone pendant,
+// a scarf, a flower behind the ear, a little pouch, a glowing jar.
+function charmSVG(kind) {
+  const pendant = (fill, glow) => `<path d="M-9 -9 Q0 -3 9 -9" stroke="#7a5a3a" stroke-width="1.2" fill="none"/>${glow ? `<circle cx="0" cy="-4" r="5" fill="${glow}" opacity=".35"/>` : ''}<ellipse cx="0" cy="-4.5" rx="2.6" ry="3.2" fill="${fill}" stroke="#5a4632" stroke-width=".6"/>`;
+  switch (kind) {
+    case 'feather': case 'feather_crown': return '<path d="M6 -40 Q16 -56 20 -60 Q18 -50 8 -40 Z" fill="#f4f0e8" stroke="#b9ae9a" stroke-width=".8"/><path d="M7 -41 L18 -57" stroke="#b9ae9a" stroke-width=".7"/>';
+    case 'shiny_shell': return pendant('#ffd6c9') + '<path d="M-2 -6 L0 -2 L2 -6" stroke="#e8a08f" stroke-width=".6" fill="none"/>';
+    case 'moon_stone': return pendant('#dfe9ff', '#bcd2ff');
+    case 'flint': case 'flint_stone': return pendant('#6f6a64');
+    case 'bell_flower': return '<g transform="translate(-17 -33)"><path d="M0 0 Q-3 6 0 8 Q3 6 0 0 Z" fill="#9a7ad6"/><path d="M-3 7 Q0 10 3 7" stroke="#7a5ab6" stroke-width="1" fill="none"/><path d="M0 0 Q2 -4 5 -5" stroke="#5e8f3a" stroke-width="1.2" fill="none"/></g>';
+    case 'warm_pelt': return '<path d="M-17 -12 Q0 -4 17 -12 L17 -8 Q0 0 -17 -8 Z" fill="#c4553e"/><path d="M10 -8 L13 2 L8 2 Z" fill="#c4553e"/><path d="M-14 -10 h4 M-4 -7 h4 M6 -8 h4" stroke="#f2d0a0" stroke-width="1.2"/>';
+    case 'seed_pouch': return '<g transform="translate(-19 -6)"><path d="M0 -4 Q-5 0 -3 5 Q0 7 3 5 Q5 0 0 -4 Z" fill="#a7814f"/><path d="M-2 -3 L2 -3" stroke="#6b4a2a" stroke-width="1"/></g>';
+    case 'firefly_jar': return '<g transform="translate(20 -6)"><circle cx="0" cy="0" r="6" fill="#ffe36b" opacity=".35"/><rect x="-3" y="-4" width="6" height="7" rx="2" fill="#e8f4ff" opacity=".8" stroke="#9fb0c6" stroke-width=".6"/><circle class="glowbug" cx="0" cy="-0.5" r="1.4" fill="#fff27a"/></g>';
+    default: return '';
+  }
+}
 const ZAP_FRIZZ = `<g class="zap"><path d="M-20 -26 l-6 -3 l4 -2 l-6 -4 M-15 -36 l-4 -6 l4 0 l-3 -6 M0 -41 l0 -7 l3 2 l1 -7 M15 -36 l4 -6 l-4 0 l3 -6 M20 -26 l6 -3 l-4 -2 l6 -4" stroke="#3a2e28" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="0" cy="-20" rx="20" ry="18" fill="#3a2e28" opacity=".22"/><path class="spark" d="M-24 -44 l4 4 M26 -40 l-4 5 M-28 -16 l5 1 M29 -12 l-5 1" stroke="#ffe36b" stroke-width="2.2" stroke-linecap="round"/></g>`;
 
 // Returns inner SVG markup for a Wobblin standing at the origin (feet at y=0).
@@ -133,6 +149,7 @@ export function wobblinSVG(w, opts = {}) {
       ${brows(w.temper, face, dark)}
       ${elder ? `<path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="#f4f0e6" stroke-width="2.4" fill="none" stroke-linecap="round"/>` : ''}
       ${mouth(face, dark)}
+      ${w.charm ? charmSVG(w.charm) : ''}
       ${w.flower ? FLOWER_CROWN + BUTTERFLY_FRIEND : ''}
       ${w.zapped ? ZAP_FRIZZ : ''}
       ${elder ? CANE : ''}

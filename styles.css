@@ -464,3 +464,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(.3); } }
 .obj .charged .spark { animation: spark-flick .3s steps(2, jump-none) infinite; }
 .obj .charged > ellipse { animation: glowpulse 1.2s ease-in-out infinite alternate; }
+
+.name-btn { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: text; border-bottom: 2px dashed rgba(120, 80, 40, .25); }
+.name-btn:hover { border-bottom-color: #e0864a; }
+.name-input { font: 600 20px var(--display); width: 9em; padding: 2px 6px; border: 2px solid #e0864a; border-radius: 8px; background: #fff; color: var(--ink); }
+#panel .name-btn { background: none; color: inherit; padding: 0 2px; min-height: 0; box-shadow: none; border-radius: 0; font: inherit; font-size: inherit; }

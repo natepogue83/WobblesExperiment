@@ -49,6 +49,7 @@ const CODES = {
   cu: ['nudge', 'curio', ['curio', 'targets']],
   mi: ['nudge', 'miracle', []],
   ca: ['nudge', 'carry', ['target', 'zone', 'thrown', 'splash', 'onto']],
+  rn: ['nudge', 'rename', ['target', 'name']],
   gi: ['gift', null, ['day', 'giftId', 'slot', 'onto']],
   go: ['claim', null, ['goal']],
   co: ['collect_offerings', null, []]

@@ -12,6 +12,7 @@ export const UNLOCKS = [
   { key: 'stone', at: 0, name: 'Drop Stone' },
   { key: 'plant', at: 0, name: 'Plant' },
   { key: 'gift', at: 0, name: 'the Daily Gift' },
+  { key: 'rename', at: 0, name: 'Naming' },
   { key: 'rain', at: 3, name: 'Rain' },
   { key: 'bless', at: 6, name: 'Bless' },
   { key: 'lightning', at: 10, name: 'Lightning' },

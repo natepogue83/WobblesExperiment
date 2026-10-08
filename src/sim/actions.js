@@ -16,7 +16,8 @@ import { GOAL_BY_ID, progressOf } from './goals.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season', 'quake'];
-export const NUDGES = ['bless', 'curio', 'miracle', 'carry'];
+export const NUDGES = ['bless', 'curio', 'miracle', 'carry', 'rename'];
+export const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,13}$/;
 export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience', 'caution', 'playfulness', 'piety'];
 // Each curio unlocks once a Wobblin has noticed its material.
 export const CURIOS = {
@@ -148,6 +149,12 @@ export function validateAction(world, a) {
       }
       case 'miracle':
         return { ok: true };
+      case 'rename': {
+        const w = findWobblin(world, a.target);
+        if (!w || !w.alive) return bad('target');
+        if (typeof a.name !== 'string' || !NAME_RE.test(a.name) || a.name === w.name) return bad('name');
+        return { ok: true };
+      }
       case 'carry': {
         // Pick a Wobblin up and set it down somewhere. It only moves them.
         const w = findWobblin(world, a.target);
@@ -352,6 +359,13 @@ function applyActionEffects(world, a) {
         data: { nudge: 'carry', from, zone: a.zone, ...(a.thrown ? { thrown: true } : {}), ...(a.splash ? { splash: true } : {}) },
         salience: a.thrown ? 2 : 1, causes });
       if (a.onto !== undefined) landOnto(world, w, a, causes);
+    } else if (a.nudge === 'rename') {
+      // The Keeper gives them a name of your own choosing. They rather like it.
+      const w = findWobblin(world, a.target);
+      const from = w.name;
+      w.name = a.name;
+      w.needs.mood = r3(clamp(w.needs.mood + 0.05, 0, 1));
+      emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id, data: { nudge: 'rename', from, to: a.name }, salience: 1, causes });
     } else if (a.nudge === 'miracle') {
       world.miracleUntil = t + POWER.miracleTicks;
       faithAll(world, 0.15);

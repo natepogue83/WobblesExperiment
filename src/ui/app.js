@@ -191,7 +191,7 @@ function actionSound(a, events) {
 function whyNot(reason) {
   return ({
     cooldown: 'Not yet. It needs to recharge.', occupied: 'Something is already there.', no_room: 'No room there.',
-    devotion: 'You need more Devotion. Collect offerings at the shrine.', slot: 'That spot will not work.', not_yet: 'Not reached yet.', claimed: 'Already claimed.',
+    devotion: 'You need more Devotion. Collect offerings at the shrine.', slot: 'That spot will not work.', name: 'Names are letters only (up to 14).', not_yet: 'Not reached yet.', claimed: 'Already claimed.',
     gift_used: "Today's gift is already in the world.", locked: 'They have not noticed that material yet.'
   })[reason] || 'Not now (' + reason.replace(/_/g, ' ') + ').';
 }
@@ -796,7 +796,9 @@ function showWobblin(w) {
   const lonely = !world.wobblins.some(o => o !== w && o.alive && o.zone === w.zone);
   const want = wantOf(world, w, lonely);
   const wantText = want ? WANT_TEXT[want.kind](w.name, ITEM_WORD[want.item] || want.item) : w.name + ' is happy right now.';
-  showWobblinCard($('#panel'), world, w, { wantText, hints: temperamentHints(world, w), onBless: ww => { $('#panel').hidden = true; if (isUnlocked(world, 'bless')) blessMenu(ww.id); else toast('Bless unlocks when their belief in you grows.'); } });
+  showWobblinCard($('#panel'), world, w, { wantText, hints: temperamentHints(world, w),
+    onRename: (ww, name) => { if (act({ type: 'nudge', nudge: 'rename', target: ww.id, name })) { toast(`They will answer to ${name} now.`); play('sparkle'); } showWobblin(world.wobblins.find(x => x.id === ww.id)); },
+    onBless: ww => { $('#panel').hidden = true; if (isUnlocked(world, 'bless')) blessMenu(ww.id); else toast('Bless unlocks when their belief in you grows.'); } });
 }
 
 // Tapping a recap or Chronicle line haloes its subject.

@@ -124,12 +124,22 @@ export function showGoals(panel, world, { states, age, onClaim }) {
 }
 
 // ---- wobblin card -------------------------------------------------------------
+// Tap the name to type a new one (letters, spaces, ' and -; up to 14).
+function renameField(btn, w, onRename) {
+  if (!onRename) return;
+  const input = h('input', { class: 'name-input', value: w.name, maxlength: '14', 'aria-label': 'New name' });
+  const done = save => { if (save && input.value.trim() && input.value.trim() !== w.name) onRename(w, input.value.trim()); else input.replaceWith(btn); };
+  input.addEventListener('keydown', ev => { if (ev.key === 'Enter') done(true); if (ev.key === 'Escape') done(false); });
+  input.addEventListener('blur', () => done(true));
+  btn.replaceWith(input);
+  input.focus(); input.select();
+}
 const TRAIT_LABEL = { curiosity: 'Curiosity', boldness: 'Bravery', sociability: 'Friendliness', patience: 'Patience', playfulness: 'Playfulness', piety: 'Faith in you', caution: 'Caution' };
 const TRAIT_HELP = { curiosity: 'tries new things', boldness: 'brave around fire, water, danger', sociability: 'teaches, sings, pairs up', patience: 'fiddly work: tools, weaving, gardens',
   playfulness: 'music, shiny things, paint', piety: 'rituals, totems, the temple', caution: 'worries enough to build walls and huts' };
 const stat10 = v => Math.max(1, Math.round(v * 10));
 
-export function showWobblinCard(panel, world, w, { onBless, wantText, hints = [] }) {
+export function showWobblinCard(panel, world, w, { onBless, onRename, wantText, hints = [] }) {
   const age = world.tick - w.bornTick;
   const pct = v => Math.round(v * 100);
   const blessed = k => w.temp[k] && w.temp[k].until > world.tick;
@@ -161,7 +171,7 @@ export function showWobblinCard(panel, world, w, { onBless, wantText, hints = []
     h('p', { class: 'muted' }, 'Bless them for a boost, or raise a Wobblin born with more of it.')) : '';
   panel.replaceChildren(
     h('div', { class: 'card-head' }, portrait(w, 72), h('div', {},
-      h('h2', {}, w.name + ' ', h('span', { class: 'title' }, titleOf(w))),
+      h('h2', {}, h('button', { class: 'name-btn', title: 'Give them a new name', onclick: ev => renameField(ev.currentTarget, w, onRename) }, w.name), ' ', h('span', { class: 'title' }, titleOf(w))),
       h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`),
       family ? h('p', { class: 'muted' }, family) : '')),
     (() => { const v = voiceLine(world, w); return v ? h('p', { class: 'voice' }, '“' + v + '”') : ''; })(),
