@@ -60,7 +60,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 ## 5. Feel
 
-- **Synthesized sound** for every action: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime. There's quiet ambience too (birds by day, crickets at night, rain, a music-box note when they're happy), and a mute button.
+- **Synthesized sound** for every action, and each Wobblin babbles its line in a little made-up voice of its own when you open its card. The sound set: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime. There's quiet ambience too (birds by day, crickets at night, rain, a music-box note when they're happy), and a mute button.
 
 ## Also added later in the night
 

@@ -20,7 +20,7 @@ import { trayItems, ICONS, zoneAt } from './inventory.js';
 import { RIVER } from '../sim/geometry.js';
 import { emoteSVG, wobblinSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
-import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted, startAmbience } from './sound.js';
+import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted, startAmbience, babble } from './sound.js';
 import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
 import { tickerFor } from './ticker.js';
@@ -940,6 +940,7 @@ const ITEM_WORD = { fire: 'fire', stones: 'stones', tree: 'trees', berry: 'berri
 
 function showWobblin(w) {
   $('#panel').dataset.who = w.id;
+  babble(w, 4 + (Number(String(w.id).slice(1)) % 3));   // they say their line out loud, in Wobblin
   const lonely = !world.wobblins.some(o => o !== w && o.alive && o.zone === w.zone);
   const want = wantOf(world, w, lonely);
   const wantText = want ? WANT_TEXT[want.kind](w.name, ITEM_WORD[want.item] || want.item) : w.name + ' is happy right now.';

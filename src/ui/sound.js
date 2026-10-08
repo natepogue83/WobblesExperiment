@@ -206,3 +206,19 @@ export function checkSounds() {
   try { bird(); cricket(); musicNote(false); } catch (e) { bad.push('ambience: ' + e.message); }
   return bad;
 }
+
+// A Wobblin "talking": a little run of babbled syllables, pitched by who it is
+// (bigger eyes, higher voice; elders lower), like a tiny made-up language.
+export function babble(w, words = 5) {
+  if (!w || !ready()) return;
+  try {
+    const seed = Number(String(w.id).slice(1)) || 1;
+    const base = 260 + (w.look ? w.look.hue % 120 : 60) + (w.look ? (w.look.eyeSize - 1) * 160 : 0) - (w.stage === 'elder' ? 60 : 0) + (w.stage === 'baby' ? 140 : 0);
+    let t = 0;
+    for (let i = 0; i < words; i++) {
+      const f = base * (1 + ((seed * (i + 3)) % 7) / 14);
+      tone(f, 0.075, { type: 'triangle', at: t, to: f * (i % 2 ? 1.18 : 0.9), vol: 0.14, attack: 0.006 });
+      t += 0.085 + ((seed + i) % 3) * 0.02;
+    }
+  } catch { /* never break the game */ }
+}
