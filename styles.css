@@ -581,3 +581,5 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @keyframes gring { to { stroke-dashoffset: -72; } }
 .gflag { transform-box: fill-box; transform-origin: 50% 0%; animation: gflag 1.4s ease-in-out infinite alternate; }
 @keyframes gflag { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+/* Sleeping puppets close their eyes (whatever face the day gave them). */
+.wobblin.doing-sleep .eyes .blink { animation: none; transform: scaleY(.12); transform-box: fill-box; transform-origin: center; }

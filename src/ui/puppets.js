@@ -6,6 +6,7 @@
 import { ZONES } from '../sim/geometry.js';
 import { ITEM_ICONS } from '../render/sprites.js';
 import { wobblinScale } from '../render/render.js';
+import { localHour } from './clock.js';
 
 const WALK = 46, RUN = 120;          // SVG units per second (RUN for long trips)
 const NOTE = '<path d="M-2 4 V-5 L5 -7 V2" stroke="#6b4fb0" stroke-width="1.8" fill="none"/><circle cx="-3.5" cy="4" r="2.4" fill="#6b4fb0"/><circle cx="3.5" cy="2" r="2.4" fill="#6b4fb0"/>';
@@ -85,6 +86,12 @@ export class Puppets {
     const objs = rs.objects.filter(o => o.zone === w.zone);
     const nearest = kinds => objs.filter(o => kinds.includes(o.kind)).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
     const beside = (o, d = 26) => ({ x: o.x + (Math.random() < 0.5 ? -d : d) + rand(-6, 6), y: o.y + rand(2, 10) });
+    // After dark (your real clock), idle ones curl up for the night, by a hut if there is one.
+    const h = localHour(Date.now());
+    if ((h >= 22 || h < 6) && ['hobby', 'play', 'inspect', 'rest'].includes(w.activity) && w.stage !== 'baby' ? Math.random() < 0.7 : false) {
+      const hut = nearest(['hut']);
+      return hut ? { x: hut.x + rand(-18, 18), y: hut.y + 14, act: 'sleep', wander: 0 } : { ...zonePoint(w.zone), act: 'sleep', wander: 0 };
+    }
     let o;
     switch (w.activity) {
       case 'forage': o = nearest(['bush', 'garden', 'sprout', 'fish', 'tree']); if (o) return { ...beside(o), act: 'eat', wander: 30 }; break;
