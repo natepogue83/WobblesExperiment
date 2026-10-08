@@ -296,3 +296,20 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
 .smoke { animation: smoke 3s ease-out infinite; }
 @keyframes smoke { 0% { transform: translateY(0); opacity: .5; } 100% { transform: translateY(-14px); opacity: 0; } }
 #hud { background: linear-gradient(180deg, rgba(20,30,20,.45), rgba(20,30,20,0)); padding: 8px 14px 18px 12px; border-radius: 0 0 18px 0; left: 0; top: 0; }
+/* ---- Ambient life ---- */
+.mote { animation: mote linear infinite; opacity: 0; }
+@keyframes mote { 0% { transform: translate(0,0); opacity: 0; } 20% { opacity: .9; } 80% { opacity: .7; } 100% { transform: translate(30px,-60px); opacity: 0; } }
+.butterfly { animation: flutter0 14s ease-in-out infinite; }
+.butterfly.b1 { animation-name: flutter1; animation-duration: 17s; }
+.butterfly.b2 { animation-name: flutter2; animation-duration: 12s; }
+@keyframes flutter0 { 0%,100% { transform: translate(0,0); } 25% { transform: translate(60px,-30px); } 50% { transform: translate(120px,10px); } 75% { transform: translate(50px,30px); } }
+@keyframes flutter1 { 0%,100% { transform: translate(0,0); } 30% { transform: translate(-80px,-20px); } 60% { transform: translate(-30px,40px); } }
+@keyframes flutter2 { 0%,100% { transform: translate(0,0); } 33% { transform: translate(40px,40px); } 66% { transform: translate(-50px,-10px); } }
+.butterfly .wings { transform-box: fill-box; transform-origin: center; animation: wings .22s ease-in-out infinite alternate; }
+@keyframes wings { from { transform: scaleX(1); } to { transform: scaleX(.25); } }
+.bird { animation: birdfly linear infinite; }
+@keyframes birdfly { from { transform: translate(-40px, 0); } to { transform: translate(1260px, -30px); } }
+.flap { animation: flap .5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(-.6); } }
+.leaf { animation: leaffall ease-in-out infinite; opacity: 0; }
+@keyframes leaffall { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(-60px, 120px) rotate(540deg); opacity: 0; } }

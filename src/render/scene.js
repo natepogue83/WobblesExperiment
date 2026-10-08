@@ -201,3 +201,33 @@ export function sceneOverlaySVG(seed, { hour = 12 } = {}) {
   parts.push(`<path class="shimmer slow" d="${rp}" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="6 70" opacity="0.45" transform="translate(0 8)"/>`);
   return parts.join('');
 }
+
+// Ambient life: butterflies and pollen by day, birds overhead, leaves
+// drifting down from the grove. CSS-animated, never touches the sim.
+export function ambientSVG(seed, { hour = 12, season = 'mild', rain = false } = {}) {
+  const tod = timeOfDay(hour);
+  if (tod === 'night') return '';
+  const r = rngFor(seed, 'ambient');
+  const parts = [];
+  const mote = tod === 'day' ? '#fffbe0' : '#ffd79a';
+  for (let i = 0; i < 26; i++) {
+    parts.push(`<circle class="mote" style="animation-delay:-${(r() * 9).toFixed(1)}s;animation-duration:${(7 + r() * 6).toFixed(1)}s" cx="${(r() * W).toFixed(0)}" cy="${(300 + r() * 280).toFixed(0)}" r="${(1 + r() * 1.4).toFixed(1)}" fill="${mote}"/>`);
+  }
+  if (!rain && season !== 'cold') {
+    const cols = ['#ffd24a', '#ff8fb8', '#9fd0ff', '#ffffff'];
+    for (let i = 0; i < 4; i++) {
+      const x = 200 + r() * 800, y = 330 + r() * 160, c = cols[i % cols.length];
+      parts.push(`<g transform="translate(${x.toFixed(0)} ${y.toFixed(0)})"><g class="butterfly b${i % 3}" style="animation-delay:-${(r() * 12).toFixed(1)}s"><g class="wings"><path d="M0 0 Q-7 -8 -9 -2 Q-8 3 0 0 Z" fill="${c}"/><path d="M0 0 Q7 -8 9 -2 Q8 3 0 0 Z" fill="${c}"/></g><rect x="-0.6" y="-3" width="1.2" height="5" rx="0.6" fill="#3a2a20"/></g></g>`);
+    }
+  }
+  for (let i = 0; i < 3; i++) {
+    parts.push(`<g transform="translate(0 ${(60 + r() * 90).toFixed(0)})"><g class="bird" style="animation-delay:-${(r() * 40).toFixed(1)}s;animation-duration:${(34 + r() * 20).toFixed(0)}s"><path class="flap" d="M-7 0 Q-3 -4 0 0 Q3 -4 7 0" stroke="#3a3a48" stroke-width="1.6" fill="none" stroke-linecap="round"/></g></g>`);
+  }
+  if (season !== 'cold') {
+    for (let i = 0; i < 6; i++) {
+      const x = 760 + r() * 400;
+      parts.push(`<g transform="translate(${x.toFixed(0)} ${(250 + r() * 30).toFixed(0)})"><path class="leaf" style="animation-delay:-${(r() * 10).toFixed(1)}s;animation-duration:${(8 + r() * 5).toFixed(1)}s" d="M0 0 Q3 -3 6 0 Q3 3 0 0 Z" fill="${r() < 0.5 ? '#7fb64e' : '#c9a23a'}"/></g>`);
+    }
+  }
+  return parts.join('');
+}

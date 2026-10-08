@@ -7,6 +7,7 @@ import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clea
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
 import { nowTickFor, localDayIndex, localHour, setClockMode, heartbeat, msToNextTick } from './clock.js';
 import { Puppets } from './puppets.js';
+import { Camera } from './camera.js';
 import { valleyImage } from '../render/painter.js';
 import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
 import { wantOf } from '../render/render.js';
@@ -33,6 +34,8 @@ const dropped = {};         // wobblinId -> { at, dizzy } just set down by the K
 const EMOTE_MS = 4000;
 let emoteEvent = null, emoteUntil = 0, emoteTimer = 0;
 const puppets = new Puppets();
+const camera = new Camera();
+let lastFrame = 0;
 let shownUnlock = null;
 let wiping = false;         // erasing the save: never write it back on the way out
 function wipe() { wiping = true; clearSave(); location.href = location.pathname + location.search.replace(/[?&]fresh=1/, ''); }     // last power_unlocked event already celebrated
@@ -93,7 +96,8 @@ function startWatching() {
 }
 
 function frame(now) {
-  if (world) { puppets.step(now); puppets.apply($('#world'), now); }
+  const dt = Math.min(64, now - (lastFrame || now)); lastFrame = now;
+  if (world) { puppets.step(now); puppets.apply($('#world'), now); camera.apply($('#world'), dt); }
   requestAnimationFrame(frame);
 }
 
@@ -310,10 +314,59 @@ function endDrag(ghost) {
 // Taps on empty valley drop an armed item there.
 function wireValley() {
   const svg = $('#world');
-  svg.addEventListener('click', ev => {
-    if (!armed || ev.target.closest('.wobblin')) return;
-    dropItem(armed, toSvgPoint(svg, ev.clientX, ev.clientY));
+  // Pan by dragging empty ground, pinch or wheel to zoom, double-tap to zoom.
+  const pointers = new Map();
+  let panning = false, pinch = null, downAt = null, lastTap = 0;
+  svg.addEventListener('pointerdown', ev => {
+    if (ev.target.closest('.wobblin')) return;
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    downAt = { x: ev.clientX, y: ev.clientY, t: performance.now() };
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mid: toSvgPoint(svg, (a.x + b.x) / 2, (a.y + b.y) / 2) };
+    }
   });
+  window.addEventListener('pointermove', ev => {
+    const p = pointers.get(ev.pointerId);
+    if (!p) return;
+    if (pinch && pointers.size === 2) {
+      pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      camera.zoomAt(pinch.mid.x, pinch.mid.y, d / pinch.d);
+      pinch.d = d;
+      return;
+    }
+    const dx = ev.clientX - p.x, dy = ev.clientY - p.y;
+    if (!panning && downAt && Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y) > 8 && camera.zoomed()) panning = true;
+    if (panning) {
+      const m = svg.getScreenCTM();
+      camera.panBy(dx / m.a, dy / m.d);
+    }
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  });
+  const end = ev => {
+    if (!pointers.has(ev.pointerId)) return;
+    pointers.delete(ev.pointerId);
+    if (pointers.size < 2) pinch = null;
+    const wasPan = panning;
+    if (pointers.size === 0) panning = false;
+    if (wasPan || !downAt || ev.type === 'pointercancel') return;
+    const moved = Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y);
+    if (moved > 8) return;
+    const pt = toSvgPoint(svg, ev.clientX, ev.clientY);
+    if (armed) { dropItem(armed, pt); return; }
+    const now = performance.now();
+    if (now - lastTap < 320) { camera.zoomed() ? camera.reset() : camera.zoomAt(pt.x, pt.y, 1.8); lastTap = 0; }
+    else lastTap = now;
+  };
+  window.addEventListener('pointerup', end);
+  window.addEventListener('pointercancel', end);
+  $('#stage').addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const pt = toSvgPoint(svg, ev.clientX, ev.clientY);
+    camera.zoomAt(pt.x, pt.y, Math.exp(-ev.deltaY * 0.0015));
+  }, { passive: false });
 }
 
 // ------------------------------------------------------------ Wobblins in hand
@@ -511,6 +564,7 @@ function draw() {
   lastRS = rs;
   const svg = $('#world');
   drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null, offerings: world.offerings >= 1, backdrop: backdropURL });
+  camera.last = ''; camera.apply(svg, 0);   // keep the camera where it was
   puppets.sync(rs);
   puppets.noteTeaching(world.events.filter(e => e.kind === 'taught' && e.t >= world.tick - 1).map(e => e.actors));
   celebrateUnlocks();
@@ -612,6 +666,10 @@ function highlightEvents(ids) {
     for (const a of e.actors.slice(0, 2)) if (world.wobblins.some(w => w.id === a && w.alive)) highlight.push(a);
   }
   draw();
+  // Swing the camera over to whatever it was about.
+  const first = highlight[0];
+  const pos = first && (puppets.position(first) || lastRS.objects.find(o => o.id === first));
+  if (pos) camera.focus(pos.x, pos.y - 20, 1.7);
 }
 
 async function showRecap(from, to) {

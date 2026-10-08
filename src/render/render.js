@@ -6,7 +6,7 @@ import { VIEW, ZONES, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
 import { BY_ID } from '../sim/discoveries.js';
 import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG } from './sprites.js';
-import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG } from './scene.js';
+import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG, ambientSVG } from './scene.js';
 import { ART_DEFS } from './objects.js';
 
 export const LAYERS = ['sky', 'hills', 'terrain', 'nature', 'structures', 'wobblins', 'effects', 'halos'];
@@ -209,6 +209,7 @@ export function drawSVG(svg, rs, opts = {}) {
       el('path', { d: `M150 520 A450 330 0 0 1 1050 520`, stroke: c, 'stroke-width': 10, fill: 'none', opacity: 0.55, transform: `translate(0 ${i * 10})` }, L.effects);
     }
   }
+  el('g', { class: 'ambient', 'pointer-events': 'none' }, L.effects).innerHTML = ambientSVG(rs.seed, { hour, season: rs.climate.season, rain: rs.climate.rain > 0 });
   const light = el('g', { class: 'light', 'pointer-events': 'none' }, L.effects);
   light.innerHTML = '<defs><radialGradient id="fireglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb35a" stop-opacity="0"/></radialGradient></defs>' +
     lightSVG(rs.seed, { hour, season: rs.climate.season, painted: !!opts.backdrop });
