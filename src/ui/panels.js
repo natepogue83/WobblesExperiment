@@ -107,8 +107,45 @@ export function showBook(panel, world) {
   panel.hidden = false;
 }
 
+// ---- the family: every Wobblin by generation, strongest traits at a glance ----
+const TRAIT_SHORT = { curiosity: 'Curious', boldness: 'Brave', sociability: 'Friendly', patience: 'Patient', playfulness: 'Playful', piety: 'Devout', caution: 'Careful' };
+export function showFamily(panel, world, { onPick }) {
+  const gen = new Map();
+  const genOf = w => {
+    if (gen.has(w.id)) return gen.get(w.id);
+    const ps = w.parents.map(id => world.wobblins.find(x => x.id === id)).filter(Boolean);
+    const g = ps.length ? 1 + Math.max(...ps.map(genOf)) : 1;
+    gen.set(w.id, g);
+    return g;
+  };
+  const name = id => (world.wobblins.find(x => x.id === id) || {}).name || '?';
+  const all = world.wobblins.slice();
+  const maxGen = Math.max(1, ...all.map(genOf));
+  const rows = [];
+  for (let g = maxGen; g >= 1; g--) {
+    const ws = all.filter(w => genOf(w) === g).sort((a, b) => (b.alive - a.alive) || a.bornTick - b.bornTick);
+    if (!ws.length) continue;
+    const living = ws.filter(w => w.alive);
+    const shown = [...living, ...ws.filter(w => !w.alive).slice(-6)];
+    rows.push(h('div', { class: 'gen' }, h('h3', { class: 'sub' }, g === 1 ? 'Founders and wanderers' : 'Generation ' + g),
+      h('div', { class: 'fam' }, shown.map(w => {
+        const top = Object.entries(w.traits).sort((a, b) => b[1] - a[1]).slice(0, 2);
+        const card = h('button', { class: 'kin' + (w.alive ? '' : ' gone'), onclick: () => w.alive && onPick(w) },
+          portrait(w, 52), h('b', {}, w.name),
+          h('small', {}, top.map(([k, v]) => TRAIT_SHORT[k] + ' ' + Math.max(1, Math.round(v * 10))).join(' · ')),
+          h('small', { class: 'par' }, w.parents.length ? 'of ' + w.parents.map(name).join(' & ') : w.alive ? (w.partnerId ? 'with ' + name(w.partnerId) : 'single') : 'remembered'));
+        return card;
+      }))));
+  }
+  const pairs = world.wobblins.filter(w => w.alive && w.partnerId && w.id < w.partnerId).length;
+  panel.replaceChildren(h('h2', {}, 'The family of ' + world.colonyName),
+    h('p', { class: 'muted' }, `${all.filter(w => w.alive).length} alive · ${pairs} pair${pairs === 1 ? '' : 's'} · ${maxGen} generation${maxGen === 1 ? '' : 's'}. Babies take after one parent or the other in each trait. To breed for a trait, set two single Wobblins who have it down together, somewhere with a hut.`),
+    ...rows, closeButton(panel));
+  panel.hidden = false;
+}
+
 // ---- the Keeper's path: ages and goals ----------------------------------------
-export function showGoals(panel, world, { states, age, onClaim }) {
+export function showGoals(panel, world, { states, age, onClaim, feedback }) {
   const nextOpen = states.find(g => g.state === 'open');
   const rows = states.map(g => h('li', { class: 'goal ' + g.state },
     h('span', { class: 'tick' }, g.state === 'claimed' ? '✓' : g.state === 'ready' ? '!' : ''),
@@ -119,7 +156,9 @@ export function showGoals(panel, world, { states, age, onClaim }) {
   panel.replaceChildren(h('h2', {}, "The Keeper's path"),
     h('p', { class: 'age-line' }, h('b', {}, age.name), ' · ' + done + ' of ' + states.length + ' milestones'),
     h('p', { class: 'muted' }, 'Milestones are things to aim for. Each one you reach deepens their belief in you, and belief unlocks new powers.'),
-    h('ul', { class: 'goals' }, rows), closeButton(panel));
+    h('ul', { class: 'goals' }, rows),
+    feedback ? h('p', { class: 'goals-foot' }, h('a', { href: feedback.url, target: '_blank', rel: 'noopener' }, feedback.label)) : '',
+    closeButton(panel));
   panel.hidden = false;
 }
 

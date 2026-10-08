@@ -13,7 +13,7 @@ import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
 import { wantOf } from '../render/render.js';
 import { narrateRecap } from '../ai/narrate.js';
 import { buildRecap, buildRecapInput } from '../sim/recap.js';
-import { showRecapCard, showChronicle, showBook, showWobblinCard, showGoals } from './panels.js';
+import { showRecapCard, showChronicle, showBook, showWobblinCard, showGoals, showFamily } from './panels.js';
 import { goalStates, ageOf, progressOf } from '../sim/goals.js';
 import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 import { trayItems, ICONS, zoneAt } from './inventory.js';
@@ -701,6 +701,7 @@ function drawHud() {
   btn('Chronicle', () => showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }));
   btn('Discovery Book', () => showBook($('#panel'), world), '', 'Book');
   btn('Goals', () => openGoals());
+  btn('Family', () => showFamily($('#panel'), world, { onPick: w => showWobblin(w) }));
   if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.innerHTML = `<span class="full">${FEEDBACK_LABEL}</span><span class="short">Feedback</span>`; row.append(a); }
   if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow');
   const snd = document.createElement('button');
@@ -760,7 +761,7 @@ function claimGoal(id) {
 }
 function openGoals() {
   const prog = progressOf(world);
-  showGoals($('#panel'), world, { states: goalStates(world, prog), age: ageOf(world, prog), onClaim: claimGoal });
+  showGoals($('#panel'), world, { states: goalStates(world, prog), age: ageOf(world, prog), onClaim: claimGoal, feedback: WAITLIST_URL ? { url: WAITLIST_URL, label: FEEDBACK_LABEL } : null });
 }
 
 const WANT_WORD = { hungry: 'hungry', cold: 'cold', scared: 'scared', tired: 'worn out', idea: 'missing something', sad: 'sad', lonely: 'lonely' };

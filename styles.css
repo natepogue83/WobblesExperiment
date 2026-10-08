@@ -471,3 +471,17 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 #panel .name-btn { background: none; color: inherit; padding: 0 2px; min-height: 0; box-shadow: none; border-radius: 0; font: inherit; font-size: inherit; }
 #stage.title { overflow: hidden !important; }
 #stage.title #world { display: none; }
+
+/* Family */
+.gen { margin: 6px 0 4px; }
+.fam { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.kin { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 4px; border: 0; border-radius: 14px; background: #f3ead6; color: var(--ink); cursor: pointer; font: inherit; }
+#panel .kin { background: #f3ead6; color: var(--ink); min-height: 0; box-shadow: 0 2px 0 #e2d5b8; }
+#panel .kin:hover { background: #fff1d0; }
+.kin b { font: 600 14px var(--display); }
+.kin small { font-size: 11px; color: #8a6a44; text-align: center; line-height: 1.25; }
+.kin small.par { color: var(--muted); }
+#panel .kin.gone { opacity: .5; cursor: default; filter: grayscale(.6); }
+@media (max-width: 700px) { .hud-buttons a.waitlist { display: none; } }
+.goals-foot { margin: 6px 0 0; font-size: 13px; }
+.goals-foot a { color: #b5602a; font-weight: 700; }
