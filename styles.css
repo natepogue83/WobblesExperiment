@@ -666,3 +666,14 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
   .tile .icon { width: 30px; height: 26px; }
   .tile .name { font-size: 10px; }
 }
+
+/* They see your power coming: the timid brace and sweat, the eager bounce. */
+.wobblin.brace .wobble { animation: brace .45s ease-in-out infinite alternate !important; transform-origin: 50% 100%; }
+@keyframes brace { from { transform: scale(1.05, .93); } to { transform: scale(1.1, .88) translateX(.7px); } }
+.wobblin.eager .wobble { animation: bounce .42s ease-in-out infinite !important; }
+.antic-mark .sweat { animation: sweat 1s ease-in infinite; }
+.antic-mark .sweat.s2 { animation-delay: .45s; }
+@keyframes sweat { 0% { opacity: 0; transform: translateY(-2px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(10px); } }
+.antic-mark .twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle .7s ease-in-out infinite alternate; }
+.antic-mark .twinkle.t2 { animation-delay: .35s; }
+@keyframes twinkle { from { transform: scale(.6) rotate(0); opacity: .6; } to { transform: scale(1.15) rotate(25deg); opacity: 1; } }

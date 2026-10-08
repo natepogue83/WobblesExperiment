@@ -50,6 +50,7 @@ All of these replay exactly and never teach the Wobblins anything.
   - into the garden: the crops are flattened for a while and the gardeners are cross
 - **Catch a flung Wobblin in mid-air** and throw it again to juggle it. The playful shriek with joy; the rest go green.
 - **Hold one still** and it dozes off in your hand. **Shake it** and it wobbles like jelly and stays rattled. **Poke it over and over** and it giggles, gets cross, then runs off.
+- **They see it coming.** Hover lightning or a boulder over them and the timid brace and sweat while the bold bounce with excitement; hover seeds or a gift and they all perk up.
 - **Drop powers on a Wobblin's head:**
   - stones: a bonk, which sometimes knocks an idea loose
   - a boulder: squashed flat. It can hurt, but never kills.

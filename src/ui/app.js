@@ -453,7 +453,9 @@ function wireTile(tile, item) {
     onMove: ev => {
       if (!ghost) return;
       ghost.move(ev.clientX, ev.clientY);
-      drawHint(svg, overSvg(svg, ev.clientX, ev.clientY) ? item.hint(toSvgPoint(svg, ev.clientX, ev.clientY), ctx()) : null);
+      const over = overSvg(svg, ev.clientX, ev.clientY), pt = over && toSvgPoint(svg, ev.clientX, ev.clientY);
+      drawHint(svg, over ? item.hint(pt, ctx()) : null);
+      anticipate(svg, item, pt);
     },
     onDrop: ev => {
       if (!ghost) { toast(item.label + ' is not ready yet.'); return; }
@@ -465,7 +467,55 @@ function wireTile(tile, item) {
   });
 }
 
+// While you hover a power over them, they see it coming: the timid brace (and
+// sweat), the eager bounce. Bold ones can't wait for the lightning.
+const VALLEY_WIDE = new Set(['quake', 'cold', 'warm', 'rain']);
+let anticAt = 0;
+const anticIds = new Set();
+function anticipation(item, w) {
+  const T = w.traits;
+  switch (item.id) {
+    case 'lightning': return T.boldness > 0.65 ? 'eager' : 'brace';
+    case 'boulder': return T.playfulness > 0.75 ? 'eager' : 'brace';
+    case 'quake': case 'cold': return T.boldness > 0.75 ? null : 'brace';
+    case 'stones': return T.playfulness > 0.55 || T.curiosity > 0.6 ? 'eager' : null;
+    case 'rain': return T.playfulness > 0.55 ? 'eager' : null;
+    case 'bush': case 'tree': case 'gift': case 'bless': case 'curio': case 'warm': case 'water': case 'miracle': return 'eager';
+  }
+  return null;
+}
+function anticipate(svg, item, pt) {
+  const now = Date.now();
+  if (pt && now - anticAt < 90) return;
+  anticAt = now;
+  const want = new Map();
+  if (pt && lastRS) for (const w of lastRS.wobblins) {
+    const q = puppets.position(w.id) || w;
+    if (!VALLEY_WIDE.has(item.id) && Math.hypot(q.x - pt.x, q.y - 30 - pt.y) > 150) continue;
+    const me = world.wobblins.find(x => x.id === w.id);
+    const k = me && anticipation(item, me);
+    if (k) want.set(w.id, k);
+  }
+  for (const id of [...anticIds]) {
+    if (want.get(id)) continue;
+    const g = svg.querySelector('#' + id);
+    if (g) { g.classList.remove('brace', 'eager'); g.querySelector('.antic-mark')?.remove(); }
+    anticIds.delete(id);
+  }
+  for (const [id, k] of want) {
+    const g = svg.querySelector('#' + id);
+    if (!g || g.classList.contains(k)) continue;
+    g.classList.remove('brace', 'eager'); g.querySelector('.antic-mark')?.remove();
+    g.classList.add(k);
+    g.insertAdjacentHTML('beforeend', k === 'brace'
+      ? '<g class="antic-mark"><path class="sweat" d="M19 -46 q-3 4.5 0 6.5 q3 -2 0 -6.5 Z" fill="#9fd4f5" stroke="#fff" stroke-width=".8"/><path class="sweat s2" d="M-21 -40 q-2.4 3.6 0 5.2 q2.4 -1.6 0 -5.2 Z" fill="#9fd4f5" stroke="#fff" stroke-width=".8"/></g>'
+      : '<g class="antic-mark"><path class="twinkle" d="M0 -78 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#ffe36b" stroke="#e0a83a" stroke-width=".8"/><path class="twinkle t2" d="M-17 -66 l1.3 3 3 1.3 -3 1.3 -1.3 3 -1.3 -3 -3 -1.3 3 -1.3 Z" fill="#fff3a0"/></g>');
+    anticIds.add(id);
+  }
+}
+
 function endDrag(ghost) {
+  anticipate($('#world'), {}, null);
   ghost.remove();
   clearHint($('#world'));
   dragging = false;
