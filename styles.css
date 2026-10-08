@@ -634,3 +634,13 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 @keyframes drip { 0% { opacity: 0; transform: translateY(-2px); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
 .wobblin:has(.drips):not(.landed):not(.held) .wobble { animation: shiver .24s linear infinite !important; }
 @keyframes shiver { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-.7px); } 75% { transform: translateX(.7px); } }
+
+/* Your hand overhead: a wave hello from those who trust you, a duck-and-cover from the wary. */
+.wobblin.greet .arm.r, .wobblin.cower .arm { visibility: hidden; }
+.wobblin .hello-arm { transform-box: fill-box; transform-origin: 50% 100%; animation: hello .28s ease-in-out 6 alternate; }
+@keyframes hello { from { transform: rotate(-12deg); } to { transform: rotate(22deg); } }
+.wobblin.greet .wobble { animation: bounce .55s ease-in-out 2 !important; }
+.wobblin.cower .gesture { animation: cover 1.5s ease-out; }
+@keyframes cover { 0% { opacity: 0; transform: translateY(-4px); } 12% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
+.wobblin.cower .wobble { animation: cower 1.5s ease-out !important; transform-origin: 50% 100%; }
+@keyframes cower { 0% { transform: none; } 12% { transform: scale(1.14, .8); } 20% { transform: scale(1.14, .8) translateX(-1px); } 28% { transform: scale(1.14, .8) translateX(1px); } 80% { transform: scale(1.1, .84); } 100% { transform: none; } }

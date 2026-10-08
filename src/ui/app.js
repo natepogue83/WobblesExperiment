@@ -112,7 +112,39 @@ window.addEventListener('pointermove', ev => {
   if (!world || !svg || !overSvg(svg, ev.clientX, ev.clientY)) return;
   const p = toSvgPoint(svg, ev.clientX, ev.clientY);
   puppets.lookAt(p.x, p.y);
+  greetHand(svg, p);
 });
+
+// Hover your hand over one: those who trust you wave hello, the wary cover their heads.
+const greeted = {};
+let greetCheck = 0;
+function greetHand(svg, p) {
+  const now = Date.now();
+  if (dragging || now - greetCheck < 120 || !lastRS) return;
+  greetCheck = now;
+  let best = null, bd = 70;
+  for (const w of lastRS.wobblins) {
+    const q = puppets.position(w.id) || w;
+    const d = Math.hypot(q.x - p.x, (q.y - 50 - p.y) * 0.8);
+    if (d < bd) { bd = d; best = w; }
+  }
+  if (!best || now - (greeted[best.id] || 0) < 6000) return;
+  const me = world.wobblins.find(x => x.id === best.id);
+  const kind = me && me.faith > 0.35 ? 'greet' : me && me.faith < -0.15 ? 'cower' : null;
+  const g = kind && svg.querySelector('#' + best.id);
+  if (!g || g.classList.contains('held')) return;
+  greeted[best.id] = now;
+  // Arms drawn in front of the body for the gesture (the real ones sit behind it).
+  const build = g.querySelector('.build'), fill = g.querySelector('.arm.r')?.getAttribute('fill') || '#9c9';
+  if (!build) return;
+  build.querySelector('.gesture')?.remove();
+  const arm = (cx, cy, rot, cls = '') => `<ellipse class="${cls}" cx="${cx}" cy="${cy}" rx="4.2" ry="6.5" fill="${fill}" transform="rotate(${rot} ${cx} ${cy})"/>`;
+  build.insertAdjacentHTML('beforeend', kind === 'greet'
+    ? `<g class="gesture"><g class="hello-arm">${arm(25, -27, 205)}</g></g>`
+    : `<g class="gesture">${arm(-9, -41, 115)}${arm(9, -41, -115)}</g>`);
+  g.classList.remove('greet', 'cower'); void g.getBBox(); g.classList.add(kind);
+  setTimeout(() => { g.classList.remove(kind); build.querySelector('.gesture')?.remove(); }, 1600);
+}
 
 function frame(now) {
   const dt = Math.min(64, now - (lastFrame || now)); lastFrame = now;
