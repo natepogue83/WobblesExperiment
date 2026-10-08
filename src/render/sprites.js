@@ -115,6 +115,11 @@ function paintSVG(i) {
   return `<g class="paint" opacity=".93">` + splat(-9, -36, 5.5, a, 0.3) + splat(9, -38, 3.4, c, 1.1) + splat(-19, -15, 6, b, 0.7, 6) +
     splat(18, -12, 5.2, a, 0.2, 5) + splat(2, -5, 4.2, c, 0.9) + splat(-9, -3, 2.6, a, 0) + `<circle cx="23" cy="-24" r="1.6" fill="${b}"/><circle cx="-24" cy="-28" r="1.4" fill="${c}"/></g>`;
 }
+// Cold snap: a knitted hat for anyone who knows Weaving (the sprout pokes out the top).
+const KNIT_HAT = '<g class="knit-hat"><path d="M-19.5 -31 Q-18 -45 0 -45.5 Q18 -45 19.5 -31 Q0 -35 -19.5 -31 Z" fill="#d9573f" stroke="#a63d2b" stroke-width="1"/>' +
+  '<path d="M-14 -39 Q0 -43 14 -39" stroke="#f6c453" stroke-width="2.2" fill="none"/>' +
+  '<path d="M-20.5 -32 Q0 -36.5 20.5 -32 L20 -27.6 Q0 -32 -20 -27.6 Z" fill="#f2efe6" stroke="#c9c1ae" stroke-width=".9"/>' +
+  [-16, -11, -6, -1, 4, 9, 14].map(x => `<path d="M${x} ${(-34 + (x * x) / 190).toFixed(1)} v3.6" stroke="#d6cfbd" stroke-width="1"/>`).join('') + '</g>';
 // Rain: a big leaf held up as an umbrella, or puddle-stomping splashes.
 const LEAF_UMBRELLA = '<g class="leaf-umbrella"><path d="M21 -14 Q24 -40 6 -58" stroke="#5e7f2e" stroke-width="2" fill="none" stroke-linecap="round"/>' +
   '<path d="M-26 -52 Q-6 -78 30 -62 Q20 -50 2 -50 Q-14 -48 -26 -52 Z" fill="#6fae46" stroke="#4f8a32" stroke-width="1.2"/>' +
@@ -184,6 +189,7 @@ export function wobblinSVG(w, opts = {}) {
       ${w.zapped ? ZAP_FRIZZ : ''}
       ${w.paint !== null && w.paint !== undefined ? paintSVG(w.paint) : ''}
       ${w.wet ? WET_DRIPS : ''}
+      ${w.hat ? KNIT_HAT : ''}
       ${w.rain === 'leaf' ? LEAF_UMBRELLA : w.rain === 'splash' ? PUDDLE_SPLASH : ''}
       ${elder ? CANE : ''}
       ${carriedSVG(w.carry || [])}

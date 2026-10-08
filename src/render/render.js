@@ -176,6 +176,8 @@ export function renderState(world) {
       ask: ((world.asks || []).find(a => !a.done && a.by === w.id) || {}).want || null, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
       wet: (w.wetUntil || 0) > world.tick, paint: paintOf(world, w),
       // In the rain the playful splash about; everyone else hides under a big leaf.
+      // In a cold snap, the ones who know Weaving wear a knitted hat.
+      hat: world.climate.season === 'cold' && !!w.knows.weaving,
       rain: world.climate.rain > 0 ? (w.stage !== 'baby' && w.traits.playfulness > 0.6 ? 'splash' : 'leaf') : null,
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
