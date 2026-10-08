@@ -104,7 +104,7 @@ export function showBook(panel, world) {
 }
 
 // ---- wobblin card -------------------------------------------------------------
-export function showWobblinCard(panel, world, w, { onBless }) {
+export function showWobblinCard(panel, world, w, { onBless, wantText }) {
   const age = world.tick - w.bornTick;
   const pct = v => Math.round(v * 100);
   const traits = h('ul', { class: 'traits' }, Object.entries(w.traits).map(([k, v]) =>
@@ -116,6 +116,7 @@ export function showWobblinCard(panel, world, w, { onBless }) {
     h('div', { class: 'card-head' }, portrait(w, 64), h('div', {},
       h('h2', {}, w.name),
       h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`))),
+    wantText ? h('p', { class: 'want-line' }, wantText) : '',
     traits,
     h('p', {}, h('b', {}, 'Knows: '), knows.length ? knows.join(', ') : 'nothing yet'),
     w.beliefs.length ? h('p', {}, h('b', {}, 'Believes: '), w.beliefs.map(b => b.replace(/_/g, ' ')).join(', ')) : '',

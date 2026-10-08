@@ -5,7 +5,10 @@ import { experimentPreview } from '../sim/experiment.js';
 import { renderState, drawSVG } from '../render/render.js';
 import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clearSave,
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
-import { nowTickFor, localDayIndex, localHour } from './clock.js';
+import { nowTickFor, localDayIndex, localHour, setClockMode, heartbeat, msToNextTick } from './clock.js';
+import { Puppets } from './puppets.js';
+import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
+import { wantOf } from '../render/render.js';
 import { narrateRecap } from '../ai/narrate.js';
 import { buildRecap, buildRecapInput } from '../sim/recap.js';
 import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panels.js';
@@ -25,9 +28,15 @@ let lastRS = null;          // the render state on screen (positions for hit tes
 let dragging = false;       // pause redraws while something is in the air
 let armed = null;           // a tray item tapped (not dragged): next valley tap drops it
 let highlight = [];
-const dropped = {};
+const dropped = {};         // wobblinId -> { at, dizzy } just set down by the Keeper
 const EMOTE_MS = 4000;
-let emoteEvent = null, emoteUntil = 0, emoteTimer = 0;         // wobblinId -> { x, y, tick, at } where the Keeper set it down
+let emoteEvent = null, emoteUntil = 0, emoteTimer = 0;
+const puppets = new Puppets();
+let shownUnlock = null;
+let wiping = false;         // erasing the save: never write it back on the way out
+function wipe() { wiping = true; clearSave(); location.href = location.pathname + location.search.replace(/[?&]fresh=1/, ''); }     // last power_unlocked event already celebrated
+const UNLOCK_OF = { stones: 'stone', boulder: 'stone', bush: 'plant', tree: 'plant', rain: 'rain', lightning: 'lightning', water: 'water',
+  cold: 'season', warm: 'season', bless: 'bless', curio: 'curio', gift: 'gift', miracle: 'miracle' };
 
 function offset() {
   try { return Number(localStorage.getItem(DEBUG_OFFSET_KEY)) || 0; } catch { return 0; }
@@ -44,6 +53,7 @@ function centerStage() {
 function boot() {
   setTimeout(centerStage, 50);
   wireValley();
+  if (DEBUG && params.get('fresh') === '1') { wipe(); return; }   // dev: start over
   save = loadSave();
   if (!save) { showNewColony(); return; }
   const now = nowTick();
@@ -51,9 +61,28 @@ function boot() {
   const from = Math.min(save.lastSeenTick, now);
   if (now > from) showRecap(from, now);
   save.lastSeenTick = now;
+  startWatching();
+}
+
+// While the page is open a colony day passes every minute; away, every hour.
+function startWatching() {
+  setClockMode(save, 'watch', Date.now());
   storeSave(save);
   draw();
-  setInterval(advance, 1000);
+  setInterval(() => advance(false), 1000);
+  requestAnimationFrame(frame);
+  document.addEventListener('visibilitychange', () => {
+    if (!save || !world) return;
+    if (wiping) return;
+    if (document.hidden) { setClockMode(save, 'away', Date.now()); storeSave(save); }
+    else { advance(true); setClockMode(save, 'watch', Date.now()); storeSave(save); }
+  });
+  window.addEventListener('pagehide', () => { if (save && !wiping) { setClockMode(save, 'away', Date.now()); storeSave(save); } });
+}
+
+function frame(now) {
+  if (world) { puppets.step(now); puppets.apply($('#world'), now); }
+  requestAnimationFrame(frame);
 }
 
 function showNewColony() {
@@ -63,28 +92,28 @@ function showNewColony() {
     save = newSave({
       seed: randomSeed(), createdAt: Date.now(),
       colonyName: $('#colonyName').value.trim() || undefined,
-      keeperName: $('#keeperName').value.trim() || undefined
+      keeperName: $('#keeperName').value.trim() || undefined,
+      progression: true
     });
     setOffset(0);
-    storeSave(save);
     $('#newColony').hidden = true;
     world = replay(save, nowTick());
-    draw();
-    toast('Drag things from your tray onto the valley. You can pick Wobblins up, too.');
-    setInterval(advance, 1000);
+    startWatching();
+    toast('Three Wobblins just woke up. See what they need, and drag things from your tray to help. You can pick them up, too.');
   };
 }
 
 // Advance the live world when the real clock (or the warp) crosses a boundary.
-function advance() {
+function advance(returning = false) {
   if (dragging) return;   // never yank the valley out from under a drag
+  heartbeat(save, Date.now());
   const now = nowTick();
-  if (now <= world.tick) return;
+  if (now <= world.tick) { if (Date.now() % 5000 < 1000) storeSave(save); drawHud(); drawTray(); return; }
   const from = world.tick;
   while (world.tick < now) tick(world);
   save.lastSeenTick = now;
   storeSave(save);
-  if (now - from >= 6) showRecap(from, now);
+  if (returning && now - from >= 2) showRecap(from, now);
   draw();
 }
 
@@ -158,6 +187,11 @@ function giftMenu(slot) {
 
 // ------------------------------------------------------------ the tray
 function itemState(item) {
+  const key = UNLOCK_OF[item.id];
+  if (key && !isUnlocked(world, key)) {
+    const u = UNLOCKS.find(x => x.key === key);
+    return { ready: false, locked: true, left: 0, frac: 0, note: 'belief ' + u.at };
+  }
   if (item.id === 'gift') {
     const used = world.giftsByDay[localDayIndex(Date.now())] !== undefined;
     return { ready: !used, left: 0, frac: used ? 1 : 0, note: used ? 'tomorrow' : '' };
@@ -167,12 +201,26 @@ function itemState(item) {
   const poor = item.cost && world.devotion < item.cost && !(item.id === 'cold' || item.id === 'warm');
   const seasonPoor = (item.id === 'cold' || item.id === 'warm') && world.seasonUses > 0 && world.devotion < 10;
   return { ready: left === 0 && !poor && !seasonPoor, left, frac: left / (CONST.COOLDOWN[item.cd] || 1),
-    note: left ? left + 'h' : (poor || seasonPoor) ? 'needs Devotion' : '' };
+    note: left ? timeLeft(left) : (poor || seasonPoor) ? 'needs Devotion' : '' };
+}
+
+// Cooldowns are in colony days; show the real time left at the current speed.
+function timeLeft(ticks) {
+  const watching = save.clock && save.clock.mode === 'watch';
+  if (!watching) return ticks + 'h';
+  const secs = Math.ceil(((ticks - 1) * 60_000 + msToNextTick(save, Date.now())) / 1000);
+  return secs >= 60 ? Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') : secs + 's';
+}
+
+// The render state with where the Wobblins actually are right now.
+function liveRS() {
+  return { ...lastRS, wobblins: lastRS.wobblins.map(w => ({ ...w, ...(puppets.position(w.id) || {}) })) };
 }
 
 function ctx() {
-  return { world, rs: lastRS, hasPond: hasPond(world), blessMenu, curioMenu, giftMenu };
+  return { world, rs: liveRS(), hasPond: hasPond(world), blessMenu, curioMenu, giftMenu };
 }
+const freshTiles = new Set();
 
 function dropItem(item, pt) {
   const res = item.drop(pt, ctx());
@@ -185,10 +233,14 @@ function drawTray() {
   for (const row of ['powers', 'nudges']) {
     const bar = $('#' + row);
     bar.replaceChildren();
+    // Show what you have, plus a teaser of the next power their belief will unlock.
+    const next = nextUnlock(world);
     for (const item of TRAY.filter(i => i.row === row)) {
+      const key = UNLOCK_OF[item.id];
+      if (key && !isUnlocked(world, key) && (!next || next.key !== key)) continue;
       const st = itemState(item);
       const tile = document.createElement('button');
-      tile.className = 'tile' + (st.ready ? '' : ' cooling') + (armed === item ? ' armed' : '') +
+      tile.className = 'tile' + (st.locked ? ' locked' : st.ready ? '' : ' cooling') + (armed === item ? ' armed' : '') + (freshTiles.has(item.id) ? ' new' : '') +
         (item.id === 'gift' && st.ready ? ' pulse' : '');
       tile.style.setProperty('--cd', st.frac);
       tile.innerHTML = `<span class="icon">${ICONS[item.id]}</span><span class="name">${item.label}</span>` +
@@ -206,6 +258,8 @@ function wireTile(tile, item) {
   press(tile, {
     onTap: () => {
       const st = itemState(item);
+      freshTiles.delete(item.id);
+      if (st.locked) { toast(item.label + ' unlocks when their belief in you reaches ' + st.note.split(' ')[1] + '. Do things they love.'); return; }
       if (!st.ready) { toast(item.label + ': ' + (st.note === 'tomorrow' ? 'one gift a day.' : st.note === 'needs Devotion' ? 'you need more Devotion.' : 'ready in ' + st.note + '.')); return; }
       armed = armed === item ? null : item;
       if (armed) toast('Drag ' + item.label.toLowerCase() + ' onto the valley, or tap where it should go.');
@@ -264,6 +318,7 @@ function wireWobblins(svg) {
       },
       onStart: () => {
         dragging = true;
+        puppets.pin(w.id, true);
         base = g.getAttribute('transform');
         trail = [];
         g.classList.add('held');
@@ -276,7 +331,7 @@ function wireWobblins(svg) {
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
         trail.push({ x: p.x, y: p.y, t: performance.now() });
         if (trail.length > 8) trail.shift();
-        const s = w.stage === 'baby' ? 0.93 : 1.6;
+        const s = w.stage === 'baby' ? 1.05 : 1.8;
         g.setAttribute('transform', `translate(${p.x},${p.y + 30}) scale(${s})`);
         const z = zoneAt(p);
         drawHint(svg, { x: p.x, y: p.y + 34, r: 30, ok: true, label: zoneLabel(z) });
@@ -287,12 +342,13 @@ function wireWobblins(svg) {
         svg.classList.remove('watching');
         clearHint(svg);
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
-        if (!overSvg(svg, ev.clientX, ev.clientY)) { g.setAttribute('transform', base); g.classList.remove('held'); return; }
+        if (!overSvg(svg, ev.clientX, ev.clientY)) { g.setAttribute('transform', base); g.classList.remove('held'); puppets.pin(w.id, false); return; }
         const v = releaseVelocity(trail);
         if (Math.hypot(v.x, v.y) > FLING_SPEED) { fling(svg, g, w, { x: p.x, y: p.y + 30 }, v); return; }
         const water = waterAt(p.x, p.y + 30);
         const zone = water || zoneAt(p);
-        dropped[w.id] = { x: Math.round(p.x), y: Math.round(p.y + 30), at: Date.now() };
+        dropped[w.id] = { at: Date.now() };
+        puppets.place(w.id, p.x, p.y + 30);
         act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}) });
       },
       onCancel: () => {
@@ -302,6 +358,7 @@ function wireWobblins(svg) {
         clearHint(svg);
         g.setAttribute('transform', base);
         g.classList.remove('held');
+        puppets.pin(w.id, false);
       }
     });
   }
@@ -352,7 +409,7 @@ function waterAt(x, y) {
 function fling(svg, g, w, start, v) {
   dragging = true;
   g.classList.add('flying');
-  const s = w.stage === 'baby' ? 0.93 : 1.6;
+  const s = w.stage === 'baby' ? 1.05 : 1.8;
   // Thrown downward, it lands further down the valley (maybe in the river).
   const ground = Math.max(300, Math.min(640, start.y + 25 + Math.max(0, v.y) * 140));
   let x = start.x, y = start.y, vx = v.x, vy = v.y, spin = 0, bounces = 0, last = performance.now();
@@ -382,7 +439,8 @@ function land(svg, g, w, x, y, water) {
   g.classList.remove('flying');
   const zone = water || zoneAt({ x, y: y - 30 });
   fx.push({ kind: water ? 'splash' : 'dust', x, y, at: Date.now() });
-  dropped[w.id] = { x: Math.round(x), y: Math.round(y), at: Date.now(), dizzy: true };
+  dropped[w.id] = { at: Date.now(), dizzy: true };
+  puppets.place(w.id, x, y);
   if (water) toast(world.wobblins.find(o => o.id === w.id).name + ' went SPLASH. Brr.');
   act({ type: 'nudge', nudge: 'carry', target: w.id, zone, thrown: true, ...(water ? { splash: true } : {}) });
 }
@@ -419,30 +477,34 @@ function poke(g) {
 function draw() {
   if (dragging) return;
   const rs = renderState(world);
-  // A Wobblin you just set down lands exactly where you let go.
+  // Draw each Wobblin where its puppet is walking right now.
   for (const w of rs.wobblins) {
+    const pp = puppets.position(w.id);
+    if (pp) { w.x = pp.x; w.y = pp.y; }
     const d = dropped[w.id];
     if (!d) continue;
-    const fresh = Date.now() - d.at < 60_000 && world.wobblins.find(x => x.id === w.id).heldUntil > world.tick;
-    if (fresh) { w.x = d.x; w.y = d.y; w.landed = Date.now() - d.at < (d.dizzy ? 2600 : 900); } else delete dropped[w.id];
+    if (Date.now() - d.at < 2600) w.landed = Date.now() - d.at < (d.dizzy ? 2600 : 900); else delete dropped[w.id];
   }
   lastRS = rs;
   const svg = $('#world');
-  drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null });
+  drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null, offerings: world.offerings >= 1 });
+  puppets.sync(rs);
+  puppets.noteTeaching(world.events.filter(e => e.kind === 'taught' && e.t >= world.tick - 1).map(e => e.actors));
+  celebrateUnlocks();
   for (const w of rs.wobblins) {
     const el = w.landed && svg.querySelector('#' + w.id);
     if (!el) continue;
     el.classList.add('landed');
     if (dropped[w.id]?.dizzy) {
       el.classList.add('dizzy');
-      el.insertAdjacentHTML('beforeend', '<g class="stars" transform="translate(0,-44)"><g class="orbit"><path d="M10 0 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z"/><path d="M-12 2 l1.5 3 3 .7 -2 2 .6 3 -3 -1.4 -3 1.4 .6 -3 -2 -2 3 -.7 Z"/></g></g>');
+      el.insertAdjacentHTML('beforeend', '<g class="stars" transform="translate(0,-54)"><g class="orbit"><path d="M10 0 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z"/><path d="M-12 2 l1.5 3 3 .7 -2 2 .6 3 -3 -1.4 -3 1.4 .6 -3 -2 -2 3 -.7 Z"/></g></g>');
     }
   }
   drawFx(svg);
   wireWobblins(svg);
   drawHud();
   drawTray();
-  if (DEBUG) { drawDebug(); window.__wob = { world, rs, svg }; }   // dev inspection only
+  if (DEBUG) { drawDebug(); window.__wob = { world, rs, svg, puppets }; }   // dev inspection only
 }
 
 function drawHud() {
@@ -452,18 +514,68 @@ function drawHud() {
   hud.replaceChildren();
   const name = document.createElement('div'); name.className = 'colony'; name.textContent = world.colonyName;
   const line = document.createElement('div');
-  line.textContent = `Day ${world.tick + 1} · ${pop} Wobblins · Discoveries ${n}/30 · Devotion ${Math.round(world.devotion)}`;
+  const secs = Math.ceil(msToNextTick(save, Date.now()) / 1000);
+  const watching = save.clock && save.clock.mode === 'watch';
+  line.textContent = `Day ${world.tick + 1}` + (watching ? ` (next in ${secs}s)` : '') + ` · ${pop} Wobblins · Discoveries ${n}/30`;
+  const belief = document.createElement('div'); belief.className = 'belief';
+  const nu = nextUnlock(world);
+  const prev = [...UNLOCKS].reverse().find(u => world.unlocked.includes(u.key));
+  const frac = nu ? Math.max(0, Math.min(1, (world.belief - (prev ? prev.at : 0)) / Math.max(1, nu.at - (prev ? prev.at : 0)))) : 1;
+  belief.innerHTML = `<span class="label">Belief ${Math.floor(world.belief)}</span><span class="bar"><i style="width:${(frac * 100).toFixed(0)}%"></i></span><span class="next">${nu ? 'next: ' + nu.name + ' at ' + nu.at : 'all powers unlocked'}</span>`;
+  const needs = colonyNeeds();
+  const needLine = document.createElement('div'); needLine.className = 'needs';
+  needLine.textContent = needs || 'Everyone is doing fine.';
   const row = document.createElement('div'); row.className = 'hud-buttons';
   const btn = (label, fn, cls = '') => { const b = document.createElement('button'); b.textContent = label; b.className = cls; b.onclick = fn; row.append(b); };
   btn('Chronicle', () => showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }));
   btn('Discovery Book', () => showBook($('#panel'), world));
   if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.textContent = FEEDBACK_LABEL; row.append(a); }
   if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow');
-  hud.append(name, line, row);
+  hud.append(name, line, belief, needLine, row);
 }
 
+const WANT_WORD = { hungry: 'hungry', cold: 'cold', scared: 'scared', tired: 'worn out', idea: 'missing something', sad: 'sad', lonely: 'lonely' };
+function colonyNeeds() {
+  const c = {};
+  for (const w of (lastRS || renderState(world)).wobblins) if (w.want) c[w.want.kind] = (c[w.want.kind] || 0) + 1;
+  return Object.entries(c).map(([k, v]) => v + ' ' + WANT_WORD[k]).join(' · ');
+}
+
+// A new power is a moment: banner, and its tile glows until you use it.
+function celebrateUnlocks() {
+  const ups = world.events.filter(e => e.kind === 'power_unlocked');
+  if (shownUnlock === null) { shownUnlock = ups.length ? ups[ups.length - 1].id : 0; return; }
+  for (const e of ups.filter(e => e.id > shownUnlock)) {
+    shownUnlock = e.id;
+    for (const [id, key] of Object.entries(UNLOCK_OF)) if (key === e.data.power) freshTiles.add(id);
+    banner('Their belief grows. New power: ' + e.data.name + '!', 'Drag it from your tray.');
+  }
+}
+
+function banner(title, sub) {
+  const b = document.createElement('div');
+  b.className = 'banner';
+  b.innerHTML = `<b>${title}</b><span>${sub}</span>`;
+  document.body.append(b);
+  setTimeout(() => b.remove(), 4200);
+}
+
+const WANT_TEXT = {
+  hungry: n => `${n} is hungry. Berry bushes nearby would help (or carry them to some).`,
+  cold: n => `${n} is cold. A fire, a hut or a friend to huddle with would help.`,
+  scared: n => `${n} is scared. Give them a moment, or something they love.`,
+  tired: n => `${n} is worn out and needs a nap.`,
+  idea: (n, item) => `${n} keeps thinking about ${item}. Something is missing...`,
+  sad: n => `${n} feels low. Do something they love.`,
+  lonely: n => `${n} is lonely. Carry a friend over.`
+};
+const ITEM_WORD = { fire: 'fire', stones: 'stones', tree: 'trees', berry: 'berries', water: 'water', rain: 'rain', gift: 'something shiny', idea: 'an idea' };
+
 function showWobblin(w) {
-  showWobblinCard($('#panel'), world, w, { onBless: ww => { $('#panel').hidden = true; blessMenu(ww.id); } });
+  const lonely = !world.wobblins.some(o => o !== w && o.alive && o.zone === w.zone);
+  const want = wantOf(world, w, lonely);
+  const wantText = want ? WANT_TEXT[want.kind](w.name, ITEM_WORD[want.item] || want.item) : w.name + ' is happy right now.';
+  showWobblinCard($('#panel'), world, w, { wantText, onBless: ww => { $('#panel').hidden = true; if (isUnlocked(world, 'bless')) blessMenu(ww.id); else toast('Bless unlocks when their belief in you grows.'); } });
 }
 
 // Tapping a recap or Chronicle line haloes its subject.
@@ -538,7 +650,7 @@ function drawDebug() {
     toast(ok ? 'Replay matches the live world.' : 'MISMATCH: replay differs from live world!');
   };
   const reset = document.createElement('button'); reset.textContent = 'New colony';
-  reset.onclick = () => { if (window.confirm('Erase this colony and start over?')) { clearSave(); location.reload(); } };
+  reset.onclick = () => { if (window.confirm('Erase this colony and start over?')) wipe(); };
   tools.append(ex, im, verify, reset);
   const exp = document.createElement('div'); exp.className = 'dbg-exp';
   exp.textContent = 'experiments (p attempt · top candidates score/pSuccess):\n' + experimentPreview(world).map(x =>

@@ -5,6 +5,7 @@
 import { rngFor } from './rng.js';
 import { ADJACENT, slotInfo } from './geometry.js';
 import { alive, r3, clamp } from './util.js';
+import { addBelief, BELIEF } from './belief.js';
 
 export const EMOTES = ['love', 'like', 'curious', 'scared', 'upset'];
 const EFFECT = {
@@ -80,5 +81,9 @@ export function reactToAction(world, a, event) {
     w.faith = r3(clamp(w.faith + EFFECT[e].faith, -1, 1));
   }
   if (event) event.data.reactions = out;
+  // Their delight (or dismay) is what your power grows from.
+  let b = 0;
+  for (const e of Object.values(out)) b += BELIEF[e];
+  if (b) addBelief(world, b, event ? [{ event: event.id }] : []);
   return out;
 }

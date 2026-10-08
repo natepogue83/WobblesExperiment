@@ -5,11 +5,12 @@
 export const SAVE_KEY = 'wobblins.save.v1';
 export const DEBUG_OFFSET_KEY = 'wobblins.debugOffsetTicks';
 
-export function newSave({ seed, createdAt, colonyName, keeperName, barren } = {}) {
+export function newSave({ seed, createdAt, colonyName, keeperName, barren, progression } = {}) {
   const s = { v: 1, seed: seed >>> 0, createdAt, actions: [], lastSeenTick: 0 };
   if (colonyName) s.colonyName = colonyName;
   if (keeperName) s.keeperName = keeperName;
   if (barren) s.barren = true;
+  if (progression) s.progression = true;
   return s;
 }
 

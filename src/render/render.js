@@ -1,9 +1,12 @@
 // render.js — renderState(world) is pure data; drawSVG(svg, rs, opts) paints it.
 // Layers back to front: sky, hills, terrain, nature, structures, wobblins,
 // effects, halos. Every living Wobblin and live object gets a stable element id.
-import { VIEW, ZONES, ZONE_IDS, RIVER, GRAVEYARD, slotInfo } from '../sim/geometry.js';
+// The painted backdrop lives in scene.js; Wobblin art in sprites.js.
+import { VIEW, ZONES, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
-import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG } from './sprites.js';
+import { BY_ID } from '../sim/discoveries.js';
+import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG } from './sprites.js';
+import { sceneSVG, lightSVG, timeOfDay } from './scene.js';
 
 export const LAYERS = ['sky', 'hills', 'terrain', 'nature', 'structures', 'wobblins', 'effects', 'halos'];
 const NATURE = new Set(['tree', 'bush', 'sprout', 'stones', 'boulder', 'reeds', 'fish', 'clay', 'gift', 'curio', 'fire']);
@@ -27,6 +30,43 @@ function objectPos(o) {
 const BUBBLE = { discovery: 'spark', rediscovery: 'spark', misfire: 'smoke', experiment_failed: 'question', pondering: 'ponder', paired: 'heart', taught: 'question' };
 const BUBBLE_RANK = { spark: 5, smoke: 4, ponder: 3, heart: 2, question: 1 };
 
+// The face follows how they feel right now.
+export function faceOf(w) {
+  const n = w.needs;
+  if (w.activity === 'rest') return 'sleep';
+  if (n.warmth < 0.25) return 'cold';
+  if (n.safety < 0.4) return 'scared';
+  if (n.mood > 0.78) return 'happy';
+  if (n.mood < 0.35) return 'sad';
+  if (n.mood < 0.5) return 'meh';
+  return 'content';
+}
+
+// Stimulus token -> icon for "something's missing".
+const TOKEN_ICON = { fire: 'fire', kept_fire: 'fire', hearth: 'fire', stones: 'stones', boulder: 'stones', wall: 'stones', tree: 'tree',
+  bush: 'berry', sprout: 'berry', garden: 'berry', reeds: 'tree', river: 'water', pond: 'water', fish: 'water', wet: 'rain', clay: 'stones', gift: 'gift', curio: 'gift' };
+
+// What a Wobblin wants most right now (null if nothing pressing).
+export function wantOf(world, w, lonely) {
+  const n = w.needs;
+  if (n.food < 0.3) return { kind: 'hungry', item: 'berry' };
+  if (n.warmth < 0.32) return { kind: 'cold', item: 'cold' };
+  if (n.safety < 0.45) return { kind: 'scared', item: 'scared' };
+  if (n.rest < 0.18 && w.activity !== 'rest') return { kind: 'tired', item: 'tired' };
+  const p = world.pondering[w.id];
+  if (p) {
+    const ids = Object.keys(p).filter(d => world.tick - p[d] >= 6).sort((a, b) => p[a] - p[b]);
+    if (ids.length && BY_ID[ids[0]]) {
+      const st = BY_ID[ids[0]].stimuli.find(s => s.anyOf);
+      const tok = st ? st.anyOf[0] : 'idea';
+      return { kind: 'idea', item: TOKEN_ICON[tok] || (tok.startsWith('item:') ? 'gift' : 'idea'), discovery: ids[0] };
+    }
+  }
+  if (n.mood < 0.35) return { kind: 'sad', item: 'sad' };
+  if (lonely && w.traits.sociability > 0.6 && w.stage !== 'baby') return { kind: 'lonely', item: 'friend' };
+  return null;
+}
+
 export function renderState(world) {
   const evById = id => world.events[id - 1];
   const objects = world.objects.filter(o => !o.state.gone).map(o => {
@@ -46,16 +86,20 @@ export function renderState(world) {
     const who = e.kind === 'taught' ? e.actors[1] : e.actors[0];
     if (!bubbles[who] || BUBBLE_RANK[b] > BUBBLE_RANK[bubbles[who]]) bubbles[who] = b;
   }
-  // Spread Wobblins around their zone, stable per id and tick.
+  // Spread Wobblins around their zone, stable per id and tick (the UI's
+  // puppets then walk them around from here).
+  const live = world.wobblins.filter(w => w.alive);
   const perZone = {};
-  const wobblins = world.wobblins.filter(w => w.alive).map(w => {
+  const wobblins = live.map(w => {
     const z = ZONES[w.zone];
     const k = perZone[w.zone] = (perZone[w.zone] || 0) + 1;
     const r = rngFor(world.seed, 'pose', w.id, world.tick);
     const ring = (k - 1) % 5, row = Math.floor((k - 1) / 5);
+    const lonely = !live.some(o => o !== w && o.zone === w.zone);
     return {
       id: w.id, name: w.name, stage: w.stage, look: w.look, zone: w.zone, activity: w.activity,
       bubble: bubbles[w.id] || null,
+      face: faceOf(w), want: wantOf(world, w, lonely), mood: w.needs.mood,
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)
@@ -88,91 +132,81 @@ function el(tag, attrs, parent) {
   return e;
 }
 
-// Sky color from the player's real local hour (render-only).
-function skyColors(hour) {
-  if (hour < 5 || hour >= 21) return ['#1d2340', '#39406b'];
-  if (hour < 7) return ['#f2b48a', '#a9c2e0'];
-  if (hour < 18) return ['#9fd0f0', '#e4f3fb'];
-  return ['#f19a76', '#8c86b8'];
+// The backdrop only changes with the light, season and wet ground: cache it.
+let sceneCache = { key: null, svg: '' };
+function backdrop(rs, hour) {
+  const key = rs.seed + '|' + timeOfDay(hour) + '|' + Math.round(hour * 4) + '|' + rs.climate.season + '|' + (rs.climate.wetUntil >= rs.tick);
+  if (sceneCache.key !== key) sceneCache = { key, svg: sceneSVG(rs.seed, { hour, season: rs.climate.season, wet: rs.climate.wetUntil >= rs.tick }) };
+  return sceneCache.svg;
 }
+
+// One Wobblin's markup: body + whatever is over its head (reaction > event
+// bubble > what it wants).
+export function wobblinMarkup(w, { emote = null, lookDx = 0 } = {}) {
+  const face = emote === 'love' || emote === 'like' ? 'happy' : emote === 'scared' ? 'scared' : emote === 'upset' ? 'sad' : w.face;
+  const over = emote ? emoteSVG(emote) : w.bubble ? bubbleSVG(w.bubble) : wantSVG(w.want);
+  return wobblinSVG({ ...w, face }, { lookDx }) + over;
+}
+
+export function wobblinScale(w) { return 1.7 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1); }
 
 export function drawSVG(svg, rs, opts = {}) {
   svg.setAttribute('viewBox', `0 0 ${VIEW.w} ${VIEW.h}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');   // fill the screen, no letterbox
   svg.replaceChildren();
   const L = {};
   for (const name of LAYERS) L[name] = el('g', { id: 'layer-' + name }, svg);
   const hour = opts.hour ?? 12;
-  const night = hour < 6 || hour >= 20;
 
-  const [top, bottom] = skyColors(hour);
-  const defs = el('defs', {}, L.sky);
-  const grad = el('linearGradient', { id: 'skyg', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-  el('stop', { offset: 0, 'stop-color': top }, grad);
-  el('stop', { offset: 1, 'stop-color': bottom }, grad);
-  el('rect', { x: 0, y: 0, width: VIEW.w, height: VIEW.h, fill: 'url(#skyg)' }, L.sky);
-  if (night) {
-    const r = rngFor(rs.seed, 'stars');
-    for (let i = 0; i < 60; i++) el('circle', { cx: r() * VIEW.w, cy: r() * VIEW.horizonY, r: r() * 1.4 + 0.3, fill: '#fff', opacity: 0.7 }, L.sky);
-  }
-
-  const cold = rs.climate.season === 'cold';
-  el('path', { d: `M0 ${VIEW.horizonY + 40} Q250 120 520 ${VIEW.horizonY + 20} T1200 ${VIEW.horizonY + 10} V675 H0 Z`, fill: cold ? '#b9cbbf' : '#9cc48a' }, L.hills);
-  el('path', { d: `M0 ${VIEW.horizonY + 90} Q400 200 800 ${VIEW.horizonY + 70} T1200 ${VIEW.horizonY + 60} V675 H0 Z`, fill: cold ? '#aac2b2' : '#8fbb78' }, L.hills);
-
-  for (const id of ZONE_IDS) {
-    const z = ZONES[id];
-    el('ellipse', { id: 'zone-' + id, cx: z.cx, cy: z.cy, rx: z.rx, ry: z.ry, fill: 'rgba(255,255,255,0.08)', class: 'zone' }, L.terrain);
-  }
-  const rv = RIVER.map(([x, y], i) => (i ? 'L' : 'M') + x + ' ' + y).join(' ');
-  el('path', { d: rv, stroke: '#5f9fcf', 'stroke-width': 34, fill: 'none', 'stroke-linecap': 'round' }, L.terrain);
-  el('path', { d: rv, stroke: '#8cc3e8', 'stroke-width': 10, fill: 'none', 'stroke-linecap': 'round', opacity: 0.7 }, L.terrain);
-  if (rs.climate.wetUntil >= rs.tick) {
-    for (const id of ZONE_IDS) {
-      const z = ZONES[id];
-      el('ellipse', { cx: z.cx, cy: z.cy + 10, rx: z.rx * 0.5, ry: z.ry * 0.35, fill: 'rgba(110,80,50,0.18)' }, L.terrain);
-    }
-  }
+  L.sky.innerHTML = backdrop(rs, hour);
   const sh = ZONES.hill.shrine;
-  el('rect', { id: 'shrine', x: sh.x - 10, y: sh.y - 22, width: 20, height: 22, rx: 4, fill: '#cbbfa8', stroke: '#8f846f' }, L.structures);
+  const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y})`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
+  shrine.innerHTML = '<ellipse cx="0" cy="2" rx="18" ry="5" fill="rgba(0,0,0,.18)"/><rect x="-12" y="-26" width="24" height="26" rx="3" fill="#d6ccb5" stroke="#8f846f"/><path d="M-16 -26 L0 -38 L16 -26 Z" fill="#b9ab8e" stroke="#8f846f"/><circle cx="0" cy="-14" r="5" fill="#f3d36b"/>' +
+    (opts.offerings ? '<circle class="halo-soft" cx="0" cy="-14" r="26" fill="#ffe28a" opacity=".35"/>' : '');
 
   for (const o of rs.objects.slice().sort((a, b) => a.y - b.y)) {
     const g = el('g', { id: o.id, transform: `translate(${o.x},${o.y})`, class: 'obj obj-' + o.kind + (o.keeper && o.age < 1 ? ' fresh' : '') }, L[o.layer]);
     g.innerHTML = objectSVG(o);
   }
 
-  // Wobblins glance toward the newest Keeper object (instant reaction).
+  // Wobblins glance toward the newest Keeper act (instant reaction).
   const fresh = rs.reaction || rs.objects.filter(o => o.keeper && o.age <= 1).sort((a, b) => b.age - a.age).pop();
   const flinchZone = rs.reaction && rs.reaction.kind === 'lightning' ? rs.reaction.zone : null;
   for (const w of rs.wobblins.slice().sort((a, b) => a.y - b.y)) {
-    const s = 1.5 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1);
-    // How they feel about what you just did (shown for a few seconds).
+    const s = wobblinScale(w);
     const emote = opts.emotes && rs.reaction && rs.reaction.id === opts.emotes ? rs.reaction.reactions[w.id] : null;
     const g = el('g', { id: w.id, transform: `translate(${w.x},${w.y}) scale(${s})`,
       class: 'wobblin act-' + w.activity + (flinchZone === w.zone && !emote ? ' flinch' : '') + (emote ? ' react react-' + emote : '') }, L.wobblins);
     const lookDx = fresh ? Math.max(-1.5, Math.min(1.5, (fresh.x - w.x) / 60)) : 0;
-    g.innerHTML = wobblinSVG(w, { lookDx }) + (emote ? emoteSVG(emote) : bubbleSVG(w.bubble));
+    g.innerHTML = wobblinMarkup(w, { emote, lookDx });
   }
 
+  for (const f of rs.objects.filter(o => o.kind === 'fire' || o.kind === 'hearth')) {
+    el('circle', { cx: f.x, cy: f.y - 10, r: 80, fill: 'url(#fireglow)', class: 'fireglow', 'pointer-events': 'none' }, L.effects);
+  }
   if (rs.climate.rain > 0) {
     const r = rngFor(rs.seed, 'raindrops', rs.tick);
-    for (let i = 0; i < 90; i++) {
+    let drops = '';
+    for (let i = 0; i < 110; i++) {
       const x = r() * VIEW.w, y = r() * VIEW.h;
-      el('line', { x1: x, y1: y, x2: x - 6, y2: y + 18, stroke: 'rgba(200,220,255,0.6)', 'stroke-width': 2 }, L.effects);
+      drops += `<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x - 7).toFixed(0)}" y2="${(y + 20).toFixed(0)}" style="animation-delay:-${(r()).toFixed(2)}s"/>`;
     }
+    el('g', { class: 'rainfall' }, L.effects).innerHTML = drops;
+    el('rect', { width: VIEW.w, height: VIEW.h, fill: '#46566e', opacity: 0.18, 'pointer-events': 'none' }, L.effects);
   }
   if (rs.reaction && rs.reaction.kind === 'lightning') {
     const { x, y } = rs.reaction;
     el('path', { d: `M${x + 30} 0 L${x - 10} ${y * 0.45} L${x + 14} ${y * 0.5} L${x - 4} ${y - 10}`, class: 'bolt' }, L.effects);
+    el('rect', { width: VIEW.w, height: VIEW.h, class: 'flash', 'pointer-events': 'none' }, L.effects);
   }
   if (rs.reaction && rs.reaction.kind === 'miracle') {
     for (const [i, c] of ['#e66', '#eb5', '#ee6', '#6c6', '#69e', '#a7e'].entries()) {
       el('path', { d: `M150 520 A450 330 0 0 1 1050 520`, stroke: c, 'stroke-width': 10, fill: 'none', opacity: 0.55, transform: `translate(0 ${i * 10})` }, L.effects);
     }
   }
-  if (night) el('rect', { x: 0, y: 0, width: VIEW.w, height: VIEW.h, fill: 'rgba(20,24,60,0.32)', 'pointer-events': 'none' }, L.effects);
-  for (const f of rs.objects.filter(o => o.kind === 'fire' || o.kind === 'hearth')) {
-    el('circle', { cx: f.x, cy: f.y - 10, r: 70, fill: 'rgba(255,170,80,0.18)', 'pointer-events': 'none' }, L.effects);
-  }
+  const light = el('g', { class: 'light', 'pointer-events': 'none' }, L.effects);
+  light.innerHTML = '<defs><radialGradient id="fireglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb35a" stop-opacity="0"/></radialGradient></defs>' +
+    lightSVG(rs.seed, { hour, season: rs.climate.season });
 
   for (const id of opts.highlight || []) {
     const t = rs.objects.find(o => o.id === id) || rs.wobblins.find(w => w.id === id);

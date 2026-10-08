@@ -4,6 +4,7 @@ import { WORLD_VERSION, START_WOBBLINS, LIFE, COOLDOWN } from './constants.js';
 import { slotIds, slotInfo } from './geometry.js';
 import { r3, clamp01 } from './util.js';
 import { emit } from './events.js';
+import { initialUnlocks } from './belief.js';
 
 const SYL_A = ['Bi', 'Mi', 'To', 'Pu', 'Ny', 'Ze', 'Lo', 'Fi', 'Wu', 'Ka', 'Ro', 'Sa', 'Di', 'Hu', 'Qe', 'Ji'];
 const SYL_B = ['x', 'p', 'k', 'bble', 'mo', 'ri', 'n', 'zz', 'lo', 'sh', 'ff', 'ndle', 'ti', 'mp', 'v', 'ro'];
@@ -62,7 +63,7 @@ export function makeWobblin(world, spec) {
     lifespan,
     needs: { food: 0.8, warmth: 0.8, rest: 0.8, mood: 0.7, safety: 0.8 },
     zone: spec.zone || 'meadow',
-    activity: 'rest',
+    activity: 'hobby',            // awake and pottering about when you first meet them
     seen: [],
     knows: {},
     temp: {},
@@ -135,7 +136,9 @@ export function createWorld(seed, opts = {}) {
     lastKeeperTick: 0,
     wishes: [],                   // { id, by, want, t, until, event, done }
     lastFestival: null,
-    lastKeeperEvent: null,        // id of the latest salient Keeper event (murals)
+    lastKeeperEvent: null,
+    unlocked: initialUnlocks(!!opts.progression),   // tray keys you can use (belief.js)
+    belief: 0,                    // lifetime belief: unlocks powers        // id of the latest salient Keeper event (murals)
     noticed: {},                  // material kind -> first tick a Wobblin saw it
     events: [],
     nextIds: { w: 1, o: 1, e: 1 }

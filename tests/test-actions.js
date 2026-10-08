@@ -181,6 +181,29 @@ section('Every Keeper act gets a visible reaction');
   ok('lightning beside timid Wobblins scares them all; a blessing makes its target light up');
 }
 
+section('Belief unlocks powers (new games)');
+{
+  const w = createWorld(8, { progression: true });
+  rejects(w, { seq: 1, t: 0, type: 'power', power: 'lightning', slot: 'meadow.1' }, 'locked_power');
+  rejects(w, { seq: 2, t: 0, type: 'nudge', nudge: 'miracle' }, 'locked_power');
+  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'plant', 'stone']);
+  // Keep doing things they enjoy until Lightning opens up.
+  let seq = 10;
+  for (let i = 0; i < 200 && !w.unlocked.includes('lightning'); i++) {
+    for (const x of w.wobblins.filter(x => x.alive)) applyAction(w, { seq: ++seq, t: w.tick, type: 'nudge', nudge: 'carry', target: x.id, zone: x.zone });
+    const s2 = ['meadow', 'grove', 'hollow', 'hill'].flatMap(z => [1, 2, 3, 4, 5].map(n => z + '.' + n)).find(sl => !w.objects.some(o => !o.state.gone && (o.slot === sl || (o.slots || []).includes(sl))));
+    if (s2) applyAction(w, { seq: ++seq, t: w.tick, type: 'power', power: 'plant', slot: s2, variant: 'bush' });
+    tick(w);
+  }
+  const ups = w.events.filter(e => e.kind === 'power_unlocked').map(e => e.target);
+  assert.ok(ups.includes('rain') && ups.includes('bless') && ups.includes('lightning'), ups.join(','));
+  assert.ok(ups.indexOf('rain') < ups.indexOf('bless') && ups.indexOf('bless') < ups.indexOf('lightning'));
+  ok('a new game starts with hand, stones, seeds and the gift; their delight unlocked ' + ups.join(', ') + ' in that order (belief ' + w.belief + ')');
+  const old = createWorld(8);
+  assert.ok(['lightning', 'miracle', 'season'].every(k => old.unlocked.includes(k)));
+  ok('worlds without progression (old saves) keep every power');
+}
+
 section('Offerings');
 {
   const w = createWorld(41);

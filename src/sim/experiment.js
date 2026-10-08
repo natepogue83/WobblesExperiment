@@ -13,6 +13,7 @@ import { trait } from './creatures.js';
 import { isWet } from './nature.js';
 import { applyDiscoveryEffect, embodimentIndex, embodimentsFrom } from './effects.js';
 import { keeperRoot } from './causes.js';
+import { addBelief, BELIEF } from './belief.js';
 import { onExperimentFailed, onExperimentSucceeded, FIRE_DISCOVERIES } from './misfires.js';
 
 // ---------------------------------------------------------------- context
@@ -281,7 +282,10 @@ export function experimentStep(world) {
       ctx.knownByLiving.add(c.d.id);
       applyDiscoveryEffect(world, c.d, w, ev);
       // They credit the Keeper when a Keeper act led to it.
-      if (keeperRoot(world, ev)) w.faith = r3(clamp(w.faith + 0.1, -1, 1));
+      if (keeperRoot(world, ev)) {
+        w.faith = r3(clamp(w.faith + 0.1, -1, 1));
+        addBelief(world, BELIEF.discovery, [{ event: ev.id }]);
+      }
       if (world.pondering[w.id]) delete world.pondering[w.id][c.d.id];
       onExperimentSucceeded(world, w, c.d, r);
     } else {

@@ -18,7 +18,7 @@ export function applyActionsAt(world, sorted, from) {
 // replay(save, nowTick) -> world with world.tick === nowTick.
 // For t = 0..nowTick: apply actions with that t, then tick() if t < nowTick.
 export function replay(save, nowTick) {
-  const world = createWorld(save.seed, { colonyName: save.colonyName, keeperName: save.keeperName, barren: save.barren });
+  const world = createWorld(save.seed, { colonyName: save.colonyName, keeperName: save.keeperName, barren: save.barren, progression: save.progression });
   const sorted = sortActions(save.actions || []);
   let i = 0;
   for (;;) {

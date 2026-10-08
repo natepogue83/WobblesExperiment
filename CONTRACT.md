@@ -207,7 +207,24 @@ action list is packed by `src/ui/save.js` into tuples under key `a`:
 that does not fit a tuple is stored as its full object. In memory a save
 always holds full action objects.
 
-## 9. Clock
+## 9. Clock (two speeds)
+
+While the page is open a colony day (tick) passes every `WATCH_TICK_MS` (60 s);
+while away, every `TICK_MS` (1 h). The save keeps `clock: { anchorMs, anchorTick,
+mode: "watch"|"away", beatMs }` (`src/ui/clock.js`); a heartbeat means a crashed
+tab is never counted as watched. Saves without `clock` use createdAt at the away
+rate. The sim only ever sees the integer tick.
+
+## 9a. Belief unlocks powers
+
+New games are created with `save.progression = true`: the world starts with
+`unlocked = [carry, stone, plant, gift]`, and lifetime `world.belief` (from
+reactions, Keeper-rooted discoveries and collected offerings, `src/sim/belief.js`)
+unlocks rain 3, bless 6, lightning 10, water 16, curio 22, season 30, miracle 40,
+each with a `power_unlocked` event. Locked actions are rejected (`locked_power`).
+Worlds without progression (old saves, tests) have every power.
+
+## 9b. Old clock text
 
 `TICK_MS = 3_600_000` (1 tick = 1 real hour = 1 colony day). `?debug=1`
 shows a time-warp panel (+1h, +12h, +3d) that adds to a stored offset; the

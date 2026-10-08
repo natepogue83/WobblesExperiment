@@ -11,6 +11,7 @@ import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
 import { reactToAction } from './reactions.js';
+import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
 export const NUDGES = ['bless', 'curio', 'miracle', 'carry'];
@@ -71,6 +72,7 @@ export function validateAction(world, a) {
     const key = a.type === 'power' ? a.power : a.nudge;
     const list = a.type === 'power' ? POWERS : NUDGES;
     if (!list.includes(key)) return bad('unknown_' + a.type);
+    if (!isUnlocked(world, key)) return bad('locked_power');
     if (world.cooldowns[key] > world.tick) return bad('cooldown');
     if (world.devotion < costOf(world, key)) return bad('devotion');
   }
@@ -144,6 +146,7 @@ export function validateAction(world, a) {
   }
 
   if (a.type === 'gift') {
+    if (!isUnlocked(world, 'gift')) return bad('locked_power');
     if (!Number.isInteger(a.day)) return bad('day');
     if (world.giftsByDay[a.day] !== undefined) return bad('gift_used');
     if (!giftOptions(world.seed, a.day).includes(a.giftId)) return bad('gift_option');
@@ -321,7 +324,8 @@ function applyActionEffects(world, a) {
     const n = world.offerings;
     world.devotion = r3(world.devotion + n);
     world.offerings = 0;
-    emit(world, { kind: 'offerings_collected', data: { amount: n }, salience: 1, causes });
+    const ev = emit(world, { kind: 'offerings_collected', data: { amount: n }, salience: 1, causes });
+    addBelief(world, n * BELIEF.perOffering, [{ event: ev.id }]);
     return { ok: true };
   }
   return { ok: false, reason: 'unreachable' };

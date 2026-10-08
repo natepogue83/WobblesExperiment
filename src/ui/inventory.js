@@ -63,7 +63,7 @@ export function trayItems() {
   const slotDrop = (power, variant, okFn) => ({
     hint: (pt, { world }) => {
       const s = nearestSlot(world, pt, s => okFn(world, s));
-      if (!s) return { ...pt, r: 26, ok: false, label: 'no room here' };
+      if (!s) return { x: pt.x, y: pt.y, r: 26, ok: false, label: 'no room here' };
       const { x, y } = slotInfo(s);
       return { x, y, r: 22, ok: true };
     },
@@ -72,7 +72,7 @@ export function trayItems() {
       return s ? { type: 'power', power, slot: s, ...(variant ? { variant } : {}) } : { error: 'No room there. Try an open spot.' };
     }
   });
-  const anywhere = action => ({ hint: pt => ({ ...pt, r: 60, ok: true }), drop: () => action });
+  const anywhere = action => ({ hint: pt => ({ x: pt.x, y: pt.y, r: 60, ok: true }), drop: () => action });
   return [
     { row: 'powers', id: 'stones', label: 'Stones', cd: 'stone', ...slotDrop('stone', 'stones', (w, s) => free(w)(s)) },
     { row: 'powers', id: 'boulder', label: 'Boulder', cd: 'stone', ...slotDrop('stone', 'boulder', (w, s) => free(w)(s)) },
@@ -84,7 +84,7 @@ export function trayItems() {
       hint: (pt, { world, hasPond }) => {
         if (!hasPond) return { x: 915, y: 440, r: 60, ok: true, label: 'dig a pond' };
         const s = nearestSlot(world, pt, s => s.startsWith('riverbank'), 200);
-        return s ? { ...slotInfo(s), r: 24, ok: true, label: 'bend the river' } : { ...pt, r: 26, ok: false };
+        return s ? { ...slotInfo(s), r: 24, ok: true, label: 'bend the river' } : { x: pt.x, y: pt.y, r: 26, ok: false };
       },
       drop: (pt, { world, hasPond }) => {
         if (!hasPond) return { type: 'power', power: 'water' };
@@ -94,12 +94,12 @@ export function trayItems() {
     { row: 'powers', id: 'cold', label: 'Cold snap', cd: 'season', ...anywhere({ type: 'power', power: 'season', variant: 'cold' }) },
     { row: 'powers', id: 'warm', label: 'Warm spell', cd: 'season', ...anywhere({ type: 'power', power: 'season', variant: 'warm' }) },
     { row: 'nudges', id: 'bless', label: 'Bless', cd: 'bless', target: 'wobblin',
-      hint: (pt, { rs }) => { const w = nearestWobblin(rs, pt); return w ? { x: w.x, y: w.y - 20, r: 36, ok: true, label: w.name } : { ...pt, r: 20, ok: false, label: 'drop on a Wobblin' }; },
+      hint: (pt, { rs }) => { const w = nearestWobblin(rs, pt); return w ? { x: w.x, y: w.y - 20, r: 36, ok: true, label: w.name } : { x: pt.x, y: pt.y, r: 20, ok: false, label: 'drop on a Wobblin' }; },
       drop: (pt, { rs, blessMenu }) => { const w = nearestWobblin(rs, pt); if (!w) return { error: 'Drop the blessing on a Wobblin.' }; blessMenu(w.id); return null; } },
     { row: 'nudges', id: 'curio', label: 'Curio', cd: 'curio', target: 'wobblin',
       hint: (pt, { rs }) => {
         const a = nearestWobblin(rs, pt);
-        if (!a) return { ...pt, r: 20, ok: false, label: 'drop between two friends' };
+        if (!a) return { x: pt.x, y: pt.y, r: 20, ok: false, label: 'drop between two friends' };
         const b = nearestWobblin(rs, { x: a.x, y: a.y - 20 }, 9999, a.id);
         return { x: a.x, y: a.y - 20, r: 36, ok: !!b, label: b ? a.name + ' & ' + b.name : 'needs two Wobblins' };
       },

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { createWorld, tick, applyAction, replay, stateHash } from '../src/sim/index.js';
 import { newSave, appendAction, exportSave, importSave, serializeSave, parseSave } from '../src/ui/save.js';
-import { nowTickFor } from '../src/ui/clock.js';
+import { nowTickFor, setClockMode, heartbeat, WATCH_TICK_MS } from '../src/ui/clock.js';
 import { TICK_MS } from '../src/sim/constants.js';
 import { proposeActions, section, ok, timeIt } from './lib.js';
 
@@ -58,6 +58,21 @@ section('Clock');
   assert.equal(nowTickFor(save, 1_000_000 + TICK_MS), 1);
   assert.equal(nowTickFor(save, 1_000_000 + 9 * TICK_MS + 5, 72), 81);
   ok('nowTick = floor((now - createdAt) / TICK_MS) + debug offset');
+
+  // Watching runs a colony day per minute; away is a day per hour.
+  const s2 = newSave({ seed: 1, createdAt: 0 });
+  const H = TICK_MS, M = WATCH_TICK_MS;
+  assert.equal(nowTickFor(s2, 5 * H), 5);
+  setClockMode(s2, 'watch', 5 * H);
+  heartbeat(s2, 5 * H + 3 * M);
+  assert.equal(nowTickFor(s2, 5 * H + 3 * M + 10), 8);
+  setClockMode(s2, 'away', 5 * H + 3 * M + 10);
+  assert.equal(nowTickFor(s2, 5 * H + 3 * M + 10 + 2 * H), 10);
+  // A crashed tab: heartbeat stopped, so the gap counts at the away rate.
+  setClockMode(s2, 'watch', 100 * H);
+  heartbeat(s2, 100 * H + 2 * M);
+  assert.equal(nowTickFor(s2, 100 * H + 2 * M + 3 * H), nowTickFor(s2, 100 * H) + 2 + 3);
+  ok('watch mode: a day per minute; away: a day per hour; a dead tab is never counted as watched');
 }
 
 section('Performance and save size');

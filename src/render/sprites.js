@@ -1,66 +1,111 @@
 // sprites.js — Wobblin and object SVG generators (pure: data in, SVG string out).
-// Wobblins are original soft blobs: a wide, low, pear-ish body that sags a
-// little at the bottom, big eyes set high, small stubby feet, seeded ears,
-// pattern and tail. Not egg-shaped roly-poly toys, not yellow jelly people.
+// Wobblins are original soft "mochi" creatures: a wide, squishy body that sags
+// a little at the base, a leaf sprout on top whose colour shows their mood,
+// big expressive eyes, blush cheeks, stubby arms and feet. Their faces follow
+// how they feel. Not egg-shaped roly-poly toys, not yellow jelly people.
 
 function hsl(h, s, l) { return `hsl(${h} ${s}% ${l}%)`; }
 
 const EARS = {
-  nubs: c => `<circle cx="-11" cy="-30" r="4" fill="${c}"/><circle cx="11" cy="-30" r="4" fill="${c}"/>`,
-  droopy: c => `<path d="M-14 -27 Q-24 -24 -22 -12 Q-17 -20 -11 -24 Z" fill="${c}"/><path d="M14 -27 Q24 -24 22 -12 Q17 -20 11 -24 Z" fill="${c}"/>`,
-  pointy: c => `<path d="M-14 -26 L-12 -42 L-5 -30 Z" fill="${c}"/><path d="M14 -26 L12 -42 L5 -30 Z" fill="${c}"/>`,
-  tufts: c => `<path d="M-6 -33 Q-8 -42 -2 -40 Q0 -44 3 -39 Q8 -42 6 -33 Z" fill="${c}"/>`,
+  nubs: c => `<circle cx="-14" cy="-33" r="4.5" fill="${c}"/><circle cx="14" cy="-33" r="4.5" fill="${c}"/>`,
+  droopy: c => `<path d="M-16 -30 Q-28 -27 -26 -13 Q-20 -22 -13 -27 Z" fill="${c}"/><path d="M16 -30 Q28 -27 26 -13 Q20 -22 13 -27 Z" fill="${c}"/>`,
+  pointy: c => `<path d="M-17 -28 L-15 -46 L-7 -33 Z" fill="${c}"/><path d="M17 -28 L15 -46 L7 -33 Z" fill="${c}"/>`,
+  tufts: c => `<path d="M-12 -34 Q-16 -42 -9 -41 Q-8 -46 -4 -39 Z M12 -34 Q16 -42 9 -41 Q8 -46 4 -39 Z" fill="${c}"/>`,
   none: () => ''
 };
 const TAILS = {
   none: () => '',
-  stub: c => `<circle cx="19" cy="-5" r="4" fill="${c}"/>`,
-  curl: c => `<path d="M17 -6 Q28 -8 26 -16 Q24 -22 19 -18" stroke="${c}" stroke-width="3" fill="none" stroke-linecap="round"/>`,
-  fluff: c => `<circle cx="20" cy="-7" r="6" fill="${c}" opacity="0.9"/><circle cx="24" cy="-11" r="4" fill="${c}"/>`
+  stub: c => `<circle cx="22" cy="-7" r="4.5" fill="${c}"/>`,
+  curl: c => `<path d="M20 -8 Q32 -10 30 -19 Q28 -26 22 -21" stroke="${c}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
+  fluff: c => `<circle cx="23" cy="-9" r="6.5" fill="${c}" opacity="0.95"/><circle cx="28" cy="-14" r="4.5" fill="${c}"/>`
 };
 
 function pattern(kind, c) {
   switch (kind) {
-    case 'spots': return `<circle cx="-8" cy="-10" r="3" fill="${c}"/><circle cx="7" cy="-6" r="2.5" fill="${c}"/><circle cx="2" cy="-14" r="2" fill="${c}"/>`;
-    case 'stripes': return `<path d="M-15 -14 Q0 -11 15 -14 M-16 -8 Q0 -5 16 -8" stroke="${c}" stroke-width="2.5" fill="none"/>`;
-    case 'freckles': return `<g fill="${c}"><circle cx="-10" cy="-15" r="1"/><circle cx="-7" cy="-14" r="1"/><circle cx="7" cy="-14" r="1"/><circle cx="10" cy="-15" r="1"/></g>`;
-    case 'patch': return `<ellipse cx="7" cy="-18" rx="7" ry="6" fill="${c}"/>`;
+    case 'spots': return `<circle cx="-11" cy="-12" r="3.2" fill="${c}"/><circle cx="10" cy="-8" r="2.7" fill="${c}"/><circle cx="13" cy="-17" r="2" fill="${c}"/>`;
+    case 'stripes': return `<path d="M-19 -15 Q0 -11 19 -15 M-20 -8 Q0 -4 20 -8" stroke="${c}" stroke-width="2.6" fill="none" opacity="0.8"/>`;
+    case 'freckles': return `<g fill="${c}"><circle cx="-13" cy="-15" r="1.1"/><circle cx="-10" cy="-13.5" r="1.1"/><circle cx="10" cy="-13.5" r="1.1"/><circle cx="13" cy="-15" r="1.1"/></g>`;
+    case 'patch': return `<ellipse cx="9" cy="-25" rx="8" ry="7" fill="${c}" opacity="0.9"/>`;
     default: return '';
   }
 }
 
-// Body path: wide bottom, soft shoulders, slight sag at the base.
-const BODY = 'M-18 -2 Q-21 -20 -12 -29 Q0 -36 12 -29 Q21 -20 18 -2 Q10 3 0 2 Q-10 3 -18 -2 Z';
+// Mood colours for the head sprout.
+const SPROUT = { happy: '#6fd35a', love: '#ff7aa2', content: '#9bd06a', meh: '#c3c76a', sad: '#7f9fd0', scared: '#f2a14e', cold: '#a8d8f2', sleep: '#8fb87a' };
+
+// Body: wide and soft, a little squashed at the base.
+const BODY = 'M-21 -1 Q-26 -16 -20 -28 Q-12 -40 0 -40 Q12 -40 20 -28 Q26 -16 21 -1 Q11 4 0 4 Q-11 4 -21 -1 Z';
+
+function eyes(face, e, lookDx, eyelids) {
+  const L = -8.5, R = 8.5, Y = -23;
+  switch (face) {
+    case 'sleep':
+      return `<path d="M${L - 4} ${Y} q4 3 8 0 M${R - 4} ${Y} q4 3 8 0" stroke="#2a2420" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+    case 'love': case 'happy':
+      return `<path d="M${L - 4.5} ${Y + 1} q4.5 -6 9 0 M${R - 4.5} ${Y + 1} q4.5 -6 9 0" stroke="#2a2420" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  }
+  const pr = face === 'scared' ? 0.32 : 0.56;
+  const ry = face === 'scared' ? 1.3 : 1.15;
+  let lids = '';
+  if (face === 'sad') lids = `<path d="M${L - e} ${Y - e * 0.6} L${L + e} ${Y - e * 1.1} L${L + e} ${Y - e * 1.4} L${L - e} ${Y - e * 1.4} Z M${R + e} ${Y - e * 0.6} L${R - e} ${Y - e * 1.1} L${R - e} ${Y - e * 1.4} L${R + e} ${Y - e * 1.4} Z" fill="${eyelids}"/>`;
+  if (face === 'cold' || face === 'meh') lids = `<rect x="${L - e - 0.5}" y="${Y - e * ry - 0.5}" width="${2 * e + 1}" height="${e * ry * 0.75}" fill="${eyelids}"/><rect x="${R - e - 0.5}" y="${Y - e * ry - 0.5}" width="${2 * e + 1}" height="${e * ry * 0.75}" fill="${eyelids}"/>`;
+  return `<g class="blink">
+    <ellipse cx="${L}" cy="${Y}" rx="${e}" ry="${e * ry}" fill="#fff"/>
+    <ellipse cx="${R}" cy="${Y}" rx="${e}" ry="${e * ry}" fill="#fff"/>
+    <circle cx="${L + 0.6 + lookDx}" cy="${Y + 0.8}" r="${e * pr}" fill="#211b18"/>
+    <circle cx="${R + 0.6 + lookDx}" cy="${Y + 0.8}" r="${e * pr}" fill="#211b18"/>
+    <circle cx="${L + 1.8 + lookDx}" cy="${Y - 1}" r="${e * 0.2}" fill="#fff"/>
+    <circle cx="${R + 1.8 + lookDx}" cy="${Y - 1}" r="${e * 0.2}" fill="#fff"/>
+    <circle cx="${L - 0.8 + lookDx}" cy="${Y + 2}" r="${e * 0.1}" fill="#fff" opacity=".8"/>
+    <circle cx="${R - 0.8 + lookDx}" cy="${Y + 2}" r="${e * 0.1}" fill="#fff" opacity=".8"/>
+    ${lids}
+  </g>`;
+}
+
+function mouth(face, dark) {
+  const Y = -13;
+  switch (face) {
+    case 'love': case 'happy': return `<path d="M-6 ${Y - 1} Q0 ${Y + 7} 6 ${Y - 1} Z" fill="#7a2f35"/><path d="M-3 ${Y + 2.5} Q0 ${Y + 5} 3 ${Y + 2.5}" fill="#ff8f9c"/>`;
+    case 'content': return `<path d="M-4.5 ${Y} Q0 ${Y + 4} 4.5 ${Y}" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    case 'meh': return `<path d="M-3.5 ${Y + 1} L3.5 ${Y + 1}" stroke="${dark}" stroke-width="1.8" stroke-linecap="round"/>`;
+    case 'sad': return `<path d="M-4.5 ${Y + 3} Q0 ${Y - 1} 4.5 ${Y + 3}" stroke="${dark}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    case 'scared': return `<ellipse cx="0" cy="${Y + 1.5}" rx="2.6" ry="3.4" fill="#5a2a2e"/>`;
+    case 'cold': return `<path d="M-5 ${Y + 1} l2.5 -1.5 2.5 1.5 2.5 -1.5 2.5 1.5" stroke="${dark}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    case 'sleep': return `<ellipse cx="0" cy="${Y + 1}" rx="1.6" ry="1.2" fill="${dark}"/>`;
+  }
+  return '';
+}
 
 // Returns inner SVG markup for a Wobblin standing at the origin (feet at y=0).
 export function wobblinSVG(w, opts = {}) {
   const h = w.look.hue;
-  const fill = hsl(h, 52, 64), dark = hsl(h, 42, 44), belly = hsl(h, 50, 78), mark = hsl((h + 30) % 360, 40, 50);
-  const e = 3.6 * w.look.eyeSize;
-  const eyeY = -20;
+  const face = w.face || 'content';
+  const fill = hsl(h, 55, 66), dark = hsl(h, 40, 40), shade = hsl(h, 45, 52), light = hsl(h, 70, 84), belly = hsl(h, 55, 80), mark = hsl((h + 35) % 360, 45, 52);
+  const e = 4.4 * w.look.eyeSize;
   const lookDx = opts.lookDx || 0;
   const elder = w.stage === 'elder';
-  return `
-    <ellipse cx="0" cy="1" rx="17" ry="4" fill="rgba(0,0,0,0.18)"/>
-    <g class="wobble" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s">
-      ${TAILS[w.look.tail](dark)}
-      ${EARS[w.look.ears](dark)}
-      <ellipse cx="-8" cy="0" rx="5" ry="3" fill="${dark}"/><ellipse cx="8" cy="0" rx="5" ry="3" fill="${dark}"/>
-      <path d="${BODY}" fill="${fill}" stroke="${dark}" stroke-width="1.5"/>
-      <ellipse cx="0" cy="-8" rx="10" ry="7" fill="${belly}" opacity="0.8"/>
+  const cheeks = face === 'cold' ? '#bfe3ff' : '#ff9fb2';
+  const blinkDelay = ((w.id ? Number(String(w.id).slice(1)) : 1) * 1.37 % 4).toFixed(2);
+  return `<g class="flip">
+    <ellipse class="shadow" cx="0" cy="2" rx="21" ry="4.5" fill="rgba(20,30,10,0.22)"/>
+    <g class="wobble face-${face}" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s;--blink:${blinkDelay}s">
+      ${TAILS[w.look.tail](shade)}
+      ${EARS[w.look.ears](shade)}
+      <g class="feet"><ellipse class="foot l" cx="-10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/><ellipse class="foot r" cx="10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/></g>
+      <ellipse class="arm l" cx="-22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" transform="rotate(25 -22 -13)"/>
+      <ellipse class="arm r" cx="22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" transform="rotate(-25 22 -13)"/>
+      <path d="${BODY}" fill="${fill}" stroke="${dark}" stroke-width="1.4"/>
+      <path d="M-21 -1 Q-26 -16 -20 -28 Q-16 -18 -14 -8 Q-11 0 0 4 Q-11 4 -21 -1 Z" fill="${shade}" opacity="0.45"/>
+      <ellipse cx="-7" cy="-31" rx="9" ry="5" fill="${light}" opacity="0.65"/>
+      <ellipse cx="0" cy="-8" rx="12.5" ry="8" fill="${belly}" opacity="0.75"/>
       ${pattern(w.look.pattern, mark)}
-      <g class="eyes">
-        <ellipse cx="-6.5" cy="${eyeY}" rx="${e}" ry="${e * 1.15}" fill="#fff"/>
-        <ellipse cx="6.5" cy="${eyeY}" rx="${e}" ry="${e * 1.15}" fill="#fff"/>
-        <circle cx="${-6 + lookDx}" cy="${eyeY + 0.6}" r="${e * 0.55}" fill="#1f1d1a"/>
-        <circle cx="${7 + lookDx}" cy="${eyeY + 0.6}" r="${e * 0.55}" fill="#1f1d1a"/>
-        <circle cx="${-5 + lookDx}" cy="${eyeY - 0.6}" r="${e * 0.18}" fill="#fff"/>
-        <circle cx="${8 + lookDx}" cy="${eyeY - 0.6}" r="${e * 0.18}" fill="#fff"/>
-      </g>
-      ${elder ? `<path d="M-11 ${eyeY - e - 3} q4 -2 8 0 M3 ${eyeY - e - 3} q4 -2 8 0" stroke="#f4f0e6" stroke-width="2" fill="none"/>` : ''}
-      <path d="M-3 -11 Q0 -9 3 -11" stroke="${dark}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <g class="sprout"><path d="M0 -40 Q-1 -46 1 -50" stroke="#5e8f3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M1 -49 Q-9 -56 -11 -48 Q-5 -45 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}"/><path d="M1 -49 Q9 -58 12 -50 Q6 -46 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}" opacity="0.85"/></g>
+      <ellipse cx="-14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/><ellipse cx="14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/>
+      <g class="eyes">${eyes(face, e, lookDx, fill)}</g>
+      ${elder ? `<path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="#f4f0e6" stroke-width="2.4" fill="none" stroke-linecap="round"/>` : ''}
+      ${mouth(face, dark)}
       ${carriedSVG(w.carry || [])}
-    </g>`;
+    </g></g>`;
 }
 
 // A mural shows the Keeper act it remembers (a real event from the log).
@@ -79,9 +124,9 @@ function muralIcon(kind) {
 // Little items a Wobblin carries once it knows how: knowledge is visible.
 export function carriedSVG(carry) {
   let s = '';
-  if (carry.includes('torch')) s += `<g transform="translate(17 -12)"><rect x="-1.5" y="0" width="3" height="12" fill="#7a5a3a"/><path class="flame" d="M-4 1 Q-4 -7 0 -10 Q4 -6 4 1 Z" fill="#f08a2c"/></g>`;
-  if (carry.includes('tool')) s += `<path d="M-22 -8 L-15 -16 L-12 -10 Z" fill="#5c6670" stroke="#363d44"/>`;
-  if (carry.includes('basket')) s += `<g transform="translate(-21 -2)"><path d="M-6 -8 L6 -8 L4 0 L-4 0 Z" fill="#c7a25a" stroke="#8a6a2e"/><path d="M-5 -5 L5 -5" stroke="#8a6a2e"/></g>`;
+  if (carry.includes('torch')) s += `<g transform="translate(22 -16)"><rect x="-1.5" y="0" width="3" height="12" fill="#7a5a3a"/><path class="flame" d="M-4 1 Q-4 -7 0 -10 Q4 -6 4 1 Z" fill="#f08a2c"/></g>`;
+  if (carry.includes('tool')) s += `<path d="M-28 -10 L-21 -18 L-18 -12 Z" fill="#5c6670" stroke="#363d44"/>`;
+  if (carry.includes('basket')) s += `<g transform="translate(-26 -4)"><path d="M-6 -8 L6 -8 L4 0 L-4 0 Z" fill="#c7a25a" stroke="#8a6a2e"/><path d="M-5 -5 L5 -5" stroke="#8a6a2e"/></g>`;
   return s;
 }
 
@@ -150,29 +195,60 @@ export function objectSVG(o) {
   }
 }
 
-// Thought bubbles (icons, no emoji).
+// Little item icons (used in wants and pondering: "something's missing").
+export const ITEM_ICONS = {
+  berry: '<circle cx="-2" cy="1" r="3.4" fill="#d23c5e"/><circle cx="3" cy="2" r="3" fill="#b8304f"/><path d="M0 -2 q2 -5 6 -4" stroke="#4f8a3a" stroke-width="1.6" fill="none"/>',
+  cold: '<g stroke="#5aa8e0" stroke-width="2" stroke-linecap="round"><path d="M0 -6 L0 6"/><path d="M-5.2 -3 L5.2 3"/><path d="M-5.2 3 L5.2 -3"/></g>',
+  tired: '<path d="M-4 -4 h6 l-6 7 h6" stroke="#6b6fb0" stroke-width="1.8" fill="none" stroke-linejoin="round"/>',
+  scared: '<path d="M-1.4 -6 h2.8 l-0.8 7 h-1.2 Z" fill="#e8463c"/><circle cy="4" r="1.5" fill="#e8463c"/>',
+  sad: '<path d="M-6 0 Q-7 -6 -1 -6 Q2 -9 5 -5 Q8 -5 7 0 Z" fill="#8a93a8"/><path d="M-3 3 l-1 3 M1 3 l-1 3 M5 3 l-1 3" stroke="#6aa7d8" stroke-width="1.4" stroke-linecap="round"/>',
+  fire: '<path d="M-5 5 Q-6 -3 -1 -7 Q0 -2 2 -4 Q6 0 5 5 Z" fill="#f08a2c"/><path d="M-2 5 Q-2 0 0 -2 Q3 1 2 5 Z" fill="#ffd25a"/>',
+  stones: '<ellipse cx="-2" cy="2" rx="4" ry="3" fill="#9a9488"/><ellipse cx="3" cy="-1" rx="3" ry="2.4" fill="#b0a99c"/>',
+  tree: '<rect x="-1" y="0" width="2" height="6" fill="#7a5a3a"/><circle cy="-2" r="5" fill="#3f7a45"/>',
+  water: '<path d="M0 -6 Q5 0 4 3 Q3 6 0 6 Q-3 6 -4 3 Q-5 0 0 -6 Z" fill="#5aa3d6"/>',
+  rain: '<path d="M-6 0 Q-7 -6 -1 -6 Q2 -9 5 -5 Q8 -5 7 0 Z" fill="#cfd8e6"/><path d="M-3 3 l-1 3 M1 3 l-1 3 M5 3 l-1 3" stroke="#5aa3d6" stroke-width="1.4" stroke-linecap="round"/>',
+  friend: '<circle cx="-3" cy="-1" r="3" fill="#f2b04a"/><circle cx="3" cy="-1" r="3" fill="#7ac0e8"/><path d="M-6 5 Q0 1 6 5" stroke="#555" stroke-width="1.4" fill="none"/>',
+  gift: '<rect x="-5" y="-3" width="10" height="8" rx="1.5" fill="#e0864a"/><path d="M0 -3 V5 M-5 0 H5" stroke="#ffe28a" stroke-width="1.6"/>',
+  idea: '<path d="M0 -7 Q5 -7 5 -2 Q5 1 2 3 V5 H-2 V3 Q-5 1 -5 -2 Q-5 -7 0 -7 Z" fill="#ffe36b" stroke="#c9a23a"/>'
+};
+
+// Thought bubbles (icons, no emoji). Sized for the new body (top of sprout ~ -56).
+function bubble(inner, cls = '') {
+  return `<g class="bubble ${cls}" transform="translate(18 -70)"><circle cx="-12" cy="16" r="2.4" fill="#fff" opacity=".9"/><circle cx="-7" cy="10" r="3.4" fill="#fff" opacity=".9"/><circle cx="0" cy="0" r="11.5" fill="#fff" opacity=".96" stroke="#c9c2b0"/>${inner}</g>`;
+}
+
 export function bubbleSVG(kind) {
-  const bub = inner => '<g transform="translate(14 -58)"><circle cx="-10" cy="14" r="2.5" fill="#fff" opacity=".9"/><circle cx="0" cy="0" r="11" fill="#fff" opacity=".95" stroke="#c9c2b0"/>' + inner + '</g>';
   switch (kind) {
-    case 'spark': return bub('<path d="M0 -7 L2 -2 L7 0 L2 2 L0 7 L-2 2 L-7 0 L-2 -2 Z" fill="#f2b632"/>');
-    case 'question': return bub('<path d="M-3 -3 Q-3 -7 0 -7 Q4 -7 4 -3 Q4 0 0 1 L0 3" stroke="#555" stroke-width="2" fill="none"/><circle cx="0" cy="6" r="1.3" fill="#555"/>');
-    case 'smoke': return bub('<g fill="#9a9a9a"><circle cx="-3" cy="1" r="4"/><circle cx="3" cy="-2" r="4"/><circle cx="1" cy="3" r="3"/></g>');
-    case 'ponder': return bub('<g fill="#777"><circle cx="-4" cy="0" r="1.6"/><circle cx="0" cy="0" r="1.6"/><circle cx="4" cy="0" r="1.6"/></g>');
-    case 'heart': return bub('<path d="M0 5 L-6 -1 Q-7 -6 -3 -6 Q0 -6 0 -3 Q0 -6 3 -6 Q7 -6 6 -1 Z" fill="#d8566a"/>');
+    case 'spark': return bubble('<path d="M0 -7 L2 -2 L7 0 L2 2 L0 7 L-2 2 L-7 0 L-2 -2 Z" fill="#f2b632"/>', 'pop');
+    case 'question': return bubble('<path d="M-3 -3 Q-3 -7 0 -7 Q4 -7 4 -3 Q4 0 0 1 L0 3" stroke="#555" stroke-width="2" fill="none"/><circle cx="0" cy="6" r="1.3" fill="#555"/>');
+    case 'smoke': return bubble('<g fill="#9a9a9a"><circle cx="-3" cy="1" r="4"/><circle cx="3" cy="-2" r="4"/><circle cx="1" cy="3" r="3"/></g>');
+    case 'ponder': return bubble('<g fill="#777"><circle cx="-4" cy="0" r="1.6"/><circle cx="0" cy="0" r="1.6"/><circle cx="4" cy="0" r="1.6"/></g>');
+    case 'heart': return bubble('<path d="M0 5 L-6 -1 Q-7 -6 -3 -6 Q0 -6 0 -3 Q0 -6 3 -6 Q7 -6 6 -1 Z" fill="#d8566a"/>');
   }
   return '';
 }
 
+// What a Wobblin wants right now, shown as a small persistent bubble.
+export function wantSVG(want) {
+  if (!want) return '';
+  const icon = ITEM_ICONS[want.item || want.kind] || ITEM_ICONS.idea;
+  const extra = want.kind === 'idea' ? '<circle cx="9" cy="-9" r="5" fill="#ffe36b" stroke="#c9a23a" stroke-width="1"/><path d="M9 -12 v4 M9 -6.5 v.5" stroke="#8a6a1a" stroke-width="1.4" stroke-linecap="round"/>' : '';
+  return `<g class="want want-${want.kind}">${bubble(icon + extra)}</g>`;
+}
+
+// Dizzy stars orbiting the head: for anything they did not enjoy.
+const STARS = `<g class="dizzy-stars" transform="translate(0 -54)"><g class="orbit"><path d="M12 0 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z"/><path d="M-13 2 l1.6 3.2 3.2 .8 -2.4 2.4 .8 3.2 -3.2 -1.6 -3.2 1.6 .8 -3.2 -2.4 -2.4 3.2 -.8 Z"/><path d="M0 -8 l1.2 2.4 2.4 .6 -1.8 1.8 .6 2.4 -2.4 -1.2 -2.4 1.2 .6 -2.4 -1.8 -1.8 2.4 -.6 Z"/></g></g>`;
+
 // Reactions to a Keeper act: hearts and sparkles when they love it, ? when
-// unsure, ! when scared, X eyes and a grumble when upset.
+// unsure; ! or X eyes plus dizzy stars when they do not like it.
 const HEART = (x, y, s, c = '#e8506a') => `<g transform="translate(${x} ${y}) scale(${s})"><path class="h" d="M0 6 L-7 -1 Q-9 -7 -4 -8 Q-1 -8 0 -4 Q1 -8 4 -8 Q9 -7 7 -1 Z" fill="${c}" stroke="#fff" stroke-width="1.2"/></g>`;
 export function emoteSVG(kind) {
   switch (kind) {
-    case 'love': return `<g class="emote em-love">${HEART(-12, -46, 1.4)}${HEART(11, -56, 1.05, '#f27a8e')}${HEART(0, -70, 0.8, '#ff9fb0')}</g>`;
-    case 'like': return `<g class="emote em-like">${HEART(0, -50, 0.8, '#f27a8e')}<path d="M14 -44 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z" fill="#ffe36b"/></g>`;
-    case 'curious': return `<g class="emote em-curious"><circle cx="12" cy="-52" r="10" fill="#fff" stroke="#c9c2b0"/><path d="M9 -55 Q9 -59 12 -59 Q16 -59 16 -55 Q16 -52 12 -51 L12 -49" stroke="#555" stroke-width="2" fill="none"/><circle cx="12" cy="-46" r="1.3" fill="#555"/></g>`;
-    case 'scared': return `<g class="emote em-scared"><path d="M10 -70 L18 -70 L15 -50 L13 -50 Z" fill="#e8463c" stroke="#fff" stroke-width="1.2"/><circle cx="14" cy="-45" r="2.5" fill="#e8463c" stroke="#fff" stroke-width="1"/><path d="M-20 -30 q-4 -3 -6 0 M-22 -22 q-4 -2 -5 1" stroke="#9fd0f0" stroke-width="1.6" fill="none"/></g>`;
-    case 'upset': return `<g class="emote em-upset"><g stroke="#3a2f2a" stroke-width="2.4" stroke-linecap="round"><path d="M-10 -24 L-3 -17 M-3 -24 L-10 -17"/><path d="M3 -24 L10 -17 M10 -24 L3 -17"/></g><g transform="translate(14 -54)"><path d="M-10 4 Q-14 -6 -4 -8 Q0 -16 8 -10 Q16 -10 12 0 Q10 6 -10 4 Z" fill="#6b6b78"/><path d="M-5 -2 L-1 2 M-1 -2 L-5 2 M4 -3 L8 1 M8 -3 L4 1" stroke="#fff" stroke-width="1.6"/></g></g>`;
+    case 'love': return `<g class="emote em-love">${HEART(-14, -60, 1.5)}${HEART(12, -70, 1.1, '#f27a8e')}${HEART(0, -84, 0.85, '#ff9fb0')}</g>`;
+    case 'like': return `<g class="emote em-like">${HEART(0, -64, 0.95, '#f27a8e')}<path d="M16 -58 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z" fill="#ffe36b"/></g>`;
+    case 'curious': return `<g class="emote em-curious">${bubble('<path d="M-3 -3 Q-3 -7 0 -7 Q4 -7 4 -3 Q4 0 0 1 L0 3" stroke="#555" stroke-width="2" fill="none"/><circle cx="0" cy="6" r="1.3" fill="#555"/>')}</g>`;
+    case 'scared': return `<g class="emote em-scared"><path d="M12 -86 L21 -86 L18 -64 L15 -64 Z" fill="#e8463c" stroke="#fff" stroke-width="1.2"/><circle cx="16.5" cy="-58" r="2.8" fill="#e8463c" stroke="#fff" stroke-width="1"/><path d="M-26 -34 q-4 -3 -6 0 M-28 -25 q-4 -2 -5 1" stroke="#9fd0f0" stroke-width="1.6" fill="none"/>${STARS}</g>`;
+    case 'upset': return `<g class="emote em-upset"><g stroke="#3a2f2a" stroke-width="2.6" stroke-linecap="round"><path d="M-12 -27 L-5 -20 M-5 -27 L-12 -20"/><path d="M5 -27 L12 -20 M12 -27 L5 -20"/></g>${STARS}</g>`;
   }
   return '';
 }
