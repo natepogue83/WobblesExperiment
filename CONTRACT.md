@@ -90,7 +90,7 @@ Ids are never reused, even after death or destruction.
 world = {
   version: 2, seed, tick, colonyName, keeperName,
   climate: { season: "mild"|"cold"|"warm", tempMod, until: tick|null, drought,
-             rain: ticksLeft, wetUntil: tick, cold: bool /* tonight */ },
+             rain: ticksLeft, wetUntil: tick, cold: bool /* tonight */, drift /* seasonal */ },
   wobblins: [ wobblin ],          // dead ones stay, alive:false
   objects:  [ object ],           // destroyed ones stay, hp 0, state.gone:true
   discoveries: { [id]: { inventor, tick, causes, forgotten } },
@@ -101,6 +101,7 @@ world = {
   seasonUses: 0,                  // Season is free the first time
   giftsByDay: { [dayIndex]: giftId },
   pondering: { [wobblinId]: { [discoveryId]: sinceTick } },
+  seedPod: null | { at: tick },   // set when the valley empties; hatches 2 Wobblins
   events: [ event ],              // append-only
   nextIds: { w, o, e }
 }
@@ -109,6 +110,8 @@ wobblin = {
   id, name, look: { hue, pattern, ears, eyeSize, tail, wobble },
   traits: { curiosity, boldness, sociability, patience, playfulness, piety }, // 0..1
   hobby, bornTick, stage: "baby"|"adult"|"elder", lifespan,
+  activity: "forage"|"warm"|"rest"|"inspect"|"hobby"|"play", seen: [objectId] /* last 8 inspected */,
+  hungry, freezing /* consecutive ticks at 0 food / 0 warmth */, lastBirth,
   needs: { food, warmth, rest, mood, safety },            // 0..1
   zone, knows: { [discoveryId]: { since, from: "self"|wobblinId } },
   temp: { [trait]: { add, until } },
@@ -123,7 +126,8 @@ object = { id, kind, zone, slot, hp, builtTick, by: [wobblinId],
 
 Object kinds: boulder, stones, tree, bush, sprout, fire, pond, reeds, clay,
 fish, curio, gift, hearth, hut, wall, garden, raft, totem, temple, mural,
-grave, ruin, scorch. Zone features that are not objects: `river`
+grave, ruin, scorch. Graves have `slot: null` and line up in
+`GEO.GRAVEYARD`; a boulder also has `slots: [a, b]`. Zone features that are not objects: `river`
 (riverbank), `shrine` (hill).
 
 ## 6. Event schema
@@ -139,7 +143,7 @@ event = { id, t, kind, actors: [wobblinId] /* inventor first */,
 Kinds (week 1): Keeper `colony_founded keeper_power keeper_nudge keeper_gift
 offerings_collected`; Discovery `experiment_failed misfire discovery
 rediscovery taught learned_from_structure pondering forgotten superstition`;
-World `built burned ruin fire_started fire_out flood pond_formed tree_grown
+World `lightning built burned ruin fire_started fire_out flood pond_formed tree_grown
 prowler lost rain cold_snap`; Life `paired birth grew_up became_elder injured healed
 death seed_pod_hatched stranger_arrived`; Faith `offering wish wish_granted
 wish_expired faith_shift festival ritual mural_painted`.
@@ -208,7 +212,15 @@ offset only changes `nowTick` in the UI.
 - Creatures are original soft blobs: not egg-shaped roly-poly toys, not
   yellow jelly people.
 
-## 12. Testing
+## 12. Tuning deviations from the build plan
+
+- Pairing: the plan says both adults need sociability > 0.4. With only 3
+  founders that left a third of seeds unable to ever pair, so the rule is each
+  > 0.25 and the pair's average > 0.4 (blessings count). Each intact hut
+  houses one pair.
+- Saves are packed on disk (section 8) to meet the 20 KB target.
+
+## 13. Testing
 
 `npm test` runs every `tests/test-*.js` with plain node and `assert`.
 Day 1 tests: determinism (2,160 ticks, same hash), purity (grep), replay
