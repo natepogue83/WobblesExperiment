@@ -195,6 +195,29 @@ section('Shake the Valley');
   ok('locked until belief 26 in a new game; packs into the save and replays');
 }
 
+section('Snowmen');
+{
+  let built = 0, smashed = 0, melted = 0;
+  for (let seed = 1; seed <= 20; seed++) {
+    const w = createWorld(seed, { barren: true });
+    let seq = 0;
+    for (const x of w.wobblins) { x.traits.playfulness = 0.8; x.zone = 'meadow'; }
+    applyAction(w, { seq: ++seq, t: 0, type: 'power', power: 'season', variant: 'cold' });
+    applyAction(w, { seq: ++seq, t: 0, type: 'power', power: 'rain' });
+    for (let i = 0; i < 6; i++) { for (const x of w.wobblins) Object.assign(x.needs, { food: 1, warmth: 1 }); tick(w); }
+    const s = w.objects.find(o => o.kind === 'snowman' && !o.state.gone);
+    if (w.events.some(e => e.kind === 'interaction' && e.data.what === 'snowman')) built++;
+    if (s) {
+      const x = w.wobblins.find(y => y.alive);
+      if (applyAction(w, { seq: ++seq, t: w.tick, type: 'nudge', nudge: 'carry', target: x.id, zone: s.zone, thrown: true, onto: s.id }).ok && s.state.gone) smashed++;
+    }
+    for (let i = 0; i < 30; i++) { for (const x of w.wobblins) Object.assign(x.needs, { food: 1, warmth: 1 }); tick(w); }
+    if (!w.objects.some(o => o.kind === 'snowman' && !o.state.gone)) melted++;
+  }
+  assert.ok(built >= 10 && smashed >= 5 && melted === 20, `${built} ${smashed} ${melted}`);
+  ok(`snow (cold snap + rain): playful ones built snowmen in ${built}/20 valleys; flung Wobblins smashed ${smashed}; all melted when the cold passed`);
+}
+
 section('Ice');
 {
   const w = createWorld(17, { barren: true });

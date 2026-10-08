@@ -579,7 +579,7 @@ function landingTarget(id, x, y) {
   bd = 40;
   for (const o of lastRS.objects) {
     if (o.kind === 'grave' && Math.hypot(o.x - x, o.y - y) > 14) continue;
-    const r = o.kind === 'boulder' || o.kind === 'temple' || o.kind === 'pond' ? 60 : o.kind === 'hut' ? 40 : 32;
+    const r = o.kind === 'boulder' || o.kind === 'temple' || o.kind === 'pond' ? 60 : o.kind === 'hut' ? 46 : 32;
     const d = Math.hypot(o.x - x, (o.y - 12 - y) * 1.2);
     if (d < Math.min(bd, r)) { bd = d; best = o.id; }
   }
@@ -592,7 +592,7 @@ const INTERACTION_TOAST = {
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
   king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',
   bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
-  zapped: 'ZAP! Frizzy.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
+  zapped: 'ZAP! Frizzy.', snowman_smashed: 'POOF. Snow everywhere.', snowman_zapped: 'Snowman to puddle in one zap.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
 };
 const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
 function ontoLabel(id) {

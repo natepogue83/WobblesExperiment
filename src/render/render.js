@@ -42,7 +42,7 @@ export function temperOf(w) {
 
 // Things are drawn a little larger than life so they sit right next to the
 // Wobblins (drawn at 1.7): a hut is big enough to go inside.
-export const OBJECT_SCALE = { hut: 1.75, temple: 1.45, totem: 1.7, wall: 1.45, hearth: 1.35, fire: 1.35, mural: 1.45, raft: 1.35,
+export const OBJECT_SCALE = { snowman: 1.45, hut: 1.75, temple: 1.45, totem: 1.7, wall: 1.45, hearth: 1.35, fire: 1.35, mural: 1.45, raft: 1.35,
   garden: 1.25, tree: 1.35, bush: 1.3, boulder: 1.15, stones: 1.25, gift: 1.35, curio: 1.35, sprout: 1.3, grave: 1.45,
   pond: 1, reeds: 1.25, clay: 1.2, fish: 1.2, ruin: 1.4, scorch: 1.35 };
 

@@ -191,6 +191,12 @@ function objectArtInner(o, muralIcon) {
         hand(-15, -12, '#c9563c') + hand(17, -10, '#4a8ac9', -12) + hand(-8, -36, '#5aa86b', 14, 0.7) +
         `<path d="M-22 -8 q4 3 8 0 q4 -3 8 0" stroke="#c9563c" stroke-width="1.4" fill="none" opacity=".7"/>` +
         `<g transform="translate(0 4) scale(.9)">${muralIcon(o.state.depictsKind)}</g>`;
+    case 'snowman':
+      return shadow(20, 5) + '<circle cx="0" cy="-12" r="13" fill="#f7fbff" stroke="#c9d8ea" stroke-width="1.2"/><circle cx="0" cy="-33" r="9.5" fill="#ffffff" stroke="#c9d8ea" stroke-width="1.2"/>' +
+        '<ellipse cx="-4" cy="-15" rx="7" ry="9" fill="#ffffff" opacity=".7"/><circle cx="-3.2" cy="-35" r="1.4" fill="#2a2420"/><circle cx="3.2" cy="-35" r="1.4" fill="#2a2420"/>' +
+        '<path d="M0 -32 L9 -30.5 L0 -30 Z" fill="#f08a2a"/><path d="M-3 -28 Q0 -26 3 -28" stroke="#2a2420" stroke-width="1" fill="none"/>' +
+        '<path d="M-12 -16 L-24 -24 M-20 -22 L-23 -27 M12 -16 L24 -22 M20 -20 L24 -18" stroke="#7a5a3a" stroke-width="1.8" stroke-linecap="round"/><circle cx="0" cy="-14" r="1.3" fill="#2a2420"/><circle cx="0" cy="-8" r="1.3" fill="#2a2420"/>' +
+        '<path d="M-9 -41 Q0 -46 9 -41 L7 -44 Q0 -50 -7 -44 Z" fill="#c4553e"/>';
     case 'grave':
       return shadow(10, 3) + `<path d="M-7 0 V-13 Q0 -21 7 -13 V0 Z" fill="${G('rock')}"/><path d="M-2 -11 h4 M0 -13 v6" stroke="#6e685e" stroke-width="1.2"/><circle cx="-8" cy="0" r="1.8" fill="#ffd6e6"/><circle cx="8" cy="-1" r="1.6" fill="#fff"/>`;
     case 'ruin':

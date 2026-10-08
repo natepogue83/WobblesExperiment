@@ -50,11 +50,11 @@ section('Render');
   ok('object kinds drawn: ' + [...kinds].sort().join(', '));
 
   // Every object kind has art (no placeholder circles).
-  for (const k of ['boulder', 'stones', 'tree', 'bush', 'sprout', 'fire', 'pond', 'reeds', 'clay', 'fish', 'curio', 'gift', 'hearth', 'hut', 'wall', 'garden', 'raft', 'totem', 'temple', 'mural', 'grave', 'ruin', 'scorch']) {
+  for (const k of ['boulder', 'stones', 'tree', 'bush', 'sprout', 'fire', 'pond', 'reeds', 'clay', 'fish', 'curio', 'gift', 'hearth', 'hut', 'wall', 'garden', 'raft', 'totem', 'temple', 'mural', 'grave', 'ruin', 'scorch', 'snowman']) {
     const svg = objectSVG({ kind: k, state: { curio: 'flint', size: 1, berries: 2 } });
     assert.ok(svg.length > 20 && !svg.includes('#c9a'), k + ' has its own art');
   }
-  ok('all 23 object kinds have their own art');
+  ok('all 24 object kinds have their own art');
 
   const w = createWorld(2);
   const a = wobblinSVG(w.wobblins[0]), b = wobblinSVG(w.wobblins[0]);

@@ -152,6 +152,15 @@ export function landOnto(world, w, a, causes) {
       if (o.kind === 'temple' || o.kind === 'totem') w.faith = r3(clamp(w.faith + 0.05, -1, 1));
       return say('king_of_the_hill', { on: o.kind }, 2, [w.id], [{ object: o.id }]);
     }
+    case 'snowman': {
+      o.state.gone = true; o.hp = 0;
+      w.needs.warmth = r3(clamp01(w.needs.warmth - 0.1));
+      mood(w, w.traits.playfulness > 0.5 ? 0.1 : -0.04);
+      const builder = o.state.by && findWobblin(world, o.state.by);
+      if (builder && builder !== w && builder.alive) { mood(builder, -0.08); addBond(world, w, builder, -0.1); }
+      laugh([w.id]);
+      return say('snowman_smashed', { by: o.state.by }, 3, [w.id], [{ object: o.id }]);
+    }
     case 'grave': {
       mood(w, -0.08);
       return say('remembers', { of: o.state.name }, 2, [w.id], [{ object: o.id }]);
@@ -259,6 +268,10 @@ export function lightningOnto(world, target, strikeEvent) {
     for (const s of target.slots || [target.slot]) makeObject(world, { kind: 'stones', slot: s, origin: { event: strikeEvent.id }, state: { count: 2 } });
     return emit(world, { kind: 'interaction', target: target.id, data: { what: 'boulder_split' }, salience: 3, causes });
   }
+  if (target && target.kind === 'snowman') {
+    target.state.gone = true; target.hp = 0;
+    return emit(world, { kind: 'interaction', target: target.id, data: { what: 'snowman_zapped' }, salience: 2, causes });
+  }
   if (target && target.kind === 'stones') {
     // KABOOM: the pile (or cairn) bursts, stones everywhere, nobody hurt.
     const was = target.state.stacked ? 'cairn' : 'pile';
@@ -329,8 +342,32 @@ export function socialStep(world) {
   }
 }
 
+// Snowmen: a cold snap plus wet weather means snow, and playful ones build.
+function snowStep(world) {
+  const t = world.tick;
+  for (const s of liveObjects(world).filter(o => o.kind === 'snowman')) {
+    if (world.climate.season !== 'cold' || t >= s.state.meltAt) {
+      s.state.gone = true; s.hp = 0;
+      emit(world, { kind: 'interaction', target: s.id, data: { what: 'snowman_melted', by: s.state.by }, salience: 1, causes: [{ object: s.id }] });
+    }
+  }
+  const snowy = world.climate.season === 'cold' && world.climate.wetUntil >= t;
+  if (snowy && liveObjects(world).filter(o => o.kind === 'snowman').length < 3) {
+    const rs = rngFor(world.seed, 'snowman', t);
+    const builder = alive(world).find(w => w.stage !== 'baby' && w.traits.playfulness > 0.5 && ['meadow', 'hill', 'grove'].includes(w.zone) && rs() < 0.18);
+    const slot = builder && freeSlotIn(world, builder.zone);
+    if (slot) {
+      const s = makeObject(world, { kind: 'snowman', slot, origin: { natural: true }, by: [builder.id], state: { by: builder.id, meltAt: world.climate.until !== null ? world.climate.until : t + 12 } });
+      mood(builder, 0.12);
+      for (const x of witnessesOf(world, builder.zone, [builder.id])) mood(x, 0.04);
+      emit(world, { kind: 'interaction', actors: [builder.id], target: s.id, data: { what: 'snowman', zone: builder.zone }, salience: 2, causes: [{ object: s.id }] });
+    }
+  }
+}
+
 // A cold snap freezes the pond: playful Wobblins go skating, careful ones slip.
 export function iceStep(world) {
+  snowStep(world);
   const pond = liveObjects(world).find(o => o.kind === 'pond');
   if (!pond) return;
   const frozen = world.climate.season === 'cold' && !(pond.state.crackedTick !== undefined && world.tick - pond.state.crackedTick < 6);
