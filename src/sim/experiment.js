@@ -11,7 +11,7 @@ import { alive, liveObjects, sortedKeys, r3, clamp } from './util.js';
 import { DISCOVERIES, BY_ID, prereqsMet } from './discoveries.js';
 import { trait } from './creatures.js';
 import { isWet } from './nature.js';
-import { applyDiscoveryEffect, embodiments } from './effects.js';
+import { applyDiscoveryEffect, embodimentIndex, embodimentsFrom } from './effects.js';
 import { keeperRoot } from './causes.js';
 import { onExperimentFailed, onExperimentSucceeded, FIRE_DISCOVERIES } from './misfires.js';
 
@@ -29,7 +29,7 @@ function makeContext(world) {
   const avgFood = live.length ? live.reduce((s, w) => s + w.needs.food, 0) / live.length : 0;
   // Open = nobody living knows it and no structure is holding it.
   const open = DISCOVERIES.filter(d => !knownByLiving.has(d.id) && !(world.discoveries[d.id] && !world.discoveries[d.id].forgotten));
-  return { world, live, objs, byZone, wobZone, knownByLiving, avgFood, wet: isWet(world), tokenCache: new Map(), open };
+  return { world, live, objs, byZone, wobZone, knownByLiving, avgFood, wet: isWet(world), tokenCache: {}, open };
 }
 
 function itemOf(o) {
@@ -47,9 +47,9 @@ function tokenMatches(o, token) {
 
 // Cached per tick: live objects in zone z matching token.
 function tokenIndex(ctx, z, token) {
-  const key = z + '|' + token;
-  let v = ctx.tokenCache.get(key);
-  if (!v) { v = (ctx.byZone[z] || []).filter(o => tokenMatches(o, token)); ctx.tokenCache.set(key, v); }
+  const zc = ctx.tokenCache[z] ||= {};
+  let v = zc[token];
+  if (v === undefined) { v = (ctx.byZone[z] || []).filter(o => tokenMatches(o, token)); zc[token] = v; }
   return v;
 }
 
@@ -241,7 +241,7 @@ export function recordDiscovery(world, wobblin, discoveryId, causes, source) {
   const kind = prev && prev.forgotten ? 'rediscovery' : 'discovery';
   world.discoveries[discoveryId] = { inventor: wobblin.id, tick: world.tick, causes, forgotten: false, orphanSince: null };
   wobblin.knows[discoveryId] = { since: world.tick, from: 'self' };
-  return emit(world, {
+  const ev = emit(world, {
     kind,
     actors: [wobblin.id],
     target: discoveryId,
@@ -250,6 +250,8 @@ export function recordDiscovery(world, wobblin, discoveryId, causes, source) {
     salience: 5,
     causes
   }, KNOWLEDGE);
+  world.discoveries[discoveryId].event = ev.id;
+  return ev;
 }
 
 function learn(world, w, d, from) {
@@ -266,7 +268,7 @@ export function experimentStep(world) {
   let attempts = 0;
   for (const w of order) {
     const cands = scoreCandidates(ctx, w);
-    ponder(world, ctx, w, cands);
+    if (t % 2 === 0) ponder(world, ctx, w, cands);
     if (!cands.length || attempts >= EXPERIMENT.colonyCapPerTick) continue;
     const r = rngFor(world.seed, 'experiment', t, w.id);
     if (r() >= pAttemptOf(cands)) continue;
@@ -294,7 +296,7 @@ function ponder(world, ctx, w, cands) {
   const t = world.tick;
   const have = new Set(cands.map(c => c.d.id));
   const mine = world.pondering[w.id] ||= {};
-  const openIds = new Set(ctx.open.map(d => d.id));
+  const openIds = ctx.openIds ||= new Set(ctx.open.map(d => d.id));
   for (const k of Object.keys(mine)) if (!openIds.has(k) || world.pondered[k] !== undefined) delete mine[k];
   for (const d of ctx.open) {
     if (world.pondered[d.id] !== undefined) continue;
@@ -327,14 +329,21 @@ export function teachingStep(world) {
   const loreMult = w => (w.knows.lore ? 2 : 1);
   const nearDeath = w => w.knows.lore && (w.lifespan - (t - w.bornTick)) < 0.1 * w.lifespan;
   const knownSorted = new Map(live.map(w => [w, Object.keys(w.knows).sort()]));
+  const zoneKnows = new Map();
+  for (const w of live) { if (!zoneKnows.has(w.zone)) zoneKnows.set(w.zone, new Set()); for (const d of knownSorted.get(w)) zoneKnows.get(w.zone).add(d); }
   const embodied = new Map();
   const objs = liveObjects(world);
-  for (const d of DISCOVERIES) if (d.embodiedBy.length && world.discoveries[d.id]) embodied.set(d.id, embodiments(world, d, objs));
+  const eIdx = embodimentIndex(objs);
+  for (const d of DISCOVERIES) if (d.embodiedBy.length && world.discoveries[d.id]) embodied.set(d.id, embodimentsFrom(eIdx, d));
   const embodiedZones = new Set([...embodied.values()].flat().map(o => o.zone));
   for (const L of live) {
     let learned = false;
     const r = rngFor(world.seed, 'teach', t, L.id);   // one stream per learner per tick
-    const teachers = live.filter(K => K !== L && K.zone === L.zone);
+    // Nothing to learn here? Skip the pairwise loop (the common case late on).
+    const zk = zoneKnows.get(L.zone);
+    let missing = false;
+    for (const d of zk) if (!L.knows[d]) { missing = true; break; }
+    const teachers = missing ? live.filter(K => K !== L && K.zone === L.zone) : [];
     for (const K of teachers) {
       for (const d of knownSorted.get(K)) {
         if (L.knows[d] || !BY_ID[d]) continue;
@@ -381,6 +390,7 @@ export function teachingStep(world) {
 function forgettingStep(world, live) {
   const t = world.tick;
   const objs = liveObjects(world);
+  const eIdx = embodimentIndex(objs);
   const known = new Set();
   for (const w of live) for (const d of Object.keys(w.knows)) known.add(d);
   for (const id of sortedKeys(world.discoveries)) {
@@ -388,7 +398,7 @@ function forgettingStep(world, live) {
     if (rec.forgotten) continue;
     if (known.has(id)) { rec.orphanSince = null; continue; }
     const d = BY_ID[id];
-    const holders = embodiments(world, d, objs);
+    const holders = embodimentsFrom(eIdx, d);
     if (rec.orphanSince === null || rec.orphanSince === undefined) rec.orphanSince = t;
     // An empty valley has nobody to learn from it yet: the clock waits.
     else if (!live.length && holders.length) rec.orphanSince++;

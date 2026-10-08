@@ -11,6 +11,7 @@ import { nowTickFor, localDayIndex, localHour } from './clock.js';
 import { narrateRecap } from '../ai/narrate.js';
 import { buildRecap, buildRecapInput } from '../sim/recap.js';
 import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panels.js';
+import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -25,7 +26,13 @@ function setOffset(n) { try { localStorage.setItem(DEBUG_OFFSET_KEY, String(n));
 function nowTick() { return nowTickFor(save, Date.now(), DEBUG ? offset() : 0); }
 
 // ------------------------------------------------------------ boot
+function centerStage() {
+  const st = document.querySelector('#stage');
+  if (st.scrollWidth > st.clientWidth) st.scrollLeft = (st.scrollWidth - st.clientWidth) / 2;
+}
+
 function boot() {
+  setTimeout(centerStage, 50);
   save = loadSave();
   if (!save) { showNewColony(); return; }
   const now = nowTick();
@@ -252,6 +259,7 @@ function drawHud() {
   const btn = (label, fn, cls = '') => { const b = document.createElement('button'); b.textContent = label; b.className = cls; b.onclick = fn; row.append(b); };
   btn('Chronicle', () => showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }));
   btn('Discovery Book', () => showBook($('#panel'), world));
+  if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.textContent = FEEDBACK_LABEL; row.append(a); }
   if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow');
   hud.append(name, line, row);
 }

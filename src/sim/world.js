@@ -134,6 +134,7 @@ export function createWorld(seed, opts = {}) {
     lastKeeperTick: 0,
     wishes: [],                   // { id, by, want, t, until, event, done }
     lastFestival: null,
+    lastKeeperEvent: null,        // id of the latest salient Keeper event (murals)
     noticed: {},                  // material kind -> first tick a Wobblin saw it
     events: [],
     nextIds: { w: 1, o: 1, e: 1 }

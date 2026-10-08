@@ -110,7 +110,7 @@ function hutBuildingStep(world) {
   if (!builders.length || hutCapacity(world) >= Math.ceil(live.length / 2) + 1) return;
   const r = rngFor(world.seed, 'hut-build', world.tick);
   if (!chance(r, SOCIAL.hutBuildChance)) return;
-  const disc = world.events.filter(e => (e.kind === 'discovery' || e.kind === 'rediscovery') && e.target === 'hut').pop();
+  const disc = world.discoveries.hut && world.discoveries.hut.event ? world.events[world.discoveries.hut.event - 1] : null;
   if (disc) buildStructure(world, 'hut', builders[0], disc);
 }
 

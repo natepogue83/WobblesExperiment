@@ -170,6 +170,10 @@ function templates(world, e, ctx) {
       const k = d.kind;
       const on = d.builtOn && ctx.builtOn;
       if (k === 'temple' && on) return [`The Wobblins built a temple to you. It stands on the ${on} you placed.`, `A temple now stands on your ${on}. It is for you.`, `They raised a temple on top of your ${on}.`];
+      if (k === 'stack') return [`${name} stacked the stones ${zoneIn(d.zone)} into a little tower.`, `A new stone stack stands ${zoneIn(d.zone)}. ${name} is very proud.`, `${name} built a stone stack.`];
+      if (k === 'pots') return [`${name} made clay pots for the hearth. Food will keep longer.`, `There are pots by the hearth now, thanks to ${name}.`, `${name} shaped pots to store food.`];
+      if (k === 'planted') return [`${name} planted seeds ${zoneIn(d.zone)}.`, `${name} pushed some seeds into the soil ${zoneIn(d.zone)}.`, `Something new is growing ${zoneIn(d.zone)}: ${name} planted it.`];
+      if (k === 'mural' && ctx.depicts) return [`${name} painted a mural of your ${ctx.depicts}.`, `A new mural ${zoneIn(d.zone)} shows your ${ctx.depicts}. ${name} painted it.`, `${name} painted your ${ctx.depicts} on a rock.`];
       if (d.rebuilt) return [`${name} rebuilt the ${k}.`, `The ${k} is back up, thanks to ${name}.`, `${name} put the ${k} back together.`];
       const label = { wall: 'a low stone wall', hearth: 'a stone hearth', hut: 'a hut', garden: 'a garden', raft: 'a raft', totem: 'a carved totem of you', temple: 'a temple to you', mural: 'a mural' }[k] || 'something';
       return [`${name} built ${label} ${zoneIn(d.zone)}.`, `There is ${label} ${zoneIn(d.zone)} now. ${name} made it.`, `${name} finished ${label}.`];
@@ -189,7 +193,8 @@ function templates(world, e, ctx) {
       : [`A stranger named ${name} wandered in and stayed.`, `${name} showed up from somewhere far away.`, `The colony has a newcomer: ${name}.`];
     case 'seed_pod_hatched': return [`The valley was empty, until a seed pod hatched: ${name} and ${wob(world, e.actors[1])}.`, `New life: a seed pod split open and out came ${name} and ${wob(world, e.actors[1])}.`, `After a long quiet, two new Wobblins hatched.`];
     case 'festival': return [`The Wobblins held a festival with lanterns and far too much food.`, `There was a festival! Everyone danced.`, `A big festival lit up the night.`];
-    case 'ritual': return d.kind === 'rain_dance'
+    case 'ritual': if (d.kind === 'song') return [`${name} and friends hummed together at dusk.`, `A humming circle formed ${zoneIn(d.zone)}.`, `Everyone ${zoneIn(d.zone)} sang along with ${name}.`];
+      return d.kind === 'rain_dance'
       ? [`The Wobblins danced for rain.`, `A rain dance broke out.`, `They sang to the dry sky.`]
       : [`They danced around the fire for you.`, `A fire dance in your honor.`, `The colony held a ritual by the hearth.`];
     case 'wish': return [`${name} made a wish: ${item(e.target)}.`, `${name} wishes for ${item(e.target)}.`, `At the temple, ${name} asked you for ${item(e.target)}.`];
@@ -222,6 +227,11 @@ function choose(world, e, variants) {
 function ctxFor(world, e) {
   const ctx = {};
   if (e.kind === 'discovery') ctx.keeper = keeperCause(world, e);
+  if (e.kind === 'built' && e.data.kind === 'mural') {
+    const m = world.objects.find(x => x.id === e.target);
+    const dep = m && m.state.depicts && world.events[m.state.depicts - 1];
+    if (dep) ctx.depicts = actionName(dep);
+  }
   if (e.kind === 'built' && e.data.builtOn) {
     const o = world.objects.find(x => x.id === e.data.builtOn);
     if (o && o.origin.action !== undefined) ctx.builtOn = o.kind === 'boulder' ? 'boulder' : 'stones';
@@ -284,11 +294,26 @@ export function buildRecap(world, fromTick, toTick) {
   }
   // Always include a Keeper-consequence line when any event in the window has one.
   const hasKeeperLine = list => list.some(e => e.kind === 'discovery' && keeperCause(world, e));
+  // The per-kind cap gives way when it would leave fewer than 3 lines.
+  for (const e of salient) {
+    if (chosen.length >= 3) break;
+    if (!chosen.includes(e)) chosen.push(e);
+  }
   let picked = chosen.slice(0, 6);
   if (!hasKeeperLine(picked)) {
     const kc = chosen.find(e => e.kind === 'discovery' && keeperCause(world, e)) ||
       salient.find(e => e.kind === 'discovery' && keeperCause(world, e));
     if (kc) picked = [kc, ...picked.filter(e => e !== kc)].slice(0, 6);
+  }
+  // Re-apply the per-kind cap now that the Keeper line is in (it only gave
+  // way to reach 3 lines).
+  if (picked.length > 3) {
+    const seen = {};
+    picked = picked.filter((e, i) => {
+      const k = e.kind === 'rediscovery' ? 'discovery' : e.kind;
+      seen[k] = (seen[k] || 0) + 1;
+      return seen[k] <= 2 || i === 0;
+    });
   }
   // Discoveries lead.
   picked.sort((a, b) => (isDisc(b) - isDisc(a)) || rank(b) - rank(a));

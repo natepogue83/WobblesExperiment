@@ -74,8 +74,8 @@ export function onExperimentFailed(world, w, d, match, r) {
   const items = objs.filter(o => (o.kind === 'gift' || o.kind === 'curio') && reach.includes(o.zone));
   const omen = recentOmen(world);
   const table = [
-    { k: 'nothing', w: 55 },
-    { k: 'funny', w: 20 },
+    { k: 'nothing', w: 40 },
+    { k: 'funny', w: 35 },
     { k: 'injury', w: risky ? 10 : 0 },
     { k: 'burned', w: fireish && builtNear.length ? 5 : 0 },
     { k: 'lost', w: items.length ? 5 : 0 },

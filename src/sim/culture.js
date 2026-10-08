@@ -5,7 +5,9 @@
 import { emit } from './events.js';
 import { rngFor, chance, pick } from './rng.js';
 import { alive, liveObjects, r3, clamp, clamp01 } from './util.js';
-import { makeWobblin } from './world.js';
+import { makeWobblin, makeObject } from './world.js';
+import { buildStructure } from './effects.js';
+import { freeSlotIn } from './nature.js';
 import { LIFE, POP_CAP } from './constants.js';
 import { ZONE_IDS } from './geometry.js';
 
@@ -29,10 +31,16 @@ function gatherings(world, live, objs, r) {
     if (here.length < 2) continue;
     // Song: humming circles at dusk.
     const singers = here.filter(w => knowsIt(w, 'song'));
-    if (singers.length >= 2) for (const w of here) mood(w, 0.04);
+    if (singers.length >= 2) {
+      for (const w of here) mood(w, 0.04);
+      if (t - (world.lastSong ?? -99) >= 6 && chance(r, 0.15)) {
+        world.lastSong = t;
+        emit(world, { kind: 'ritual', actors: singers.map(w => w.id), data: { zone: z, kind: 'song' }, salience: 2 });
+      }
+    }
     // Ritual: dances around the hearth with 3+ who know it.
     const dancers = here.filter(w => knowsIt(w, 'ritual'));
-    if (hearthZones.has(z) && dancers.length >= 3 && chance(r, 0.15)) {
+    if (hearthZones.has(z) && dancers.length >= 3 && chance(r, 0.25)) {
       for (const w of here) { mood(w, 0.08); faith(w, 0.06); }
       emit(world, { kind: 'ritual', actors: here.map(w => w.id), data: { zone: z, kind: 'fire_dance' }, salience: 3 });
     }
@@ -65,6 +73,53 @@ function rebuilding(world, live, objs, r) {
     emit(world, { kind: 'built', actors: [builder.id], target: o.id, data: { kind: o.kind, zone: o.zone, rebuilt: true },
       salience: 3, causes: [{ object: o.id }] });
   }
+}
+
+// Ongoing works: Wobblins keep using what they know, so the valley keeps
+// changing while you are away (stacks, walls, gardens, new murals, pots).
+const WORKS = [
+  { d: 'stone_stacking', ok: (world, objs) => objs.some(o => o.kind === 'stones' && !o.state.stacked),
+    run: (world, objs, w, r) => { const s = objs.filter(o => o.kind === 'stones' && !o.state.stacked); const o = s[Math.floor(r() * s.length)]; o.state.stacked = true; return { o, kind: 'stack' }; } },
+  // (No extra walls: they ate the stone piles that Huts and the Temple need.)
+  { d: 'garden', ok: (world, objs) => objs.filter(o => o.kind === 'garden').length < 3, build: 'garden', zones: ['meadow', 'grove'] },
+  { d: 'paint', ok: (world, objs) => objs.filter(o => o.kind === 'mural').length < 6 && newKeeperEvent(world, objs), build: 'mural', zones: ['hill', 'grove'] },
+  { d: 'raft', ok: (world, objs) => !objs.some(o => o.kind === 'raft'), build: 'raft' },
+  { d: 'pottery', ok: (world, objs) => objs.some(o => o.kind === 'hearth' && !o.state.pots),
+    run: (world, objs) => { const o = objs.find(x => x.kind === 'hearth' && !x.state.pots); o.state.pots = true; return { o, kind: 'pots' }; } },
+  { d: 'planting', ok: (world, objs) => objs.filter(o => o.kind === 'bush' || o.kind === 'sprout').length < 6,
+    run: (world, objs, w) => {
+      const slot = freeSlotIn(world, 'grove');
+      if (!slot) return null;
+      const o = makeObject(world, { kind: 'sprout', slot, by: [w.id], origin: { natural: true }, state: { grows: 'bush', readyAt: world.tick + 6 } });
+      return { o, kind: 'planted' };
+    } }
+];
+
+function newKeeperEvent(world, objs) {
+  const last = Math.max(0, ...objs.filter(o => o.kind === 'mural').map(o => o.state.depicts || 0));
+  return world.lastKeeperEvent !== null && world.lastKeeperEvent > last;
+}
+
+function works(world, live, objs, r) {
+  if (!chance(r, 0.35)) return;
+  const options = WORKS.filter(x => live.some(w => w.stage !== 'baby' && knowsIt(w, x.d)) && x.ok(world, objs));
+  if (!options.length) return;
+  const job = options[Math.floor(r() * options.length)];
+  const builders = live.filter(w => w.stage !== 'baby' && knowsIt(w, job.d));
+  const w = builders[Math.floor(r() * builders.length)];
+  const rec = world.discoveries[job.d];
+  const disc = rec && rec.event ? world.events[rec.event - 1] : null;
+  if (job.build) {
+    let state = {};
+    if (job.build === 'mural') {
+      state = { depicts: world.lastKeeperEvent };
+    }
+    if (disc) buildStructure(world, job.build, w, disc, state, job.zones);
+    return;
+  }
+  const done = job.run(world, objs, w, r);
+  if (done) emit(world, { kind: 'built', actors: [w.id], target: done.o.id, data: { kind: done.kind, zone: done.o.zone, work: true },
+    salience: 2, causes: disc ? [{ event: disc.id }] : [] });
 }
 
 // Beliefs spread like knowledge (more slowly); Lore lets them fade.
@@ -163,6 +218,7 @@ export function cultureStep(world) {
   const r = rngFor(world.seed, 'culture', world.tick);
   gatherings(world, live, objs, r);
   rebuilding(world, live, objs, r);
+  works(world, live, objs, r);
   beliefs(world, live, r);
   care(world, live);
   raftStrangers(world, live, objs, r);

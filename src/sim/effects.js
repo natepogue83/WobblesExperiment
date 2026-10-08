@@ -13,7 +13,7 @@ const SITES = {
   hut: ['hollow', 'meadow'],
   garden: ['meadow', 'grove'],
   raft: ['riverbank', 'pondsite'],
-  mural: ['hollow', 'hill', 'meadow'],
+  mural: ['hill', 'grove', 'meadow'],   // never the hollow: that is where huts go
   totem: ['hill', 'meadow'],
   temple: ['hill']
 };
@@ -26,10 +26,10 @@ function nearest(world, w, kinds, pred = () => true) {
 }
 
 // Builders use up a plain stone pile when the site has no free slot.
-const USES_STONE = new Set(['wall', 'hut', 'hearth', 'temple', 'totem', 'mural']);
+const USES_STONE = new Set(['wall', 'hut', 'hearth', 'temple', 'totem']);
 
-export function buildStructure(world, kind, w, ev, state = {}) {
-  for (const zone of SITES[kind]) {
+export function buildStructure(world, kind, w, ev, state = {}, zones = SITES[kind]) {
+  for (const zone of zones) {
     let slot = freeSlotIn(world, zone);
     if (!slot && USES_STONE.has(kind)) {
       // A temple rises on the boulder you dropped, if there is one.
@@ -92,4 +92,19 @@ export function embodiments(world, d, objs = liveObjects(world)) {
   return objs.filter(o =>
     (d.embodiedBy.includes(o.kind) && !o.state.decayFrom) ||
     (d.embodiedBy.includes('kept_fire') && o.kind === 'fire' && o.state.kept));
+}
+
+// One pass over live objects: kind -> objects that can hold knowledge.
+export function embodimentIndex(objs) {
+  const idx = {};
+  for (const o of objs) {
+    if (o.state.decayFrom === undefined) (idx[o.kind] ||= []).push(o);
+    if (o.kind === 'fire' && o.state.kept) (idx.kept_fire ||= []).push(o);
+  }
+  return idx;
+}
+
+export function embodimentsFrom(idx, d) {
+  if (d.embodiedBy.length === 1) return idx[d.embodiedBy[0]] || [];
+  return d.embodiedBy.flatMap(k => idx[k] || []);
 }

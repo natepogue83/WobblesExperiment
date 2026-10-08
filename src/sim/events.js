@@ -26,6 +26,7 @@ export function emit(world, ev, tag) {
     causes: ev.causes || []
   };
   world.events.push(e);
+  if (e.kind.startsWith('keeper_') && e.salience >= 2) world.lastKeeperEvent = e.id;
   // Salient events become memories of the Wobblins involved.
   if (e.salience >= 2) {
     for (const id of e.actors) {

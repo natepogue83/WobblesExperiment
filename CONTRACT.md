@@ -103,7 +103,7 @@ world = {
              rainEvent: eventId /* cause of the current rain */ },
   wobblins: [ wobblin ],          // dead ones stay, alive:false
   objects:  [ object ],           // destroyed ones stay, hp 0, state.gone:true
-  discoveries: { [id]: { inventor, tick, causes, forgotten, orphanSince, forgottenTick? } },
+  discoveries: { [id]: { inventor, tick, causes, forgotten, orphanSince, event, forgottenTick? } },
                                   // orphanSince: tick the last knower died (a structure may still hold it)
   devotion: 0,
   offerings: 0,                   // waiting at the shrine, collected by action
@@ -118,7 +118,7 @@ world = {
   miracleUntil, riverBend: slot|null, lastKeeperTick,
   noticed: { [objectKind]: tick },// first tick a Wobblin was near a material (unlocks curios)
   wishes: [ { id, by, want: "rain"|"stones_on_hill"|"warmth", t, until, event, done: null|"granted"|"expired" } ],
-  lastFestival: tick|null
+  lastFestival: tick|null, lastSong: tick|null, lastKeeperEvent: eventId|null
   events: [ event ],              // append-only
   nextIds: { w, o, e }
 }
@@ -258,9 +258,24 @@ offset only changes `nowTick` in the UI.
   stands on the boulder you dropped": the built event cites it).
 - Herb Healing counts an injured Wobblin anywhere in the colony; Fire
   Carrying takes sticks from trees, bushes or reeds.
+- Ongoing works (culture.js): Wobblins keep stacking stones, planting in the
+  grove, painting new murals of new Keeper acts, adding gardens and pots, so a
+  few hours away still shows change. Nothing new is ever built in the hollow
+  except huts (murals there starved colonies of hut space).
+- Misfire weights: nothing 40, funny 35 (plan: 55/20), for more story per absence.
+- Pondering is checked every other tick.
 - Teaching rolls use one stream per learner per tick: rngFor(seed, "teach", t, id).
 
-## 13. Testing
+## 13. Recap
+
+`src/sim/recap.js` `buildRecap(world, from, to)` reads only the event log.
+The window is ticks from..to-1 (the Keeper saw the world at `from`; their own
+actions are not news). Discoveries lead, at most 2 lines per kind (the cap
+gives way only to reach 3 lines), teaching / offerings batched, and a
+Keeper-consequence line whenever `keeperRoot` finds one. Roots older than 30
+ticks are told as "long ago". `buildRecapInput` is the week-2 AI input.
+
+## 14. Testing
 
 `npm test` runs every `tests/test-*.js` with plain node and `assert`.
 Day 1 tests: determinism (2,160 ticks, same hash), purity (grep), replay

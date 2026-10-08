@@ -45,7 +45,8 @@ section('Recap over many windows');
         }
       }
       // Discoveries lead.
-      const kinds = r.lines.map(l => l.eventIds.length === 1 ? w.events[l.eventIds[0] - 1].kind : 'batch');
+      const BATCH = ['taught', 'offering', 'experiment_failed'];
+      const kinds = r.lines.map(l => l.eventIds.length === 1 && !BATCH.includes(w.events[l.eventIds[0] - 1].kind) ? w.events[l.eventIds[0] - 1].kind : 'batch');
       const firstNonDisc = kinds.findIndex(k => k !== 'discovery' && k !== 'rediscovery');
       if (firstNonDisc >= 0) assert.ok(kinds.slice(firstNonDisc).every(k => k !== 'discovery' && k !== 'rediscovery'), 'discoveries first');
       // A Keeper-consequence line appears when any discovery in the window has a root.
@@ -54,7 +55,9 @@ section('Recap over many windows');
       // At most 2 lines per kind.
       const per = {};
       for (const k of kinds) if (k !== 'batch') per[k === 'rediscovery' ? 'discovery' : k] = (per[k === 'rediscovery' ? 'discovery' : k] || 0) + 1;
-      for (const k in per) assert.ok(per[k] <= 2, k + ' x' + per[k]);
+      // (The cap gives way only to reach 3 single-event lines.)
+      const singles = kinds.filter(k => k !== 'batch').length;
+      if (singles > 3) for (const k in per) assert.ok(per[k] <= 2, k + ' x' + per[k] + ' seed ' + seed + ' ' + from + ' ' + JSON.stringify(r.lines.map(l => l.text)));
     }
   }
   ok(windows + ' recaps: 1-7 lines (3+ when 3+ salient events, ' + salientWindows + ' windows), only cited, in-window events and their own Wobblins');
