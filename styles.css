@@ -686,3 +686,9 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
   5.5% { opacity: 1; transform: translate(40px, 0) rotate(55deg); } 6% { opacity: 0; transform: translate(41px, 4px) rotate(60deg); } 100% { opacity: 0; transform: translate(41px, 4px); } }
 .river-plop { opacity: 0; transform-box: fill-box; transform-origin: center; animation: river-plop linear infinite; }
 @keyframes river-plop { 0%, 5.4% { opacity: 0; transform: scale(.4); } 6% { opacity: .9; transform: scale(.6); } 11% { opacity: 0; transform: scale(2.2); } 100% { opacity: 0; transform: scale(2.2); } }
+
+/* The Keeper's hand: an open hand over the valley and anything you can pick up, a fist while you carry. */
+@media (hover: hover) and (pointer: fine) {
+  #world, .wobblin, .obj.movable, .tile:not(.cooling) { cursor: url(cursors/hand-open.svg) 16 9, grab; }
+  .wobblin.held, .obj.held, .tile:active, body.is-dragging, body.is-dragging * { cursor: url(cursors/hand-grab.svg) 16 14, grabbing !important; }
+}
