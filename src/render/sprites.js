@@ -1,3 +1,4 @@
+import { objectArt } from './objects.js';
 // sprites.js — Wobblin and object SVG generators (pure: data in, SVG string out).
 // Wobblins are original soft "mochi" creatures: a wide, squishy body that sags
 // a little at the base, a leaf sprout on top whose colour shows their mood,
@@ -86,18 +87,22 @@ export function wobblinSVG(w, opts = {}) {
   const elder = w.stage === 'elder';
   const cheeks = face === 'cold' ? '#bfe3ff' : '#ff9fb2';
   const blinkDelay = ((w.id ? Number(String(w.id).slice(1)) : 1) * 1.37 % 4).toFixed(2);
+  const gid = 'wb' + h;
   return `<g class="flip">
-    <ellipse class="shadow" cx="0" cy="2" rx="21" ry="4.5" fill="rgba(20,30,10,0.22)"/>
+    <defs><radialGradient id="${gid}" cx="0.36" cy="0.22" r="0.85"><stop offset="0" stop-color="${hsl(h, 75, 86)}"/><stop offset="0.5" stop-color="${fill}"/><stop offset="1" stop-color="${hsl(h, 45, 44)}"/></radialGradient>
+      <radialGradient id="${gid}b" cx="0.5" cy="0.3" r="0.7"><stop offset="0" stop-color="${hsl(h, 70, 90)}"/><stop offset="1" stop-color="${belly}" stop-opacity="0"/></radialGradient></defs>
+    <ellipse class="shadow" cx="0" cy="2" rx="22" ry="5" fill="url(#a-shadow)"/>
     <g class="wobble face-${face}" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s;--blink:${blinkDelay}s">
       ${TAILS[w.look.tail](shade)}
       ${EARS[w.look.ears](shade)}
       <g class="feet"><ellipse class="foot l" cx="-10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/><ellipse class="foot r" cx="10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/></g>
       <ellipse class="arm l" cx="-22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" transform="rotate(25 -22 -13)"/>
       <ellipse class="arm r" cx="22" cy="-13" rx="4.2" ry="6.5" fill="${shade}" transform="rotate(-25 22 -13)"/>
-      <path d="${BODY}" fill="${fill}" stroke="${dark}" stroke-width="1.4"/>
-      <path d="M-21 -1 Q-26 -16 -20 -28 Q-16 -18 -14 -8 Q-11 0 0 4 Q-11 4 -21 -1 Z" fill="${shade}" opacity="0.45"/>
-      <ellipse cx="-7" cy="-31" rx="9" ry="5" fill="${light}" opacity="0.65"/>
-      <ellipse cx="0" cy="-8" rx="12.5" ry="8" fill="${belly}" opacity="0.75"/>
+      <path d="${BODY}" fill="url(#${gid})" stroke="${dark}" stroke-width="1.2" stroke-opacity="0.8"/>
+      <ellipse cx="0" cy="-9" rx="13" ry="9" fill="url(#${gid}b)"/>
+      <path d="M-17 -27 Q-9 -38 3 -38" stroke="#fff" stroke-opacity="0.55" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="-9" cy="-31" rx="5" ry="2.6" fill="#fff" opacity="0.55" transform="rotate(-22 -9 -31)"/>
+      <path d="M14 -4 Q20 -12 20 -22" stroke="${hsl(h, 55, 80)}" stroke-opacity="0.5" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       ${pattern(w.look.pattern, mark)}
       <g class="sprout"><path d="M0 -40 Q-1 -46 1 -50" stroke="#5e8f3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M1 -49 Q-9 -56 -11 -48 Q-5 -45 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}"/><path d="M1 -49 Q9 -58 12 -50 Q6 -46 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}" opacity="0.85"/></g>
       <ellipse cx="-14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/><ellipse cx="14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/>
@@ -131,6 +136,8 @@ export function carriedSVG(carry) {
 }
 
 export function objectSVG(o) {
+  const art = objectArt(o, muralIcon);
+  if (art) return art;
   switch (o.kind) {
     case 'stones':
       if (o.state.stacked) return '<g fill="#9a9488" stroke="#6f695e"><ellipse cx="0" cy="-3" rx="11" ry="5"/><ellipse cx="0" cy="-11" rx="8" ry="4"/><ellipse cx="0" cy="-18" rx="5.5" ry="3"/><ellipse cx="0" cy="-23" rx="3" ry="2"/></g>';

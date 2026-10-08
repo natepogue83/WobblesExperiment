@@ -7,6 +7,7 @@ import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clea
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
 import { nowTickFor, localDayIndex, localHour, setClockMode, heartbeat, msToNextTick } from './clock.js';
 import { Puppets } from './puppets.js';
+import { valleyImage } from '../render/painter.js';
 import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
 import { wantOf } from '../render/render.js';
 import { narrateRecap } from '../ai/narrate.js';
@@ -54,6 +55,17 @@ function boot() {
   setTimeout(centerStage, 50);
   wireValley();
   if (DEBUG && params.get('fresh') === '1') { wipe(); return; }   // dev: start over
+  if (DEBUG && params.get('devload')) {                              // dev: load a prepared save
+    wiping = true;
+    fetch(params.get('devload')).then(r => r.json()).then(s2 => {
+      const ticks = s2.lastSeenTick || 0;
+      s2.createdAt = Date.now() - ticks * 3_600_000 - 1000; delete s2.clock;
+      localStorage.setItem('wobblins.save.v1', JSON.stringify(s2));
+      localStorage.setItem('wobblins.debugOffsetTicks', '0');
+      location.href = location.pathname + '?debug=1';
+    });
+    return;
+  }
   save = loadSave();
   if (!save) { showNewColony(); return; }
   const now = nowTick();
@@ -474,8 +486,19 @@ function poke(g) {
 }
 
 // ------------------------------------------------------------ drawing
+// The painted valley is made once per light/season/wet state, off the main draw.
+let backdropURL = null, backdropKey = null;
+function ensureBackdrop() {
+  const hour = localHour(Date.now()), season = world.climate.season, wet = world.climate.wetUntil >= world.tick;
+  const key = [world.seed, Math.round(hour * 2), season, wet].join('|');
+  if (key === backdropKey) return;
+  backdropKey = key;
+  valleyImage(world.seed, { hour, season, wet }).then(url => { if (backdropKey === key) { backdropURL = url; draw(); } });
+}
+
 function draw() {
   if (dragging) return;
+  ensureBackdrop();
   const rs = renderState(world);
   // Draw each Wobblin where its puppet is walking right now.
   for (const w of rs.wobblins) {
@@ -487,7 +510,7 @@ function draw() {
   }
   lastRS = rs;
   const svg = $('#world');
-  drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null, offerings: world.offerings >= 1 });
+  drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null, offerings: world.offerings >= 1, backdrop: backdropURL });
   puppets.sync(rs);
   puppets.noteTeaching(world.events.filter(e => e.kind === 'taught' && e.t >= world.tick - 1).map(e => e.actors));
   celebrateUnlocks();

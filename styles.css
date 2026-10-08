@@ -276,3 +276,23 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
 .tile.new { animation: glow 1.2s ease-in-out infinite; outline: 3px solid #ffd86b; }
 .want-line { background: #fff3c4; border-radius: 10px; padding: 8px 10px; font-weight: 700; }
 #world { overflow: hidden; background: #8cc472; }
+
+/* ---- Object life ---- */
+.flame.f2 { animation-duration: .38s; animation-delay: -.2s; }
+.flame.f3 { animation-duration: .3s; animation-delay: -.1s; }
+.spark { animation: spark 1.4s ease-out infinite; }
+.spark.s2 { animation-delay: -.5s; } .spark.s3 { animation-delay: -1s; }
+@keyframes spark { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(6px,-26px); opacity: 0; } }
+.ember-glow { animation: glowpulse .9s ease-in-out infinite alternate; }
+.ripple { transform-box: fill-box; transform-origin: center; animation: ripple2 2.6s ease-out infinite; }
+@keyframes ripple2 { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(2.4); opacity: 0; } }
+.fishjump { animation: fishjump 3.2s ease-in-out infinite; }
+@keyframes fishjump { 0%, 55%, 100% { transform: translate(0, 6px) rotate(0); opacity: 0; } 62% { opacity: 1; } 70% { transform: translate(6px, -16px) rotate(-30deg); } 80% { transform: translate(12px, 2px) rotate(40deg); opacity: 1; } 86% { opacity: 0; } }
+.gift-bob { animation: giftbob 2.2s ease-in-out infinite; }
+@keyframes giftbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle2 1.6s ease-in-out infinite; }
+@keyframes twinkle2 { 0%,100% { transform: scale(.4) rotate(0); opacity: .3; } 50% { transform: scale(1.2) rotate(45deg); opacity: 1; } }
+.orb { filter: drop-shadow(0 0 6px #ffe28a); animation: glowpulse 1.4s ease-in-out infinite alternate; }
+.smoke { animation: smoke 3s ease-out infinite; }
+@keyframes smoke { 0% { transform: translateY(0); opacity: .5; } 100% { transform: translateY(-14px); opacity: 0; } }
+#hud { background: linear-gradient(180deg, rgba(20,30,20,.45), rgba(20,30,20,0)); padding: 8px 14px 18px 12px; border-radius: 0 0 18px 0; left: 0; top: 0; }

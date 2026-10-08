@@ -6,7 +6,8 @@ import { VIEW, ZONES, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
 import { BY_ID } from '../sim/discoveries.js';
 import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG, wantSVG } from './sprites.js';
-import { sceneSVG, lightSVG, timeOfDay } from './scene.js';
+import { sceneSVG, lightSVG, timeOfDay, sceneOverlaySVG } from './scene.js';
+import { ART_DEFS } from './objects.js';
 
 export const LAYERS = ['sky', 'hills', 'terrain', 'nature', 'structures', 'wobblins', 'effects', 'halos'];
 const NATURE = new Set(['tree', 'bush', 'sprout', 'stones', 'boulder', 'reeds', 'fish', 'clay', 'gift', 'curio', 'fire']);
@@ -158,7 +159,11 @@ export function drawSVG(svg, rs, opts = {}) {
   for (const name of LAYERS) L[name] = el('g', { id: 'layer-' + name }, svg);
   const hour = opts.hour ?? 12;
 
-  L.sky.innerHTML = backdrop(rs, hour);
+  // A painted valley when the browser has made one; vector fallback otherwise.
+  L.sky.innerHTML = opts.backdrop
+    ? `<image href="${opts.backdrop}" x="0" y="0" width="${VIEW.w}" height="${VIEW.h}" preserveAspectRatio="none"/>` + sceneOverlaySVG(rs.seed, { hour })
+    : backdrop(rs, hour);
+  el('g', { id: 'art-defs' }, L.terrain).innerHTML = ART_DEFS;
   const sh = ZONES.hill.shrine;
   const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y})`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
   shrine.innerHTML = '<ellipse cx="0" cy="2" rx="18" ry="5" fill="rgba(0,0,0,.18)"/><rect x="-12" y="-26" width="24" height="26" rx="3" fill="#d6ccb5" stroke="#8f846f"/><path d="M-16 -26 L0 -38 L16 -26 Z" fill="#b9ab8e" stroke="#8f846f"/><circle cx="0" cy="-14" r="5" fill="#f3d36b"/>' +
@@ -206,7 +211,7 @@ export function drawSVG(svg, rs, opts = {}) {
   }
   const light = el('g', { class: 'light', 'pointer-events': 'none' }, L.effects);
   light.innerHTML = '<defs><radialGradient id="fireglow"><stop offset="0" stop-color="#ffb35a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb35a" stop-opacity="0"/></radialGradient></defs>' +
-    lightSVG(rs.seed, { hour, season: rs.climate.season });
+    lightSVG(rs.seed, { hour, season: rs.climate.season, painted: !!opts.backdrop });
 
   for (const id of opts.highlight || []) {
     const t = rs.objects.find(o => o.id === id) || rs.wobblins.find(w => w.id === id);

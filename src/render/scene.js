@@ -169,11 +169,12 @@ export function sceneSVG(seed, { hour = 12, season = 'mild', wet = false } = {})
 }
 
 // Light over everything (tint, vignette, fireflies at night, frost in a cold snap).
-export function lightSVG(seed, { hour = 12, season = 'mild' } = {}) {
+export function lightSVG(seed, { hour = 12, season = 'mild', painted = false } = {}) {
   const tod = timeOfDay(hour);
   const P = TIMES[tod];
   const r = rngFor(seed, 'light');
-  let s = `<rect width="${W}" height="${H}" fill="${P.tint}" pointer-events="none"/>`;
+  // The painting already carries its own colour grade and vignette.
+  let s = painted ? `<rect width="${W}" height="${H}" fill="${tod === 'night' ? 'rgba(20,30,80,0.18)' : 'rgba(0,0,0,0)'}" pointer-events="none"/>` : `<rect width="${W}" height="${H}" fill="${P.tint}" pointer-events="none"/>`;
   if (tod === 'night') {
     for (let i = 0; i < 18; i++) s += `<circle class="firefly" style="animation-delay:-${(r() * 6).toFixed(1)}s" cx="${(r() * W).toFixed(0)}" cy="${(300 + r() * 300).toFixed(0)}" r="2.2" fill="#fff59a"/>`;
   }
@@ -181,6 +182,22 @@ export function lightSVG(seed, { hour = 12, season = 'mild' } = {}) {
     s += `<rect width="${W}" height="${H}" fill="#dceeff" opacity="0.18" pointer-events="none"/>`;
     for (let i = 0; i < 60; i++) s += `<circle class="snow" style="animation-delay:-${(r() * 8).toFixed(1)}s;animation-duration:${(6 + r() * 6).toFixed(1)}s" cx="${(r() * W).toFixed(0)}" cy="-10" r="${(1.5 + r() * 2).toFixed(1)}" fill="#fff"/>`;
   }
-  s += `<rect width="${W}" height="${H}" fill="url(#vignette)" pointer-events="none"/>`;
+  if (!painted) s += `<rect width="${W}" height="${H}" fill="url(#vignette)" pointer-events="none"/>`;
   return s;
+}
+
+// The moving parts drawn over the painted valley: drifting clouds, river
+// shimmer and a few twinkling stars. (The painting itself is painter.js.)
+export function sceneOverlaySVG(seed, { hour = 12 } = {}) {
+  const tod = timeOfDay(hour);
+  const r = rngFor(seed, 'overlay');
+  const parts = [];
+  if (tod === 'night') {
+    for (let i = 0; i < 30; i++) parts.push(`<circle class="star" style="animation-delay:-${(r() * 4).toFixed(1)}s" cx="${(r() * W).toFixed(0)}" cy="${(r() * 200).toFixed(0)}" r="${(r() * 1.3 + 0.6).toFixed(1)}" fill="#fff"/>`);
+  }
+  for (let i = 0; i < 5; i++) parts.push(cloud(r, r() * W, 40 + r() * 110, 0.7 + r() * 0.6));
+  const rp = riverPath();
+  parts.push(`<path class="shimmer" d="${rp}" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-dasharray="14 46" opacity="0.6" transform="translate(0 -4)"/>`);
+  parts.push(`<path class="shimmer slow" d="${rp}" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="6 70" opacity="0.45" transform="translate(0 8)"/>`);
+  return parts.join('');
 }
