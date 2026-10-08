@@ -153,7 +153,7 @@ export function showFamily(panel, world, { onPick }) {
   }
   const pairs = world.wobblins.filter(w => w.alive && w.partnerId && w.id < w.partnerId).length;
   panel.replaceChildren(h('h2', {}, 'The family of ' + world.colonyName),
-    h('p', { class: 'muted' }, `${all.filter(w => w.alive).length} alive · ${pairs} pair${pairs === 1 ? '' : 's'} · ${maxGen} generation${maxGen === 1 ? '' : 's'}. Babies take after one parent or the other in each trait. To breed for a trait, set two single Wobblins who have it down together, somewhere with a hut.`),
+    h('p', { class: 'muted' }, `${all.filter(w => w.alive).length} alive · ${pairs} pair${pairs === 1 ? '' : 's'} · ${maxGen} generation${maxGen === 1 ? '' : 's'}. Babies take after one parent or the other in each trait. To breed for a trait, pick two single Wobblins who have it and drop one onto the other for a hug, near a hut. Close friends pair up much sooner.`),
     ...rows, closeButton(panel));
   panel.hidden = false;
 }

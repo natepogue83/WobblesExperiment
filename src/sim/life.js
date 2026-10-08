@@ -5,7 +5,7 @@ import { emit } from './events.js';
 import { makeObject, makeWobblin, ALL_TRAITS } from './world.js';
 import { trait } from './creatures.js';
 import { buildStructure } from './effects.js';
-import { addBond } from './interactions.js';
+import { addBond, bond } from './interactions.js';
 import { cultureStep } from './culture.js';
 import { alive, liveObjects, findWobblin, idNum, r3 } from './util.js';
 
@@ -66,7 +66,9 @@ function pairingStep(world) {
           (a.parents.length && a.parents.some(p => b.parents.includes(p)))) continue;
       const r = rngFor(world.seed, 'pair', world.tick, a.id, b.id);
       const matched = a.heldUntil > world.tick || b.heldUntil > world.tick;
-      if (!chance(r, SOCIAL.pairChance * (matched ? 4 : 1))) continue;
+      // Close friends pair up far more readily (hugging them together is matchmaking).
+      const affinity = 1 + 2 * Math.max(0, bond(a, b.id));
+      if (!chance(r, SOCIAL.pairChance * (matched ? 4 : 1) * affinity)) continue;
       a.partnerId = b.id; b.partnerId = a.id;
       addBond(world, a, b, 0.3);
       emit(world, { kind: 'paired', actors: [a.id, b.id], data: { zone: a.zone }, salience: 3 });

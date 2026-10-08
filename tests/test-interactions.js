@@ -134,6 +134,29 @@ section('Dropped right on their heads');
   ok('on-head drops pack into the save and replay to the same world');
 }
 
+section('Matchmaking');
+{
+  const firstPair = hug => {
+    let total = 0, n = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const w = createWorld(seed);
+      makeObject(w, { kind: 'hut', slot: 'hollow.1', origin: { natural: true } });
+      makeObject(w, { kind: 'hut', slot: 'hollow.3', origin: { natural: true } });
+      const [a, b] = w.wobblins;
+      let seq = 0, t = 0;
+      for (; t < 120 && !a.partnerId && !b.partnerId; t++) {
+        if (hug && t % 2 === 0) applyAction(w, { seq: ++seq, t: w.tick, type: 'nudge', nudge: 'carry', target: a.id, zone: b.zone, onto: b.id });
+        tick(w);
+      }
+      total += t; n++;
+    }
+    return total / n;
+  };
+  const alone = firstPair(false), matched = firstPair(true);
+  assert.ok(matched < alone * 0.8, `${matched} vs ${alone}`);
+  ok(`hugging two Wobblins together makes a match sooner: first pair after ${matched.toFixed(1)} days, against ${alone.toFixed(1)} left alone`);
+}
+
 section('Cradled or shaken');
 {
   const w = createWorld(41, { barren: true });

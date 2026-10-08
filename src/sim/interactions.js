@@ -50,6 +50,7 @@ export function landOnto(world, w, a, causes) {
     if (!thrown && (friends || r() < 0.5 + w.traits.sociability * 0.4)) {
       mood(w, 0.1); mood(other, 0.1);
       addBond(world, w, other, 0.15);
+      w.heldUntil = Math.max(w.heldUntil || 0, t + 2); other.heldUntil = Math.max(other.heldUntil || 0, t + 2);   // they stay together a while
       return say('hug', {}, 2, [w.id, other.id]);
     }
     // Flung into someone (or an unwelcome drop): a bonk, and a grudge.
