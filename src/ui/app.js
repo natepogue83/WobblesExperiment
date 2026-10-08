@@ -400,7 +400,8 @@ function dropItem(item, pt) {
 }
 // What happened when something landed on a Wobblin's head.
 function headToast() {
-  const e = world.events.slice(-4).reverse().find(x => x.kind === 'interaction' && x.t === world.tick);
+  const recent = world.events.slice(-5).reverse().filter(x => x.kind === 'interaction' && x.t === world.tick);
+  const e = recent.find(x => x.data.what !== 'comforted') || recent[0];
   if (e && interactionToast(e)) toast(interactionToast(e));
 }
 
@@ -628,16 +629,24 @@ let held = null, heldTimer = null;
 const heldFlags = {};
 // A flung Wobblin can be caught in mid-air and thrown again: juggling.
 const flights = {}, juggles = {}, caughtMid = {};
+// Still something in the air or in hand? Then keep redraws paused.
+const busyElsewhere = () => !!held || Object.keys(flights).length > 0;
 const juggledFlag = id => { const n = juggles[id] || 0; juggles[id] = 0; return n >= 2 ? { juggled: Math.min(n, 50) } : {}; };
 function wireWobblins(svg) {
   for (const w of lastRS.wobblins) {
     const g = svg.querySelector('#' + w.id);
     if (!g) continue;
     let base = null, trail = [];
-    g.addEventListener('pointerdown', () => {
+    g.addEventListener('pointerdown', ev => {
       const f = flights[w.id];
-      if (!f || f.caught) return;
-      f.caught = true; caughtMid[w.id] = true;
+      if (!f || f.caught || (ev.button !== undefined && ev.button !== 0)) return;
+      f.caught = true; caughtMid[w.id] = true; trail = [];
+      const cancel = c => {
+        if (c.pointerId !== ev.pointerId) return;
+        window.removeEventListener('pointercancel', cancel); window.removeEventListener('pointerup', cancel);
+        if (c.type === 'pointercancel' && caughtMid[w.id]) dropHeld(null);
+      };
+      window.addEventListener('pointercancel', cancel); window.addEventListener('pointerup', cancel);
       juggles[w.id] = (juggles[w.id] || 0) + 1;
       g.classList.remove('flying');
       play('pop');
@@ -654,7 +663,7 @@ function wireWobblins(svg) {
       },
       onStart: () => {
         dragging = true;
-        held = { still: performance.now(), lx: null, ly: null, dir: 0, flips: [], cradled: false, shaken: false };
+        held = { id: w.id, still: performance.now(), lx: null, ly: null, dir: 0, flips: [], cradled: false, shaken: false };
         clearInterval(heldTimer);
         heldTimer = setInterval(() => {
           if (!held || held.shaken || held.cradled || performance.now() - held.still < 2600) return;
@@ -712,11 +721,12 @@ function wireWobblins(svg) {
     function dropHeld(ev) {
         delete caughtMid[w.id]; delete flights[w.id];
         clearInterval(heldTimer);
-        const flags = held ? { ...(held.shaken ? { shaken: true } : held.cradled ? { cradled: true } : {}) } : {};
-        held = null;
+        const mine = held && held.id === w.id ? held : null;
+        const flags = mine ? { ...(mine.shaken ? { shaken: true } : mine.cradled ? { cradled: true } : {}) } : {};
+        if (mine || !held) held = null;
         heldFlags[w.id] = flags;
         g.classList.remove('cradled', 'shook', 'struggle', 'snuggle'); g.querySelector('.held-z')?.remove();
-        dragging = false;
+        dragging = busyElsewhere();
         document.body.classList.remove('is-dragging');
         svg.classList.remove('watching');
         clearHint(svg);
@@ -737,7 +747,10 @@ function wireWobblins(svg) {
         riverAfter(w, p.x, water);
     }
     function cancelHeld() {
-        dragging = false;
+        clearInterval(heldTimer);
+        if (held && held.id === w.id) held = null;
+        g.classList.remove('cradled', 'shook', 'struggle', 'snuggle'); g.querySelector('.held-z')?.remove();
+        dragging = busyElsewhere();
         document.body.classList.remove('is-dragging');
         svg.classList.remove('watching');
         clearHint(svg);
@@ -824,7 +837,7 @@ function fling(svg, g, w, start, v) {
 
 function land(svg, g, w, x, y, water) {
   delete flights[w.id];
-  dragging = false;
+  dragging = busyElsewhere();
   g.classList.remove('flying');
   const zone = water || zoneAt({ x, y: y - 30 });
   fx.push({ kind: water ? 'splash' : 'dust', x, y, at: Date.now() });
@@ -855,7 +868,7 @@ function riverAfter(w, x, water) {
       setTimeout(() => puppets.goTo(w.id, x2 + dir * 10, bank(x2 + dir * 10), 1200), 1700);
     } else if (ev.data.what === 'rescued') {
       setTimeout(() => puppets.rushTo(ev.actors[0], w.id), 250);
-      setTimeout(() => puppets.goTo(w.id, x, bank(x), 1200), 1500);
+      setTimeout(() => { puppets.goTo(w.id, x, bank(x), 1200); puppets.goTo(ev.actors[0], x + 30, bank(x + 30), 1200); }, 1500);
     } else if (ev.data.what === 'swam') {
       const dir = x < 600 ? 1 : -1;
       puppets.goTo(w.id, x + dir * 60, riverYAt(x + dir * 60), 1200);

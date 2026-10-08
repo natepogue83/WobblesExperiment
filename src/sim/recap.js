@@ -222,9 +222,9 @@ function templates(world, e, ctx) {
       const T = {
         hug: [`You set ${name} down next to ${other}. Big hug.`, `${name} and ${other} had a cuddle.`, `${name} landed right in ${other}'s arms.`],
         juggled: d.loved ? [`You juggled ${name} ${d.n} times. They shrieked with joy.`, `${name} went up and down ${d.n} times and loved every one.`, `Juggled ${d.n} times: ${name} wants another go.`] : [`You juggled ${name} ${d.n} times. They are a little green.`, `${name} went up and down ${d.n} times and would like to stay down now.`, `${name} is still dizzy from being juggled.`],
-        swam: [`You flung ${name} into the river. They swam back laughing.`, `${name} did a cannonball and paddled about happily.`, `Splash! ${name} loved the river.`],
+        swam: [`${name} splashed into the river and swam back laughing.`, `${name} did a cannonball and paddled about happily.`, `Splash! ${name} loved the river.`],
         rescued: [`${name} waded into the river to fish ${other} out.`, `When you dropped ${other} in the river, ${name} came to the rescue.`, `${name} pulled a soggy ${other} out of the water.`],
-        swept_downstream: [`You flung ${name} in the river and it carried them off downstream.` + (d.fish ? ' They came out with a fish.' : ''), `${name} was swept down the river and climbed out, dripping.` + (d.fish ? ' A fish came too.' : ''), `${name} went for an unplanned trip down the river.`],
+        swept_downstream: [`${name} landed in the river and it carried them off downstream.` + (d.fish ? ' They came out with a fish.' : ''), `${name} was swept down the river and climbed out, dripping.` + (d.fish ? ' A fish came too.' : ''), `${name} went for an unplanned trip down the river.`],
         paint_splat: [`You flung ${name} into a mural. Now ${name} is covered in paint and the mural has a Wobblin-shaped smudge.` + (d.by ? ` ${wob(world, d.by)} is not pleased.` : ''), `${name} crashed into the mural and came out every colour.`, `SPLAT. ${name} is a work of art now.`],
         trampled: [`You flung ${name} into the garden and flattened the crops.`, `${name} landed in the vegetable patch. The gardeners are cross.`, `The garden has a ${name}-shaped dent in it.`],
         weeded: [`You set ${name} down in the garden, and they pulled some weeds.`, `${name} tidied the garden.`, `${name} pottered about in the garden.`],
