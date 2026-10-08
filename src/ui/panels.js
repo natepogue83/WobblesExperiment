@@ -183,18 +183,22 @@ export function showHelp(panel) {
 }
 
 // ---- the Keeper's path: ages and goals ----------------------------------------
-export function showGoals(panel, world, { states, age, onClaim, feedback }) {
+export function showGoals(panel, world, { states: all, age, onClaim, feedback }) {
+  const states = all.filter(g => !g.trick), tricks = all.filter(g => g.trick);
   const nextOpen = states.find(g => g.state === 'open');
-  const rows = states.map(g => h('li', { class: 'goal ' + g.state },
+  const row = g => h('li', { class: 'goal ' + g.state },
     h('span', { class: 'tick' }, g.state === 'claimed' ? '✓' : g.state === 'ready' ? '!' : ''),
-    h('div', {}, h('b', {}, g.text), g === nextOpen ? h('small', {}, g.hint) : ''),
+    h('div', {}, h('b', {}, g.text), g === nextOpen || (g.trick && g.state !== 'claimed') ? h('small', {}, g.hint) : ''),
     g.state === 'ready' ? h('button', { class: 'claim', onclick: () => onClaim(g.id) }, 'Claim +' + g.belief) :
-      h('span', { class: 'reward' }, '+' + g.belief)));
-  const done = states.filter(g => g.state === 'claimed').length;
+      h('span', { class: 'reward' }, '+' + g.belief));
+  const rows = states.map(row);
+  const done = states.filter(g => g.state === 'claimed').length, tricksDone = tricks.filter(g => g.state === 'claimed').length;
   panel.replaceChildren(h('h2', {}, "The Keeper's path"),
     h('p', { class: 'age-line' }, h('b', {}, age.name), ' · ' + done + ' of ' + states.length + ' milestones'),
     h('p', { class: 'muted' }, 'Milestones are things to aim for. Each one you reach deepens their belief in you, and belief unlocks new powers.'),
     h('ul', { class: 'goals' }, rows),
+    tricks.length ? h('h3', { class: 'tricks-head' }, 'Tricks to try (' + tricksDone + ' of ' + tricks.length + ')') : '',
+    tricks.length ? h('ul', { class: 'goals tricks' }, tricks.map(row)) : '',
     feedback ? h('p', { class: 'goals-foot' }, h('a', { href: feedback.url, target: '_blank', rel: 'noopener' }, feedback.label)) : '',
     closeButton(panel));
   panel.hidden = false;

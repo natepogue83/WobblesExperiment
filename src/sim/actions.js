@@ -246,7 +246,7 @@ function applyActionEffects(world, a) {
   if (a.type === 'claim') {
     const g = GOAL_BY_ID[a.goal];
     world.goalsClaimed = [...(world.goalsClaimed || []), g.id];
-    const ev = emit(world, { kind: 'goal_reached', target: g.id, data: { goal: g.id, text: g.text, belief: g.belief }, salience: 3, causes });
+    const ev = emit(world, { kind: 'goal_reached', target: g.id, data: { goal: g.id, text: g.text, belief: g.belief, ...(g.trick ? { trick: true } : {}) }, salience: g.trick ? 2 : 3, causes });
     addBelief(world, g.belief, [{ event: ev.id }]);
     return { ok: true };
   }

@@ -706,3 +706,7 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 .wobblin:has(.puddle-splash):not(.held):not(.walking) .wobble { animation: bounce .5s ease-in-out infinite !important; }
 .puddle-splash .sp { animation: puddle-sp .5s ease-out infinite; }
 @keyframes puddle-sp { 0% { opacity: 0; transform: translateY(2px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-3px); } }
+
+.tricks-head { margin: 14px 0 2px; font: 600 15px var(--display); color: #5a3412; }
+.goals.tricks .goal b { font-weight: 700; }
+#panel .goals { max-height: none; overflow: visible; }   /* one scroll for the whole panel, not one per list */

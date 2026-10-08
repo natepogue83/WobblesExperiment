@@ -42,6 +42,27 @@ section('Goals are reached by playing, claimed once, and add belief');
   ok(`40 colonies x 30 days (generous player): ${claimedTotal} claims. ${line}`);
 }
 
+section('Tricks: small things to try with your own hands');
+{
+  const w = createWorld(9, { progression: true, barren: true });
+  const [a, b] = w.wobblins;
+  for (const x of [a, b]) x.zone = 'meadow';
+  a.bonds = { [b.id]: 0.6 }; b.bonds = { [a.id]: 0.6 };
+  assert.ok(goalStates(w).filter(g => g.trick).every(g => g.state === 'open'));
+  let seq = 0;
+  assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'nudge', nudge: 'carry', target: a.id, zone: 'meadow', onto: b.id }).ok, true);
+  assert.equal(goalStates(w).find(g => g.id === 'trick_hug').state, 'ready');
+  const before = w.belief, k = knowledge(w);
+  assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'claim', goal: 'trick_hug' }).ok, true);
+  assert.equal(knowledge(w), k);
+  assert.ok(w.belief >= before + 1 - 1e-9);
+  assert.equal(w.events[w.events.length - 1].data.trick, true);
+  assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'claim', goal: 'trick_juggle' }).reason, 'not_yet');
+  assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'nudge', nudge: 'carry', target: b.id, zone: 'meadow', thrown: true, juggled: 3 }).ok, true);
+  assert.equal(applyAction(w, { seq: ++seq, t: 0, type: 'claim', goal: 'trick_juggle' }).ok, true);
+  ok('a hug and a juggle each unlock a trick worth 1 belief; claiming never adds knowledge');
+}
+
 section('Population over time is read correctly from the log');
 {
   for (const seed of [3, 9, 14]) {

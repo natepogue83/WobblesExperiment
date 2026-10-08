@@ -18,7 +18,9 @@ export function progressOf(world) {
   const tier = found.reduce((m, id) => Math.max(m, BY_ID[id].tier), 0);
   let friends = 0, births = 0, grandkids = 0, festivals = 0;
   let added = 0;
+  const tricks = {};
   for (const e of world.events) {
+    if (e.kind === 'interaction') tricks[e.data.what] = (tricks[e.data.what] || 0) + 1;
     if (e.kind === 'friends') friends++;
     else if (e.kind === 'festival') festivals++;
     if (e.kind === 'birth') { births++; added++; }
@@ -38,7 +40,7 @@ export function progressOf(world) {
       if (parents.some(p => p.parents && p.parents.length)) grandkids++;
     }
   }
-  return { found: found.length, known: id => !!world.discoveries[id], tier, friends, births, grandkids, festivals, maxPop };
+  return { found: found.length, known: id => !!world.discoveries[id], tier, friends, births, grandkids, festivals, maxPop, tricks };
 }
 
 export function ageOf(world, p = progressOf(world)) {
@@ -63,10 +65,27 @@ export const GOALS = [
   { id: 'festival', belief: 4, text: 'Throw a festival', hint: 'A big, happy, musical colony celebrates.', done: p => p.festivals >= 1 || p.known('festival') },
   { id: 'all', belief: 10, text: `All ${DISCOVERIES.length} discoveries`, hint: 'Every temperament, every material, every season.', done: p => p.found >= DISCOVERIES.length }
 ];
-export const GOAL_BY_ID = Object.fromEntries(GOALS.map(g => [g.id, g]));
+// Tricks: small things to try with your own hands, each worth a little belief.
+// They teach what the valley can do; the discoveries stay the Wobblins' own.
+const T = (id, what, text, hint) => ({ id: 'trick_' + id, trick: true, belief: 1, text, hint, done: p => (p.tricks[what] || 0) >= 1 });
+export const TRICKS = [
+  T('hug', 'hug', 'A hug', 'Set one Wobblin down right next to a friend.'),
+  T('crown', 'flower_crown', 'A flower crown', 'Drop a seed right on a Wobblin\'s head.'),
+  T('cradle', 'cradled', 'Rocked to sleep', 'Pick one up and hold it very still.'),
+  T('juggle', 'juggled', 'Juggling', 'Fling one, then catch it in mid-air. Twice.'),
+  T('hill', 'king_of_the_hill', 'King of the hill', 'Set one down on top of a boulder or the totem.'),
+  T('bowl', 'bowled_over', 'Strike!', 'Fling one Wobblin into another.'),
+  T('rescue', 'rescued', 'To the rescue', 'Drop a Wobblin in the river near a close friend.'),
+  T('fish', 'caught_fish', 'Gone fishing', 'Drop one in the water where the fish are.'),
+  T('paint', 'paint_splat', 'Art, the hard way', 'Fling one into a mural.'),
+  T('zap', 'zapped', 'Frizz', 'Drop lightning right on a Wobblin. A brave one, ideally.'),
+  T('skate', 'skating', 'On thin ice', 'A cold snap freezes the pond. Then set one on it.'),
+  T('snowman', 'snowman_smashed', 'Poof', 'Fling one through a snowman.')
+];
+export const GOAL_BY_ID = Object.fromEntries([...GOALS, ...TRICKS].map(g => [g.id, g]));
 
 // Each goal's state for the UI: claimed, ready (reached, not claimed) or open.
 export function goalStates(world, p = progressOf(world)) {
   const claimed = new Set(world.goalsClaimed || []);
-  return GOALS.map(g => ({ ...g, state: claimed.has(g.id) ? 'claimed' : g.done(p) ? 'ready' : 'open' }));
+  return [...GOALS, ...TRICKS].map(g => ({ ...g, state: claimed.has(g.id) ? 'claimed' : g.done(p) ? 'ready' : 'open' }));
 }

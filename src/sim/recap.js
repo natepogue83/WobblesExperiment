@@ -277,7 +277,8 @@ function templates(world, e, ctx) {
       : [`${name} took the ${item(d.item)} home as a keepsake.`, `${name} kept the ${item(d.item)}.`, `The ${item(d.item)} went home with ${name}.`];
     case 'ask': return [`${name} looked up at the sky and asked for ${ASK_WORD[e.target] || 'something'}.`, `${name} asked you for ${ASK_WORD[e.target] || 'something'}.`, `"Please?" ${name} would love ${ASK_WORD[e.target] || 'something'}.`];
     case 'ask_granted': return [`You gave ${name} the ${ASK_WORD[e.target] || 'thing'} they asked for. They glowed.`, `${name} asked, and you answered.`, `${name} got the ${ASK_WORD[e.target] || 'thing'} they wished for.`];
-    case 'goal_reached': return [`Milestone: ${d.text}. Their belief in you grew.`, `You reached a milestone: ${d.text}.`, `${d.text}: done.`];
+    case 'goal_reached': if (d.trick) return [`New trick: ${d.text}. They believe in you a little more.`, `You tried a new trick: ${d.text}.`, `Trick: ${d.text}.`];
+      return [`Milestone: ${d.text}. Their belief in you grew.`, `You reached a milestone: ${d.text}.`, `${d.text}: done.`];
     case 'friends': return [`${name} and ${wob(world, e.actors[1])} are best friends now.`, `${name} and ${wob(world, e.actors[1])} are inseparable.`, `A friendship: ${name} and ${wob(world, e.actors[1])}.`];
     case 'rivals': return [`${name} and ${wob(world, e.actors[1])} can't stand each other.`, `A rivalry has started between ${name} and ${wob(world, e.actors[1])}.`, `${name} and ${wob(world, e.actors[1])} are rivals now.`];
     case 'level_up': { const S = { foraging: 'foraging', building: 'building', crafting: 'tinkering', social: 'storytelling', explore: 'exploring' }[d.skill] || d.skill;
