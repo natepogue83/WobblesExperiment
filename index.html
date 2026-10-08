@@ -11,10 +11,26 @@
   <meta property="og:description" content="Shape their world. Watch them figure it out.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Patrick+Hand&display=swap">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="handmade.css">
 </head>
 <body>
+  <!-- Ink filters for the hand-made look: lines that wobble a little, and a sepia outline. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="inked" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feMorphology in="d" operator="dilate" radius="1.1" result="thick"/>
+      <feFlood flood-color="#3a2717"/>
+      <feComposite in2="thick" operator="in" result="outline"/>
+      <feMerge><feMergeNode in="outline"/><feMergeNode in="d"/></feMerge>
+    </filter>
+    <filter id="wobble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
   <main id="stage">
     <svg id="world" role="img" aria-label="The Wobblins' valley"></svg>
     <div id="hud"></div>
