@@ -499,3 +499,11 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .tick-item .portrait { flex: none; background: rgba(255,255,255,.85); border-radius: 50%; }
 .tick-item.out { opacity: 0; transform: translateY(6px); transition: opacity .5s, transform .5s; }
 @keyframes tick-in { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+
+/* Discovery icons */
+.book .page .art { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 42px; }
+.book .page .art .dicon { filter: drop-shadow(0 2px 1px rgba(80,50,20,.25)); }
+.book .page .art .portrait { margin-left: -8px; }
+.book .page.tier3 { background: linear-gradient(180deg, #fff3d6, #f3ead6); }
+.book .page.tier4 { background: linear-gradient(180deg, #f6ecff, #f3ead6); }
+.moment .what b .dicon { display: inline-block; vertical-align: -5px; margin-right: 6px; }

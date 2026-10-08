@@ -3,6 +3,7 @@
 // of the sim.
 import { BY_ID } from '../sim/discoveries.js';
 import { wobblinSVG } from '../render/sprites.js';
+import { discoveryIcon } from '../render/icons.js';
 
 // What changes for them once they know it (never how to find it).
 const BLURB = {
@@ -101,7 +102,7 @@ function discoveryCard(world, e, done) {
     <div class="who">${inv ? `<svg viewBox="-30 -58 60 64" width="96" height="100" aria-hidden="true">${wobblinSVG({ ...inv, face: 'love', carry: [] })}</svg>` : ''}</div>
     <div class="what">
       <small>Eureka! · ${inv ? esc(inv.name) : 'Someone'} worked something out</small>
-      <b>${esc(d.name)}</b>
+      <b><span class="dicon">${discoveryIcon(d.id, 30)}</span>${esc(d.name)}</b>
       <p>${BLURB[d.id] || ''}</p>
       <span class="meta">Tier ${d.tier} · ${n} of 30 discovered</span>
     </div>`;

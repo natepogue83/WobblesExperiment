@@ -2,6 +2,7 @@
 // Read-only views of the world; they never change it.
 import { DISCOVERIES, BY_ID } from '../sim/discoveries.js';
 import { inheritance } from './moments.js';
+import { discoveryIcon } from '../render/icons.js';
 import { voiceLine } from './voice.js';
 import { describeEvent, keeperCause, actionName } from '../sim/recap.js';
 import { wobblinSVG } from '../render/sprites.js';
@@ -100,8 +101,9 @@ export function showBook(panel, world) {
       const rec = world.discoveries[d.id];
       if (!rec) { grid.append(h('div', { class: 'page unknown', title: 'Not yet discovered' }, h('span', { class: 'sil' }, '?'), h('small', {}, 'Tier ' + tier))); continue; }
       const inv = world.wobblins.find(w => w.id === rec.inventor);
-      grid.append(h('div', { class: 'page' + (rec.forgotten ? ' forgotten' : '') },
-        inv ? portrait(inv, 40, world) : '',
+      const ic = h('span', { class: 'dicon' }); ic.innerHTML = discoveryIcon(d.id, 34);
+      grid.append(h('div', { class: 'page' + (rec.forgotten ? ' forgotten' : '') + ' tier' + d.tier },
+        h('div', { class: 'art' }, ic, inv ? portrait(inv, 30, world) : ''),
         h('b', {}, d.name),
         h('small', {}, (inv ? inv.name : '?') + ', day ' + (rec.tick + 1) + (rec.forgotten ? ' · forgotten' : ''))));
     }
