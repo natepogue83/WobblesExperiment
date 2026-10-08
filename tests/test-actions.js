@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { createWorld, tick, applyAction, stateHash, giftOptions } from '../src/sim/index.js';
 import { stableStringify } from '../src/sim/util.js';
-import { section, ok } from './lib.js';
+import { section, ok, generousActions } from './lib.js';
 
 function rejects(world, action, reason) {
   const before = stateHash(world), nEvents = world.events.length;
@@ -144,6 +144,41 @@ section('Pick up and drop a Wobblin');
   assert.ok(w3.needs.warmth < warm && w3.faith < faith && w3.alive && w3.injuries === 0);
   ok('carry moves a living Wobblin to a zone, has no cooldown, and they stay put for a few ticks');
   ok('flinging one into the river chills it and shakes its faith a little, but never hurts it');
+}
+
+section('Every Keeper act gets a visible reaction');
+{
+  const seen = {};
+  let acts = 0;
+  for (let seed = 1; seed <= 40; seed++) {
+    const w = createWorld(seed);
+    let seq = 0;
+    for (let i = 0; i < 120; i++) {
+      for (const a of generousActions(w)) {
+        const before = w.events.length;
+        const res = applyAction(w, { seq: ++seq, t: w.tick, ...a });
+        if (!res.ok) continue;
+        acts++;
+        const ev = w.events.slice(before).find(e => e.kind.startsWith('keeper_') || e.kind === 'offerings_collected');
+        assert.ok(ev && ev.data.reactions, 'no reactions for ' + JSON.stringify(a));
+        if (w.wobblins.some(x => x.alive)) assert.ok(Object.keys(ev.data.reactions).length >= 1 || a.type === 'collect_offerings' || a.power, 'nobody reacted');
+        for (const [id, e] of Object.entries(ev.data.reactions)) { seen[e] = (seen[e] || 0) + 1; assert.ok(['love', 'like', 'curious', 'scared', 'upset'].includes(e)); }
+      }
+      tick(w);
+    }
+  }
+  for (const e of ['love', 'like', 'curious', 'scared', 'upset']) assert.ok(seen[e] > 0, 'never ' + e);
+  ok(acts + ' Keeper acts, each with per-Wobblin reactions: ' + Object.entries(seen).map(([k, v]) => k + ' ' + v).join(', '));
+
+  // Lightning right next to a timid Wobblin scares it; a blessing delights its target.
+  const w = createWorld(3, { barren: true });
+  for (const x of w.wobblins) { x.traits.boldness = 0.05; x.zone = 'meadow'; }
+  applyAction(w, { seq: 1, t: 0, type: 'power', power: 'lightning', slot: 'meadow.1' });
+  const lr = w.events.find(e => e.data.power === 'lightning').data.reactions;
+  assert.ok(Object.values(lr).every(e => e === 'scared'), JSON.stringify(lr));
+  applyAction(w, { seq: 2, t: 0, type: 'nudge', nudge: 'bless', target: 'w2', trait: 'curiosity' });
+  assert.equal(w.events.find(e => e.data.nudge === 'bless').data.reactions.w2, 'love');
+  ok('lightning beside timid Wobblins scares them all; a blessing makes its target light up');
 }
 
 section('Offerings');

@@ -267,6 +267,14 @@ offset only changes `nowTick` in the UI.
 - Pondering is checked every other tick.
 - Teaching rolls use one stream per learner per tick: rngFor(seed, "teach", t, id).
 
+## 12b. Reactions
+
+Every valid Keeper act records how each witness felt about it on the act's
+event: `data.reactions = { [wobblinId]: "love"|"like"|"curious"|"scared"|"upset" }`
+(`src/sim/reactions.js`, deterministic from traits, needs and beliefs plus
+`rngFor(seed, "react", tick, seq)`). It nudges mood and faith slightly. The UI shows
+it for 4 seconds: hearts, sparkle, ?, ! or X eyes, with matching body language.
+
 ## 13. Recap
 
 `src/sim/recap.js` `buildRecap(world, from, to)` reads only the event log.

@@ -10,6 +10,7 @@ import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
+import { reactToAction } from './reactions.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
 export const NUDGES = ['bless', 'curio', 'miracle', 'carry'];
@@ -169,7 +170,22 @@ function witnesses(world, zone, except) {
   return alive(world).filter(w => w.zone === zone && w.id !== except).map(w => w.id);
 }
 
+// Apply a valid action, then record how each Wobblin felt about it.
 export function applyAction(world, a) {
+  const firstEvent = world.nextIds.e;
+  const res = applyActionEffects(world, a);
+  if (!res.ok) return res;
+  let ev = null;
+  for (let i = world.events.length - 1; i >= 0 && world.events[i].id >= firstEvent; i--) {
+    if (KEEPER_EVENT.has(world.events[i].kind)) ev = world.events[i];   // the earliest one this action made
+  }
+  reactToAction(world, a, ev || null);
+  return res;
+}
+
+const KEEPER_EVENT = new Set(['keeper_power', 'keeper_nudge', 'keeper_gift', 'offerings_collected']);
+
+function applyActionEffects(world, a) {
   const v = validateAction(world, a);
   if (!v.ok) return v;
   const origin = { action: a.seq };

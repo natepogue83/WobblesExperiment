@@ -162,3 +162,17 @@ export function bubbleSVG(kind) {
   }
   return '';
 }
+
+// Reactions to a Keeper act: hearts and sparkles when they love it, ? when
+// unsure, ! when scared, X eyes and a grumble when upset.
+const HEART = (x, y, s, c = '#e8506a') => `<g transform="translate(${x} ${y}) scale(${s})"><path class="h" d="M0 6 L-7 -1 Q-9 -7 -4 -8 Q-1 -8 0 -4 Q1 -8 4 -8 Q9 -7 7 -1 Z" fill="${c}" stroke="#fff" stroke-width="1.2"/></g>`;
+export function emoteSVG(kind) {
+  switch (kind) {
+    case 'love': return `<g class="emote em-love">${HEART(-12, -46, 1.4)}${HEART(11, -56, 1.05, '#f27a8e')}${HEART(0, -70, 0.8, '#ff9fb0')}</g>`;
+    case 'like': return `<g class="emote em-like">${HEART(0, -50, 0.8, '#f27a8e')}<path d="M14 -44 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1 Z" fill="#ffe36b"/></g>`;
+    case 'curious': return `<g class="emote em-curious"><circle cx="12" cy="-52" r="10" fill="#fff" stroke="#c9c2b0"/><path d="M9 -55 Q9 -59 12 -59 Q16 -59 16 -55 Q16 -52 12 -51 L12 -49" stroke="#555" stroke-width="2" fill="none"/><circle cx="12" cy="-46" r="1.3" fill="#555"/></g>`;
+    case 'scared': return `<g class="emote em-scared"><path d="M10 -70 L18 -70 L15 -50 L13 -50 Z" fill="#e8463c" stroke="#fff" stroke-width="1.2"/><circle cx="14" cy="-45" r="2.5" fill="#e8463c" stroke="#fff" stroke-width="1"/><path d="M-20 -30 q-4 -3 -6 0 M-22 -22 q-4 -2 -5 1" stroke="#9fd0f0" stroke-width="1.6" fill="none"/></g>`;
+    case 'upset': return `<g class="emote em-upset"><g stroke="#3a2f2a" stroke-width="2.4" stroke-linecap="round"><path d="M-10 -24 L-3 -17 M-3 -24 L-10 -17"/><path d="M3 -24 L10 -17 M10 -24 L3 -17"/></g><g transform="translate(14 -54)"><path d="M-10 4 Q-14 -6 -4 -8 Q0 -16 8 -10 Q16 -10 12 0 Q10 6 -10 4 Z" fill="#6b6b78"/><path d="M-5 -2 L-1 2 M-1 -2 L-5 2 M4 -3 L8 1 M8 -3 L4 1" stroke="#fff" stroke-width="1.6"/></g></g>`;
+  }
+  return '';
+}

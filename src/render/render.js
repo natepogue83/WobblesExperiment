@@ -3,7 +3,7 @@
 // effects, halos. Every living Wobblin and live object gets a stable element id.
 import { VIEW, ZONES, ZONE_IDS, RIVER, GRAVEYARD, slotInfo } from '../sim/geometry.js';
 import { rngFor } from '../sim/rng.js';
-import { wobblinSVG, objectSVG, bubbleSVG } from './sprites.js';
+import { wobblinSVG, objectSVG, bubbleSVG, emoteSVG } from './sprites.js';
 
 export const LAYERS = ['sky', 'hills', 'terrain', 'nature', 'structures', 'wobblins', 'effects', 'halos'];
 const NATURE = new Set(['tree', 'bush', 'sprout', 'stones', 'boulder', 'reeds', 'fish', 'clay', 'gift', 'curio', 'fire']);
@@ -62,14 +62,15 @@ export function renderState(world) {
     };
   });
   // The Keeper's latest act this tick, so Wobblins can react to it at once.
-  const last = world.events.slice(-12).reverse().find(e => e.t === world.tick &&
-    (e.kind === 'keeper_power' || e.kind === 'keeper_nudge' || e.kind === 'keeper_gift'));
+  const last = world.events.slice(-40).reverse().find(e => e.t === world.tick &&
+    (e.kind === 'keeper_power' || e.kind === 'keeper_nudge' || e.kind === 'keeper_gift' || e.kind === 'offerings_collected'));
   let reaction = null;
   if (last) {
     const tgt = last.target && objects.find(o => o.id === last.target);
     const s = last.data.slot && slotInfo(last.data.slot);
     const z = ZONES[last.data.zone || 'meadow'];
     reaction = { id: last.id, kind: last.data.power || last.data.nudge || 'gift', zone: last.data.zone || null,
+      reactions: last.data.reactions || {},
       x: tgt ? tgt.x : s ? s.x : z.cx, y: tgt ? tgt.y : s ? s.y : z.cy };
   }
   return {
@@ -144,9 +145,12 @@ export function drawSVG(svg, rs, opts = {}) {
   const flinchZone = rs.reaction && rs.reaction.kind === 'lightning' ? rs.reaction.zone : null;
   for (const w of rs.wobblins.slice().sort((a, b) => a.y - b.y)) {
     const s = 1.5 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1);
-    const g = el('g', { id: w.id, transform: `translate(${w.x},${w.y}) scale(${s})`, class: 'wobblin act-' + w.activity + (flinchZone === w.zone ? ' flinch' : '') }, L.wobblins);
+    // How they feel about what you just did (shown for a few seconds).
+    const emote = opts.emotes && rs.reaction && rs.reaction.id === opts.emotes ? rs.reaction.reactions[w.id] : null;
+    const g = el('g', { id: w.id, transform: `translate(${w.x},${w.y}) scale(${s})`,
+      class: 'wobblin act-' + w.activity + (flinchZone === w.zone && !emote ? ' flinch' : '') + (emote ? ' react react-' + emote : '') }, L.wobblins);
     const lookDx = fresh ? Math.max(-1.5, Math.min(1.5, (fresh.x - w.x) / 60)) : 0;
-    g.innerHTML = wobblinSVG(w, { lookDx }) + bubbleSVG(w.bubble);
+    g.innerHTML = wobblinSVG(w, { lookDx }) + (emote ? emoteSVG(emote) : bubbleSVG(w.bubble));
   }
 
   if (rs.climate.rain > 0) {

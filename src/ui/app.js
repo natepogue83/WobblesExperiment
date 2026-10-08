@@ -12,6 +12,7 @@ import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panel
 import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 import { trayItems, ICONS, zoneAt } from './inventory.js';
 import { RIVER } from '../sim/geometry.js';
+import { emoteSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
 
 const params = new URLSearchParams(location.search);
@@ -24,7 +25,9 @@ let lastRS = null;          // the render state on screen (positions for hit tes
 let dragging = false;       // pause redraws while something is in the air
 let armed = null;           // a tray item tapped (not dragged): next valley tap drops it
 let highlight = [];
-const dropped = {};         // wobblinId -> { x, y, tick, at } where the Keeper set it down
+const dropped = {};
+const EMOTE_MS = 4000;
+let emoteEvent = null, emoteUntil = 0, emoteTimer = 0;         // wobblinId -> { x, y, tick, at } where the Keeper set it down
 
 function offset() {
   try { return Number(localStorage.getItem(DEBUG_OFFSET_KEY)) || 0; } catch { return 0; }
@@ -91,7 +94,16 @@ function act(action) {
   const a = appendAction(save, world.tick, action);
   const res = applyAction(world, a);
   if (!res.ok) { popAction(save); toast(whyNot(res.reason)); }
-  else storeSave(save);
+  else {
+    storeSave(save);
+    // Show how everyone felt about it for a few seconds.
+    for (let i = world.events.length - 1; i >= 0 && world.events[i].t === world.tick; i--) {
+      if (world.events[i].data.reactions) { emoteEvent = world.events[i].id; break; }
+    }
+    emoteUntil = Date.now() + EMOTE_MS;
+    clearTimeout(emoteTimer);
+    emoteTimer = setTimeout(draw, EMOTE_MS + 50);
+  }
   armed = null;
   draw();
   return res.ok;
@@ -394,6 +406,10 @@ const ZONE_LABEL = { hill: 'the hill', grove: 'the grove', meadow: 'the meadow',
 function zoneLabel(z) { return ZONE_LABEL[z] || z; }
 
 function poke(g) {
+  // A poke gets a little reaction of its own (just for show).
+  const w = world.wobblins.find(x => x.id === g.id);
+  g.querySelector('.emote')?.remove();
+  if (w) g.insertAdjacentHTML('beforeend', emoteSVG(w.traits.playfulness > 0.5 ? 'love' : w.traits.boldness < 0.3 ? 'scared' : 'like'));
   g.classList.remove('poked');
   void g.getBBox();       // restart the animation
   g.classList.add('poked');
@@ -412,7 +428,7 @@ function draw() {
   }
   lastRS = rs;
   const svg = $('#world');
-  drawSVG(svg, rs, { hour: localHour(Date.now()), highlight });
+  drawSVG(svg, rs, { hour: localHour(Date.now()), highlight, emotes: Date.now() < emoteUntil ? emoteEvent : null });
   for (const w of rs.wobblins) {
     const el = w.landed && svg.querySelector('#' + w.id);
     if (!el) continue;
