@@ -507,3 +507,10 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .book .page.tier3 { background: linear-gradient(180deg, #fff3d6, #f3ead6); }
 .book .page.tier4 { background: linear-gradient(180deg, #f6ecff, #f3ead6); }
 .moment .what b .dicon { display: inline-block; vertical-align: -5px; margin-right: 6px; }
+
+/* Chronicle with faces */
+.chronicle li { display: flex; align-items: center; gap: 10px; }
+.chronicle li > .portrait, .chronicle li > .dicon, .chronicle li > .dot { flex: none; }
+.chronicle li > .dot { width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle, #cfe3b8 0 35%, transparent 36%); }
+.chronicle li > .dot.keeper { background: radial-gradient(circle, #ffd86b 0 30%, #ffe9b0 31% 60%, transparent 61%); }
+#panel .tabs button { min-height: 34px; }

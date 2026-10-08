@@ -61,23 +61,32 @@ export function showRecapCard(panel, world, narrated, { onPick, onClose }) {
 // ---- chronicle --------------------------------------------------------------
 const CHRONICLE_HIDE = new Set(['taught', 'experiment_failed', 'offering', 'healed', 'rain', 'fire_out', 'grew_up', 'faith_shift', 'tree_grown']);
 
-export function showChronicle(panel, world, { filter = 'all', onPick }) {
+const KEEPER_KINDS_UI = new Set(['keeper_power', 'keeper_nudge', 'keeper_gift', 'offerings_collected', 'goal_reached']);
+export function showChronicle(panel, world, { filter = 'story', onPick }) {
   const draw = f => {
     panel.replaceChildren(h('h2', {}, 'Chronicle of ' + world.colonyName));
     const tabs = h('div', { class: 'tabs' },
-      h('button', { class: f === 'all' ? 'on' : '', onclick: () => draw('all') }, 'Everything'),
-      h('button', { class: f === 'disc' ? 'on' : '', onclick: () => draw('disc') }, 'Discoveries'));
+      h('button', { class: f === 'story' ? 'on' : '', onclick: () => draw('story') }, 'Their story'),
+      h('button', { class: f === 'disc' ? 'on' : '', onclick: () => draw('disc') }, 'Discoveries'),
+      h('button', { class: f === 'all' ? 'on' : '', onclick: () => draw('all') }, 'Everything'));
     panel.append(tabs);
     const list = h('ol', { class: 'chronicle', reversed: '' });
     const evs = world.events.filter(e => f === 'disc'
       ? ['discovery', 'rediscovery', 'forgotten'].includes(e.kind)
-      : !CHRONICLE_HIDE.has(e.kind)).slice(-300).reverse();
+      : f === 'story'
+        ? !CHRONICLE_HIDE.has(e.kind) && !KEEPER_KINDS_UI.has(e.kind) && e.salience >= (e.kind === 'level_up' ? 3 : 2)
+        : !CHRONICLE_HIDE.has(e.kind)).slice(-300).reverse();
     for (const e of evs) {
-      const li = h('li', {}, h('span', { class: 'day' }, 'Day ' + (e.t + 1)), ' ', describeEvent(world, e));
+      const who = e.actors && e.actors[0] && world.wobblins.find(w => w.id === e.actors[0]);
+      let lead;
+      if (e.kind === 'discovery' || e.kind === 'rediscovery' || e.kind === 'forgotten') { lead = h('span', { class: 'dicon' }); lead.innerHTML = discoveryIcon(e.target, 28); }
+      else if (who) lead = portrait(who, 28, world);
+      else lead = h('span', { class: 'dot' + (KEEPER_KINDS_UI.has(e.kind) ? ' keeper' : '') });
+      const li = h('li', {}, lead, h('div', {}, h('span', { class: 'day' }, 'Day ' + (e.t + 1)), ' ', describeEvent(world, e)));
       if (f === 'disc' && e.kind !== 'forgotten') {
         const kc = keeperCause(world, e);
         const inv = world.wobblins.find(w => w.id === e.actors[0]);
-        li.append(h('div', { class: 'why' },
+        li.lastChild.append(h('div', { class: 'why' },
           'Inventor: ' + (inv ? inv.name : '?') + (kc ? ` · started with your ${actionName(kc.event)} (day ${kc.event.t + 1})` : ' · their own idea')));
       }
       li.onclick = () => onPick([e.id]);
