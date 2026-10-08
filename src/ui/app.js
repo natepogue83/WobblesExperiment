@@ -23,6 +23,7 @@ import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './dr
 import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted, startAmbience } from './sound.js';
 import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
+import { tickerFor } from './ticker.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -146,7 +147,7 @@ function advance(returning = false) {
   if (now <= world.tick) { if (Date.now() % 5000 < 1000) storeSave(save); drawHud(); drawTray(); return; }
   const from = world.tick, seen = world.events.length;
   while (world.tick < now) tick(world);
-  if (!returning) { soundForEvents(world.events.slice(seen)); momentsFor(world, world.events.slice(seen)); }
+  if (!returning) { soundForEvents(world.events.slice(seen)); momentsFor(world, world.events.slice(seen)); tickerFor(world, world.events.slice(seen)); }
   save.lastSeenTick = now;
   storeSave(save);
   if (returning && now - from >= 2) showRecap(from, now);
@@ -310,6 +311,7 @@ function drawTray() {
       bar.append(tile);
     }
   }
+  document.documentElement.style.setProperty('--tray-h', $('#bars').offsetHeight + 'px');
 }
 
 function wireTile(tile, item) {
