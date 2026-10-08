@@ -539,3 +539,5 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 /* Asking the Keeper: a golden bubble that bobs */
 .wobblin .ask { animation: ask-bob 1.6s ease-in-out infinite; }
 @keyframes ask-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+
+.wobblin .pupils { transition: transform .25s ease-out; }

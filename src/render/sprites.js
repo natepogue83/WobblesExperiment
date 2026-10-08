@@ -60,10 +60,10 @@ function eyes(face, e, lookDx, eyelids) {
   switch (face) {
     case 'sleep':
       return `<path d="M${L - 4} ${Y} q4 3 8 0 M${R - 4} ${Y} q4 3 8 0" stroke="#2a2420" stroke-width="2" fill="none" stroke-linecap="round"/>`;
-    case 'love': case 'happy':
+    case 'love':
       return `<path d="M${L - 4.5} ${Y + 1} q4.5 -6 9 0 M${R - 4.5} ${Y + 1} q4.5 -6 9 0" stroke="#2a2420" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
   }
-  const pr = face === 'scared' ? 0.32 : 0.56;
+  const pr = face === 'scared' ? 0.32 : face === 'happy' ? 0.62 : 0.56;   // happy: big open, shiny eyes
   const ry = face === 'scared' ? 1.3 : 1.15;
   let lids = '';
   if (face === 'sad') lids = `<path d="M${L - e} ${Y - e * 0.6} L${L + e} ${Y - e * 1.1} L${L + e} ${Y - e * 1.4} L${L - e} ${Y - e * 1.4} Z M${R + e} ${Y - e * 0.6} L${R - e} ${Y - e * 1.1} L${R - e} ${Y - e * 1.4} L${R + e} ${Y - e * 1.4} Z" fill="${eyelids}"/>`;
@@ -71,12 +71,14 @@ function eyes(face, e, lookDx, eyelids) {
   return `<g class="blink">
     <ellipse cx="${L}" cy="${Y}" rx="${e}" ry="${e * ry}" fill="#fff"/>
     <ellipse cx="${R}" cy="${Y}" rx="${e}" ry="${e * ry}" fill="#fff"/>
+    <g class="pupils">
     <circle cx="${L + 0.6 + lookDx}" cy="${Y + 0.8}" r="${e * pr}" fill="#211b18"/>
     <circle cx="${R + 0.6 + lookDx}" cy="${Y + 0.8}" r="${e * pr}" fill="#211b18"/>
     <circle cx="${L + 1.8 + lookDx}" cy="${Y - 1}" r="${e * 0.2}" fill="#fff"/>
     <circle cx="${R + 1.8 + lookDx}" cy="${Y - 1}" r="${e * 0.2}" fill="#fff"/>
     <circle cx="${L - 0.8 + lookDx}" cy="${Y + 2}" r="${e * 0.1}" fill="#fff" opacity=".8"/>
     <circle cx="${R - 0.8 + lookDx}" cy="${Y + 2}" r="${e * 0.1}" fill="#fff" opacity=".8"/>
+    </g>
     ${lids}
   </g>`;
 }

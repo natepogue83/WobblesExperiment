@@ -53,6 +53,9 @@ export class Puppets {
 
   pin(id, on) { const p = this.p.get(id); if (p) p.pinned = on; }
 
+  // Where the Keeper's hand is (SVG coords), so their eyes can follow it.
+  lookAt(x, y) { this.focus = { x, y, at: performance.now() }; }
+
   // Scurry off a little way (UI only: poked one time too many).
   flee(id) {
     const p = this.p.get(id);
@@ -208,6 +211,18 @@ export class Puppets {
       const flip = g.querySelector('.flip');
       const want = p.face < 0 ? 'scale(-1,1)' : '';
       if (flip && flip.getAttribute('transform') !== want) flip.setAttribute('transform', want);
+      // Eyes follow your hand for a few seconds after it moves.
+      const pup = g.querySelector('.pupils');
+      if (pup) {
+        let tf = '';
+        if (this.focus && now - this.focus.at < 3000) {
+          const s = wobblinScale(p.w);
+          const dx = Math.max(-1, Math.min(1, (this.focus.x - p.x) / 160)) * 1.7 * (p.face < 0 ? -1 : 1);
+          const dy = Math.max(-1, Math.min(1, (this.focus.y - (p.y - 40 * s)) / 160)) * 1.2;
+          tf = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+        }
+        if (pup.style.transform !== tf) pup.style.transform = tf;
+      }
       const doing = p.walking ? 'walking' : p.arrived ? 'doing-' + p.act : '';
       if (g.dataset.doing !== doing) {
         if (g.dataset.doing) g.classList.remove(g.dataset.doing);

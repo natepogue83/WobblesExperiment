@@ -103,6 +103,14 @@ function startWatching() {
   window.addEventListener('pagehide', () => { if (save && !wiping) { setClockMode(save, 'away', Date.now()); storeSave(save); } });
 }
 
+// Their eyes follow the pointer over the valley.
+window.addEventListener('pointermove', ev => {
+  const svg = document.getElementById('world');
+  if (!world || !svg || !overSvg(svg, ev.clientX, ev.clientY)) return;
+  const p = toSvgPoint(svg, ev.clientX, ev.clientY);
+  puppets.lookAt(p.x, p.y);
+});
+
 function frame(now) {
   const dt = Math.min(64, now - (lastFrame || now)); lastFrame = now;
   if (world) { puppets.step(now); puppets.apply($('#world'), now); camera.apply($('#world'), dt); }
