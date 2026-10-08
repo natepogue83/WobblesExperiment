@@ -175,6 +175,8 @@ export function renderState(world) {
       flower: (w.flowerUntil || 0) > world.tick, charm: charmOf(world, w),
       ask: ((world.asks || []).find(a => !a.done && a.by === w.id) || {}).want || null, zapped: (w.zappedUntil || 0) > world.tick, temper: temperOf(w),
       wet: (w.wetUntil || 0) > world.tick, paint: paintOf(world, w),
+      // In the rain the playful splash about; everyone else hides under a big leaf.
+      rain: world.climate.rain > 0 ? (w.stage !== 'baby' && w.traits.playfulness > 0.6 ? 'splash' : 'leaf') : null,
       carry: [w.knows.fire_carrying && 'torch', w.knows.sharp_stone && 'tool', w.knows.weaving && 'basket'].filter(Boolean),
       x: Math.round(z.cx + (ring - 2) * 44 + (r() - 0.5) * 24),
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)

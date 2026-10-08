@@ -699,3 +699,10 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 .stats-line .stat svg { flex: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
 .stats-line small { opacity: .75; font-size: .92em; }
 .belief { flex-wrap: wrap; row-gap: 3px; }
+
+/* Rain: leaf umbrellas sway, puddle-stompers bounce. */
+.leaf-umbrella { transform-box: fill-box; transform-origin: 80% 100%; animation: leaf-sway 2.6s ease-in-out infinite; }
+@keyframes leaf-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.wobblin:has(.puddle-splash):not(.held):not(.walking) .wobble { animation: bounce .5s ease-in-out infinite !important; }
+.puddle-splash .sp { animation: puddle-sp .5s ease-out infinite; }
+@keyframes puddle-sp { 0% { opacity: 0; transform: translateY(2px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-3px); } }

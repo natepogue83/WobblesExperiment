@@ -115,6 +115,13 @@ function paintSVG(i) {
   return `<g class="paint" opacity=".93">` + splat(-9, -36, 5.5, a, 0.3) + splat(9, -38, 3.4, c, 1.1) + splat(-19, -15, 6, b, 0.7, 6) +
     splat(18, -12, 5.2, a, 0.2, 5) + splat(2, -5, 4.2, c, 0.9) + splat(-9, -3, 2.6, a, 0) + `<circle cx="23" cy="-24" r="1.6" fill="${b}"/><circle cx="-24" cy="-28" r="1.4" fill="${c}"/></g>`;
 }
+// Rain: a big leaf held up as an umbrella, or puddle-stomping splashes.
+const LEAF_UMBRELLA = '<g class="leaf-umbrella"><path d="M21 -14 Q24 -40 6 -58" stroke="#5e7f2e" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+  '<path d="M-26 -52 Q-6 -78 30 -62 Q20 -50 2 -50 Q-14 -48 -26 -52 Z" fill="#6fae46" stroke="#4f8a32" stroke-width="1.2"/>' +
+  '<path d="M-22 -53 Q4 -64 28 -61" stroke="#a9d77e" stroke-width="1.2" fill="none"/><path d="M-10 -56 l3 -6 M2 -58 l2 -7 M14 -59 l1 -6" stroke="#4f8a32" stroke-width="1" fill="none"/></g>';
+const PUDDLE_SPLASH = '<g class="puddle-splash"><ellipse cx="0" cy="5.5" rx="23" ry="3" fill="#8fc6f0" opacity=".4"/>' +
+  '<path class="sp" d="M-21 3 l-5 -6 M-17 4 l-3 -7 M17 4 l3 -7 M21 3 l5 -6" stroke="#cfe9fb" stroke-width="1.6" stroke-linecap="round"/></g>';
+
 // Fresh out of the river: a wet sheen and drips.
 const WET_DRIPS = '<g class="drips"><path d="M-21 -26 Q-14 -40 0 -42 Q14 -40 21 -26" stroke="#bfe3ff" stroke-width="2" fill="none" opacity=".7"/><ellipse cx="0" cy="-20" rx="23" ry="19" fill="#5aa3d8" opacity=".12"/>' +
   ['-16 -10 0', '17 -14 .4', '-4 -2 .8', '9 -1 .2'].map(s => { const [x, y, d] = s.split(' '); return `<path class="drop" style="animation-delay:${d}s" d="M${x} ${y} q-2.4 3.4 0 5 q2.4 -1.6 0 -5 Z" fill="#7cc0f0"/>`; }).join('') + '</g>';
@@ -177,6 +184,7 @@ export function wobblinSVG(w, opts = {}) {
       ${w.zapped ? ZAP_FRIZZ : ''}
       ${w.paint !== null && w.paint !== undefined ? paintSVG(w.paint) : ''}
       ${w.wet ? WET_DRIPS : ''}
+      ${w.rain === 'leaf' ? LEAF_UMBRELLA : w.rain === 'splash' ? PUDDLE_SPLASH : ''}
       ${elder ? CANE : ''}
       ${carriedSVG(w.carry || [])}
     </g></g></g>`;
