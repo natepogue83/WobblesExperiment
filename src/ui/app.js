@@ -13,12 +13,15 @@ import { isUnlocked, UNLOCKS, nextUnlock } from '../sim/belief.js';
 import { wantOf } from '../render/render.js';
 import { narrateRecap } from '../ai/narrate.js';
 import { buildRecap, buildRecapInput } from '../sim/recap.js';
-import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panels.js';
+import { showRecapCard, showChronicle, showBook, showWobblinCard, showGoals } from './panels.js';
+import { goalStates, ageOf, progressOf } from '../sim/goals.js';
 import { WAITLIST_URL, FEEDBACK_LABEL } from './config.js';
 import { trayItems, ICONS, zoneAt } from './inventory.js';
 import { RIVER } from '../sim/geometry.js';
 import { emoteSVG, wobblinSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
+import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted } from './sound.js';
+import { momentsFor } from './moments.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -56,6 +59,7 @@ function centerStage() {
 
 function boot() {
   setTimeout(centerStage, 50);
+  initSound();
   wireValley();
   if (DEBUG && params.get('fresh') === '1') { wipe(); return; }   // dev: start over
   if (DEBUG && params.get('devload')) {                              // dev: load a prepared save
@@ -135,8 +139,9 @@ function advance(returning = false) {
   heartbeat(save, Date.now());
   const now = nowTick();
   if (now <= world.tick) { if (Date.now() % 5000 < 1000) storeSave(save); drawHud(); drawTray(); return; }
-  const from = world.tick;
+  const from = world.tick, seen = world.events.length;
   while (world.tick < now) tick(world);
+  if (!returning) { soundForEvents(world.events.slice(seen)); momentsFor(world, world.events.slice(seen)); }
   save.lastSeenTick = now;
   storeSave(save);
   if (returning && now - from >= 2) showRecap(from, now);
@@ -147,10 +152,13 @@ function advance(returning = false) {
 function act(action) {
   advance();
   const a = appendAction(save, world.tick, action);
+  const seen = world.events.length;
   const res = applyAction(world, a);
-  if (!res.ok) { popAction(save); toast(whyNot(res.reason)); }
+  if (!res.ok) { popAction(save); toast(whyNot(res.reason)); play('uhoh'); }
   else {
     storeSave(save);
+    actionSound(a, world.events.slice(seen));
+    momentsFor(world, world.events.slice(seen));
     // Show how everyone felt about it for a few seconds.
     for (let i = world.events.length - 1; i >= 0 && world.events[i].t === world.tick; i--) {
       if (world.events[i].data.reactions) { emoteEvent = world.events[i].id; break; }
@@ -164,10 +172,22 @@ function act(action) {
   return res.ok;
 }
 
+// Every act has a sound, then whatever it set off, then how they felt about it.
+const ACTION_SOUND = { stones: 'thud', boulder: 'thump', plant: 'sprout', rain: 'rain', lightning: 'zap', water: 'splash', season: 'whoosh',
+  bless: 'sparkle', curio: 'chime', miracle: 'fanfare', gift: 'chime', collect_offerings: 'chime' };
+function actionSound(a, events) {
+  const key = a.type === 'power' ? (a.power === 'stone' ? a.variant : a.power) : a.type === 'nudge' ? a.nudge : a.type;
+  if (ACTION_SOUND[key]) play(ACTION_SOUND[key]);
+  const follow = events.filter(e => !['keeper_power', 'keeper_nudge', 'keeper_gift', 'offerings_collected'].includes(e.kind));
+  if (follow.length) setTimeout(() => soundForEvents(follow), ACTION_SOUND[key] ? 160 : 0);
+  const k = events.find(e => e.data && e.data.reactions);
+  if (k) soundForReaction(k.data.reactions);
+}
+
 function whyNot(reason) {
   return ({
     cooldown: 'Not yet. It needs to recharge.', occupied: 'Something is already there.', no_room: 'No room there.',
-    devotion: 'You need more Devotion. Collect offerings at the shrine.', slot: 'That spot will not work.',
+    devotion: 'You need more Devotion. Collect offerings at the shrine.', slot: 'That spot will not work.', not_yet: 'Not reached yet.', claimed: 'Already claimed.',
     gift_used: "Today's gift is already in the world.", locked: 'They have not noticed that material yet.'
   })[reason] || 'Not now (' + reason.replace(/_/g, ' ') + ').';
 }
@@ -205,10 +225,10 @@ function curioMenu(targets) {
   menu('Leave a curio for ' + names, open.map(c => [c.replace(/_/g, ' '), c]), c => act({ type: 'nudge', nudge: 'curio', curio: c, targets }));
 }
 
-function giftMenu(slot) {
+function giftMenu(slot, onto) {
   const day = localDayIndex(Date.now());
   if (world.giftsByDay[day] !== undefined) { toast("Today's gift is already in the world. Come back tomorrow."); return; }
-  menu("Today's gift", giftOptions(world.seed, day).map(g => [g.replace(/_/g, ' '), g]), g => act({ type: 'gift', day, giftId: g, slot }));
+  menu("Today's gift", giftOptions(world.seed, day).map(g => [g.replace(/_/g, ' '), g]), g => { act({ type: 'gift', day, giftId: g, slot, ...(onto ? { onto } : {}) }); headToast(); });
 }
 
 // ------------------------------------------------------------ the tray
@@ -253,6 +273,12 @@ function dropItem(item, pt) {
   if (!res) return;                    // the item opened a menu
   if (res.error) { toast(res.error); return; }
   act(res);
+  if (res.onto) headToast();
+}
+// What happened when something landed on a Wobblin's head.
+function headToast() {
+  const e = world.events.slice(-4).reverse().find(x => x.kind === 'interaction' && x.t === world.tick);
+  if (e && interactionToast(e)) toast(interactionToast(e));
 }
 
 function drawTray() {
@@ -397,6 +423,7 @@ function wireWobblins(svg) {
         base = g.getAttribute('transform');
         trail = [];
         g.classList.add('held');
+        play('lift');
         g.parentNode.append(g);           // lift above the others
         document.body.classList.add('is-dragging');
         // Everyone else turns to watch.
@@ -426,6 +453,7 @@ function wireWobblins(svg) {
         const onto = landingTarget(w.id, p.x, p.y + 30);
         dropped[w.id] = { at: Date.now() };
         puppets.place(w.id, p.x, p.y + 30);
+        play(water ? 'splash' : 'drop');
         act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}) });
         const last = world.events[world.events.length - 1];
         if (last && last.kind === 'interaction' && interactionToast(last)) toast(interactionToast(last));
@@ -487,6 +515,7 @@ function waterAt(x, y) {
 
 function fling(svg, g, w, start, v) {
   dragging = true;
+  play('whoosh');
   g.classList.add('flying');
   const s = w.stage === 'baby' ? 1.05 : 1.8;
   // Thrown downward, it lands further down the valley (maybe in the river).
@@ -503,6 +532,7 @@ function fling(svg, g, w, start, v) {
     if (wet || (vy > 0 && y >= ground)) {
       if (!wet && bounces === 0 && vy > 0.35) {
         bounces++; y = ground; vy = -vy * 0.35; vx *= 0.55;
+        play('boing');
         fx.push({ kind: 'dust', x, y, at: Date.now() });
       } else return land(svg, g, w, x, Math.min(y, ground), wet);
     }
@@ -518,6 +548,7 @@ function land(svg, g, w, x, y, water) {
   g.classList.remove('flying');
   const zone = water || zoneAt({ x, y: y - 30 });
   fx.push({ kind: water ? 'splash' : 'dust', x, y, at: Date.now() });
+  play(water ? 'splash' : 'thud');
   dropped[w.id] = { at: Date.now(), dizzy: true };
   puppets.place(w.id, x, y);
   if (water) toast(world.wobblins.find(o => o.id === w.id).name + ' went SPLASH. Brr.');
@@ -551,7 +582,9 @@ const INTERACTION_TOAST = {
   hug: 'Aww, a hug.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
   stuck_in_tree: 'Stuck in a tree!', fire_walk: 'Walked right through the fire...', singed: 'HOT HOT HOT! Off to the river.', caught_fish: 'Caught a fish!',
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
-  king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.'
+  king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',
+  bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
+  zapped: 'ZAP! Frizzy.', gift_caught: 'Caught it!'
 };
 const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
 function ontoLabel(id) {
@@ -585,6 +618,7 @@ function poke(g) {
   const w = world.wobblins.find(x => x.id === g.id);
   g.querySelector('.emote')?.remove();
   if (w) g.insertAdjacentHTML('beforeend', emoteSVG(w.traits.playfulness > 0.5 ? 'love' : w.traits.boldness < 0.3 ? 'scared' : 'like'));
+  play('giggle');
   g.classList.remove('poked');
   void g.getBBox();       // restart the animation
   g.classList.add('poked');
@@ -641,7 +675,9 @@ function drawHud() {
   const n = Object.values(world.discoveries).filter(d => !d.forgotten).length;
   const hud = $('#hud');
   hud.replaceChildren();
-  const name = document.createElement('div'); name.className = 'colony'; name.textContent = world.colonyName;
+  const prog = progressOf(world), states = goalStates(world, prog), age = ageOf(world, prog);
+  const name = document.createElement('div'); name.className = 'colony'; name.innerHTML = `${esc(world.colonyName)} <span class="age">${age.name}</span>`;
+  noticeGoals(states);
   const line = document.createElement('div');
   const secs = Math.ceil(msToNextTick(save, Date.now()) / 1000);
   const watching = save.clock && save.clock.mode === 'watch';
@@ -655,12 +691,49 @@ function drawHud() {
   const needLine = document.createElement('div'); needLine.className = 'needs';
   needLine.textContent = needs || 'Everyone is doing fine.';
   const row = document.createElement('div'); row.className = 'hud-buttons';
-  const btn = (label, fn, cls = '') => { const b = document.createElement('button'); b.textContent = label; b.className = cls; b.onclick = fn; row.append(b); };
+  const btn = (label, fn, cls = '', short = null) => { const b = document.createElement('button'); if (short) b.innerHTML = `<span class="full">${label}</span><span class="short">${short}</span>`; else b.textContent = label; b.className = cls; b.onclick = fn; row.append(b); };
   btn('Chronicle', () => showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }));
-  btn('Discovery Book', () => showBook($('#panel'), world));
-  if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.textContent = FEEDBACK_LABEL; row.append(a); }
+  btn('Discovery Book', () => showBook($('#panel'), world), '', 'Book');
+  btn('Goals', () => openGoals());
+  if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.innerHTML = `<span class="full">${FEEDBACK_LABEL}</span><span class="short">Feedback</span>`; row.append(a); }
   if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow');
-  hud.append(name, line, belief, needLine, row);
+  const snd = document.createElement('button');
+  snd.className = 'sound' + (isMuted() ? ' off' : '');
+  snd.setAttribute('aria-label', isMuted() ? 'Sound off' : 'Sound on');
+  snd.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>' + (isMuted() ? '<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' : '<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>') + '</svg>';
+  snd.onclick = () => { setMuted(!isMuted()); if (!isMuted()) play('pop'); drawHud(); };
+  row.append(snd);
+  const ready = states.find(g => g.state === 'ready'), next = states.find(g => g.state === 'open');
+  const goal = document.createElement('div'); goal.className = 'goal-line';
+  if (ready) {
+    const b = document.createElement('button'); b.className = 'glow claim';
+    b.textContent = 'Milestone: ' + ready.text + '! Claim +' + ready.belief + ' belief';
+    b.onclick = () => claimGoal(ready.id);
+    goal.append(b);
+  } else if (next) goal.textContent = 'Goal: ' + next.text;
+  hud.append(name, line, belief, goal, needLine, row);
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+
+// Goals: a banner the first time one is reached, a claim that grows belief.
+let readySeen = null;
+function noticeGoals(states) {
+  const ready = states.filter(g => g.state === 'ready').map(g => g.id);
+  if (readySeen === null) { readySeen = new Set(ready); return; }
+  for (const id of ready) if (!readySeen.has(id)) {
+    readySeen.add(id);
+    const g = states.find(x => x.id === id);
+    banner('Milestone reached: ' + g.text + '!', 'Claim it at the top for +' + g.belief + ' belief.');
+    play('fanfare');
+  }
+}
+function claimGoal(id) {
+  if (act({ type: 'claim', goal: id })) { play('levelup'); if (!$('#panel').hidden && $('#panel').querySelector('.goals')) openGoals(); }
+}
+function openGoals() {
+  const prog = progressOf(world);
+  showGoals($('#panel'), world, { states: goalStates(world, prog), age: ageOf(world, prog), onClaim: claimGoal });
 }
 
 const WANT_WORD = { hungry: 'hungry', cold: 'cold', scared: 'scared', tired: 'worn out', idea: 'missing something', sad: 'sad', lonely: 'lonely' };

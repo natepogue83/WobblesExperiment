@@ -147,6 +147,7 @@ export function createWorld(seed, opts = {}) {
     wishes: [],                   // { id, by, want, t, until, event, done }
     lastFestival: null,
     lastKeeperEvent: null,
+    goalsClaimed: [],             // goals.js ids the Keeper has claimed
     unlocked: initialUnlocks(!!opts.progression),   // tray keys you can use (belief.js)
     belief: 0,                    // lifetime belief: unlocks powers        // id of the latest salient Keeper event (murals)
     noticed: {},                  // material kind -> first tick a Wobblin saw it

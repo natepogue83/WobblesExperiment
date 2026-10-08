@@ -53,6 +53,74 @@ section('Dropping and flinging onto things');
   ok('none of it adds knowledge (rule zero)');
 }
 
+section('Dropped right on their heads');
+{
+  const w = createWorld(31, { barren: true });
+  const [a, b, c] = w.wobblins;
+  for (const x of [a, b, c]) x.zone = 'meadow';
+  let seq = 0;
+  const go = act => {
+    const k = knowledge(w);
+    const res = applyAction(w, { seq: ++seq, t: w.tick, ...act });
+    assert.equal(knowledge(w), k, 'a gag never adds knowledge');
+    return res;
+  };
+
+  assert.equal(go({ type: 'power', power: 'rain', onto: a.id }).ok, false);
+  assert.equal(go({ type: 'power', power: 'stone', variant: 'stones', slot: 'meadow.1', onto: 'w999' }).ok, false);
+  ok('only stones, seeds, lightning and the gift can land on a Wobblin, and it must be alive');
+
+  assert.equal(go({ type: 'power', power: 'stone', variant: 'stones', slot: 'meadow.1', onto: a.id }).ok, true);
+  const bonk = w.events.filter(e => e.kind === 'interaction').pop();
+  assert.ok(['bonked', 'bonk_idea'].includes(bonk.data.what));
+  assert.ok(w.events.find(e => e.kind === 'keeper_power' && e.data.onto === a.id).data.reactions[a.id]);
+  ok(`stones on the head: ${bonk.data.what}, and a reaction from the one it hit`);
+
+  const inj = b.injuries;
+  b.injuries = 2;  // one more would be fatal
+  tick(w); tick(w);
+  assert.equal(go({ type: 'power', power: 'stone', variant: 'boulder', slot: 'meadow.3', onto: b.id }).ok, true);
+  assert.ok(last(w, 'squashed'));
+  assert.equal(b.injuries, 2);
+  assert.ok(b.alive);
+  b.injuries = inj;
+  ok('a boulder squashes them flat, hurts, but never kills');
+
+  for (let i = 0; i < 8; i++) tick(w);
+  assert.equal(go({ type: 'power', power: 'plant', variant: 'bush', slot: 'meadow.5', onto: c.id }).ok, true);
+  assert.ok(last(w, 'flower_crown'));
+  assert.ok(c.flowerUntil > w.tick);
+  ok('a seed on the head grows a flower crown');
+
+  let zaps = 0, ideas = 0, hurts = 0;
+  for (const x of [a, b, c]) x.lifespan = 99999;   // nobody dies of old age mid-test
+  for (let i = 0; i < 30; i++) {
+    for (let k = 0; k < 8; k++) { for (const x of [a, b, c]) Object.assign(x.needs, { food: 1, warmth: 1, rest: 1 }); tick(w); }
+    const tgt = [a, b, c][i % 3];
+    for (const x of [a, b, c]) x.zone = x === tgt ? 'meadow' : 'grove';   // bystanders out of the blast
+    const res = go({ type: 'power', power: 'lightning', slot: 'meadow.6', onto: tgt.id });
+    assert.equal(res.ok, true, res.reason);
+    const z = last(w, 'zapped');
+    if (z && z.t === w.tick) { zaps++; if (z.data.idea) ideas++; if (z.data.hurt) hurts++; }
+  }
+  assert.ok(zaps >= 25 && ideas > 0, zaps + " zaps");
+  assert.ok([a, b, c].every(x => x.alive));
+  ok(`${zaps} zaps: ${ideas} knocked an idea loose, ${hurts} hurt someone, nobody died of it`);
+
+  ok('nothing dropped on a head ever adds knowledge (rule zero)');
+
+  const save = newSave({ seed: 31, createdAt: 0 });
+  const live = createWorld(31);
+  const doIt = (t, x) => applyAction(live, appendAction(save, t, x));
+  doIt(0, { type: 'power', power: 'stone', variant: 'stones', slot: 'meadow.1', onto: 'w1' });
+  doIt(0, { type: 'power', power: 'lightning', slot: 'meadow.4', onto: 'w2' });
+  for (let i = 0; i < 6; i++) tick(live);
+  const back = parseSave(serializeSave(save));
+  assert.equal(stateHash(replay(back, 6)), stateHash(live));
+  assert.ok(serializeSave(save).includes('"w1"'));
+  ok('on-head drops pack into the save and replay to the same world');
+}
+
 section('Lightning on odd things');
 {
   const w = createWorld(13, { barren: true });

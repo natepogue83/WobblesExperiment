@@ -104,6 +104,22 @@ export function showBook(panel, world) {
   panel.hidden = false;
 }
 
+// ---- the Keeper's path: ages and goals ----------------------------------------
+export function showGoals(panel, world, { states, age, onClaim }) {
+  const nextOpen = states.find(g => g.state === 'open');
+  const rows = states.map(g => h('li', { class: 'goal ' + g.state },
+    h('span', { class: 'tick' }, g.state === 'claimed' ? '✓' : g.state === 'ready' ? '!' : ''),
+    h('div', {}, h('b', {}, g.text), g === nextOpen ? h('small', {}, g.hint) : ''),
+    g.state === 'ready' ? h('button', { class: 'claim', onclick: () => onClaim(g.id) }, 'Claim +' + g.belief) :
+      h('span', { class: 'reward' }, '+' + g.belief)));
+  const done = states.filter(g => g.state === 'claimed').length;
+  panel.replaceChildren(h('h2', {}, "The Keeper's path"),
+    h('p', { class: 'age-line' }, h('b', {}, age.name), ' · ' + done + ' of ' + states.length + ' milestones'),
+    h('p', { class: 'muted' }, 'Milestones are things to aim for. Each one you reach deepens their belief in you, and belief unlocks new powers.'),
+    h('ul', { class: 'goals' }, rows), closeButton(panel));
+  panel.hidden = false;
+}
+
 // ---- wobblin card -------------------------------------------------------------
 const TRAIT_LABEL = { curiosity: 'Curiosity', boldness: 'Bravery', sociability: 'Friendliness', patience: 'Patience', playfulness: 'Playfulness', piety: 'Faith in you', caution: 'Caution' };
 const TRAIT_HELP = { curiosity: 'tries new things', boldness: 'brave around fire, water, danger', sociability: 'teaches, sings, pairs up', patience: 'fiddly work: tools, weaving, gardens',

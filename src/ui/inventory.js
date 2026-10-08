@@ -60,16 +60,24 @@ const free = world => s => !objectAtSlot(world, s);
 // drop(pt, ctx) returns an action, or calls ctx helpers for multi-step drops.
 // hint(pt, ctx) returns { x, y, r, ok, label } for the drop preview.
 export function trayItems() {
-  const slotDrop = (power, variant, okFn) => ({
-    hint: (pt, { world }) => {
+  // Over a Wobblin's head? It lands on them (the thing itself goes in the nearest open spot).
+  const onHead = (pt, rs) => nearestWobblin(rs, pt, 30);
+  const slotDrop = (power, variant, okFn, canOnto = true) => ({
+    hint: (pt, { world, rs }) => {
+      const w = canOnto && onHead(pt, rs);
+      if (w) {
+        const s = nearestSlot(world, { x: w.x, y: w.y }, s => okFn(world, s), 240);
+        return s ? { x: w.x, y: w.y - 22, r: 34, ok: true, label: 'on ' + w.name + '!' } : { x: w.x, y: w.y - 22, r: 34, ok: false, label: 'no room' };
+      }
       const s = nearestSlot(world, pt, s => okFn(world, s));
       if (!s) return { x: pt.x, y: pt.y, r: 26, ok: false, label: 'no room here' };
       const { x, y } = slotInfo(s);
       return { x, y, r: 22, ok: true };
     },
-    drop: (pt, { world }) => {
-      const s = nearestSlot(world, pt, s => okFn(world, s));
-      return s ? { type: 'power', power, slot: s, ...(variant ? { variant } : {}) } : { error: 'No room there. Try an open spot.' };
+    drop: (pt, { world, rs }) => {
+      const w = canOnto && onHead(pt, rs);
+      const s = w ? nearestSlot(world, { x: w.x, y: w.y }, s => okFn(world, s), 240) : nearestSlot(world, pt, s => okFn(world, s));
+      return s ? { type: 'power', power, slot: s, ...(variant ? { variant } : {}), ...(w ? { onto: w.id } : {}) } : { error: 'No room there. Try an open spot.' };
     }
   });
   const anywhere = action => ({ hint: pt => ({ x: pt.x, y: pt.y, r: 60, ok: true }), drop: () => action });
@@ -112,10 +120,11 @@ export function trayItems() {
       } },
     { row: 'nudges', id: 'gift', label: 'Daily gift', cd: null,
       ...slotDrop('gift', null, (w, s) => free(w)(s)),
-      drop: (pt, { world, giftMenu }) => {
-        const s = nearestSlot(world, pt, free(world));
+      drop: (pt, { world, rs, giftMenu }) => {
+        const w = onHead(pt, rs);
+        const s = w ? nearestSlot(world, { x: w.x, y: w.y }, free(world), 240) : nearestSlot(world, pt, free(world));
         if (!s) return { error: 'No room there for a gift.' };
-        giftMenu(s);
+        giftMenu(s, w ? w.id : undefined);
         return null;
       } },
     { row: 'nudges', id: 'miracle', label: 'Miracle', cd: 'miracle', cost: 20, ...anywhere({ type: 'nudge', nudge: 'miracle' }) }

@@ -5,5 +5,6 @@ export { validateAction, applyAction, giftOptions, POWERS, NUDGES, BLESS_TRAITS,
 export { replay, sortActions } from './replay.js';
 export { stateHash, stableStringify } from './util.js';
 export { eventsBetween } from './events.js';
+export { GOALS, AGES, goalStates, ageOf, progressOf } from './goals.js';
 export * as GEO from './geometry.js';
 export * as CONST from './constants.js';

@@ -10,8 +10,9 @@ import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
-import { landOnto } from './interactions.js';
+import { landOnto, powerOnto } from './interactions.js';
 import { reactToAction } from './reactions.js';
+import { GOAL_BY_ID, progressOf } from './goals.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
@@ -76,6 +77,13 @@ export function validateAction(world, a) {
     if (!isUnlocked(world, key)) return bad('locked_power');
     if (world.cooldowns[key] > world.tick) return bad('cooldown');
     if (world.devotion < costOf(world, key)) return bad('devotion');
+  }
+
+  if ((a.type === 'power' || a.type === 'gift') && a.onto !== undefined) {
+    // Dropped right on a Wobblin's head (stones, seeds, lightning, the gift).
+    if (a.type === 'power' && !['stone', 'plant', 'lightning'].includes(a.power)) return bad('onto');
+    const w = findWobblin(world, a.onto);
+    if (!w || !w.alive) return bad('onto');
   }
 
   if (a.type === 'power') {
@@ -167,6 +175,14 @@ export function validateAction(world, a) {
     return { ok: true };
   }
 
+  if (a.type === 'claim') {
+    const g = GOAL_BY_ID[a.goal];
+    if (!g) return bad('goal');
+    if ((world.goalsClaimed || []).includes(g.id)) return bad('claimed');
+    if (!g.done(progressOf(world))) return bad('not_yet');
+    return { ok: true };
+  }
+
   return bad('unknown_type');
 }
 
@@ -182,7 +198,7 @@ function witnesses(world, zone, except) {
 export function applyAction(world, a) {
   const firstEvent = world.nextIds.e;
   const res = applyActionEffects(world, a);
-  if (!res.ok) return res;
+  if (!res.ok || a.type === 'claim') return res;   // claiming a goal is bookkeeping: nobody reacts
   let ev = null;
   for (let i = world.events.length - 1; i >= 0 && world.events[i].id >= firstEvent; i--) {
     if (KEEPER_EVENT.has(world.events[i].kind)) ev = world.events[i];   // the earliest one this action made
@@ -199,6 +215,13 @@ function applyActionEffects(world, a) {
   const origin = { action: a.seq };
   const causes = [{ action: a.seq }];
   const t = world.tick;
+  if (a.type === 'claim') {
+    const g = GOAL_BY_ID[a.goal];
+    world.goalsClaimed = [...(world.goalsClaimed || []), g.id];
+    const ev = emit(world, { kind: 'goal_reached', target: g.id, data: { goal: g.id, text: g.text, belief: g.belief }, salience: 3, causes });
+    addBelief(world, g.belief, [{ event: ev.id }]);
+    return { ok: true };
+  }
   world.lastKeeperTick = t;
 
   if (a.type === 'power' || a.type === 'nudge') {
@@ -218,7 +241,8 @@ function applyActionEffects(world, a) {
           kind: a.variant, slot: a.slot, slots: slots || undefined, origin,
           state: { count: a.variant === 'boulder' ? 4 : 1 }
         });
-        power({ power: 'stone', variant: a.variant, slot: a.slot, zone: o.zone }, o.id);
+        const ev = power({ power: 'stone', variant: a.variant, slot: a.slot, zone: o.zone, ...(a.onto ? { onto: a.onto } : {}) }, o.id);
+        if (a.onto) powerOnto(world, findWobblin(world, a.onto), a, ev);
         break;
       }
       case 'plant': {
@@ -226,7 +250,8 @@ function applyActionEffects(world, a) {
           kind: 'sprout', slot: a.slot, origin,
           state: { grows: a.variant, readyAt: t + POWER.sproutGrowTicks }
         });
-        power({ power: 'plant', variant: a.variant, slot: a.slot, zone: o.zone }, o.id);
+        const ev = power({ power: 'plant', variant: a.variant, slot: a.slot, zone: o.zone, ...(a.onto ? { onto: a.onto } : {}) }, o.id);
+        if (a.onto) powerOnto(world, findWobblin(world, a.onto), a, ev);
         break;
       }
       case 'rain': {
@@ -242,9 +267,11 @@ function applyActionEffects(world, a) {
         }
         break;
       }
-      case 'lightning':
-        strike(world, a.slot, causes, { power: 'lightning', zone: slotInfo(a.slot).zone });
+      case 'lightning': {
+        const ev = strike(world, a.slot, causes, { power: 'lightning', zone: slotInfo(a.slot).zone, ...(a.onto ? { onto: a.onto } : {}) });
+        if (a.onto) powerOnto(world, findWobblin(world, a.onto), a, ev);
         break;
+      }
       case 'water': {
         if (!hasPond(world)) {
           const ev = power({ power: 'water', variant: 'pond', zone: 'pondsite' }, null, 3);
@@ -321,8 +348,9 @@ function applyActionEffects(world, a) {
   if (a.type === 'gift') {
     world.giftsByDay[a.day] = a.giftId;
     const o = makeObject(world, { kind: 'gift', slot: a.slot !== undefined ? a.slot : freeSlotNear(world, 'meadow'), origin, state: { giftId: a.giftId } });
-    emit(world, { kind: 'keeper_gift', actors: witnesses(world, o.zone), target: o.id,
-      data: { giftId: a.giftId, day: a.day, zone: o.zone }, salience: 2, causes });
+    const ev = emit(world, { kind: 'keeper_gift', actors: witnesses(world, o.zone), target: o.id,
+      data: { giftId: a.giftId, day: a.day, zone: o.zone, ...(a.onto ? { onto: a.onto } : {}) }, salience: 2, causes });
+    if (a.onto) powerOnto(world, findWobblin(world, a.onto), a, ev);
     return { ok: true };
   }
 

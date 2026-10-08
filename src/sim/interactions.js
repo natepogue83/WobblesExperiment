@@ -9,6 +9,7 @@ import { alive, liveObjects, findWobblin, findObject, r3, clamp, clamp01 } from 
 import { makeObject } from './world.js';
 import { slotIds } from './geometry.js';
 import { practice, shapeTrait } from './growth.js';
+import { SOCIAL } from './constants.js';
 
 // ---- bonds: friends and rivals --------------------------------------------------
 export function bond(w, otherId) { return (w.bonds && w.bonds[otherId]) || 0; }
@@ -146,6 +147,64 @@ export function landOnto(world, w, a, causes) {
     case 'grave': {
       mood(w, -0.08);
       return say('remembers', { of: o.state.name }, 2, [w.id], [{ object: o.id }]);
+    }
+  }
+  return null;
+}
+
+// A Keeper power dropped right on a Wobblin's head. Pocket God slapstick, with
+// consequences: bumps and grudges, a flower crown, a frizzy zap that sometimes
+// knocks an idea loose (a short curiosity boost; the idea itself still has to be
+// worked out in experiment.js). A squash or zap can hurt, but never fatally.
+export function powerOnto(world, w, a, ev) {
+  if (!w || !w.alive) return null;
+  const t = world.tick;
+  const r = rngFor(world.seed, 'onto', t, a.seq);
+  const causes = [{ event: ev.id }];
+  const say = (what, data = {}, salience = 3) =>
+    emit(world, { kind: 'interaction', actors: [w.id], target: w.id, data: { what, ...data }, salience, causes });
+  const laugh = () => { for (const x of witnessesOf(world, w.zone, [w.id])) mood(x, r3(0.02 + 0.04 * x.traits.playfulness)); };
+  const faith = d => { w.faith = r3(clamp(w.faith + d, -1, 1)); };
+  const hurt = () => {
+    if (w.injuries >= SOCIAL.injuryDeath - 1) return false;
+    w.injuries++;
+    emit(world, { kind: 'injured', actors: [w.id], data: { cause: a.type === 'power' ? a.power : a.type, zone: w.zone }, salience: 3, causes });
+    return true;
+  };
+  const idea = (add, ticks) => {
+    const cur = w.temp.curiosity;
+    if (!cur || cur.until <= t || cur.add < add) w.temp.curiosity = { add, until: t + ticks };
+  };
+  if (a.type === 'gift') {
+    w.luckyCharm = ev.target; mood(w, 0.15); faith(0.05);
+    return say('gift_caught', { item: a.giftId }, 2);
+  }
+  switch (a.power) {
+    case 'stone':
+      if (a.variant === 'boulder') {
+        const hurtNow = hurt();
+        mood(w, -0.2); faith(-0.08); w.heldUntil = t + 3;
+        shapeTrait(w, 'caution', 0.04);
+        for (const x of witnessesOf(world, w.zone, [w.id])) x.needs.safety = r3(clamp01(x.needs.safety - 0.1));
+        return say('squashed', { hurt: hurtNow }, 4);
+      }
+      mood(w, -0.06); faith(-0.02); w.heldUntil = t + 1;
+      laugh();
+      if (r() < 0.4) { idea(0.15, 3); return say('bonk_idea'); }
+      return say('bonked');
+    case 'plant':
+      w.flowerUntil = t + 24; mood(w, 0.12); faith(0.02);
+      shapeTrait(w, 'playfulness', 0.01);
+      return say('flower_crown', { variant: a.variant }, 2);
+    case 'lightning': {
+      w.zappedUntil = t + 3; w.heldUntil = t + 2; w.needs.warmth = 1;
+      const bold = w.traits.boldness > 0.65;
+      const hurtNow = !bold && r() < 0.3 * (1.2 - w.traits.boldness) && hurt();
+      if (bold) { mood(w, 0.1); shapeTrait(w, 'boldness', 0.02); faith(0.03); }
+      else { mood(w, -0.12); shapeTrait(w, 'caution', 0.03); faith(-0.06); }
+      const bright = r() < 0.5;
+      if (bright) idea(0.2, 4);
+      return say('zapped', { bold, idea: bright, hurt: !!hurtNow });
     }
   }
   return null;

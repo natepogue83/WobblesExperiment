@@ -33,6 +33,13 @@ function feel(world, w, a, here, r) {
   const near = !here || w.zone === here;
   const jitter = (r() - 0.5) * 0.3;
   let s = 0, fear = false;
+  if (a.onto === w.id) {
+    const kind = a.type === 'gift' ? 'gift' : a.power === 'stone' ? a.variant : a.power;
+    s = { stones: -0.35 + 0.6 * T.playfulness, boulder: -1 + 0.3 * T.boldness, plant: 0.7 + 0.2 * T.playfulness,
+      lightning: -0.9 + 1.5 * T.boldness, gift: 0.9 }[kind] + jitter;
+    fear = kind === 'lightning';
+    return s > 0.55 ? 'love' : s > 0.2 ? 'like' : s > -0.2 ? 'curious' : fear ? 'scared' : 'upset';
+  }
   switch (a.type === 'power' ? a.power : a.type === 'nudge' ? a.nudge : a.type) {
     case 'stone': case 'plant':
       s = 0.1 + 0.5 * T.curiosity + (a.variant === 'boulder' ? 0.2 * T.boldness - 0.15 * (1 - T.boldness) : 0); break;
@@ -66,7 +73,7 @@ function feel(world, w, a, here, r) {
 // to it, or everyone for valley-wide acts.
 function witnesses(world, a, here) {
   const live = alive(world);
-  const ids = new Set([a.target, ...(a.targets || [])].filter(Boolean));
+  const ids = new Set([a.target, a.onto, ...(a.targets || [])].filter(Boolean));
   if (!here) return live;
   return live.filter(w => ids.has(w.id) || w.zone === here || ADJACENT[here].includes(w.zone));
 }

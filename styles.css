@@ -371,3 +371,63 @@ h2 { font-weight: 600; letter-spacing: .2px; }
   #bars { flex-direction: column; align-items: stretch; gap: 4px; }
   #bars #nudges:not(:empty) { padding-left: 0; border-left: 0; }
 }
+
+/* Dropped on their head: frizzy zap and a flower crown. */
+.wobblin .zap .spark { animation: spark-flick .28s steps(2, jump-none) infinite; }
+.wobblin .zap { animation: zap-buzz .12s linear infinite; }
+.wobblin .crown { animation: crown-sway 2.4s ease-in-out infinite; transform-origin: 0 -36px; transform-box: view-box; }
+@keyframes spark-flick { 0% { opacity: 1; } 100% { opacity: .15; } }
+@keyframes zap-buzz { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(.6px, -.4px); } }
+@keyframes crown-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+.hud-buttons button.sound { min-width: 44px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; border-radius: 22px; border: 0; background: rgba(255,255,255,.9); color: #4a3a2a; }
+.hud-buttons button.sound.off { background: rgba(0,0,0,.35); color: #fff; }
+
+/* Ages and goals */
+#hud .colony .age { font: 600 12px/1 var(--display); letter-spacing: .4px; text-transform: uppercase; padding: 3px 8px; margin-left: 6px; border-radius: 10px; background: rgba(255, 216, 107, .22); color: #ffe7a6; vertical-align: middle; }
+.goal-line { margin-top: 4px; font-size: 13px; font-weight: 700; color: #dff3ff; }
+.goal-line button.claim { min-height: 34px; padding: 4px 12px; border-radius: 17px; border: 0; color: #4a3a12; font: 600 13px var(--display); }
+.goals { list-style: none; padding: 0; margin: 8px 0 12px; max-height: min(52vh, 420px); overflow-y: auto; }
+.goals .goal { display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: center; padding: 8px 4px; border-bottom: 1px solid #ece2cc; }
+.goals .goal small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.goals .goal .tick { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #d9cbb0; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 13px; }
+.goals .goal.claimed .tick { background: #5aa86b; border-color: #5aa86b; }
+.goals .goal.claimed b { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(0,0,0,.25); }
+.goals .goal.ready .tick { background: #f0a020; border-color: #f0a020; animation: glow 1.4s ease-in-out infinite; }
+.goals .goal .reward { font: 600 12px var(--display); color: #b58a2a; }
+.goals .goal button.claim { border: 0; border-radius: 14px; padding: 6px 10px; background: #ffd86b; font: 600 13px var(--display); color: #4a3a12; box-shadow: 0 0 10px #ffd86b; }
+.age-line { margin: 0 0 4px; }
+
+/* Compact HUD on narrow screens: short labels, one row of buttons. */
+.hud-buttons .short { display: none; }
+@media (max-width: 700px) {
+  .hud-buttons .full { display: none; }
+  .hud-buttons .short { display: inline; }
+  .hud-buttons { gap: 5px; flex-wrap: nowrap; }
+  .hud-buttons button, .hud-buttons a.waitlist { min-height: 38px; padding: 4px 11px; font-size: 13px; white-space: nowrap; }
+  .hud-buttons button.sound { min-width: 38px; padding: 0 8px; }
+  #hud { padding: 8px 12px 10px; }
+  .goal-line button.claim { font-size: 12px; min-height: 32px; text-align: left; }
+}
+#stage { scrollbar-width: none; }
+#stage::-webkit-scrollbar { display: none; }
+
+/* Moments: a discovery card with confetti. */
+.moment { position: fixed; left: 50%; top: 30%; z-index: 70; transform: translateX(-50%); display: flex; align-items: center; gap: 14px;
+  width: min(440px, calc(100vw - 32px)); padding: 14px 18px 14px 10px; border-radius: 22px; cursor: pointer;
+  background: linear-gradient(160deg, #fffaf0 0%, #fff0c8 100%); box-shadow: 0 0 0 3px #ffd86b, 0 18px 50px rgba(40, 20, 0, .4);
+  animation: moment-in .55s cubic-bezier(.2, 1.6, .4, 1) both; }
+.moment.out { animation: moment-out .35s ease-in forwards; }
+.moment .who { flex: none; filter: drop-shadow(0 6px 6px rgba(0,0,0,.2)); animation: eureka-hop .7s ease-in-out .3s 2; }
+.moment .what small { display: block; font: 600 12px var(--display); letter-spacing: .3px; color: #b5782a; text-transform: uppercase; }
+.moment .what b { display: block; font: 700 26px/1.1 var(--display); color: #5a3412; margin: 2px 0 4px; }
+.moment .what p { margin: 0 0 6px; font-size: 14px; color: #5f4a33; }
+.moment .what .meta { font: 600 12px var(--display); color: #a08a6a; }
+.moment.tier3 { box-shadow: 0 0 0 3px #ffb44a, 0 0 40px #ffd86b, 0 18px 50px rgba(40, 20, 0, .4); }
+.moment.tier4 { box-shadow: 0 0 0 3px #c9a6ff, 0 0 50px #e6d2ff, 0 18px 50px rgba(40, 20, 0, .4); background: linear-gradient(160deg, #fffaf6, #f3e6ff); }
+.moment .burst { position: absolute; left: 58px; top: 50%; width: 0; height: 0; pointer-events: none; }
+.moment .burst i { position: absolute; width: 9px; height: 5px; border-radius: 2px; opacity: 0; animation: confetti 1.4s cubic-bezier(.15, .7, .3, 1) forwards; }
+@keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 90px)) rotate(var(--r)); } }
+@keyframes moment-in { from { opacity: 0; transform: translate(-50%, -30px) scale(.8); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+@keyframes moment-out { to { opacity: 0; transform: translate(-50%, -16px) scale(.94); } }
+@keyframes eureka-hop { 0%, 100% { transform: translateY(0) scale(1, 1); } 40% { transform: translateY(-14px) scale(.95, 1.06); } 60% { transform: translateY(0) scale(1.08, .92); } }

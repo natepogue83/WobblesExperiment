@@ -233,6 +233,12 @@ function templates(world, e, ctx) {
         boulder_split: [`Lightning cracked the boulder into stones.`, `Your lightning split the boulder clean in two.`, `The boulder is a pile of stones now.`],
         fish_stunned: [`Lightning hit the water and stunned fish floated up.`, `Free fish! Your lightning stunned a few.`, `The river glowed, and then there were fish everywhere.`],
         squabble: [`${name} and ${other} had a squabble.`, `${name} and ${other} are bickering again.`, `There was shouting between ${name} and ${other}.`],
+        bonked: [`You dropped stones on ${name}'s head. Bonk.`, `${name} took a pebble to the head and is not amused.`, `Bonk! ${name} rubbed their head and glared at the sky.`],
+        bonk_idea: [`A stone bonked ${name} on the head, and their eyes lit up with an idea.`, `Bonk! Something shook loose in ${name}'s head. They look thoughtful.`, `${name} got hit by a pebble and suddenly started tinkering.`],
+        squashed: [`You dropped a boulder on ${name}. They popped out flat as a pancake` + (d.hurt ? ', and hurt.' : ', but fine.'), `${name} got squashed under a boulder. Everyone gasped.`, `A boulder landed on ${name}. They will remember that.`],
+        flower_crown: [`A seed landed on ${name}'s head and burst into flowers.`, `${name} is wearing a crown of flowers now, and loves it.`, `Flowers sprouted on ${name}'s head. They keep showing everyone.`],
+        zapped: [`You zapped ${name}. ` + (d.bold ? 'They loved it!' : 'They are frizzy and furious.') + (d.idea ? ' Then they had a bright idea.' : ''), `ZAP! ${name}'s fur is standing on end.` + (d.hurt ? ' It hurt.' : ''), `Lightning hit ${name} square on the head.` + (d.idea ? ' Something sparked in there.' : '')],
+        gift_caught: [`${name} caught the ${item(d.item)} as it fell from the sky.`, `The ${item(d.item)} landed right in ${name}'s arms.`, `${name} won't let go of the ${item(d.item)} you gave them.`],
         slipped: [`${name} slipped on the ice and sat down hard.`, `${name} did not enjoy the frozen pond.`, `Whoops: ${name} went flat on the ice.`],
         pond_froze: [`The pond froze solid.`, `The cold snap turned the pond to ice.`, `Ice on the pond!`],
         pond_thawed: [`The pond thawed.`, `The ice on the pond melted.`, `The pond is water again.`],
@@ -240,6 +246,7 @@ function templates(world, e, ctx) {
       }[d.what];
       return T || null;
     }
+    case 'goal_reached': return [`Milestone: ${d.text}. Their belief in you grew.`, `You reached a milestone: ${d.text}.`, `${d.text}: done.`];
     case 'friends': return [`${name} and ${wob(world, e.actors[1])} are best friends now.`, `${name} and ${wob(world, e.actors[1])} are inseparable.`, `A friendship: ${name} and ${wob(world, e.actors[1])}.`];
     case 'rivals': return [`${name} and ${wob(world, e.actors[1])} can't stand each other.`, `A rivalry has started between ${name} and ${wob(world, e.actors[1])}.`, `${name} and ${wob(world, e.actors[1])} are rivals now.`];
     case 'level_up': { const S = { foraging: 'foraging', building: 'building', crafting: 'tinkering', social: 'storytelling', explore: 'exploring' }[d.skill] || d.skill;

@@ -38,17 +38,18 @@ export function popAction(save) { save.actions.pop(); }
 // after 500 actions: [code, dt, ...fields], with seq implied by position
 // (seq = index + 1) and t stored as a delta from the previous action.
 const CODES = {
-  st: ['power', 'stone', ['slot', 'variant']],
-  pl: ['power', 'plant', ['slot', 'variant']],
+  st: ['power', 'stone', ['slot', 'variant', 'onto']],
+  pl: ['power', 'plant', ['slot', 'variant', 'onto']],
   ra: ['power', 'rain', []],
-  li: ['power', 'lightning', ['slot']],
+  li: ['power', 'lightning', ['slot', 'onto']],
   wa: ['power', 'water', ['slot']],
   se: ['power', 'season', ['variant']],
   bl: ['nudge', 'bless', ['target', 'trait']],
   cu: ['nudge', 'curio', ['curio', 'targets']],
   mi: ['nudge', 'miracle', []],
   ca: ['nudge', 'carry', ['target', 'zone', 'thrown', 'splash', 'onto']],
-  gi: ['gift', null, ['day', 'giftId', 'slot']],
+  gi: ['gift', null, ['day', 'giftId', 'slot', 'onto']],
+  go: ['claim', null, ['goal']],
   co: ['collect_offerings', null, []]
 };
 const CODE_OF = {};

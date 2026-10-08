@@ -39,6 +39,7 @@ export function strike(world, slot, causes, data) {
   const r = rngFor(world.seed, 'strike', world.tick, slot);
   for (const w of alive(world).filter(x => x.zone === zone)) {
     w.needs.safety = r3(clamp01(w.needs.safety - 0.3));
+    if (w.id === data.onto) continue;
     if (r() < 0.12 * (1.2 - w.traits.boldness)) {
       w.injuries++;
       if (!data.natural) w.faith = r3(clamp(w.faith - 0.1, -1, 1));
