@@ -163,8 +163,13 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
   .bar { flex-wrap: wrap; }
 }
 @media (orientation: portrait), (max-width: 700px) {
-  .bar { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; }
-  .tile { width: 70px; flex: none; }
+  /* Every tile in reach on a phone: rows that wrap, five across, no sideways scrolling
+     (tiles swallow touches for dragging, so a scrolling row would hide half the powers). */
+  #bars { flex-wrap: nowrap; }
+  #bars .bar { flex-wrap: wrap; justify-content: center; min-width: 0; overflow: visible; gap: 5px; padding: 2px 0; }
+  .tile { width: calc((100% - 20px) / 5); max-width: 76px; min-height: 54px; flex: none; padding: 3px 1px 4px; }
+  .tile .icon { width: 34px; height: 28px; }
+  .tile .name { font-size: 10.5px; }
 }
 
 /* ---- Flinging ---- */
@@ -554,10 +559,10 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .moment.farewell .what b { color: #3a4560; }
 .moment.farewell .who { filter: grayscale(.35) drop-shadow(0 6px 6px rgba(0,0,0,.15)); animation: none; }
 
-.help { list-style: none; padding: 0; margin: 6px 0 12px; }
-.help li { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid #ece2cc; font-size: 14px; }
-.help li b { font: 600 14px var(--display); color: #5a3412; }
-@media (max-width: 700px) { .help li { grid-template-columns: 1fr; gap: 2px; } }
+ul.help { list-style: none; padding: 0; margin: 6px 0 12px; }
+ul.help li { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid #ece2cc; font-size: 14px; }
+ul.help li b { font: 600 14px var(--display); color: #5a3412; }
+@media (max-width: 700px) { ul.help li { grid-template-columns: 1fr; gap: 2px; } }
 
 /* Foreground grass sways; rain splashes bloom on the ground */
 .fg-grass .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: grass-sway ease-in-out infinite alternate; }
@@ -608,3 +613,14 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .stat-pop.skill { background: linear-gradient(#fff3c2, #ffd86b); color: #6b4410; font-size: 15px; }
 @keyframes stat-up { 0% { opacity: 0; transform: translate(-50%, -20%) scale(.6); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
   20% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -190%); } }
+
+/* A slimmer HUD on phones, so the valley gets the room. */
+@media (max-width: 700px) {
+  #hud { font-size: 12px; line-height: 1.35; padding: 6px 10px 8px; }
+  #hud .colony { font-size: 16px; }
+  #hud .colony .age { font-size: 10px; padding: 2px 6px; }
+  .goal-line { font-size: 12px; margin-top: 2px; }
+  .hud-buttons { margin-top: 4px; }
+  .hud-buttons button, .hud-buttons a.waitlist { min-height: 34px; padding: 3px 10px; font-size: 12.5px; }
+  .hud-buttons button.sound { min-width: 34px; }
+}

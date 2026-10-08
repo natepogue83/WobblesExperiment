@@ -65,7 +65,7 @@ function boot() {
   setTimeout(centerStage, 50);
   initSound();
   wireValley();
-  if (DEBUG && params.get('fresh') === '1') { wipe(); return; }   // dev: start over
+  if (DEBUG && params.get('fresh') === '1') { try { localStorage.removeItem('wobblins.coachDone'); } catch { /* private mode */ } wipe(); return; }   // dev: start over, first-time pointers and all
   if (DEBUG && params.get('devload')) {                              // dev: load a prepared save
     wiping = true;
     fetch(params.get('devload')).then(r => r.json()).then(s2 => {
