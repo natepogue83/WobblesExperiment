@@ -52,25 +52,128 @@ section('Validation');
   ok('boulder takes 2 slots and records its action origin');
 }
 
+section('Every power and nudge');
+{
+  const w = createWorld(31, { barren: true });
+  let seq = 100;
+  const A = a => applyAction(w, { seq: ++seq, t: w.tick, ...a });
+  const run = n => { for (let i = 0; i < n; i++) tick(w); };
+
+  // Devotion costs; Season is free the first time.
+  rejects(w, { seq: 1, t: 0, type: 'nudge', nudge: 'miracle' }, 'devotion');
+  assert.equal(A({ type: 'power', power: 'season', variant: 'cold' }).ok, true);
+  assert.equal(w.climate.season, 'cold');
+  assert.ok(w.climate.tempMod < 0);
+  run(24);
+  assert.equal(w.climate.season, 'mild');
+  rejects(w, { seq: 2, t: w.tick, type: 'power', power: 'season', variant: 'warm' }, 'devotion');
+  w.devotion = 30;
+  assert.equal(A({ type: 'power', power: 'season', variant: 'warm' }).ok, true);
+  assert.equal(w.devotion, 20);
+  assert.equal(A({ type: 'nudge', nudge: 'miracle' }).ok, true);
+  assert.equal(w.devotion, 0);
+  assert.ok(w.miracleUntil > w.tick);
+  ok('Season free once then 10 Devotion; Miracle costs 20; cold snap lasts 24 ticks');
+
+  // Lightning on a tree: fire, whose origin chains back to the action.
+  const plant = A({ type: 'power', power: 'plant', slot: 'grove.2', variant: 'tree' });
+  assert.equal(plant.ok, true);
+  run(6);
+  const tree = w.objects.find(o => o.kind === 'tree' && !o.state.gone);
+  assert.ok(tree, 'sprout grew into a tree');
+  rejects(w, { seq: 3, t: w.tick, type: 'power', power: 'lightning', slot: 'nowhere.1' }, 'slot');
+  const lseq = seq + 1;
+  assert.equal(A({ type: 'power', power: 'lightning', slot: 'grove.2' }).ok, true);
+  const fire = w.objects.find(o => o.kind === 'fire');
+  assert.ok(fire && tree.state.gone, 'tree became a fire');
+  const strikeEv = w.events.find(e => e.id === fire.origin.event);
+  assert.deepEqual(strikeEv.causes, [{ action: lseq }]);
+  rejects(w, { seq: 4, t: w.tick, type: 'power', power: 'lightning', slot: 'grove.1' }, 'cooldown');
+  run(8);
+  assert.ok(fire.state.gone, 'fire burned out');
+  assert.ok(w.events.some(e => e.kind === 'fire_out' && e.target === fire.id));
+  ok('lightning turns a tree into a fire that burns out; the fire\'s origin is the lightning action');
+
+  // Shape Water: a pond, then reeds, clay, fish over 12 ticks; then river bends.
+  assert.equal(A({ type: 'power', power: 'water' }).ok, true);
+  const pond = w.objects.find(o => o.kind === 'pond');
+  assert.deepEqual(pond.slots, ['pondsite.1', 'pondsite.2']);
+  run(13);
+  for (const k of ['reeds', 'clay', 'fish']) assert.ok(w.objects.some(o => o.kind === k && o.zone === 'pondsite' && !o.state.gone), 'pond grew ' + k);
+  rejects(w, { seq: 5, t: w.tick, type: 'power', power: 'water', slot: 'meadow.1' }, 'slot');
+  assert.equal(A({ type: 'power', power: 'water', slot: 'riverbank.3' }).ok, true);
+  assert.equal(w.riverBend, 'riverbank.3');
+  ok('Shape Water digs the pond (reeds, clay, fish follow), then bends the river');
+
+  // Rain three times within 6 ticks floods.
+  for (let i = 0; i < 3; i++) {
+    assert.equal(A({ type: 'power', power: 'rain' }).ok, true);
+    assert.equal(w.events.filter(e => e.kind === 'flood').length, i < 2 ? 0 : 1);
+    run(3);
+  }
+  ok('three rains within 6 ticks cause a flood');
+
+  // Curio: locked until the material has been noticed; needs two living targets.
+  const w2 = createWorld(31, { barren: true });
+  rejects(w2, { seq: 1, t: 0, type: 'nudge', nudge: 'curio', curio: 'flint', targets: ['w1', 'w2'] }, 'locked');
+  applyAction(w2, { seq: 2, t: 0, type: 'power', power: 'stone', slot: 'meadow.1', variant: 'stones' });
+  for (let i = 0; i < 30 && w2.noticed.stones === undefined; i++) tick(w2);
+  assert.ok(w2.noticed.stones !== undefined, 'someone noticed the stones');
+  rejects(w2, { seq: 3, t: w2.tick, type: 'nudge', nudge: 'curio', curio: 'flint', targets: ['w1', 'w1'] }, 'targets');
+  rejects(w2, { seq: 4, t: w2.tick, type: 'nudge', nudge: 'curio', curio: 'flint', targets: ['w1', 'w9'] }, 'targets');
+  assert.equal(applyAction(w2, { seq: 5, t: w2.tick, type: 'nudge', nudge: 'curio', curio: 'flint', targets: ['w1', 'w3'] }).ok, true);
+  const cur = w2.objects.find(o => o.kind === 'curio');
+  tick(w2);
+  for (const id of ['w1', 'w3']) assert.equal(w2.wobblins.find(x => x.id === id).zone, cur.zone, id + ' pulled to the curio');
+  ok('curio unlocks after its material is noticed and pulls both chosen Wobblins to it');
+}
+
+section('Offerings');
+{
+  const w = createWorld(41);
+  for (const x of w.wobblins) x.faith = 0.6;
+  for (let i = 0; i < 40; i++) { w.lastKeeperTick = w.tick; tick(w); }
+  assert.ok(w.offerings > 0, 'faithful Wobblins leave offerings');
+  const n = w.offerings;
+  assert.equal(applyAction(w, { seq: 1, t: w.tick, type: 'collect_offerings' }).ok, true);
+  assert.equal(w.devotion, n);
+  assert.equal(w.offerings, 0);
+  ok('faithful Wobblins left ' + n + ' offerings; collecting turns them into Devotion');
+}
+
 section('Player never creates discoveries (actions half)');
 {
   const w = createWorld(21);
   for (let i = 0; i < 30; i++) tick(w);
+  // Give the world some knowledge so "unchanged" is a real check.
+  w.wobblins[0].knows.stone_stacking = { since: 1, from: 'self' };
+  w.discoveries.stone_stacking = { inventor: 'w1', tick: 1, causes: [], forgotten: false };
+  w.devotion = 100; w.offerings = 3;
+  w.noticed.stones = 1;
+  const stoneSlot = ['hollow.1', 'hollow.2', 'hollow.3', 'hollow.4', 'hollow.5'].find(s => !w.objects.some(o => o.slot === s && !o.state.gone));
+  const plantSlot = ['grove.1', 'grove.2', 'grove.3', 'grove.4', 'grove.5'].find(s => !w.objects.some(o => o.slot === s && !o.state.gone));
   const actions = [
-    { type: 'power', power: 'stone', slot: 'hollow.1', variant: 'stones' },
-    { type: 'power', power: 'plant', slot: 'grove.5', variant: 'tree' },
+    { type: 'power', power: 'stone', slot: stoneSlot, variant: 'stones' },
+    { type: 'power', power: 'plant', slot: plantSlot, variant: 'tree' },
     { type: 'power', power: 'rain' },
+    { type: 'power', power: 'lightning', slot: plantSlot },
+    { type: 'power', power: 'water' },
+    { type: 'power', power: 'season', variant: 'cold' },
     { type: 'nudge', nudge: 'bless', target: 'w2', trait: 'curiosity' },
-    { type: 'gift', day: 20400, giftId: giftOptions(w.seed, 20400)[0] }
+    { type: 'nudge', nudge: 'curio', curio: 'flint', targets: ['w1', 'w2'] },
+    { type: 'nudge', nudge: 'miracle' },
+    { type: 'gift', day: 20400, giftId: giftOptions(w.seed, 20400)[0] },
+    { type: 'collect_offerings' }
   ];
   let seq = 1;
   for (const a of actions) {
     const before = knowledge(w);
     const res = applyAction(w, { seq: seq++, t: w.tick, ...a });
-    assert.equal(res.ok, true, a.power || a.nudge || a.type);
+    assert.equal(res.ok, true, (a.power || a.nudge || a.type) + ' ' + res.reason);
     assert.equal(knowledge(w), before, 'action changed knowledge');
   }
-  ok('every implemented action leaves world.discoveries and all knows unchanged');
+  assert.ok(!w.events.some(e => ['discovery', 'rediscovery', 'taught', 'learned_from_structure'].includes(e.kind)));
+  ok('all 11 action types leave world.discoveries and every knows unchanged, and emit no knowledge events');
 }
 
 console.log('\ntest-actions: all passed');

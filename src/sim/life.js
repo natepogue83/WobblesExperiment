@@ -106,7 +106,30 @@ function seedPodStep(world) {
   emit(world, { kind: 'seed_pod_hatched', actors: born, data: {}, salience: 5 });
 }
 
+// Faithful Wobblins leave offerings at the shrine; long neglect erodes faith.
+function faithStep(world) {
+  const neglected = world.tick - world.lastKeeperTick > 72;
+  const mult = liveObjects(world).some(o => o.kind === 'temple') ? 2 : liveObjects(world).some(o => o.kind === 'totem') ? 1.5 : 1;
+  for (const w of alive(world)) {
+    const before = w.faith;
+    if (neglected) w.faith = r3(Math.max(-1, w.faith - 0.003));
+    for (const th of [0.3, 0.5, -0.3]) {
+      if ((before < th) !== (w.faith < th)) {
+        emit(world, { kind: 'faith_shift', actors: [w.id], data: { threshold: th, rising: w.faith > before }, salience: 2 });
+      }
+    }
+    if (w.faith > 0.3 && w.stage !== 'baby') {
+      const r = rngFor(world.seed, 'offering', world.tick, w.id);
+      if (chance(r, 0.08)) {
+        world.offerings = r3(world.offerings + mult);
+        emit(world, { kind: 'offering', actors: [w.id], data: { amount: mult }, salience: 1 });
+      }
+    }
+  }
+}
+
 export function lifeEventsStep(world) {
+  faithStep(world);
   deathsStep(world);
   healStep(world);
   pairingStep(world);

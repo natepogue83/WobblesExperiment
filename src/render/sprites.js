@@ -85,6 +85,22 @@ export function objectSVG(o) {
       return `<path d="M-7 0 V-14 Q0 -21 7 -14 V0 Z" fill="#a8a294" stroke="#7d776b"/>`;
     case 'gift':
       return `<circle cx="0" cy="-8" r="9" fill="#f3d36b" stroke="#c79a2e" stroke-width="2"/><circle cx="-3" cy="-11" r="2.5" fill="#fff7d0"/>`;
+    case 'pond':
+      return `<ellipse cx="0" cy="0" rx="62" ry="22" fill="#6aa7cf" stroke="#7d6a4a" stroke-width="3"/><ellipse cx="-10" cy="-4" rx="30" ry="8" fill="#8cc3e8" opacity="0.7"/>`;
+    case 'reeds':
+      return `<g stroke="#6f8f3a" stroke-width="3" stroke-linecap="round"><path d="M-8 0 Q-10 -18 -12 -30"/><path d="M0 0 L0 -34"/><path d="M8 0 Q10 -16 13 -28"/></g><ellipse cx="0" cy="-34" rx="2.5" ry="6" fill="#7a5a3a"/><ellipse cx="13" cy="-28" rx="2.5" ry="6" fill="#7a5a3a"/>`;
+    case 'clay':
+      return `<ellipse cx="0" cy="-2" rx="16" ry="6" fill="#b86f4c"/><ellipse cx="-4" cy="-4" rx="6" ry="2" fill="#d58b63"/><circle cx="7" cy="-4" r="1.5" fill="#fff4d0"/>`;
+    case 'fish':
+      return `<g class="fishy"><path d="M-10 -4 Q0 -12 10 -4 Q0 4 -10 -4 Z M10 -4 L16 -9 L16 1 Z" fill="#e8a74a"/></g>`;
+    case 'curio': {
+      const c = o.state.curio;
+      if (c === 'hollow_log') return `<rect x="-20" y="-14" width="40" height="14" rx="7" fill="#8a6440"/><ellipse cx="20" cy="-7" rx="4" ry="7" fill="#3d2a18"/>`;
+      if (c === 'flint') return `<path d="M-8 0 L-2 -16 L9 -6 L6 0 Z" fill="#4c5560" stroke="#2d333a"/>`;
+      if (c === 'feather') return `<path d="M-12 0 Q0 -30 12 -26 Q4 -10 -12 0 Z" fill="#e6e0f2" stroke="#9a8fb8"/>`;
+      if (c === 'reed_bundle') return `<g stroke="#8a9a4a" stroke-width="3"><path d="M-10 0 L8 -22"/><path d="M-6 0 L12 -20"/><path d="M-2 0 L14 -16"/></g><path d="M-2 -10 L6 -6" stroke="#5a4020" stroke-width="3"/>`;
+      return `<ellipse cx="0" cy="-6" rx="10" ry="8" fill="#b86f4c"/>`;
+    }
     case 'hut':
       return `<path d="M-26 0 V-18 L0 -38 L26 -18 V0 Z" fill="#b48a5a" stroke="#7a5a3a" stroke-width="2"/><path d="M-6 0 V-12 Q0 -17 6 -12 V0 Z" fill="#4a3424"/>`;
     default:

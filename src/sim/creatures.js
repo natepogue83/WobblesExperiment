@@ -116,6 +116,9 @@ function chooseActivity(world, w, objs, live) {
     if (w.hobby === 'humming') wgt += live.filter(o => o !== w && o.zone === z).length * 0.2;
     add('hobby', z, wgt * (0.5 + w.traits.playfulness), 'hobby');
   }
+  // A Keeper curio pulls its two chosen Wobblins over for a while.
+  const curio = objs.find(o => o.kind === 'curio' && !o.state.pullDone && o.state.targets.includes(w.id));
+  if (curio && w.stage !== 'baby') return { activity: 'inspect', zone: curio.zone, why: curio.id };
   // Babies stay near a parent.
   if (w.stage === 'baby') {
     const parent = live.find(p => w.parents.includes(p.id));
@@ -147,9 +150,15 @@ export function creaturesStep(world) {
     w.activity = p.activity;
     w.zone = p.zone;
     if (p.activity === 'inspect') {
-      w.seen.push(p.why);
+      if (!w.seen.includes(p.why)) w.seen.push(p.why);
       if (w.seen.length > 8) w.seen.shift();
     }
   }
   for (const w of live) updateNeeds(world, w, objs, live);
+  // Materials a Wobblin has been near (unlocks curios).
+  for (const w of live) {
+    for (const o of objs) {
+      if (o.zone === w.zone && world.noticed[o.kind] === undefined) world.noticed[o.kind] = world.tick;
+    }
+  }
 }

@@ -13,6 +13,12 @@ function objectPos(o) {
     const i = o.state.index;
     return { x: GRAVEYARD.x + (i % GRAVEYARD.perRow) * GRAVEYARD.dx, y: GRAVEYARD.y + Math.floor(i / GRAVEYARD.perRow) * GRAVEYARD.dy };
   }
+  if (!o.slot) {
+    // Unslotted things (fish) sit in the water of their zone.
+    if (o.zone === 'pondsite') return { x: 905, y: 440 };
+    const z = ZONES[o.zone];
+    return { x: z.cx + 60, y: z.cy + 50 };
+  }
   const s = slotInfo(o.slot);
   const s2 = o.slots ? slotInfo(o.slots[1]) : null;
   return s2 ? { x: (s.x + s2.x) / 2, y: (s.y + s2.y) / 2 } : { x: s.x, y: s.y };
@@ -21,7 +27,7 @@ function objectPos(o) {
 export function renderState(world) {
   const objects = world.objects.filter(o => !o.state.gone).map(o => ({
     id: o.id, kind: o.kind, zone: o.zone, ...objectPos(o),
-    layer: NATURE.has(o.kind) ? 'nature' : 'structures',
+    layer: o.kind === 'pond' ? 'terrain' : NATURE.has(o.kind) ? 'nature' : 'structures',
     state: o.state, keeper: o.origin.action !== undefined, age: world.tick - o.builtTick
   }));
   // Spread Wobblins around their zone, stable per id and tick.
@@ -37,8 +43,19 @@ export function renderState(world) {
       y: Math.round(z.cy + 10 + row * 26 + (r() - 0.5) * 16)
     };
   });
+  // The Keeper's latest act this tick, so Wobblins can react to it at once.
+  const last = world.events.slice(-12).reverse().find(e => e.t === world.tick &&
+    (e.kind === 'keeper_power' || e.kind === 'keeper_nudge' || e.kind === 'keeper_gift'));
+  let reaction = null;
+  if (last) {
+    const tgt = last.target && objects.find(o => o.id === last.target);
+    const s = last.data.slot && slotInfo(last.data.slot);
+    const z = ZONES[last.data.zone || 'meadow'];
+    reaction = { id: last.id, kind: last.data.power || last.data.nudge || 'gift', zone: last.data.zone || null,
+      x: tgt ? tgt.x : s ? s.x : z.cx, y: tgt ? tgt.y : s ? s.y : z.cy };
+  }
   return {
-    seed: world.seed, tick: world.tick, colonyName: world.colonyName,
+    seed: world.seed, tick: world.tick, colonyName: world.colonyName, reaction,
     climate: { ...world.climate },
     objects, wobblins
   };
@@ -105,10 +122,11 @@ export function drawSVG(svg, rs, opts = {}) {
   }
 
   // Wobblins glance toward the newest Keeper object (instant reaction).
-  const fresh = rs.objects.filter(o => o.keeper && o.age <= 1).sort((a, b) => b.age - a.age).pop();
+  const fresh = rs.reaction || rs.objects.filter(o => o.keeper && o.age <= 1).sort((a, b) => b.age - a.age).pop();
+  const flinchZone = rs.reaction && rs.reaction.kind === 'lightning' ? rs.reaction.zone : null;
   for (const w of rs.wobblins.slice().sort((a, b) => a.y - b.y)) {
     const s = 1.5 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1);
-    const g = el('g', { id: w.id, transform: `translate(${w.x},${w.y}) scale(${s})`, class: 'wobblin act-' + w.activity }, L.wobblins);
+    const g = el('g', { id: w.id, transform: `translate(${w.x},${w.y}) scale(${s})`, class: 'wobblin act-' + w.activity + (flinchZone === w.zone ? ' flinch' : '') }, L.wobblins);
     const lookDx = fresh ? Math.max(-1.5, Math.min(1.5, (fresh.x - w.x) / 60)) : 0;
     g.innerHTML = wobblinSVG(w, { lookDx });
   }
@@ -118,6 +136,15 @@ export function drawSVG(svg, rs, opts = {}) {
     for (let i = 0; i < 90; i++) {
       const x = r() * VIEW.w, y = r() * VIEW.h;
       el('line', { x1: x, y1: y, x2: x - 6, y2: y + 18, stroke: 'rgba(200,220,255,0.6)', 'stroke-width': 2 }, L.effects);
+    }
+  }
+  if (rs.reaction && rs.reaction.kind === 'lightning') {
+    const { x, y } = rs.reaction;
+    el('path', { d: `M${x + 30} 0 L${x - 10} ${y * 0.45} L${x + 14} ${y * 0.5} L${x - 4} ${y - 10}`, class: 'bolt' }, L.effects);
+  }
+  if (rs.reaction && rs.reaction.kind === 'miracle') {
+    for (const [i, c] of ['#e66', '#eb5', '#ee6', '#6c6', '#69e', '#a7e'].entries()) {
+      el('path', { d: `M150 520 A450 330 0 0 1 1050 520`, stroke: c, 'stroke-width': 10, fill: 'none', opacity: 0.55, transform: `translate(0 ${i * 10})` }, L.effects);
     }
   }
   if (night) el('rect', { x: 0, y: 0, width: VIEW.w, height: VIEW.h, fill: 'rgba(20,24,60,0.32)', 'pointer-events': 'none' }, L.effects);

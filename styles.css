@@ -60,3 +60,9 @@ button { font: inherit; cursor: pointer; }
 .act-rest .wobble { animation-duration: 4.5s !important; }
 .act-inspect .wobble { animation-name: hop; }
 @keyframes hop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px) rotate(3deg); } }
+.bolt { fill: none; stroke: #fff6b0; stroke-width: 6; stroke-linejoin: round; filter: drop-shadow(0 0 8px #ffe680); animation: boltfade 1.2s ease-out forwards; }
+@keyframes boltfade { 0%,30% { opacity: 1; } 100% { opacity: 0; } }
+.flinch .wobble { animation: flinch .35s ease-in-out 4 !important; }
+@keyframes flinch { 0%,100% { transform: translateX(0) scaleY(1); } 50% { transform: translateX(-3px) scaleY(.85); } }
+.fishy { animation: swim 3s ease-in-out infinite; }
+@keyframes swim { 0%,100% { transform: translateX(-6px); } 50% { transform: translateX(6px) scaleX(-1); } }

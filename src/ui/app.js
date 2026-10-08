@@ -1,5 +1,6 @@
 // app.js — clock, input, panels. The only place real time and the DOM meet the sim.
-import { createWorld, tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST } from '../sim/index.js';
+import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST } from '../sim/index.js';
+import { unlockedCurios, hasPond } from '../sim/actions.js';
 import { renderState, drawSVG } from '../render/render.js';
 import { ZONES, ZONE_IDS, slotIds, slotInfo } from '../sim/geometry.js';
 import { objectAtSlot } from '../sim/util.js';
@@ -80,27 +81,75 @@ const POWER_UI = [
   { key: 'stone', label: 'Drop Stone', variants: ['stones', 'boulder'], slot: true },
   { key: 'plant', label: 'Plant', variants: ['bush', 'tree'], slot: true },
   { key: 'rain', label: 'Rain' },
-  { key: 'lightning', label: 'Lightning', soon: true },
-  { key: 'water', label: 'Shape Water', soon: true },
-  { key: 'season', label: 'Season', soon: true }
+  { key: 'lightning', label: 'Lightning', slot: true },
+  { key: 'water', label: 'Shape Water' },
+  { key: 'season', label: 'Season' }
 ];
 const NUDGE_UI = [
   { key: 'bless', label: 'Bless' },
-  { key: 'curio', label: 'Curio', soon: true },
+  { key: 'curio', label: 'Curio' },
   { key: 'gift', label: 'Daily Gift' },
-  { key: 'miracle', label: 'Miracle', soon: true }
+  { key: 'miracle', label: 'Miracle', cost: 20 }
 ];
 
 function onButton(b) {
-  if (b.soon) { toast(b.label + ' arrives on Day 3.'); return; }
   if (b.key === 'rain') { act({ type: 'power', power: 'rain' }); return; }
+  if (b.key === 'miracle') { act({ type: 'nudge', nudge: 'miracle' }); return; }
   if (b.key === 'gift') { showGift(); return; }
+  if (b.key === 'season') { showSeason(); return; }
+  if (b.key === 'curio') { showCurio(); return; }
   if (b.key === 'bless') { mode = { kind: 'bless' }; toast('Tap a Wobblin to bless.'); draw(); return; }
+  if (b.key === 'water') {
+    if (!hasPond(world)) { act({ type: 'power', power: 'water' }); return; }
+    mode = { kind: 'slot', power: 'water', zone: 'riverbank' };
+    toast('Shape Water: tap a spot on the riverbank to bend the river there.');
+    draw(); return;
+  }
+  if (b.key === 'lightning') {
+    mode = { kind: 'slot', power: 'lightning', any: true };
+    toast('Lightning: tap where it should strike. Trees and bushes catch fire.');
+    draw(); return;
+  }
   if (b.variants) {
     mode = { kind: 'slot', power: b.key, variant: mode && mode.power === b.key && mode.variant === b.variants[0] ? b.variants[1] : b.variants[0] };
     toast(b.label + ': ' + mode.variant + '. Tap a spot (tap the button again to switch).');
     draw();
   }
+}
+
+function menu(title, items, onPick) {
+  const card = $('#giftCard');
+  card.replaceChildren();
+  const h = document.createElement('h3');
+  h.textContent = title;
+  card.append(h);
+  for (const [label, value] of items) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.onclick = () => { card.hidden = true; onPick(value); };
+    card.append(btn);
+  }
+  const close = document.createElement('button');
+  close.textContent = 'Close'; close.className = 'ghost';
+  close.onclick = () => { card.hidden = true; mode = null; draw(); };
+  card.append(close);
+  card.hidden = false;
+}
+
+function showSeason() {
+  const cost = world.seasonUses === 0 ? 'free the first time' : '10 Devotion';
+  menu('Bring a season for a day (' + cost + ')', [['Cold Snap', 'cold'], ['Warm Spell', 'warm']],
+    v => act({ type: 'power', power: 'season', variant: v }));
+}
+
+function showCurio() {
+  const open = unlockedCurios(world);
+  if (!open.length) { toast('No curios yet. They unlock once a Wobblin notices a material.'); return; }
+  menu('Place a curio between two Wobblins', open.map(c => [c.replace(/_/g, ' '), c]), c => {
+    mode = { kind: 'curio', curio: c, picked: [] };
+    toast('Tap two Wobblins.');
+    draw();
+  });
 }
 
 function showGift() {
@@ -155,7 +204,12 @@ function draw() {
     g.style.cursor = 'pointer';
     g.onclick = () => {
       const ww = world.wobblins.find(x => x.id === w.id);
-      if (mode && mode.kind === 'bless') blessMenu(ww); else showWobblin(ww);
+      if (mode && mode.kind === 'bless') blessMenu(ww);
+      else if (mode && mode.kind === 'curio') {
+        if (!mode.picked.includes(ww.id)) mode.picked.push(ww.id);
+        if (mode.picked.length === 2) act({ type: 'nudge', nudge: 'curio', curio: mode.curio, targets: mode.picked });
+        else toast(ww.name + ' picked. Tap one more.');
+      } else showWobblin(ww);
     };
   }
   drawHud();
@@ -169,13 +223,14 @@ function drawSlotTargets(svg) {
   g.id = 'slot-targets';
   for (const z of ZONE_IDS) {
     for (const s of slotIds(z)) {
-      if (objectAtSlot(world, s)) continue;
+      if (mode.zone && z !== mode.zone) continue;
+      if (!mode.any && mode.power !== 'water' && objectAtSlot(world, s)) continue;
       if (mode.power === 'plant' && mode.variant === 'tree' && z === 'riverbank') continue;
       const { x, y } = slotInfo(s);
       const c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 16);
       c.setAttribute('class', 'slot-target');
-      c.onclick = () => act({ type: 'power', power: mode.power, slot: s, variant: mode.variant });
+      c.onclick = () => act(Object.assign({ type: 'power', power: mode.power, slot: s }, mode.variant ? { variant: mode.variant } : {}));
       g.append(c);
     }
   }
@@ -204,7 +259,7 @@ function drawBars() {
     bar.replaceChildren();
     for (const b of list) {
       const btn = document.createElement('button');
-      btn.className = 'power' + (b.soon ? ' soon' : '') + (mode && (mode.power === b.key || mode.kind === b.key) ? ' active' : '');
+      btn.className = 'power' + (b.cost && world.devotion < b.cost ? ' soon' : '') + (mode && (mode.power === b.key || mode.kind === b.key) ? ' active' : '');
       const f = cooldownFrac(b.key);
       btn.style.setProperty('--cd', f);
       btn.disabled = f > 0;

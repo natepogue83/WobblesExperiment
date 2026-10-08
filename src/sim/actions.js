@@ -2,26 +2,29 @@
 // Actions shape conditions only. They NEVER add knowledge (rule zero).
 // Validation reads world state alone, so replay rejects exactly what live
 // play rejected, with no events.
-//
-// Day 1: the full validation frame for every action type, with effects for
-// stone, plant, rain, bless, gift and collect_offerings. Lightning, water,
-// season, curio and miracle effects land on Day 3 (rejected until then).
 import { COOLDOWN, COST, POWER } from './constants.js';
 import { rngFor } from './rng.js';
 import { slotInfo, ZONES } from './geometry.js';
-import { r3, clamp, objectAtSlot, findWobblin } from './util.js';
+import { r3, clamp, objectAtSlot, findWobblin, alive, liveObjects } from './util.js';
 import { emit } from './events.js';
 import { makeObject } from './world.js';
+import { strike, digPond, flood, freeSlotIn } from './nature.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
 export const NUDGES = ['bless', 'curio', 'miracle'];
 export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience'];
-export const CURIOS = ['hollow_log', 'flint', 'feather', 'reed_bundle', 'clay_lump'];
+// Each curio unlocks once a Wobblin has noticed its material.
+export const CURIOS = {
+  hollow_log: ['tree'],
+  flint: ['stones', 'boulder'],
+  feather: ['gift', 'bush'],
+  reed_bundle: ['reeds'],
+  clay_lump: ['clay']
+};
 export const GIFT_POOL = [
   'flint_stone', 'hollow_log', 'shiny_shell', 'moon_stone', 'feather_crown', 'seed_pouch',
   'honey_comb', 'reed_bundle', 'clay_lump', 'warm_pelt', 'bell_flower', 'firefly_jar'
 ];
-const IMPLEMENTED = new Set(['stone', 'plant', 'rain', 'bless']);
 
 // Three seeded options for a real-world day index.
 export function giftOptions(seed, day) {
@@ -30,6 +33,17 @@ export function giftOptions(seed, day) {
   const out = [];
   for (let i = 0; i < 3; i++) out.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
   return out;
+}
+
+export function unlockedCurios(world) {
+  return Object.keys(CURIOS).filter(c => CURIOS[c].some(k => world.noticed[k] !== undefined));
+}
+
+export function hasPond(world) { return liveObjects(world).some(o => o.kind === 'pond'); }
+
+function costOf(world, key) {
+  if (key === 'season' && world.seasonUses === 0) return 0;
+  return COST[key] || 0;
 }
 
 function bad(reason) { return { ok: false, reason }; }
@@ -43,18 +57,20 @@ function boulderSlots(world, slot) {
   return [slot, other];
 }
 
+function freeSlotNear(world, zone) {
+  return freeSlotIn(world, zone) || ZONES[zone] && ['meadow', 'grove', 'hill', 'hollow'].map(z => freeSlotIn(world, z)).find(Boolean) || null;
+}
+
 export function validateAction(world, a) {
   if (!a || typeof a !== 'object') return bad('malformed');
   if (a.t !== world.tick) return bad('wrong_tick');
-  const cdKey = a.type === 'power' ? a.power : a.type === 'nudge' ? a.nudge : null;
 
   if (a.type === 'power' || a.type === 'nudge') {
+    const key = a.type === 'power' ? a.power : a.nudge;
     const list = a.type === 'power' ? POWERS : NUDGES;
-    if (!list.includes(cdKey)) return bad('unknown_' + a.type);
-    if (!IMPLEMENTED.has(cdKey)) return bad('not_implemented');
-    if (world.cooldowns[cdKey] > world.tick) return bad('cooldown');
-    const cost = cdKey === 'season' && world.seasonUses === 0 ? 0 : (COST[cdKey] || 0);
-    if (world.devotion < cost) return bad('devotion');
+    if (!list.includes(key)) return bad('unknown_' + a.type);
+    if (world.cooldowns[key] > world.tick) return bad('cooldown');
+    if (world.devotion < costOf(world, key)) return bad('devotion');
   }
 
   if (a.type === 'power') {
@@ -76,16 +92,43 @@ export function validateAction(world, a) {
       }
       case 'rain':
         return { ok: true };
+      case 'lightning':
+        return slotInfo(a.slot) ? { ok: true } : bad('slot');
+      case 'water': {
+        if (!hasPond(world)) {
+          if (objectAtSlot(world, 'pondsite.1') || objectAtSlot(world, 'pondsite.2')) return bad('occupied');
+          return { ok: true };
+        }
+        const info = slotInfo(a.slot);
+        if (!info || info.zone !== 'riverbank') return bad('slot');
+        if (world.riverBend === a.slot) return bad('already');
+        return { ok: true };
+      }
+      case 'season':
+        return a.variant === 'cold' || a.variant === 'warm' ? { ok: true } : bad('variant');
     }
     return bad('unknown_power');
   }
 
   if (a.type === 'nudge') {
-    if (a.nudge === 'bless') {
-      const w = findWobblin(world, a.target);
-      if (!w || !w.alive) return bad('target');
-      if (!BLESS_TRAITS.includes(a.trait)) return bad('trait');
-      return { ok: true };
+    switch (a.nudge) {
+      case 'bless': {
+        const w = findWobblin(world, a.target);
+        if (!w || !w.alive) return bad('target');
+        if (!BLESS_TRAITS.includes(a.trait)) return bad('trait');
+        return { ok: true };
+      }
+      case 'curio': {
+        if (!CURIOS[a.curio]) return bad('curio');
+        if (!unlockedCurios(world).includes(a.curio)) return bad('locked');
+        if (!Array.isArray(a.targets) || a.targets.length !== 2 || a.targets[0] === a.targets[1]) return bad('targets');
+        const ws = a.targets.map(id => findWobblin(world, id));
+        if (ws.some(w => !w || !w.alive)) return bad('targets');
+        if (!freeSlotNear(world, ws[0].zone)) return bad('no_room');
+        return { ok: true };
+      }
+      case 'miracle':
+        return { ok: true };
     }
     return bad('unknown_nudge');
   }
@@ -94,7 +137,7 @@ export function validateAction(world, a) {
     if (!Number.isInteger(a.day)) return bad('day');
     if (world.giftsByDay[a.day] !== undefined) return bad('gift_used');
     if (!giftOptions(world.seed, a.day).includes(a.giftId)) return bad('gift_option');
-    if (!freeSlot(world, 'meadow')) return bad('no_room');
+    if (!freeSlotNear(world, 'meadow')) return bad('no_room');
     return { ok: true };
   }
 
@@ -106,12 +149,12 @@ export function validateAction(world, a) {
   return bad('unknown_type');
 }
 
-function freeSlot(world, zone) {
-  for (let i = 1; i <= ZONES[zone].slots.length; i++) {
-    const s = zone + '.' + i;
-    if (!objectAtSlot(world, s)) return s;
-  }
-  return null;
+function faithAll(world, d) {
+  for (const w of alive(world)) w.faith = r3(clamp(w.faith + d, -1, 1));
+}
+
+function witnesses(world, zone, except) {
+  return alive(world).filter(w => w.zone === zone && w.id !== except).map(w => w.id);
 }
 
 export function applyAction(world, a) {
@@ -120,48 +163,106 @@ export function applyAction(world, a) {
   const origin = { action: a.seq };
   const causes = [{ action: a.seq }];
   const t = world.tick;
+  world.lastKeeperTick = t;
 
   if (a.type === 'power' || a.type === 'nudge') {
     const key = a.type === 'power' ? a.power : a.nudge;
     world.cooldowns[key] = t + COOLDOWN[key];
-    const cost = key === 'season' && world.seasonUses === 0 ? 0 : (COST[key] || 0);
-    world.devotion = r3(world.devotion - cost);
+    world.devotion = r3(world.devotion - costOf(world, key));
   }
 
+  const power = (data, target, salience = 2) =>
+    emit(world, { kind: 'keeper_power', target: target || null, data, salience, causes });
+
   if (a.type === 'power') {
-    if (a.power === 'stone') {
-      const slots = a.variant === 'boulder' ? boulderSlots(world, a.slot) : null;
-      const o = makeObject(world, {
-        kind: a.variant, slot: a.slot, slots: slots || undefined, origin,
-        state: { count: a.variant === 'boulder' ? 4 : 1 }
-      });
-      emit(world, { kind: 'keeper_power', target: o.id, data: { power: 'stone', variant: a.variant, slot: a.slot }, salience: 2, causes });
-    } else if (a.power === 'plant') {
-      const o = makeObject(world, {
-        kind: 'sprout', slot: a.slot, origin,
-        state: { grows: a.variant, readyAt: t + POWER.sproutGrowTicks }
-      });
-      emit(world, { kind: 'keeper_power', target: o.id, data: { power: 'plant', variant: a.variant, slot: a.slot }, salience: 2, causes });
-    } else if (a.power === 'rain') {
-      world.climate.rain = POWER.rainTicks;
-      world.climate.wetUntil = t + POWER.rainTicks + POWER.wetTicks;
-      emit(world, { kind: 'keeper_power', data: { power: 'rain', ticks: POWER.rainTicks }, salience: 2, causes });
+    switch (a.power) {
+      case 'stone': {
+        const slots = a.variant === 'boulder' ? boulderSlots(world, a.slot) : null;
+        const o = makeObject(world, {
+          kind: a.variant, slot: a.slot, slots: slots || undefined, origin,
+          state: { count: a.variant === 'boulder' ? 4 : 1 }
+        });
+        power({ power: 'stone', variant: a.variant, slot: a.slot, zone: o.zone }, o.id);
+        break;
+      }
+      case 'plant': {
+        const o = makeObject(world, {
+          kind: 'sprout', slot: a.slot, origin,
+          state: { grows: a.variant, readyAt: t + POWER.sproutGrowTicks }
+        });
+        power({ power: 'plant', variant: a.variant, slot: a.slot, zone: o.zone }, o.id);
+        break;
+      }
+      case 'rain': {
+        world.rainUses = world.rainUses.filter(x => t - x <= POWER.floodWindow).concat([t]);
+        const ev = power({ power: 'rain', ticks: POWER.rainTicks });
+        world.climate.rain = POWER.rainTicks;
+        world.climate.rainEvent = ev.id;
+        world.climate.wetUntil = t + POWER.rainTicks + POWER.wetTicks;
+        for (const f of liveObjects(world).filter(o => o.kind === 'fire' && !o.state.kept)) f.state.until = t;
+        if (world.rainUses.length >= POWER.floodUses) {
+          world.rainUses = [];
+          flood(world, [{ action: a.seq }, { event: ev.id }]);
+        }
+        break;
+      }
+      case 'lightning':
+        strike(world, a.slot, causes, { power: 'lightning', zone: slotInfo(a.slot).zone });
+        break;
+      case 'water': {
+        if (!hasPond(world)) {
+          const ev = power({ power: 'water', variant: 'pond', zone: 'pondsite' }, null, 3);
+          digPond(world, ev.id);
+        } else {
+          world.riverBend = a.slot;
+          const ev = power({ power: 'water', variant: 'bend', slot: a.slot, zone: 'riverbank' });
+          makeObject(world, { kind: 'fish', slot: null, zone: 'riverbank', origin: { event: ev.id }, state: { until: t + 12 } });
+        }
+        break;
+      }
+      case 'season': {
+        world.seasonUses++;
+        const c = world.climate;
+        c.season = a.variant;
+        c.tempMod = a.variant === 'cold' ? -0.15 : 0.08;
+        c.until = t + POWER.seasonTicks;
+        power({ power: 'season', variant: a.variant, ticks: POWER.seasonTicks }, null, 3);
+        break;
+      }
     }
     return { ok: true };
   }
 
-  if (a.type === 'nudge' && a.nudge === 'bless') {
-    const w = findWobblin(world, a.target);
-    w.temp[a.trait] = { add: POWER.blessAdd, until: t + POWER.blessTicks };
-    w.faith = r3(clamp(w.faith + 0.1, -1, 1));
-    emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id, data: { nudge: 'bless', trait: a.trait }, salience: 2, causes });
+  if (a.type === 'nudge') {
+    if (a.nudge === 'bless') {
+      const w = findWobblin(world, a.target);
+      w.temp[a.trait] = { add: POWER.blessAdd, until: t + POWER.blessTicks };
+      w.faith = r3(clamp(w.faith + 0.1, -1, 1));
+      const seen = witnesses(world, w.zone, w.id);
+      emit(world, { kind: 'keeper_nudge', actors: [w.id, ...seen], target: w.id,
+        data: { nudge: 'bless', trait: a.trait, witnesses: seen }, salience: 2, causes });
+    } else if (a.nudge === 'curio') {
+      const [w1, w2] = a.targets.map(id => findWobblin(world, id));
+      const slot = freeSlotNear(world, w1.zone);
+      const o = makeObject(world, { kind: 'curio', slot, origin,
+        state: { curio: a.curio, targets: a.targets.slice(), until: t + POWER.curioTicks } });
+      emit(world, { kind: 'keeper_nudge', actors: [w1.id, w2.id], target: o.id,
+        data: { nudge: 'curio', curio: a.curio, zone: o.zone }, salience: 2, causes });
+    } else if (a.nudge === 'miracle') {
+      world.miracleUntil = t + POWER.miracleTicks;
+      faithAll(world, 0.15);
+      const seen = alive(world).map(w => w.id);
+      emit(world, { kind: 'keeper_nudge', actors: seen, data: { nudge: 'miracle', ticks: POWER.miracleTicks, witnesses: seen },
+        salience: 4, causes });
+    }
     return { ok: true };
   }
 
   if (a.type === 'gift') {
     world.giftsByDay[a.day] = a.giftId;
-    const o = makeObject(world, { kind: 'gift', slot: freeSlot(world, 'meadow'), origin, state: { giftId: a.giftId } });
-    emit(world, { kind: 'keeper_gift', target: o.id, data: { giftId: a.giftId, day: a.day }, salience: 2, causes });
+    const o = makeObject(world, { kind: 'gift', slot: freeSlotNear(world, 'meadow'), origin, state: { giftId: a.giftId } });
+    emit(world, { kind: 'keeper_gift', actors: witnesses(world, o.zone), target: o.id,
+      data: { giftId: a.giftId, day: a.day, zone: o.zone }, salience: 2, causes });
     return { ok: true };
   }
 

@@ -115,7 +115,7 @@ export function createWorld(seed, opts = {}) {
     tick: 0,
     colonyName: opts.colonyName || defaultColonyName(seed),
     keeperName: opts.keeperName || 'Keeper',
-    climate: { season: 'mild', tempMod: 0, until: null, drought: 0, rain: 0, wetUntil: -1, cold: false },
+    climate: { season: 'mild', tempMod: 0, until: null, drought: 0, rain: 0, wetUntil: -1, cold: false, drift: 0, rainEvent: null },
     wobblins: [],
     objects: [],
     discoveries: {},
@@ -126,6 +126,11 @@ export function createWorld(seed, opts = {}) {
     giftsByDay: {},
     pondering: {},
     seedPod: null,
+    rainUses: [],                 // ticks of recent Keeper rain (flood check)
+    miracleUntil: -1,
+    riverBend: null,
+    lastKeeperTick: 0,
+    noticed: {},                  // material kind -> first tick a Wobblin saw it
     events: [],
     nextIds: { w: 1, o: 1, e: 1 }
   };

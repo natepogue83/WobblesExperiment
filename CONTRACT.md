@@ -90,7 +90,8 @@ Ids are never reused, even after death or destruction.
 world = {
   version: 2, seed, tick, colonyName, keeperName,
   climate: { season: "mild"|"cold"|"warm", tempMod, until: tick|null, drought,
-             rain: ticksLeft, wetUntil: tick, cold: bool /* tonight */, drift /* seasonal */ },
+             rain: ticksLeft, wetUntil: tick, cold: bool /* tonight */, drift /* seasonal */,
+             rainEvent: eventId /* cause of the current rain */ },
   wobblins: [ wobblin ],          // dead ones stay, alive:false
   objects:  [ object ],           // destroyed ones stay, hp 0, state.gone:true
   discoveries: { [id]: { inventor, tick, causes, forgotten } },
@@ -102,6 +103,9 @@ world = {
   giftsByDay: { [dayIndex]: giftId },
   pondering: { [wobblinId]: { [discoveryId]: sinceTick } },
   seedPod: null | { at: tick },   // set when the valley empties; hatches 2 Wobblins
+  rainUses: [tick],               // recent Keeper rains; 3 within 6 ticks = flood
+  miracleUntil, riverBend: slot|null, lastKeeperTick,
+  noticed: { [objectKind]: tick },// first tick a Wobblin was near a material (unlocks curios)
   events: [ event ],              // append-only
   nextIds: { w, o, e }
 }
@@ -164,6 +168,10 @@ Chronicle, murals and the week-2 AI.
 ```
 
 - Actions apply at tick `t`, in `seq` order, BEFORE that tick's `tick()` runs.
+- Timed state (`until`, `readyAt`) means: by the time `world.tick === until`
+  the effect is over. A 24-tick season placed at t covers ticks t..t+23.
+- Curios unlock per material: hollow_log (tree), flint (stones/boulder),
+  feather (gift/bush), reed_bundle (reeds), clay_lump (clay).
 - `replay(save, nowTick)`: start from `createWorld(save.seed, save)`; for
   `t = 0..nowTick`, apply actions with that `t` in seq order, then call
   `tick()` if `t < nowTick`. Result has `world.tick === nowTick`.

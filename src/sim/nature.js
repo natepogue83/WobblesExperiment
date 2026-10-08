@@ -5,8 +5,8 @@ import { NATURE, POWER, FIRE, CLIMATE, NEEDS } from './constants.js';
 import { rngFor, chance, randInt, pick } from './rng.js';
 import { emit } from './events.js';
 import { makeObject } from './world.js';
-import { slotIds } from './geometry.js';
-import { alive, liveObjects, objectAtSlot, r3, clamp01 } from './util.js';
+import { slotIds, slotInfo } from './geometry.js';
+import { alive, liveObjects, objectAtSlot, r3, clamp01, clamp } from './util.js';
 
 // Triangle wave, period 1, range [-1, 1]. Add/mul/abs only (bit identical).
 function tri(x) { const f = x - Math.floor(x); return 1 - 4 * Math.abs(f - 0.5); }
@@ -25,6 +25,82 @@ export function strike(world, slot, causes, data) {
   const ev = emit(world, { kind: data.natural ? 'lightning' : 'keeper_power', target: target ? target.id : null,
     data: { ...data, slot }, salience: data.natural ? 2 : 2, causes });
   if (target && burnableAt(world, slot)) igniteObject(world, target, ev.id);
+  // Everyone nearby flinches; someone standing right there may get hurt.
+  const zone = slotInfo(slot).zone;
+  const r = rngFor(world.seed, 'strike', world.tick, slot);
+  for (const w of alive(world).filter(x => x.zone === zone)) {
+    w.needs.safety = r3(clamp01(w.needs.safety - 0.3));
+    if (r() < 0.12 * (1.2 - w.traits.boldness)) {
+      w.injuries++;
+      if (!data.natural) w.faith = r3(clamp(w.faith - 0.1, -1, 1));
+      emit(world, { kind: 'injured', actors: [w.id], data: { cause: 'lightning', zone }, salience: 3, causes: [{ event: ev.id }] });
+    }
+  }
+  return ev;
+}
+
+// ---- water: rain side effects, ponds, floods ----------------------------
+export function freeSlotIn(world, zone) {
+  for (const s of slotIds(zone)) if (!objectAtSlot(world, s)) return s;
+  return null;
+}
+
+function hasKind(world, kind, zone) { return liveObjects(world).some(o => o.kind === kind && o.zone === zone); }
+
+// Called once per tick while it rains. Rain softens soil, brings fish up in
+// the river, and shows clay on the bank. `rainEvent` is the cause.
+function rainEffects(world, r, rainEvent) {
+  if (!rainEvent) return;
+  if (!hasKind(world, 'fish', 'riverbank') && chance(r, 0.5)) {
+    makeObject(world, { kind: 'fish', slot: null, zone: 'riverbank', origin: { event: rainEvent }, state: { until: world.tick + 8 } });
+  }
+  if (!hasKind(world, 'clay', 'riverbank') && chance(r, 0.35)) {
+    const s = freeSlotIn(world, 'riverbank');
+    if (s) makeObject(world, { kind: 'clay', slot: s, origin: { event: rainEvent }, state: {} });
+  }
+}
+
+// Dig the pond. Reeds, then clay, then fish follow over 12 ticks.
+export function digPond(world, causeEventId) {
+  const pond = makeObject(world, { kind: 'pond', slot: 'pondsite.1', slots: ['pondsite.1', 'pondsite.2'],
+    origin: { event: causeEventId }, state: { dug: world.tick } });
+  emit(world, { kind: 'pond_formed', target: pond.id, data: { zone: 'pondsite' }, salience: 3, causes: [{ event: causeEventId }] });
+  return pond;
+}
+
+function pondStep(world) {
+  const pond = liveObjects(world).find(o => o.kind === 'pond');
+  if (!pond) return;
+  const age = world.tick - pond.state.dug;
+  const grow = (kind, zone) => {
+    const s = freeSlotIn(world, zone);
+    if (!s) return;
+    const o = makeObject(world, { kind, slot: s, origin: { object: pond.id }, state: {} });
+    emit(world, { kind: 'tree_grown', target: o.id, data: { zone, kind }, salience: 2, causes: [{ object: pond.id }] });
+  };
+  if (age === 4 && !hasKind(world, 'reeds', 'pondsite')) grow('reeds', 'pondsite');
+  if (age === 8 && !hasKind(world, 'clay', 'pondsite')) grow('clay', 'pondsite');
+  if (age >= 12 && !hasKind(world, 'fish', 'pondsite')) {
+    makeObject(world, { kind: 'fish', slot: null, zone: 'pondsite', origin: { object: pond.id }, state: {} });
+  }
+}
+
+export function flood(world, causes) {
+  const ev = emit(world, { kind: 'flood', data: { zones: ['riverbank', 'pondsite'] }, salience: 4, causes });
+  const r = rngFor(world.seed, 'flood', world.tick);
+  for (const w of alive(world).filter(x => x.zone === 'riverbank' || x.zone === 'pondsite')) {
+    w.needs.safety = r3(clamp01(w.needs.safety - 0.4));
+    if (r() < 0.15) {
+      w.injuries++;
+      emit(world, { kind: 'injured', actors: [w.id], data: { cause: 'flood' }, salience: 3, causes: [{ event: ev.id }] });
+    }
+  }
+  for (const o of liveObjects(world).filter(x => x.zone === 'riverbank' && x.slot && x.kind !== 'pond')) {
+    if (r() < 0.3) {
+      o.state.gone = true; o.hp = 0;
+      emit(world, { kind: 'lost', target: o.id, data: { cause: 'flood', kind: o.kind }, salience: 2, causes: [{ event: ev.id }] });
+    }
+  }
   return ev;
 }
 
@@ -45,7 +121,7 @@ function fireStep(world) {
   for (const f of liveObjects(world).filter(o => o.kind === 'fire')) {
     if (f.state.kept) continue;                       // a kept fire (Day 4+) does not burn out
     const r = rngFor(world.seed, 'fire-spread', world.tick, f.id);
-    if (world.climate.rain > 0 || world.tick >= f.state.until) {
+    if (world.climate.rain > 0 || world.tick + 1 >= f.state.until) {
       f.state.gone = true; f.hp = 0;
       emit(world, { kind: 'fire_out', target: f.id, data: { zone: f.zone, rain: world.climate.rain > 0 }, salience: 1 });
       continue;
@@ -62,7 +138,7 @@ function fireStep(world) {
 
 function growthStep(world) {
   for (const o of liveObjects(world)) {
-    if (o.kind === 'sprout' && world.tick >= o.state.readyAt) {
+    if (o.kind === 'sprout' && world.tick + 1 >= o.state.readyAt) {
       o.kind = o.state.grows;
       o.state = o.kind === 'tree' ? { size: 1 } : { berries: 3 };
       emit(world, { kind: 'tree_grown', target: o.id, data: { zone: o.zone, kind: o.kind }, salience: 2,
@@ -95,18 +171,16 @@ export function environmentStep(world) {
   const t = world.tick;
   const r = rngFor(world.seed, 'weather', t);
 
-  if (c.until !== null && t >= c.until) {
-    c.season = 'mild'; c.tempMod = 0; c.until = null;
-  }
   c.drift = r3(CLIMATE.driftAmp * tri((t + (world.seed % CLIMATE.driftPeriod)) / CLIMATE.driftPeriod));
 
-  if (c.rain > 0) {
-    c.rain--;
-    c.wetUntil = t + POWER.wetTicks;
-  } else if (chance(r, NATURE.rainChance + (c.season === 'warm' ? -0.02 : 0))) {
+  // c.rain = ticks of rain still to fall, counting this one.
+  if (c.rain === 0 && chance(r, NATURE.rainChance + (c.season === 'warm' ? -0.02 : 0))) {
     c.rain = 1;
+    c.rainEvent = emit(world, { kind: 'rain', data: { natural: true, ticks: 1 }, salience: 1 }).id;
+  }
+  if (c.rain > 0) {
     c.wetUntil = t + POWER.wetTicks;
-    emit(world, { kind: 'rain', data: { natural: true, ticks: 1 }, salience: 1 });
+    rainEffects(world, r, c.rainEvent);
   }
 
   const coldP = NATURE.coldNightChance + (c.season === 'cold' ? 0.5 : c.season === 'warm' ? -0.2 : 0) - c.drift;
@@ -120,8 +194,18 @@ export function environmentStep(world) {
     }
   }
 
+  for (const o of liveObjects(world)) {
+    if (o.state.until !== undefined && o.kind === 'fish' && t >= o.state.until) { o.state.gone = true; o.hp = 0; }
+    if (o.kind === 'curio' && o.state.until !== undefined && t >= o.state.until) o.state.pullDone = true;
+  }
+
   fireStep(world);
   growthStep(world);
+  pondStep(world);
   prowlerStep(world, r);
+  if (c.rain > 0) c.rain--;
+  // A Keeper season covers ticks [start, until); it is over once the next tick is until.
+  if (c.until !== null && t + 1 >= c.until) {
+    c.season = 'mild'; c.tempMod = 0; c.until = null;
+  }
 }
-
