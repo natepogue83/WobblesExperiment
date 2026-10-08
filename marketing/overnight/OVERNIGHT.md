@@ -7,7 +7,7 @@ Nothing here needs you to act. If you only have a minute, open the game and star
 - `http://localhost:8137/?debug=1&fresh=1` starts a brand-new colony (the new-player flow).
 - `http://localhost:8137/?debug=1&devload=/_dev_save.json` loads a 300-day village with every power unlocked.
 
-Sound plays after your first tap; the speaker button (top left) mutes it. The **?** button explains every gesture. Everything is committed in the local git repo, and all 14 test files pass.
+Sound plays after your first tap; the speaker button (top left) mutes it. The **?** button explains every gesture. Everything is committed in the local git repo, and all 14 test files pass. Screenshots 1-18 are in this folder.
 
 ## 1. Art
 
@@ -67,28 +67,29 @@ All of these replay exactly and never teach the Wobblins anything.
 
 ## 4. A reason to play
 
-- **Devotion is shown next to belief** once you have some, and a Miracle tile says how much it costs.
-- **You can see belief grow:** every act that delights them floats a "+1.6 belief" up from where it happened, and the belief bar flashes (scaring them shows a red minus).
+- **You can see belief grow:** every act that delights them floats a "+1.6 belief" up from where it happened, and the belief bar flashes (scaring them shows a red minus). Devotion now shows next to it once you have some, and the Miracle tile says how much it costs.
 - **Twelve tricks to try** sit under the milestones in the Goals panel (a hug, a flower crown, juggling, to the rescue, art the hard way, on thin ice...). Each one you pull off is worth 1 belief, and the panel says how to do it, so it doubles as a list of what your hands can do.
 - **Ages and 15 milestones** (the Goals button). Examples: tame fire, welcome a baby, three generations, a temple. Claiming one gives belief, and belief unlocks powers.
 - **A fast start:** while you watch a new colony, its first 12 days pass at 20 seconds each, then slow to a day a minute. The first discoveries, asks and unlocks arrive within a few minutes.
 - **Each new power gets a banner** with its icon when belief unlocks it, and its tray tile glows until you try it.
 - **A first-time coach** gives four pointers (drag stones in, pick a Wobblin up, watch them think, claim a goal), then gets out of the way.
 - **Big moments get their own card:** a discovery with confetti and what it means, a baby and who it takes after, a goodbye. They queue one at a time. A live ticker in the corner shows the day's most interesting happening.
-- **Coming back after a while,** the recap shows who each line is about and includes friendships and squabbles. In 85-97% of 8-hour absences there are now 3 or more changes, up from 63-93%. The Chronicle has a "Their story" tab with a face on every line.
+- **Coming back after a while,** the recap shows who each line is about and includes friendships and squabbles. In 94-99% of 8-hour absences there are now 3 or more changes, up from 63-93%. The Chronicle has a "Their story" tab with a face on every line.
 
 ## 5. Feel
 
 - **Synthesized sound** for every action: pops, boings, splashes, zaps, rumbles, giggles and a eureka chime, plus quiet ambience (birds by day, crickets at night, rain, a music-box note when they're happy) and a mute button.
 - **A new colony opens with the three Wobblins asleep.** They pop awake one by one after you tap Wake them up.
+- **Your hand:** the cursor is an open cartoon hand over the valley and a fist while you carry something, and a flung Wobblin casts a shadow on the ground that shrinks the higher it flies. The HUD's numbers have little icons.
 - **Juice:** sparkles where seeds, gifts and blessings land; a big dust puff and a screen thump for boulders; happy Wobblins play tag now and then; at night by your clock, idle ones curl up to sleep by a hut.
 - **Smoother:** no twitch when a new day starts; on a phone every tray tile now fits on screen (half the powers used to be out of reach) and the HUD is slimmer; small laptop windows and phones on their side get a compact HUD and one row of tiles; tray tiles have hover tips; Esc closes a panel; the recap also appears after a laptop slept with the game open.
 
 ## Under the hood
 
 - A chaos test throws 8,700 random acts at 16 colonies: nothing crashes, no number goes out of range, and every save replays exactly.
-- Ticks got faster with identical results, so a 90-day replay still runs in about 220 ms against the 250 ms target.
-- A new syntax test parses every module, including the browser-only ones the other tests never load.
+- Ticks got faster with identical results, so a 90-day replay runs in about 200-225 ms against the 250 ms target.
+- A new syntax test parses every module, including the browser-only ones the other tests never load, and fails if two CSS animations share a name.
+- A second Claude reviewed the night's code. It found five bugs in catching and dropping (one could freeze a Wobblin in mid-air and pause the screen); all are fixed.
 - CONTRACT.md and the README are up to date.
 
 ## Decisions you might want to change
@@ -97,6 +98,9 @@ All of these replay exactly and never teach the Wobblins anything.
 - Goals and asks grant belief, which makes powers unlock faster. A busy player can reach the Age of Wonders in about 90 days.
 - New colonies run three times faster for their first 12 watched days.
 - The display font loads from Google Fonts, so it needs internet. Without it the page falls back to system fonts.
+- Tricks give 1 belief each (12 in all).
+- Any Wobblin dropped in the river gets a dunk, even a gentle drop, not just a fling.
+- A colony you already had replays under the new rules, so it may look a little different from when you left it. A few generated names are now filtered out (rude ones, and confusing ones like Fish).
 
 ## Still waiting on you (from before)
 
