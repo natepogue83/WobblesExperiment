@@ -150,12 +150,21 @@ function primaryTrait(w, d, tick) {
 }
 
 // Which temperament (if any) stops this Wobblin from working d out.
+const NEEDS = new Map();   // discovery id -> sorted [trait, min] (hot path: computed once)
+function needsOf(d) {
+  let n = NEEDS.get(d.id);
+  if (!n) {
+    const need = { ...(TEMPERAMENT[d.id] || {}) };
+    need.curiosity = Math.max(need.curiosity || 0, CURIOSITY_BY_TIER[d.tier]);
+    n = Object.keys(need).sort().map(k => [k, need[k]]);
+    NEEDS.set(d.id, n);
+  }
+  return n;
+}
 export function temperamentGap(w, d, tick) {
-  const need = { ...(TEMPERAMENT[d.id] || {}) };
-  need.curiosity = Math.max(need.curiosity || 0, CURIOSITY_BY_TIER[d.tier]);
-  for (const t of Object.keys(need).sort()) {
+  for (const [t, v] of needsOf(d)) {
     const have = trait(w, t, tick);
-    if (have < need[t]) return { trait: t, need: need[t], have: r3(have) };
+    if (have < v) return { trait: t, need: v, have: r3(have) };
   }
   return null;
 }
@@ -170,9 +179,9 @@ export function scoreCandidates(ctx, w) {
   for (const d of ctx.open) {
     if (w.knows[d.id] || ctx.knownByLiving.has(d.id)) continue;   // spreads by teaching instead
     if (w.tabooUntil > t && FIRE_DISCOVERIES.has(d.id)) continue;  // Fire Taboo
-    if (temperamentGap(w, d, t)) continue;                            // not the type to figure this out
     if (baby && d.tier > 1) continue;
     if (!prereqsMet(d, w.knows)) continue;
+    if (temperamentGap(w, d, t)) continue;                            // not the type to figure this out
     const m = stimulusMatch(ctx, w, d);
     if (!m) continue;
     let stim = (m.sameZone ? 1 : 0.7) + 0.2 * m.extra;

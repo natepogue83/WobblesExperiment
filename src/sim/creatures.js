@@ -4,7 +4,7 @@
 // drive experiments (Day 4).
 import { LIFE, NEEDS, SOCIAL } from './constants.js';
 import { rngFor, weightedPick } from './rng.js';
-import { ZONE_IDS, isAdjacent } from './geometry.js';
+import { ZONE_IDS, isAdjacent, ADJACENT } from './geometry.js';
 import { alive, liveObjects, sortedKeys, r3, clamp01 } from './util.js';
 import { emit } from './events.js';
 import { skillLevel } from './growth.js';
@@ -187,8 +187,14 @@ export function creaturesStep(world) {
   // Decide first (from the same snapshot), then apply, so order by id cannot
   // let early movers change later choices within the tick.
   const plans = live.map(w => [w, chooseActivity(world, w, objs, live)]);
+  world.trails ||= {};
   for (const [w, p] of plans) {
     w.activity = p.activity;
+    // Every trip wears the grass down a little: paths appear where they walk most.
+    if (p.zone !== w.zone && ADJACENT[w.zone] && ADJACENT[w.zone].includes(p.zone)) {
+      const k = [w.zone, p.zone].sort().join('|');
+      world.trails[k] = (world.trails[k] || 0) + 1;
+    }
     w.zone = p.zone;
     if (p.activity === 'inspect') {
       if (!w.seen.includes(p.why)) w.seen.push(p.why);

@@ -207,7 +207,8 @@ function objectArtInner(o, muralIcon) {
         [-26, -16, -6, 4, 14, 24].map(x => `<path d="M${x} -16 Q${x + 2} -32 ${x * 0.3} -46" stroke="#a87a34" stroke-width="1.4" fill="none" opacity="0.6"/>`).join('') +
         `<path d="M-30 -20 Q0 -14 30 -20" stroke="#8f652a" stroke-width="2.2" fill="none"/>` +
         `<path d="M-7 0 V-11 Q0 -17 7 -11 V0 Z" fill="${G('doorglow')}"/>` +
-        `<path d="M-2 -50 Q0 -56 2 -50" stroke="#8f652a" stroke-width="3" fill="none"/>`;
+        `<path d="M-2 -50 Q0 -56 2 -50" stroke="#8f652a" stroke-width="3" fill="none"/>` +
+        (o.state.smoke ? `<g class="chimney"><path class="smoke" d="M14 -44 q-5 -8 0 -14 q5 -6 0 -14" stroke="#d8d4cc" stroke-width="3.4" fill="none" opacity="0.6" stroke-linecap="round"/></g>` : '');
   }
   return null;
 }

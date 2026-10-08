@@ -56,6 +56,8 @@ export function strike(world, slot, causes, data) {
 export const TIDY = { keepsake: 48, stones: 72, cairn: 144, spareStones: 3, scorch: 48, ruin: 240 };
 function tidyStep(world) {
   const t = world.tick;
+  if (t % 4 !== 0) return;   // every few days is plenty (and keeps replay fast)
+  if (world.trails && t % 48 === 44) for (const k of Object.keys(world.trails).sort()) { world.trails[k] = Math.floor(world.trails[k] * 0.9); if (!world.trails[k]) delete world.trails[k]; }
   const live = alive(world);
   const takerIn = zone => live.find(w => w.zone === zone && w.stage !== 'baby') || live.find(w => w.stage !== 'baby') || null;
   const piles = liveObjects(world).filter(o => o.kind === 'stones');

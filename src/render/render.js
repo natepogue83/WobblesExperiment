@@ -46,6 +46,22 @@ export const OBJECT_SCALE = { hut: 1.75, temple: 1.45, totem: 1.7, wall: 1.45, h
   garden: 1.25, tree: 1.35, bush: 1.3, boulder: 1.15, stones: 1.25, gift: 1.35, curio: 1.35, sprout: 1.3, grave: 1.45,
   pond: 1, reeds: 1.25, clay: 1.2, fish: 1.2, ruin: 1.4, scorch: 1.35 };
 
+// Worn dirt paths between the places they go back and forth between most.
+function trailsSVG(trails) {
+  let s = '';
+  for (const { a, b, n } of trails) {
+    const A = ZONES[a], B = ZONES[b];
+    if (!A || !B) continue;
+    const w = Math.min(16, 3 + Math.log2(n) * 2.2), op = Math.min(0.55, 0.12 + Math.log2(n) * 0.06);
+    const x1 = A.cx, y1 = A.cy + 14, x2 = B.cx, y2 = B.cy + 14;
+    const mx = (x1 + x2) / 2 + (y2 - y1) * 0.12, my = (y1 + y2) / 2 + 10;
+    const d = `M${x1} ${y1} Q${mx.toFixed(0)} ${my.toFixed(0)} ${x2} ${y2}`;
+    s += `<path d="${d}" stroke="#9a7a4c" stroke-width="${w.toFixed(1)}" stroke-linecap="round" fill="none" opacity="${op.toFixed(2)}"/>` +
+      `<path d="${d}" stroke="#c9ab78" stroke-width="${(w * 0.45).toFixed(1)}" stroke-linecap="round" stroke-dasharray="2 9" fill="none" opacity="${(op * 0.9).toFixed(2)}"/>`;
+  }
+  return s;
+}
+
 // The face follows how they feel right now.
 export function faceOf(w) {
   const n = w.needs;
@@ -88,6 +104,7 @@ export function renderState(world) {
   const objects = world.objects.filter(o => !o.state.gone).map(o => {
     let st = o.kind === 'mural' && o.state.depicts ? { ...o.state, depictsKind: (evById(o.state.depicts) || { data: {} }).data.power || (evById(o.state.depicts) || { data: {} }).data.nudge || 'gift' } : o.state;
     if ((o.state.chargedUntil || 0) > world.tick) st = { ...st, charged: true };
+    if (o.kind === 'hut' && world.discoveries.hearth) st = { ...st, smoke: true };
     return {
       id: o.id, kind: o.kind, zone: o.zone, ...objectPos(o),
       layer: o.kind === 'pond' ? 'terrain' : NATURE.has(o.kind) ? 'nature' : 'structures',
@@ -135,8 +152,9 @@ export function renderState(world) {
       reactions: last.data.reactions || {},
       x: tgt ? tgt.x : s ? s.x : z.cx, y: tgt ? tgt.y : s ? s.y : z.cy };
   }
+  const trails = Object.entries(world.trails || {}).filter(([, n]) => n >= 4).map(([k, n]) => { const [a, b] = k.split('|'); return { a, b, n }; });
   return {
-    seed: world.seed, tick: world.tick, colonyName: world.colonyName, reaction,
+    seed: world.seed, tick: world.tick, colonyName: world.colonyName, reaction, trails,
     climate: { ...world.climate },
     objects, wobblins
   };
@@ -181,6 +199,7 @@ export function drawSVG(svg, rs, opts = {}) {
     ? `<image href="${opts.backdrop}" x="0" y="0" width="${VIEW.w}" height="${VIEW.h}" preserveAspectRatio="none"/>` + sceneOverlaySVG(rs.seed, { hour })
     : backdrop(rs, hour);
   el('g', { id: 'art-defs' }, L.terrain).innerHTML = ART_DEFS;
+  if (rs.trails && rs.trails.length) el('g', { id: 'trails', 'pointer-events': 'none' }, L.terrain).innerHTML = trailsSVG(rs.trails);
   const sh = ZONES.hill.shrine;
   const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y}) scale(1.5)`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
   shrine.innerHTML = '<ellipse cx="0" cy="2" rx="18" ry="5" fill="rgba(0,0,0,.18)"/><rect x="-12" y="-26" width="24" height="26" rx="3" fill="#d6ccb5" stroke="#8f846f"/><path d="M-16 -26 L0 -38 L16 -26 Z" fill="#b9ab8e" stroke="#8f846f"/><circle cx="0" cy="-14" r="5" fill="#f3d36b"/>' +
