@@ -166,7 +166,7 @@ export function drawSVG(svg, rs, opts = {}) {
     }
   }
   if (night) el('rect', { x: 0, y: 0, width: VIEW.w, height: VIEW.h, fill: 'rgba(20,24,60,0.32)', 'pointer-events': 'none' }, L.effects);
-  for (const f of rs.objects.filter(o => o.kind === 'fire')) {
+  for (const f of rs.objects.filter(o => o.kind === 'fire' || o.kind === 'hearth')) {
     el('circle', { cx: f.x, cy: f.y - 10, r: 70, fill: 'rgba(255,170,80,0.18)', 'pointer-events': 'none' }, L.effects);
   }
 

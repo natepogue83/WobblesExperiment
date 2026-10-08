@@ -9,6 +9,8 @@ import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clea
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
 import { nowTickFor, localDayIndex, localHour } from './clock.js';
 import { narrateRecap } from '../ai/narrate.js';
+import { buildRecap, buildRecapInput } from '../sim/recap.js';
+import { showRecapCard, showChronicle, showBook, showWobblinCard } from './panels.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -241,11 +243,17 @@ function drawSlotTargets(svg) {
 function drawHud() {
   const pop = world.wobblins.filter(w => w.alive).length;
   const n = Object.values(world.discoveries).filter(d => !d.forgotten).length;
-  $('#hud').innerHTML = '';
+  const hud = $('#hud');
+  hud.replaceChildren();
   const name = document.createElement('div'); name.className = 'colony'; name.textContent = world.colonyName;
   const line = document.createElement('div');
-  line.textContent = `Day ${world.tick + 1} · ${pop} Wobblins · Discoveries ${n}/30 · Devotion ${world.devotion}`;
-  $('#hud').append(name, line);
+  line.textContent = `Day ${world.tick + 1} · ${pop} Wobblins · Discoveries ${n}/30 · Devotion ${Math.round(world.devotion)}`;
+  const row = document.createElement('div'); row.className = 'hud-buttons';
+  const btn = (label, fn, cls = '') => { const b = document.createElement('button'); b.textContent = label; b.className = cls; b.onclick = fn; row.append(b); };
+  btn('Chronicle', () => showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }));
+  btn('Discovery Book', () => showBook($('#panel'), world));
+  if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow');
+  hud.append(name, line, row);
 }
 
 function cooldownFrac(key) {
@@ -265,6 +273,7 @@ function drawBars() {
       btn.style.setProperty('--cd', f);
       btn.disabled = f > 0;
       btn.textContent = b.label + (f > 0 ? ' · ' + (world.cooldowns[b.key] - world.tick) + 'h' : '');
+      if (b.key === 'gift' && world.giftsByDay[localDayIndex(Date.now())] === undefined) btn.className += ' pulse';
       btn.onclick = () => onButton(b);
       bar.append(btn);
     }
@@ -272,39 +281,30 @@ function drawBars() {
 }
 
 function showWobblin(w) {
-  const card = $('#giftCard');
-  card.replaceChildren();
-  const h = document.createElement('h3');
-  h.textContent = `${w.name} (${w.stage}, day ${world.tick - w.bornTick} of life)`;
-  const p = document.createElement('p');
-  p.textContent = 'Loves ' + w.hobby + '. ' + Object.entries(w.traits).map(([k, v]) => k + ' ' + Math.round(v * 100)).join(', ');
-  const close = document.createElement('button');
-  close.textContent = 'Close'; close.className = 'ghost';
-  close.onclick = () => { card.hidden = true; };
-  card.append(h, p, close);
-  card.hidden = false;
+  showWobblinCard($('#panel'), world, w, { onBless: ww => { $('#panel').hidden = true; blessMenu(ww); } });
+}
+
+// Tapping a recap or Chronicle line haloes its subject.
+function highlightEvents(ids) {
+  highlight = [];
+  for (const id of ids) {
+    const e = world.events[id - 1];
+    if (!e) continue;
+    const o = e.target && world.objects.find(x => x.id === e.target && !x.state.gone);
+    if (o) highlight.push(o.id);
+    for (const a of e.actors.slice(0, 2)) if (world.wobblins.some(w => w.id === a && w.alive)) highlight.push(a);
+  }
+  draw();
 }
 
 let highlight = [];
 async function showRecap(from, to) {
-  const hours = to - from;
-  const events = world.events.filter(e => e.t >= from && e.t < to && e.salience >= 2);
-  const recap = await narrateRecap({ world, fromTick: from, toTick: to, events });
-  const card = $('#recap');
-  card.replaceChildren();
-  const h = document.createElement('h2');
-  h.textContent = `You were gone ${hours} hour${hours === 1 ? '' : 's'}. ${hours} day${hours === 1 ? '' : 's'} passed in ${world.colonyName}.`;
-  card.append(h);
-  for (const line of recap.lines) {
-    const p = document.createElement('p');
-    p.textContent = line.text;
-    card.append(p);
-  }
-  const close = document.createElement('button');
-  close.textContent = 'Back to the valley';
-  close.onclick = () => { card.hidden = true; highlight = []; draw(); };
-  card.append(close);
-  card.hidden = false;
+  const narrated = await narrateRecap(buildRecapInput(world, from, to));
+  narrated.stats = buildRecap(world, from, to).stats;
+  showRecapCard($('#recap'), world, narrated, {
+    onPick: ids => highlightEvents(ids),
+    onClose: () => { highlight = []; draw(); }
+  });
 }
 
 let toastTimer = 0;

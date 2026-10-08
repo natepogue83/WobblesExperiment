@@ -211,9 +211,8 @@ function buildCauses(world, w, d, match) {
   const causes = [];
   const seen = new Set();
   const add = c => { const k = JSON.stringify(c); if (!seen.has(k)) { seen.add(k); causes.push(c); } };
-  const objs = match.contrib.filter(o => o.id)
-    .sort((a, b) => (a.zone === w.zone ? 0 : 1) - (b.zone === w.zone ? 0 : 1) ||
-      (a.origin.action !== undefined ? 0 : 1) - (b.origin.action !== undefined ? 0 : 1));
+  // In stimulus order: the first requirement (the defining one) leads.
+  const objs = match.contrib.filter(o => o.id);
   for (const o of objs.slice(0, 3)) add({ object: o.id });
   for (const o of objs.slice(0, 3)) if (!o.origin.natural) add({ ...o.origin });
   const t = world.tick;

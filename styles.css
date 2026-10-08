@@ -31,7 +31,8 @@ button { font: inherit; cursor: pointer; }
 .card h3 { margin: 0 0 10px; font-size: 17px; }
 .card p { margin: 6px 0; line-height: 1.4; }
 .card button { min-height: 44px; margin: 8px 8px 0 0; padding: 8px 16px; border-radius: 12px; border: 0;
-  background: var(--accent); color: #fff; font-weight: 700; text-transform: capitalize; }
+  background: var(--accent); color: #fff; font-weight: 700; }
+#giftCard button { text-transform: capitalize; }
 .card button.ghost { background: transparent; color: var(--muted); }
 .card label { display: block; margin: 10px 0; font-weight: 700; }
 .card input { display: block; width: 100%; margin-top: 4px; padding: 10px; border-radius: 10px; border: 1px solid #d8cfbb; font: inherit; }
@@ -67,3 +68,35 @@ button { font: inherit; cursor: pointer; }
 .fishy { animation: swim 3s ease-in-out infinite; }
 @keyframes swim { 0%,100% { transform: translateX(-6px); } 50% { transform: translateX(6px) scaleX(-1); } }
 .dbg-exp { white-space: pre-wrap; margin: 6px 0; color: #f0e2a8; }
+
+/* ---- Day 6: panels ---- */
+.hud-buttons { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.hud-buttons button { min-height: 36px; padding: 6px 12px; border-radius: 18px; border: 0; background: rgba(255,255,255,.85); color: var(--ink); font-weight: 700; }
+.hud-buttons button.glow { background: #ffe9a8; box-shadow: 0 0 14px #ffd86b; animation: glow 1.6s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 26px #ffd86b; } }
+.power.pulse { animation: glow 1.6s ease-in-out infinite; }
+.card.panel { max-height: calc(100% - 32px); overflow: auto; width: min(560px, calc(100% - 32px)); max-width: none; }
+.recap-lines { list-style: none; padding: 0; margin: 8px 0; }
+.recap-lines li { padding: 10px 12px; margin: 6px 0; border-radius: 12px; background: #f3ead6; cursor: pointer; line-height: 1.4; }
+.recap-lines li.on, .recap-lines li:hover { background: #ffe9a8; }
+.stats, .muted { color: var(--muted); font-size: 14px; }
+.tabs { display: flex; gap: 6px; }
+.tabs button { background: #eadfc6 !important; color: var(--ink) !important; }
+.tabs button.on { background: var(--accent) !important; color: #fff !important; }
+.chronicle { padding-left: 0; list-style: none; font-size: 14px; }
+.chronicle li { padding: 6px 0; border-bottom: 1px solid #ece3cf; cursor: pointer; }
+.chronicle .day { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.chronicle .why { color: var(--muted); font-size: 12px; }
+.book { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin: 10px 0; }
+.book .page { background: #f3ead6; border-radius: 12px; padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; }
+.book .page small { color: var(--muted); font-size: 11px; }
+.book .page.unknown { background: #e4dccb; }
+.book .page.unknown .sil { font-size: 28px; color: #b9ae96; font-weight: 800; line-height: 40px; }
+.book .page.forgotten { opacity: .55; }
+.portrait { display: inline-block; flex: none; }
+.card-head { display: flex; gap: 12px; align-items: center; }
+.traits { list-style: none; padding: 0; margin: 8px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-size: 13px; }
+.traits li { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+.traits .bar { flex: 1; max-width: 110px; height: 8px; background: #e6dcc6; border-radius: 4px; overflow: hidden; }
+.traits .bar i { display: block; height: 100%; background: var(--accent); }
+.memories { margin: 4px 0 8px; padding-left: 18px; font-size: 14px; }
