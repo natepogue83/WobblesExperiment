@@ -4,7 +4,7 @@
 // play rejected, with no events.
 import { COOLDOWN, COST, POWER } from './constants.js';
 import { rngFor } from './rng.js';
-import { slotInfo, ZONES } from './geometry.js';
+import { slotInfo, ZONES, ZONE_IDS } from './geometry.js';
 import { r3, clamp, objectAtSlot, findWobblin, alive, liveObjects } from './util.js';
 import { emit } from './events.js';
 import { makeObject } from './world.js';
@@ -12,7 +12,7 @@ import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season'];
-export const NUDGES = ['bless', 'curio', 'miracle'];
+export const NUDGES = ['bless', 'curio', 'miracle', 'carry'];
 export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience'];
 // Each curio unlocks once a Wobblin has noticed its material.
 export const CURIOS = {
@@ -130,6 +130,13 @@ export function validateAction(world, a) {
       }
       case 'miracle':
         return { ok: true };
+      case 'carry': {
+        // Pick a Wobblin up and set it down somewhere. It only moves them.
+        const w = findWobblin(world, a.target);
+        if (!w || !w.alive) return bad('target');
+        if (!ZONE_IDS.includes(a.zone)) return bad('zone');
+        return { ok: true };
+      }
     }
     return bad('unknown_nudge');
   }
@@ -138,7 +145,10 @@ export function validateAction(world, a) {
     if (!Number.isInteger(a.day)) return bad('day');
     if (world.giftsByDay[a.day] !== undefined) return bad('gift_used');
     if (!giftOptions(world.seed, a.day).includes(a.giftId)) return bad('gift_option');
-    if (!freeSlotNear(world, 'meadow')) return bad('no_room');
+    if (a.slot !== undefined) {
+      if (!slotInfo(a.slot)) return bad('slot');
+      if (objectAtSlot(world, a.slot)) return bad('occupied');
+    } else if (!freeSlotNear(world, 'meadow')) return bad('no_room');
     return { ok: true };
   }
 
@@ -168,7 +178,7 @@ export function applyAction(world, a) {
 
   if (a.type === 'power' || a.type === 'nudge') {
     const key = a.type === 'power' ? a.power : a.nudge;
-    world.cooldowns[key] = t + COOLDOWN[key];
+    if (COOLDOWN[key]) world.cooldowns[key] = t + COOLDOWN[key];
     world.devotion = r3(world.devotion - costOf(world, key));
   }
 
@@ -251,6 +261,15 @@ export function applyAction(world, a) {
         state: { curio: a.curio, targets: a.targets.slice(), until: t + POWER.curioTicks } });
       emit(world, { kind: 'keeper_nudge', actors: [w1.id, w2.id], target: o.id,
         data: { nudge: 'curio', curio: a.curio, zone: o.zone }, salience: 2, causes });
+    } else if (a.nudge === 'carry') {
+      const w = findWobblin(world, a.target);
+      const from = w.zone;
+      w.zone = a.zone;
+      w.heldUntil = t + POWER.carryStay;
+      // Playful ones love the ride; timid ones find it a bit much.
+      w.needs.mood = r3(clamp(w.needs.mood + 0.06 * w.traits.playfulness, 0, 1));
+      w.needs.safety = r3(clamp(w.needs.safety - 0.08 * (1 - w.traits.boldness), 0, 1));
+      emit(world, { kind: 'keeper_nudge', actors: [w.id], target: w.id, data: { nudge: 'carry', from, zone: a.zone }, salience: 1, causes });
     } else if (a.nudge === 'miracle') {
       world.miracleUntil = t + POWER.miracleTicks;
       faithAll(world, 0.15);
@@ -265,7 +284,7 @@ export function applyAction(world, a) {
 
   if (a.type === 'gift') {
     world.giftsByDay[a.day] = a.giftId;
-    const o = makeObject(world, { kind: 'gift', slot: freeSlotNear(world, 'meadow'), origin, state: { giftId: a.giftId } });
+    const o = makeObject(world, { kind: 'gift', slot: a.slot !== undefined ? a.slot : freeSlotNear(world, 'meadow'), origin, state: { giftId: a.giftId } });
     emit(world, { kind: 'keeper_gift', actors: witnesses(world, o.zone), target: o.id,
       data: { giftId: a.giftId, day: a.day, zone: o.zone }, salience: 2, causes });
     return { ok: true };

@@ -128,6 +128,19 @@ section('Every power and nudge');
   ok('curio unlocks after its material is noticed and pulls both chosen Wobblins to it');
 }
 
+section('Pick up and drop a Wobblin');
+{
+  const w = createWorld(51, { barren: true });
+  rejects(w, { seq: 1, t: 0, type: 'nudge', nudge: 'carry', target: 'w9', zone: 'hill' }, 'target');
+  rejects(w, { seq: 2, t: 0, type: 'nudge', nudge: 'carry', target: 'w1', zone: 'moon' }, 'zone');
+  assert.equal(applyAction(w, { seq: 3, t: 0, type: 'nudge', nudge: 'carry', target: 'w1', zone: 'hill' }).ok, true);
+  assert.equal(w.wobblins[0].zone, 'hill');
+  assert.equal(applyAction(w, { seq: 4, t: 0, type: 'nudge', nudge: 'carry', target: 'w2', zone: 'hill' }).ok, true, 'no cooldown');
+  tick(w); tick(w);
+  assert.equal(w.wobblins[0].zone, 'hill', 'stays where it was put for a while');
+  ok('carry moves a living Wobblin to a zone, has no cooldown, and they stay put for a few ticks');
+}
+
 section('Offerings');
 {
   const w = createWorld(41);
@@ -162,6 +175,7 @@ section('Player never creates discoveries (actions half)');
     { type: 'nudge', nudge: 'bless', target: 'w2', trait: 'curiosity' },
     { type: 'nudge', nudge: 'curio', curio: 'flint', targets: ['w1', 'w2'] },
     { type: 'nudge', nudge: 'miracle' },
+    { type: 'nudge', nudge: 'carry', target: 'w3', zone: 'hill' },
     { type: 'gift', day: 20400, giftId: giftOptions(w.seed, 20400)[0] },
     { type: 'collect_offerings' }
   ];
@@ -174,7 +188,7 @@ section('Player never creates discoveries (actions half)');
     assert.equal(knowledge(w), before, 'action changed knowledge');
   }
   assert.ok(!w.events.slice(firstEvent).some(e => ['discovery', 'rediscovery', 'taught', 'learned_from_structure'].includes(e.kind)));
-  ok('all 11 action types leave world.discoveries and every knows unchanged, and emit no knowledge events');
+  ok('all 12 action types leave world.discoveries and every knows unchanged, and emit no knowledge events');
 }
 
 console.log('\ntest-actions: all passed');

@@ -175,9 +175,10 @@ Chronicle, murals and the week-2 AI.
 { seq, t, type: "power", power: "stone"|"plant"|"rain"|"lightning"|"water"|"season",
   slot?, zone?, variant? }        // stone: "stones"|"boulder"; plant: "tree"|"bush";
                                   // season: "cold"|"warm"
-{ seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle",
-  target?, trait?, curio?, targets? }
-{ seq, t, type: "gift", day, giftId }
+{ seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry",
+  target?, trait?, curio?, targets?, zone? }   // carry: pick a Wobblin up, set it down in zone
+                                             // (no cooldown; it stays put 3 ticks; never adds knowledge)
+{ seq, t, type: "gift", day, giftId, slot? }   // slot: where it was dropped (else first free meadow slot)
 { seq, t, type: "collect_offerings" }
 ```
 

@@ -73,6 +73,7 @@ export function makeWobblin(world, spec) {
     memories: [],
     injuries: 0,
     hungry: 0, freezing: 0, lastBirth: null,
+    heldUntil: -1,                // set down by the Keeper: stays put until this tick
     witnessed: false,             // has seen a Keeper blessing or miracle (Totem)
     alive: true,
     deathTick: null,

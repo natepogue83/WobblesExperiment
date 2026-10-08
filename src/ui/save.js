@@ -46,7 +46,8 @@ const CODES = {
   bl: ['nudge', 'bless', ['target', 'trait']],
   cu: ['nudge', 'curio', ['curio', 'targets']],
   mi: ['nudge', 'miracle', []],
-  gi: ['gift', null, ['day', 'giftId']],
+  ca: ['nudge', 'carry', ['target', 'zone']],
+  gi: ['gift', null, ['day', 'giftId', 'slot']],
   co: ['collect_offerings', null, []]
 };
 const CODE_OF = {};

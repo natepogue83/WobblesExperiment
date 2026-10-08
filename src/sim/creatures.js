@@ -143,6 +143,10 @@ function chooseActivity(world, w, objs, live) {
   // It is a strong pull, but needs still come first.
   const curio = objs.curios.find(o => o.state.targets.includes(w.id));
   if (curio && w.stage !== 'baby') add('inspect', curio.zone, 6 * comfort, curio.id);
+  // Just set down by the Keeper: stay and look around, unless in real need.
+  if (w.heldUntil > world.tick && n.food > 0.15 && n.warmth > 0.15) {
+    return { activity: zoneObjects(objs, w.zone).length ? 'inspect' : 'hobby', zone: w.zone, why: (zoneObjects(objs, w.zone)[0] || {}).id };
+  }
   // Babies stay near a parent.
   if (w.stage === 'baby') {
     const parent = live.find(p => w.parents.includes(p.id));

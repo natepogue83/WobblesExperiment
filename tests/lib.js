@@ -12,7 +12,7 @@ export function proposeActions(world, scriptSeed) {
   const out = [];
   if (r() < 0.25) {
     const kind = pick(r, ['stone', 'stone', 'plant', 'plant', 'rain', 'bless', 'gift', 'collect',
-      'lightning', 'water', 'season', 'curio', 'miracle']);
+      'lightning', 'water', 'season', 'curio', 'miracle', 'carry', 'carry']);
     const slot = pick(r, ALL_SLOTS);
     if (kind === 'stone') out.push({ type: 'power', power: 'stone', slot, variant: r() < 0.3 ? 'boulder' : 'stones' });
     else if (kind === 'plant') out.push({ type: 'power', power: 'plant', slot, variant: r() < 0.5 ? 'tree' : 'bush' });
@@ -31,6 +31,7 @@ export function proposeActions(world, scriptSeed) {
       out.push({ type: 'nudge', nudge: 'curio', curio: pick(r, Object.keys(CURIOS)),
         targets: live.length >= 2 ? [live[0].id, live[live.length - 1].id] : ['w1', 'w2'] });
     } else if (kind === 'miracle') out.push({ type: 'nudge', nudge: 'miracle' });
+    else if (kind === 'carry') out.push({ type: 'nudge', nudge: 'carry', target: 'w' + randInt(r, 1, 6), zone: pick(r, ['hill', 'grove', 'meadow', 'hollow', 'pondsite', 'riverbank']) });
     else out.push({ type: 'collect_offerings' });
   }
   return out;
