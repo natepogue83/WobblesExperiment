@@ -7,7 +7,7 @@ Nothing here needs you to act. If you only have a minute, open the game and star
 - `http://localhost:8137/?debug=1&fresh=1` starts a brand-new colony (the new-player flow).
 - `http://localhost:8137/?debug=1&devload=/_dev_save.json` loads a 300-day village with every power unlocked.
 
-Sound plays after your first tap; the speaker button (top left) mutes it. Everything is committed in the local git repo, and all 11 test files pass.
+Sound plays after your first tap; the speaker button (top left) mutes it. Everything is committed in the local git repo, and all 12 test files pass.
 
 ## 1. Art
 
@@ -74,6 +74,8 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Pick things up:** press and drag stones, gifts, curios, sprouts or clay to set them down somewhere else.
 - **Night falls on everything,** not only the sky. The Wobblins and huts dim with the light, and doorways and fires glow warm. Dusk turns everything rosy.
 - **The temple looks Wobblin-built** now: stacked stones, carved posts, a leaf-thatch roof, prayer flags and a sun disc. It used to be white marble.
+- **Happy Wobblins play tag** now and then: one dashes after another, who scampers off.
+- **On phones** the HUD button row scrolls instead of getting cut off.
 - **A chaos test** throws 8,700 random acts at 16 colonies. Nothing crashes, no number goes out of range, and every save replays exactly.
 
 ## Decisions you might want to change
