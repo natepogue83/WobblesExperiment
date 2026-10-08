@@ -62,6 +62,8 @@ export function makeWobblin(world, spec) {
     lifespan,
     needs: { food: 0.8, warmth: 0.8, rest: 0.8, mood: 0.7, safety: 0.8 },
     zone: spec.zone || 'meadow',
+    activity: 'rest',
+    seen: [],
     knows: {},
     temp: {},
     partnerId: null,
@@ -70,6 +72,7 @@ export function makeWobblin(world, spec) {
     beliefs: [],
     memories: [],
     injuries: 0,
+    hungry: 0, freezing: 0, lastBirth: null,
     alive: true,
     deathTick: null,
     deathCause: null
@@ -122,6 +125,7 @@ export function createWorld(seed, opts = {}) {
     seasonUses: 0,
     giftsByDay: {},
     pondering: {},
+    seedPod: null,
     events: [],
     nextIds: { w: 1, o: 1, e: 1 }
   };

@@ -34,9 +34,9 @@ export const ZONES = {
     slots: [[880, 445], [950, 430], [990, 470], [905, 485]]
   },
   riverbank: {
-    name: 'the riverbank', cx: 600, cy: 585, rx: 420, ry: 50,
+    name: 'the riverbank', cx: 600, cy: 540, rx: 420, ry: 40,
     features: ['river'],
-    slots: [[330, 580], [470, 570], [610, 585], [750, 575], [890, 590]]
+    slots: [[330, 548], [470, 540], [610, 555], [750, 545], [890, 556]]
   }
 };
 
@@ -51,6 +51,9 @@ export const ADJACENT = {
   pondsite: ['meadow', 'riverbank'],
   riverbank: ['grove', 'meadow', 'pondsite']
 };
+
+// Graves are not slotted; they line up in rows on the far side of the hill.
+export const GRAVEYARD = { x: 70, y: 250, dx: 16, dy: 14, perRow: 6 };
 
 // River polyline for the renderer (south edge, west to east).
 export const RIVER = [[0, 600], [250, 590], [520, 610], [800, 588], [1050, 605], [1200, 595]];

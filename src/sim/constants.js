@@ -43,6 +43,38 @@ export const NATURE = {
   prowlerPop: 5
 };
 
+// Per-tick need changes (1 tick = 1 colony day).
+export const NEEDS = {
+  foodDecay: 0.08,
+  forage: { meadow: 0.2, riverbank: 0.16, grove: 0.14, hollow: 0.08, hill: 0.07, pondsite: 0.08 },
+  bushFood: 0.12,               // per bush in zone, before Foraging is known
+  warmthDrift: 0.15,            // toward 0.75 on a mild day
+  coldNight: 0.26,
+  rainChill: 0.08,
+  shelter: 0.08,                // resting in the sheltered hollow
+  huddle: 0.08,                 // per other Wobblin resting in the same zone (max 3)
+  fireWarm: 0.15,               // fire in or next to the zone, before Fire Warmth
+  restDecay: 0.12,
+  restGain: 0.4,
+  moodDrift: 0.05,              // toward 0.6
+  hobbyMood: 0.08,
+  socialMood: 0.03,
+  safetyDrift: 0.1,             // toward 0.85
+  prowlerFear: 0.5,
+  hungry: 0.4, cold: 0.35, tired: 0.3   // thresholds that drive activity
+};
+
+export const SOCIAL = {
+  pairChance: 0.08, pairSociability: 0.4, pairSociabilityMin: 0.25, pairMood: 0.5,
+  birthChance: 0.08, birthFood: 0.3, birthGap: 30,
+  injuryDeath: 3, healEvery: 16,
+  curiosityPull: 24             // Keeper objects this new pull Wobblins over
+};
+
+export const FIRE = { burnMin: 3, burnMax: 6, spreadChance: 0.15 };
+
+export const CLIMATE = { driftPeriod: 240, driftAmp: 0.08 };
+
 export const EXPERIMENT = {
   base: { 1: 0.04, 2: 0.02, 3: 0.01, 4: 0.005 },
   successBase: { 1: 0.6, 2: 0.45, 3: 0.35, 4: 0.3 },

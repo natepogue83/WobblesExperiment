@@ -52,3 +52,11 @@ button { font: inherit; cursor: pointer; }
 .dbg-title { font-weight: 700; }
 .dbg-info { margin: 6px 0; color: #9fc0a0; }
 .dbg-log { padding-left: 18px; margin: 6px 0 0; }
+
+.flame { transform-box: fill-box; transform-origin: 50% 100%; animation: flicker .5s ease-in-out infinite alternate; }
+@keyframes flicker { from { transform: scaleY(1) skewX(-3deg); } to { transform: scaleY(.88) skewX(4deg); } }
+.obj.fresh { transform-box: fill-box; animation: pop .5s ease-out; }
+@keyframes pop { from { opacity: 0; } to { opacity: 1; } }
+.act-rest .wobble { animation-duration: 4.5s !important; }
+.act-inspect .wobble { animation-name: hop; }
+@keyframes hop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px) rotate(3deg); } }
