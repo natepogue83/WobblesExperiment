@@ -75,6 +75,7 @@ export function momentsFor(world, events) {
   for (const e of events) {
     if (e.kind === 'discovery') queue.push({ kind: 'discovery', e });
     else if (e.kind === 'birth') queue.push({ kind: 'birth', e });
+    else if (e.kind === 'death') queue.push({ kind: 'death', e });
     else if (e.kind === 'goal_reached') continue;
   }
   if (!showing) next(world);
@@ -88,6 +89,7 @@ function next(world) {
   if (m.kind === 'banner') bannerCard(m.title, m.sub, () => next(world));
   else if (m.kind === 'discovery') discoveryCard(world, m.e, () => next(world));
   else if (m.kind === 'birth') birthCard(world, m.e, () => next(world));
+  else if (m.kind === 'death') farewellCard(world, m.e, () => next(world));
 }
 
 function discoveryCard(world, e, done) {
@@ -135,6 +137,34 @@ function birthCard(world, e, done) {
   const close = () => { if (gone) return; gone = true; card.classList.add('out'); setTimeout(() => { card.remove(); done(); }, 350); };
   card.addEventListener('pointerdown', close);
   setTimeout(close, 5200);
+}
+
+// A quiet goodbye: who they were, what they knew, who will miss them.
+const CAUSE = { old_age: 'of old age, after a long life', starvation: 'of hunger', hunger: 'of hunger', cold: 'of the cold', injury: 'of their injuries', prowler: 'in the night', lost: 'far from home' };
+function farewellCard(world, e, done) {
+  const w = world.wobblins.find(x => x.id === e.actors[0]);
+  if (!w) { done(); return; }
+  const knew = Object.keys(w.knows).filter(k => BY_ID[k]).map(k => BY_ID[k].name);
+  const friends = Object.entries(w.bonds || {}).filter(([id, v]) => v >= 0.5 && world.wobblins.some(x => x.id === id && x.alive)).map(([id]) => world.wobblins.find(x => x.id === id).name);
+  const kids = world.wobblins.filter(x => x.parents.includes(w.id)).length;
+  const lines = [knew.length ? 'They knew ' + (knew.length > 3 ? knew.slice(0, 3).join(', ') + ' and ' + (knew.length - 3) + ' more' : knew.join(', ').replace(/, ([^,]*)$/, ' and $1')) + '.' : '',
+    friends.length ? 'Missed by ' + friends.slice(0, 3).join(', ').replace(/, ([^,]*)$/, ' and $1') + '.' : '',
+    kids ? kids + (kids === 1 ? ' child carries on.' : ' children carry on.') : ''].filter(Boolean).join(' ');
+  const card = document.createElement('div');
+  card.className = 'moment farewell';
+  card.innerHTML = `
+    <div class="who">${`<svg viewBox="-30 -58 60 64" width="88" height="92" aria-hidden="true">${wobblinSVG({ ...w, face: 'sleep', carry: [] })}</svg>`}</div>
+    <div class="what">
+      <small>Goodbye · day ${e.t + 1}</small>
+      <b>${esc(w.name)}</b>
+      <p>${esc(w.name)} died ${CAUSE[e.data.cause] || ''}, ${e.data.age} days old. ${esc(lines)}</p>
+      <span class="meta">A grave stands on the hill</span>
+    </div>`;
+  document.body.append(card);
+  let gone = false;
+  const close = () => { if (gone) return; gone = true; card.classList.add('out'); setTimeout(() => { card.remove(); done(); }, 350); };
+  card.addEventListener('pointerdown', close);
+  setTimeout(close, 6000);
 }
 
 function wobblinSVGBox(w) {

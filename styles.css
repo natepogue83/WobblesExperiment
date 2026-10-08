@@ -548,3 +548,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .fx-big .puff { fill: rgba(225, 212, 188, .85); transform-box: fill-box; transform-origin: center; animation: puff 1s ease-out forwards; }
 #stage.thumped #world { animation: thump .45s cubic-bezier(.36,.07,.19,.97); }
 @keyframes thump { 0%, 100% { transform: translateY(0); } 20% { transform: translateY(6px); } 45% { transform: translateY(-3px); } 70% { transform: translateY(1.5px); } }
+
+.moment.farewell { background: linear-gradient(160deg, #f4f6fb, #e3e8f2); box-shadow: 0 0 0 3px #b9c3d8, 0 18px 50px rgba(20, 30, 60, .35); }
+.moment.farewell .what small { color: #6a7896; }
+.moment.farewell .what b { color: #3a4560; }
+.moment.farewell .who { filter: grayscale(.35) drop-shadow(0 6px 6px rgba(0,0,0,.15)); animation: none; }

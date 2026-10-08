@@ -71,6 +71,8 @@ All of these replay exactly and never teach the Wobblins anything.
 - **Portraits show flower crowns, frizz and charms.** The zap is easier to see from across the valley.
 - **Smoother redraws:** the Wobblins no longer twitch when a new day starts.
 - **Wobblins ask you for things,** from day one: berries when they're hungry, a friend when they're lonely, rain in a dry spell, stones to stack, flowers. A golden bubble shows what they want, and the top of the screen says how to help. Granting an ask makes them glow and gives belief. If you ignore it, they give up after a while.
+- **A quiet goodbye card** when a Wobblin dies: how it died, what it knew, who will miss it, and how many children carry on.
+- **Juice:** sparkles where seeds, gifts and blessings land, and a big dust puff and a screen thump for boulders.
 - **Their eyes follow your hand** around the valley. Happy Wobblins now keep their eyes open (big and shiny) instead of squinting, so you can see them look at you.
 - **Hold a Wobblin still** for a couple of seconds and it dozes off in your hand. **Shake it back and forth** and it wobbles like jelly and stays rattled.
 - **Pick things up:** press and drag stones, gifts, curios, sprouts or clay to set them down somewhere else.
