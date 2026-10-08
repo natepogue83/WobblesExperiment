@@ -92,6 +92,19 @@ section('Dropped right on their heads');
   assert.ok(c.flowerUntil > w.tick);
   ok('a seed on the head grows a flower crown');
 
+  for (let i = 0; i < 4; i++) tick(w);
+  let objs = w.objects.length;
+  assert.equal(go({ type: 'power', power: 'plant', variant: 'tree', onto: a.id }).ok, true);
+  assert.equal(w.objects.length, objs, 'no spot needed: nothing is placed');
+  assert.ok(a.flowerUntil > w.tick);
+  for (let i = 0; i < 4; i++) tick(w);
+  objs = w.objects.length;
+  assert.equal(go({ type: 'power', power: 'stone', variant: 'stones', onto: b.id }).ok, true);
+  assert.ok(['bonked', 'bonk_idea'].includes(w.events.filter(e => e.kind === 'interaction').pop().data.what));
+  assert.equal(w.objects.length, objs, 'no spot needed: nothing is placed');
+  assert.equal(go({ type: 'power', power: 'stone', variant: 'stones' }).reason, 'cooldown');
+  ok('with no room left in the valley, stones and seeds still land on a head (and nothing is placed)');
+
   let zaps = 0, ideas = 0, hurts = 0;
   for (const x of [a, b, c]) x.lifespan = 99999;   // nobody dies of old age mid-test
   for (let i = 0; i < 30; i++) {

@@ -20,6 +20,7 @@ const EFFECT = {
 // Where did it happen? Zone of the slot/target, or null for valley-wide acts.
 function whereOf(world, a) {
   if (a.slot && slotInfo(a.slot)) return slotInfo(a.slot).zone;
+  if (a.onto) { const w = world.wobblins.find(x => x.id === a.onto); if (w) return w.zone; }
   if (a.nudge === 'carry') return a.zone;
   if (a.power === 'water' && !a.slot) return 'pondsite';
   if (a.target) { const w = world.wobblins.find(x => x.id === a.target); return w ? w.zone : null; }

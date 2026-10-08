@@ -93,6 +93,7 @@ export function validateAction(world, a) {
     switch (a.power) {
       case 'stone': {
         if (a.variant !== 'stones' && a.variant !== 'boulder') return bad('variant');
+        if (a.onto !== undefined && a.slot === undefined) return { ok: true };   // straight onto a head, then gone
         if (!slotInfo(a.slot)) return bad('slot');
         const there = objectAtSlot(world, a.slot);
         // More stones on a small pile just make the pile bigger.
@@ -102,6 +103,7 @@ export function validateAction(world, a) {
       }
       case 'plant': {
         if (a.variant !== 'tree' && a.variant !== 'bush') return bad('variant');
+        if (a.onto !== undefined && a.slot === undefined) return { ok: true };   // a seed that only ever blooms on a head
         const info = slotInfo(a.slot);
         if (!info) return bad('slot');
         if (info.zone === 'riverbank' && a.variant === 'tree') return bad('slot');
@@ -249,6 +251,12 @@ function applyActionEffects(world, a) {
   if (a.type === 'power') {
     switch (a.power) {
       case 'stone': {
+        if (a.slot === undefined) {
+          const w = findWobblin(world, a.onto);
+          const ev = power({ power: 'stone', variant: a.variant, zone: w.zone, onto: a.onto, bounced: true }, null);
+          powerOnto(world, w, a, ev);
+          break;
+        }
         const pile = a.variant === 'stones' && objectAtSlot(world, a.slot);
         if (pile) {
           pile.state.count = (pile.state.count || 1) + 1;
@@ -267,6 +275,12 @@ function applyActionEffects(world, a) {
         break;
       }
       case 'plant': {
+        if (a.slot === undefined) {
+          const w = findWobblin(world, a.onto);
+          const ev = power({ power: 'plant', variant: a.variant, zone: w.zone, onto: a.onto }, null);
+          powerOnto(world, w, a, ev);
+          break;
+        }
         const o = makeObject(world, {
           kind: 'sprout', slot: a.slot, origin,
           state: { grows: a.variant, readyAt: t + POWER.sproutGrowTicks }

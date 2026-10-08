@@ -68,7 +68,7 @@ export function trayItems() {
       const w = canOnto && onHead(pt, rs);
       if (w) {
         const s = nearestSlot(world, { x: w.x, y: w.y }, s => okFn(world, s), 240);
-        return s ? { x: w.x, y: w.y - 22, r: 34, ok: true, label: 'on ' + w.name + '!' } : { x: w.x, y: w.y - 22, r: 34, ok: false, label: 'no room' };
+        return { x: w.x, y: w.y - 22, r: 34, ok: !!s || power !== 'gift', label: s || power !== 'gift' ? 'on ' + w.name + '!' : 'no room' };
       }
       const s = nearestSlot(world, pt, s => okFn(world, s));
       if (!s) return { x: pt.x, y: pt.y, r: 26, ok: false, label: 'no room here' };
@@ -78,6 +78,7 @@ export function trayItems() {
     drop: (pt, { world, rs }) => {
       const w = canOnto && onHead(pt, rs);
       const s = w ? nearestSlot(world, { x: w.x, y: w.y }, s => okFn(world, s), 240) : nearestSlot(world, pt, s => okFn(world, s));
+      if (w && !s && power !== 'lightning') return { type: 'power', power, ...(variant ? { variant } : {}), onto: w.id };   // no room: it lands on them and that's that
       return s ? { type: 'power', power, slot: s, ...(variant ? { variant } : {}), ...(w ? { onto: w.id } : {}) } : { error: 'No room there. Try an open spot.' };
     }
   });
