@@ -176,13 +176,25 @@ function objectArtInner(o, muralIcon) {
         `<g fill="#2a1a10"><circle cx="-3.5" cy="-52" r="2.2"/><circle cx="3.5" cy="-52" r="2.2"/><circle cx="-3" cy="-22" r="2"/><circle cx="3" cy="-22" r="2"/></g>` +
         `<path d="M-4 -46 Q0 -43 4 -46" stroke="#2a1a10" stroke-width="1.6" fill="none"/><rect x="-8" y="-33" width="16" height="4" fill="#3f86c4"/><path d="M-5 -15 h10" stroke="#2a1a10" stroke-width="1.6"/>` +
         `<path d="M-6 -62 L0 -72 L6 -62 Z" fill="#f2b632"/>`;
-    case 'temple':
-      return shadow(64, 12, 4) +
-        `<path d="M-60 4 L-56 -6 L56 -6 L60 4 Z" fill="#b8ad95"/><path d="M-52 -6 L-50 -14 L50 -14 L52 -6 Z" fill="#cfc4ab"/>` +
-        [-38, -19, 0, 19, 38].map(x => `<rect x="${x - 5}" y="-50" width="10" height="36" fill="${G('marble')}"/><rect x="${x - 7}" y="-52" width="14" height="4" fill="#e9dfc8"/>`).join('') +
-        `<path d="M-58 -52 L0 -80 L58 -52 Z" fill="#efe5cf" stroke="#b9ad92" stroke-width="1.5"/><path d="M-40 -55 L0 -73 L40 -55 Z" fill="#e2d6bb"/>` +
-        `<circle class="orb" cx="0" cy="-62" r="6" fill="${G('gold')}"/>` +
-        `<path d="M-58 -52 L-58 -64 L-48 -60 L-58 -58" fill="#c45a3a"/><path d="M58 -52 L58 -64 L48 -60 L58 -58" fill="#3f86c4"/>`;
+    case 'temple': {
+      // Built by Wobblins, for you: a stacked-stone platform, carved wooden posts,
+      // a great leaf-thatch roof, prayer flags and a sun disc that catches the light.
+      const stones = [];
+      for (let row = 0; row < 3; row++) for (let i = 0; i < 7 - row; i++) {
+        const x = -54 + row * 8 + i * 17 + (row % 2 ? 8 : 0), y = -2 - row * 7;
+        stones.push(`<rect x="${x}" y="${y - 6}" width="15" height="7" rx="3" fill="${(i + row) % 2 ? '#b4ada2' : '#a59e93'}" stroke="#857e73" stroke-width=".8"/>`);
+      }
+      const posts = [-34, -12, 12, 34].map(x => `<rect x="${x - 4}" y="-56" width="8" height="34" rx="2" fill="${G('wood')}"/><path d="M${x - 4} -48 h8 M${x - 4} -40 h8 M${x - 4} -32 h8" stroke="#6b4a2a" stroke-width="1"/><circle cx="${x}" cy="-44" r="1.6" fill="#f2d07a"/>`).join('');
+      const flags = ['#c9563c', '#ffd24a', '#4a8ac9', '#5aa86b', '#b9a0f0'].map((c, i) => `<path d="M${-46 + i * 23} -60 l5 9 l5 -9" fill="${c}"/>`).join('');
+      return shadow(64, 12, 4) + stones.join('') +
+        `<rect x="-44" y="-24" width="88" height="4" rx="2" fill="#8a6a44"/>` + posts +
+        `<path d="M-66 -54 Q-40 -96 0 -100 Q40 -96 66 -54 Q0 -46 -66 -54 Z" fill="${G('thatch')}"/>` +
+        [-50, -34, -18, 0, 18, 34, 50].map(x => `<path d="M${x} -54 Q${x * 0.9} -76 ${x * 0.35} -96" stroke="#a87a34" stroke-width="1.4" fill="none" opacity=".6"/>`).join('') +
+        `<path d="M-62 -60 Q0 -52 62 -60" stroke="#8f652a" stroke-width="2.4" fill="none"/>` +
+        `<path d="M-48 -60 Q0 -52 48 -60" stroke="#6b4a2a" stroke-width=".8" fill="none"/>` + flags +
+        `<circle cx="0" cy="-80" r="11" fill="#fff3a0" opacity=".35"/><circle class="orb" cx="0" cy="-80" r="7" fill="${G('gold')}"/>` +
+        [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<path d="M0 -90 L0 -94" stroke="#f2b13a" stroke-width="1.6" stroke-linecap="round" transform="rotate(${a} 0 -80)"/>`).join('');
+    }
     case 'mural':
       return shadow(28, 6) +
         `<path d="M-26 2 L-28 -36 Q-27 -46 -16 -47 L18 -48 Q28 -47 28 -37 L27 2 Z" fill="${G('rock')}"/>` +
