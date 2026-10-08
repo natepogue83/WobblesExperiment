@@ -791,7 +791,7 @@ function drawHud() {
   btn('Goals', () => openGoals());
   btn('Family', () => showFamily($('#panel'), world, { onPick: w => showWobblin(w) }));
   if (WAITLIST_URL) { const a = document.createElement('a'); a.href = WAITLIST_URL; a.target = '_blank'; a.rel = 'noopener'; a.className = 'waitlist'; a.innerHTML = `<span class="full">${FEEDBACK_LABEL}</span><span class="short">Feedback</span>`; row.append(a); }
-  if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow');
+  if (world.offerings >= 1) btn('Collect ' + Math.floor(world.offerings) + ' offerings', () => act({ type: 'collect_offerings' }), 'glow', 'Collect ' + Math.floor(world.offerings));
   const snd = document.createElement('button');
   snd.className = 'sound' + (isMuted() ? ' off' : '');
   snd.setAttribute('aria-label', isMuted() ? 'Sound off' : 'Sound on');

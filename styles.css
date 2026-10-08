@@ -530,3 +530,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @keyframes cradle { 0%, 100% { transform: rotate(-4deg) scaleY(1.02); } 50% { transform: rotate(4deg) scaleY(.98); } }
 .wobblin.held.shook .wobble { animation: jelly .18s linear infinite !important; }
 @keyframes jelly { 0%, 100% { transform: scale(1.08, .92) rotate(-6deg); } 50% { transform: scale(.92, 1.08) rotate(6deg); } }
+@media (max-width: 700px) {
+  .hud-buttons { overflow-x: auto; scrollbar-width: none; max-width: calc(100vw - 24px); padding-bottom: 2px; }
+  .hud-buttons::-webkit-scrollbar { display: none; }
+  .hud-buttons button { flex: none; }
+}
