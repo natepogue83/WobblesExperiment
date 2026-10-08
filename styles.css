@@ -560,8 +560,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @media (max-width: 700px) { .help li { grid-template-columns: 1fr; gap: 2px; } }
 
 /* Foreground grass sways; rain splashes bloom on the ground */
-.fg-grass .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: sway ease-in-out infinite alternate; }
-@keyframes sway { from { transform: rotate(-3deg); } to { transform: rotate(4deg); } }
+.fg-grass .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: grass-sway ease-in-out infinite alternate; }
+@keyframes grass-sway { from { transform: rotate(-3deg); } to { transform: rotate(4deg); } }
 .rsplash { fill: none; stroke: rgba(220, 235, 255, .7); stroke-width: 1.2; transform-box: fill-box; transform-origin: center; animation: rsplash 1.2s ease-out infinite; }
 @keyframes rsplash { 0% { opacity: .9; transform: scale(.2); } 100% { opacity: 0; transform: scale(1.6); } }
 
