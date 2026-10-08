@@ -489,3 +489,5 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .recap-lines li { display: flex; align-items: center; gap: 10px; }
 .recap-lines li .portrait { flex: none; }
 .recap-lines li .dot { flex: none; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, #ffd86b 0 30%, #ffe9b0 31% 60%, transparent 61%); }
+
+.wobblin .zap .bolt-mini { animation: spark-flick .2s steps(2, jump-none) infinite; }

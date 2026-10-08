@@ -114,7 +114,7 @@ function charmSVG(kind) {
     default: return '';
   }
 }
-const ZAP_FRIZZ = `<g class="zap"><path d="M-20 -26 l-6 -3 l4 -2 l-6 -4 M-15 -36 l-4 -6 l4 0 l-3 -6 M0 -41 l0 -7 l3 2 l1 -7 M15 -36 l4 -6 l-4 0 l3 -6 M20 -26 l6 -3 l-4 -2 l6 -4" stroke="#3a2e28" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="0" cy="-20" rx="20" ry="18" fill="#3a2e28" opacity=".22"/><path class="spark" d="M-24 -44 l4 4 M26 -40 l-4 5 M-28 -16 l5 1 M29 -12 l-5 1" stroke="#ffe36b" stroke-width="2.2" stroke-linecap="round"/></g>`;
+const ZAP_FRIZZ = `<g class="zap"><path d="M-26 -30 l-8 -2 l5 -3 l-8 -5 M-22 -38 l-6 -6 l5 -1 l-5 -7 M-9 -42 l-2 -8 l4 1 l-1 -8 M9 -42 l2 -8 l-4 1 l1 -8 M22 -38 l6 -6 l-5 -1 l5 -7 M26 -30 l8 -2 l-5 -3 l8 -5" stroke="#3a2e28" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path class="bolt-mini" d="M4 -74 L-3 -62 L2 -62 L-2 -52 L8 -66 L3 -66 Z" fill="#ffe36b" stroke="#c9a23a" stroke-width="1"/><path d="M-20 -26 l-6 -3 l4 -2 l-6 -4 M-15 -36 l-4 -6 l4 0 l-3 -6 M0 -41 l0 -7 l3 2 l1 -7 M15 -36 l4 -6 l-4 0 l3 -6 M20 -26 l6 -3 l-4 -2 l6 -4" stroke="#3a2e28" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="0" cy="-20" rx="20" ry="18" fill="#3a2e28" opacity=".22"/><path class="spark" d="M-24 -44 l4 4 M26 -40 l-4 5 M-28 -16 l5 1 M29 -12 l-5 1" stroke="#ffe36b" stroke-width="2.2" stroke-linecap="round"/></g>`;
 
 // Returns inner SVG markup for a Wobblin standing at the origin (feet at y=0).
 export function wobblinSVG(w, opts = {}) {

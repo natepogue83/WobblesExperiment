@@ -5,7 +5,7 @@ import { inheritance } from './moments.js';
 import { voiceLine } from './voice.js';
 import { describeEvent, keeperCause, actionName } from '../sim/recap.js';
 import { wobblinSVG } from '../render/sprites.js';
-import { temperOf } from '../render/render.js';
+import { temperOf, decorOf } from '../render/render.js';
 import { SKILLS, SKILL_NAMES, levelOf, xpForLevel, MAX_LEVEL, titleOf } from '../sim/growth.js';
 
 const h = (tag, props = {}, ...kids) => {
@@ -19,7 +19,8 @@ const h = (tag, props = {}, ...kids) => {
   return e;
 };
 
-export function portrait(w, size = 44) {
+export function portrait(w, size = 44, world = null) {
+  if (world && w.traits) w = { ...w, ...decorOf(world, w) };
   const span = h('span', { class: 'portrait', style: `width:${size}px;height:${size}px` });
   span.innerHTML = `<svg viewBox="-28 -52 56 58" width="${size}" height="${size}" aria-hidden="true">${wobblinSVG({ ...w, temper: w.traits ? temperOf(w) : w.temper, carry: [] })}</svg>`;
   return span;
@@ -36,7 +37,7 @@ export function showRecapCard(panel, world, narrated, { onPick, onClose }) {
   for (const line of narrated.lines) {
     const ev = line.eventIds.map(id => world.events[id - 1]).find(e => e && e.actors && e.actors.length);
     const who = ev && world.wobblins.find(w => w.id === ev.actors[0]);
-    const li = h('li', { tabindex: 0 }, who ? portrait(who, 30) : h('span', { class: 'dot' }), h('span', {}, line.text));
+    const li = h('li', { tabindex: 0 }, who ? portrait(who, 30, world) : h('span', { class: 'dot' }), h('span', {}, line.text));
     li.onclick = () => {
       for (const x of list.children) x.classList.remove('on');
       li.classList.add('on');
@@ -100,7 +101,7 @@ export function showBook(panel, world) {
       if (!rec) { grid.append(h('div', { class: 'page unknown', title: 'Not yet discovered' }, h('span', { class: 'sil' }, '?'), h('small', {}, 'Tier ' + tier))); continue; }
       const inv = world.wobblins.find(w => w.id === rec.inventor);
       grid.append(h('div', { class: 'page' + (rec.forgotten ? ' forgotten' : '') },
-        inv ? portrait(inv, 40) : '',
+        inv ? portrait(inv, 40, world) : '',
         h('b', {}, d.name),
         h('small', {}, (inv ? inv.name : '?') + ', day ' + (rec.tick + 1) + (rec.forgotten ? ' · forgotten' : ''))));
     }
@@ -133,7 +134,7 @@ export function showFamily(panel, world, { onPick }) {
       h('div', { class: 'fam' }, shown.map(w => {
         const top = Object.entries(w.traits).sort((a, b) => b[1] - a[1]).slice(0, 2);
         const card = h('button', { class: 'kin' + (w.alive ? '' : ' gone'), onclick: () => w.alive && onPick(w) },
-          portrait(w, 52), h('b', {}, w.name),
+          portrait(w, 52, world), h('b', {}, w.name),
           h('small', {}, top.map(([k, v]) => TRAIT_SHORT[k] + ' ' + Math.max(1, Math.round(v * 10))).join(' · ')),
           h('small', { class: 'par' }, w.parents.length ? 'of ' + w.parents.map(name).join(' & ') : w.alive ? (w.partnerId ? 'with ' + name(w.partnerId) : 'single') : 'remembered'));
         return card;
@@ -211,7 +212,7 @@ export function showWobblinCard(panel, world, w, { onBless, onRename, wantText, 
     h('ul', {}, hints.map(x => h('li', {}, (stat10(x.have) >= stat10(x.need) ? `${x.name}: needs just a little more ${TRAIT_LABEL[x.trait]}` : `${x.name}: needs ${TRAIT_LABEL[x.trait]} ${stat10(x.need)} (has ${stat10(x.have)})`) + (x.here ? '. Everything else is right here!' : '.')))),
     h('p', { class: 'muted' }, 'Bless them for a boost, or raise a Wobblin born with more of it.')) : '';
   panel.replaceChildren(
-    h('div', { class: 'card-head' }, portrait(w, 72), h('div', {},
+    h('div', { class: 'card-head' }, portrait(w, 72, world), h('div', {},
       h('h2', {}, h('button', { class: 'name-btn', title: 'Give them a new name', onclick: ev => renameField(ev.currentTarget, w, onRename) }, w.name), ' ', h('span', { class: 'title' }, titleOf(w))),
       h('p', { class: 'muted' }, `${w.stage}, ${age} days old · loves ${w.hobby} · ${faithWord}`),
       family ? h('p', { class: 'muted' }, family) : '')),

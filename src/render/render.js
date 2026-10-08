@@ -47,6 +47,10 @@ export const OBJECT_SCALE = { snowman: 1.45, hut: 1.75, temple: 1.45, totem: 1.7
   pond: 1, reeds: 1.25, clay: 1.2, fish: 1.2, ruin: 1.4, scorch: 1.35 };
 
 // The keepsake a Wobblin treasures (its lucky charm), worn where you can see it.
+// What a portrait needs beyond the raw Wobblin: brows, crown, frizz, charm.
+export function decorOf(world, w) {
+  return { temper: temperOf(w), flower: (w.flowerUntil || 0) > world.tick, zapped: (w.zappedUntil || 0) > world.tick, charm: charmOf(world, w) };
+}
 function charmOf(world, w) {
   if (!w.luckyCharm) return null;
   const o = world.objects.find(x => x.id === w.luckyCharm);
