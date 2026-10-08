@@ -24,6 +24,7 @@ import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted, s
 import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
 import { tickerFor } from './ticker.js';
+import { keeperTitle } from './keeper.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -839,7 +840,10 @@ function drawHud() {
     b.onclick = () => claimGoal(ready.id);
     goal.append(b);
   } else if (next) goal.textContent = 'Goal: ' + next.text;
-  hud.append(name, line, belief, goal, needLine, row);
+  const kt = keeperTitle(world);
+  const k = document.createElement('div');
+  if (kt) { k.className = 'keeper-title ' + kt.tone; k.textContent = (kt.tone === 'fond' ? 'They lovingly call you ' : kt.tone === 'wary' ? 'They whisper about ' : 'They call you ') + kt.name; }
+  hud.append(name, line, ...(kt ? [k] : []), belief, goal, needLine, row);
   placeCoach();
 }
 

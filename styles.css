@@ -569,3 +569,7 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @keyframes struggle { from { transform: rotate(-16deg) scaleY(1.1); } to { transform: rotate(16deg) scaleY(1.06); } }
 .wobblin.held.snuggle .wobble { animation: snuggle 1.4s ease-in-out infinite alternate !important; transform-origin: 50% 0%; }
 @keyframes snuggle { from { transform: rotate(-5deg) scale(1.02, .98); } to { transform: rotate(5deg) scale(.98, 1.02); } }
+
+.keeper-title { font: 600 12px var(--display); color: #ffe7a6; margin-top: 1px; }
+.keeper-title.wary { color: #ffc2b0; }
+.keeper-title.fond { color: #ffd6e6; }

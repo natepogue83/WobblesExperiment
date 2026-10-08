@@ -5,7 +5,9 @@
 import { BY_ID } from '../sim/discoveries.js';
 import { temperOf } from '../render/render.js';
 import { SKILL_NAMES } from '../sim/growth.js';
+import { keeperTitle } from './keeper.js';   // they mention you by the name they've given you
 
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const nameOf = (world, id) => (world.wobblins.find(w => w.id === id) || {}).name || 'someone';
 const item = id => String(id || 'thing').replace(/_/g, ' ');
 
@@ -90,6 +92,8 @@ export function voiceLine(world, w) {
   if (best) return best;
   if (w.needs.rest < 0.12) return 'So... sleepy...';
   const pal = Object.entries(w.bonds || {}).filter(([id, v]) => v >= 0.5 && world.wobblins.some(x => x.id === id && x.alive)).sort((x, y) => y[1] - x[1])[0];
+  const kt = keeperTitle(world);
+  if (kt && (world.tick + Number(String(w.id).slice(1))) % 5 === 0) return kt.tone === 'wary' ? `Shh. ${cap(kt.name)} might be watching.` : kt.tone === 'fond' ? `I love it when ${kt.name} visits.` : `Have you seen what ${kt.name} does?`;
   const lines = IDLE[temperOf(w) || 'none'];
   const pickIdx = (world.tick + Number(String(w.id).slice(1))) % (lines.length + (pal ? 1 : 0));
   return pickIdx === lines.length ? nameOf(world, pal[0]) + ' is my favourite.' : lines[pickIdx];
