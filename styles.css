@@ -692,3 +692,10 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
   #world, .wobblin, .obj.movable, .tile:not(.cooling) { cursor: url(cursors/hand-open.svg) 16 9, grab; }
   .wobblin.held, .obj.held, .tile:active, body.is-dragging, body.is-dragging * { cursor: url(cursors/hand-grab.svg) 16 14, grabbing !important; }
 }
+
+/* HUD numbers with little icons */
+.stats-line { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.stats-line .stat { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.stats-line .stat svg { flex: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+.stats-line small { opacity: .75; font-size: .92em; }
+.belief { flex-wrap: wrap; row-gap: 3px; }

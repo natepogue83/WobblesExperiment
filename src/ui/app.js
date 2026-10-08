@@ -1016,6 +1016,13 @@ function draw() {
   if (DEBUG) { drawDebug(); window.__wob = { world, rs, svg, puppets }; }   // dev inspection only
 }
 
+// Little icons for the HUD's numbers.
+const HUD_ICON = {
+  day: '<svg viewBox="-8 -8 16 16" width="14" height="14" aria-hidden="true"><circle r="3.6" fill="#ffd24a"/><g stroke="#ffd24a" stroke-width="1.6" stroke-linecap="round"><path d="M0 -7v2M0 5v2M-7 0h2M5 0h2M-5 -5l1.4 1.4M3.6 3.6L5 5M5 -5l-1.4 1.4M-3.6 3.6L-5 5"/></g></svg>',
+  pop: '<svg viewBox="-8 -9 16 16" width="14" height="14" aria-hidden="true"><path d="M-6.5 5 Q-7.5 -5 0 -5.5 Q7.5 -5 6.5 5 Z" fill="#8fd16b"/><circle cx="-2.2" cy="-0.5" r="1.1" fill="#2a2a2a"/><circle cx="2.2" cy="-0.5" r="1.1" fill="#2a2a2a"/><path d="M0 -5.5 q-.5 -2 1 -3" stroke="#5e8f3a" stroke-width="1.2" fill="none"/></svg>',
+  disc: '<svg viewBox="-8 -8 16 16" width="14" height="14" aria-hidden="true"><path d="M0 -6.5 Q4.6 -6.5 4.6 -2 Q4.6 .8 2 2.6 V4.5 H-2 V2.6 Q-4.6 .8 -4.6 -2 Q-4.6 -6.5 0 -6.5 Z" fill="#ffe36b" stroke="#c9a23a" stroke-width=".9"/><rect x="-2" y="5" width="4" height="1.6" rx=".6" fill="#a8a29a"/></svg>'
+};
+
 function drawHud() {
   const pop = world.wobblins.filter(w => w.alive).length;
   const n = Object.values(world.discoveries).filter(d => !d.forgotten).length;
@@ -1024,10 +1031,11 @@ function drawHud() {
   const prog = progressOf(world), states = goalStates(world, prog), age = ageOf(world, prog);
   const name = document.createElement('div'); name.className = 'colony'; name.innerHTML = `${esc(world.colonyName)} <span class="age">${age.name}</span>`;
   noticeGoals(states);
-  const line = document.createElement('div');
+  const line = document.createElement('div'); line.className = 'stats-line';
   const secs = Math.ceil(msToNextTick(save, Date.now()) / 1000);
   const watching = save.clock && save.clock.mode === 'watch';
-  line.textContent = `Day ${world.tick + 1}` + (watching ? ` (next in ${secs}s)` : '') + ` · ${pop} Wobblins · Discoveries ${n}/30`;
+  line.innerHTML = `<span class="stat">${HUD_ICON.day}Day ${world.tick + 1}${watching ? ` <small>next in ${secs}s</small>` : ''}</span>` +
+    `<span class="stat">${HUD_ICON.pop}${pop} Wobblins</span><span class="stat" title="Discoveries they have made">${HUD_ICON.disc}${n}/30 discoveries</span>`;
   const belief = document.createElement('div'); belief.className = 'belief';
   const nu = nextUnlock(world);
   const prev = [...UNLOCKS].reverse().find(u => world.unlocked.includes(u.key));
