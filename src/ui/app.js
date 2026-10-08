@@ -159,7 +159,7 @@ function advance(returning = false) {
   if (!returning) { soundForEvents(world.events.slice(seen)); momentsFor(world, world.events.slice(seen)); tickerFor(world, world.events.slice(seen)); }
   save.lastSeenTick = now;
   storeSave(save);
-  if (returning && now - from >= 2) showRecap(from, now);
+  if ((returning && now - from >= 2) || now - from >= 6) showRecap(from, now);   // also after a sleeping laptop
   draw();
 }
 
