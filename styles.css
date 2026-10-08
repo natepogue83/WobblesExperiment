@@ -460,8 +460,8 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 
 .wobblin .crown-fly { animation: crown-fly 4s linear infinite; }
 @keyframes crown-fly { 0% { transform: translate(-22px, -50px); } 25% { transform: translate(0, -62px); } 50% { transform: translate(22px, -50px); } 75% { transform: translate(0, -44px); } 100% { transform: translate(-22px, -50px); } }
-.wobblin .crown-fly .wings { animation: flap .2s ease-in-out infinite alternate; transform-origin: 0 0; }
-@keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(.3); } }
+.wobblin .crown-fly .wings { animation: crown-flap .2s ease-in-out infinite alternate; transform-origin: 0 0; }
+@keyframes crown-flap { from { transform: scaleX(1); } to { transform: scaleX(.3); } }
 .obj .charged .spark { animation: spark-flick .3s steps(2, jump-none) infinite; }
 .obj .charged > ellipse { animation: glowpulse 1.2s ease-in-out infinite alternate; }
 
