@@ -54,7 +54,7 @@ function todOf(hour) {
 
 function frost(pal) {
   // A cold snap: pale, blue-shifted greens with snow on the ground.
-  return { ...pal, ground: '#c9dcd2', groundDark: '#9fb8ae', groundLight: '#eef6f2', hillFar: '#b4c9c0', hillMid: '#a3bbb1',
+  return { ...pal, snowy: true, shadow: 'rgba(80,110,150,0.20)', ground: '#cfe0d8', groundDark: '#b0c6bd', groundLight: '#f2f8f5', hillFar: '#b4c9c0', hillMid: '#a3bbb1',
     tree: ['#4d6b62', '#5f7d72', '#86a097', '#d8e6e2'], water: '#7fa9c9', waterLight: '#dff0fb' };
 }
 
@@ -382,6 +382,16 @@ export function paintValley(canvas, seed, { hour = 12, season = 'mild', wet = fa
     for (let i = 0; i < 160; i++) softBlob(ctx, r() * W, 300 + r() * 370, 20 + r() * 40, '#ffffff', 0.35);
   }
   if (wet) { ctx.fillStyle = 'rgba(60,45,20,0.10)'; ctx.fillRect(0, 290, W, H); }
+  // A cold snap: drifts of snow and a frosting of white flecks on the ground.
+  if (P.snowy) {
+    const rs = rngFor(seed, 'snow');   // its own stream, so the rest of the valley paints the same
+    let wash = ctx.createLinearGradient(0, 280, 0, H);
+    wash.addColorStop(0, 'rgba(255,255,255,0.18)'); wash.addColorStop(1, 'rgba(255,255,255,0.42)');
+    ctx.fillStyle = wash; ctx.fillRect(0, 280, W, H - 280);
+    for (let i = 0; i < 40; i++) softBlob(ctx, rs() * W, 300 + rs() * 330, 50 + rs() * 90, '#ffffff', 0.35);
+    for (let i = 0; i < 900; i++) blob(ctx, rs() * W, 290 + rs() * 360, 0.8 + rs() * 1.6, 0.6 + rs(), '#ffffff', 0.45 + rs() * 0.45);
+  }
+
 
   // Foreground: tall blades and leaves framing the bottom edge.
   for (let x = -10; x < W + 20; x += 5 + r() * 6) {
