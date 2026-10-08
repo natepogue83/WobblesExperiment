@@ -61,6 +61,21 @@ section('Render');
   assert.equal(a, b);
   assert.notEqual(wobblinSVG(w.wobblins[0]), wobblinSVG(w.wobblins[1]));
   ok('Wobblin sprites are deterministic and differ by seeded look');
+
+  // What happened to them shows on them: paint, river water, rain gear, a knitted hat.
+  const base = w.wobblins[0];
+  const dressed = wobblinSVG({ ...base, paint: 2, wet: true, rain: 'leaf', hat: true });
+  for (const cls of ['class="paint"', 'class="drips"', 'class="leaf-umbrella"', 'class="knit-hat"']) assert.ok(dressed.includes(cls), cls);
+  assert.ok(wobblinSVG({ ...base, rain: 'splash' }).includes('class="puddle-splash"'));
+  assert.ok(!wobblinSVG(base).includes('knit-hat') && !wobblinSVG(base).includes('drips'));
+  const rw = createWorld(2);
+  rw.climate.rain = 3; rw.climate.season = 'cold';
+  rw.wobblins[0].knows.weaving = { at: 0 };
+  const rr = renderState(rw);
+  assert.ok(rr.wobblins.every(x => x.rain === 'leaf' || x.rain === 'splash'));
+  assert.equal(rr.wobblins.find(x => x.id === rw.wobblins[0].id).hat, true);
+  assert.ok(rr.wobblins.filter(x => x.id !== rw.wobblins[0].id).every(x => !x.hat));
+  ok('paint, river water, leaf umbrellas, puddle splashes and knitted hats show on the sprite');
 }
 
 console.log('\ntest-render: all passed');
