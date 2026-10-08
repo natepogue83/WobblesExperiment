@@ -37,6 +37,24 @@ const SPROUT = { happy: '#6fd35a', love: '#ff7aa2', content: '#9bd06a', meh: '#c
 // Body: wide and soft, a little squashed at the base.
 const BODY = 'M-21 -1 Q-26 -16 -20 -28 Q-12 -40 0 -40 Q12 -40 20 -28 Q26 -16 21 -1 Q11 4 0 4 Q-11 4 -21 -1 Z';
 
+// Body build: each Wobblin is a little rounder, taller or wider (from its look).
+const BUILD = [[1, 1], [0.96, 1.05], [1.1, 0.93], [1.05, 0.98]];
+function buildOf(look) { return BUILD[Math.floor((look.wobble || 1) * 1000) % BUILD.length]; }
+
+// Brows show temperament at a glance (only on calm faces; strong feelings win).
+function brows(temper, face, dark) {
+  if (!temper || !['content', 'happy', 'meh'].includes(face)) return '';
+  const s = `stroke="${dark}" stroke-width="2" fill="none" stroke-linecap="round"`;
+  switch (temper) {
+    case 'caution': return `<path d="M-13 -31 Q-9 -33 -5 -35 M13 -31 Q9 -33 5 -35" ${s}/>`;           // worried
+    case 'boldness': return `<path d="M-13 -35 L-5 -32 M13 -35 L5 -32" ${s}/>`;                       // determined
+    case 'curiosity': return `<path d="M-13 -33 Q-9 -35 -5 -33 M5 -36 Q9 -39 13 -36" ${s}/>`;          // one brow up
+    case 'patience': return `<path d="M-13 -33 L-5 -33 M5 -33 L13 -33" ${s} opacity=".7"/>`;           // calm
+    default: return '';
+  }
+}
+const CANE = '<g class="cane"><path d="M27 2 L27 -16 Q27 -22 22 -21" stroke="#8a6a44" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>';
+
 function eyes(face, e, lookDx, eyelids) {
   const L = -8.5, R = 8.5, Y = -23;
   switch (face) {
@@ -89,14 +107,14 @@ export function wobblinSVG(w, opts = {}) {
   const e = 4.4 * w.look.eyeSize;
   const lookDx = opts.lookDx || 0;
   const elder = w.stage === 'elder';
-  const cheeks = face === 'cold' ? '#bfe3ff' : '#ff9fb2';
+  const cheeks = face === 'cold' ? '#bfe3ff' : w.temper === 'sociability' ? '#ff7f9b' : '#ff9fb2';
   const blinkDelay = ((w.id ? Number(String(w.id).slice(1)) : 1) * 1.37 % 4).toFixed(2);
   const gid = 'wb' + h;
   return `<g class="flip">
     <defs><radialGradient id="${gid}" cx="0.36" cy="0.22" r="0.85"><stop offset="0" stop-color="${hsl(h, 75, 86)}"/><stop offset="0.5" stop-color="${fill}"/><stop offset="1" stop-color="${hsl(h, 45, 44)}"/></radialGradient>
       <radialGradient id="${gid}b" cx="0.5" cy="0.3" r="0.7"><stop offset="0" stop-color="${hsl(h, 70, 90)}"/><stop offset="1" stop-color="${belly}" stop-opacity="0"/></radialGradient></defs>
     <ellipse class="shadow" cx="0" cy="2" rx="22" ry="5" fill="url(#a-shadow)"/>
-    <g class="wobble face-${face}" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s;--blink:${blinkDelay}s">
+    <g class="wobble face-${face}" style="animation-duration:${(2.4 / w.look.wobble).toFixed(2)}s;--blink:${blinkDelay}s"><g class="build" transform="scale(${buildOf(w.look).join(' ')})">
       ${TAILS[w.look.tail](shade)}
       ${EARS[w.look.ears](shade)}
       <g class="feet"><ellipse class="foot l" cx="-10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/><ellipse class="foot r" cx="10" cy="1" rx="6.5" ry="3.6" fill="${dark}"/></g>
@@ -111,12 +129,14 @@ export function wobblinSVG(w, opts = {}) {
       <g class="sprout"><path d="M0 -40 Q-1 -46 1 -50" stroke="#5e8f3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M1 -49 Q-9 -56 -11 -48 Q-5 -45 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}"/><path d="M1 -49 Q9 -58 12 -50 Q6 -46 1 -49 Z" fill="${SPROUT[face] || SPROUT.content}" opacity="0.85"/></g>
       <ellipse cx="-14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/><ellipse cx="14" cy="-15" rx="4" ry="2.4" fill="${cheeks}" opacity="0.7"/>
       <g class="eyes">${eyes(face, e, lookDx, fill)}</g>
+      ${brows(w.temper, face, dark)}
       ${elder ? `<path d="M-14 ${-23 - e * 1.4} q5 -3 10 0 M4 ${-23 - e * 1.4} q5 -3 10 0" stroke="#f4f0e6" stroke-width="2.4" fill="none" stroke-linecap="round"/>` : ''}
       ${mouth(face, dark)}
       ${w.flower ? FLOWER_CROWN : ''}
       ${w.zapped ? ZAP_FRIZZ : ''}
+      ${elder ? CANE : ''}
       ${carriedSVG(w.carry || [])}
-    </g></g>`;
+    </g></g></g>`;
 }
 
 // A mural shows the Keeper act it remembers (a real event from the log).

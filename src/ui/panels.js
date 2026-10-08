@@ -4,6 +4,7 @@ import { DISCOVERIES, BY_ID } from '../sim/discoveries.js';
 import { inheritance } from './moments.js';
 import { describeEvent, keeperCause, actionName } from '../sim/recap.js';
 import { wobblinSVG } from '../render/sprites.js';
+import { temperOf } from '../render/render.js';
 import { SKILLS, SKILL_NAMES, levelOf, xpForLevel, MAX_LEVEL, titleOf } from '../sim/growth.js';
 
 const h = (tag, props = {}, ...kids) => {
@@ -19,7 +20,7 @@ const h = (tag, props = {}, ...kids) => {
 
 export function portrait(w, size = 44) {
   const span = h('span', { class: 'portrait', style: `width:${size}px;height:${size}px` });
-  span.innerHTML = `<svg viewBox="-26 -48 52 54" width="${size}" height="${size}" aria-hidden="true">${wobblinSVG({ ...w, carry: [] })}</svg>`;
+  span.innerHTML = `<svg viewBox="-28 -52 56 58" width="${size}" height="${size}" aria-hidden="true">${wobblinSVG({ ...w, temper: w.traits ? temperOf(w) : w.temper, carry: [] })}</svg>`;
   return span;
 }
 
