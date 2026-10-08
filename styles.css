@@ -541,3 +541,10 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 @keyframes ask-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
 
 .wobblin .pupils { transition: transform .25s ease-out; }
+
+/* Juice: sparkles where seeds and gifts land, a big puff and a thump for boulders */
+.fx-sparkle .spk { transform-box: fill-box; transform-origin: center; animation: spk-out .9s cubic-bezier(.2, .9, .3, 1) forwards; }
+@keyframes spk-out { 0% { opacity: 0; transform: translateY(0) scale(.4); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px) scale(1.1); } }
+.fx-big .puff { fill: rgba(225, 212, 188, .85); transform-box: fill-box; transform-origin: center; animation: puff 1s ease-out forwards; }
+#stage.thumped #world { animation: thump .45s cubic-bezier(.36,.07,.19,.97); }
+@keyframes thump { 0%, 100% { transform: translateY(0); } 20% { transform: translateY(6px); } 45% { transform: translateY(-3px); } 70% { transform: translateY(1.5px); } }

@@ -194,6 +194,14 @@ const ACTION_SOUND = { quake: 'rumble', stones: 'thud', boulder: 'thump', plant:
 function actionSound(a, events) {
   const key = a.type === 'power' ? (a.power === 'stone' ? a.variant : a.power) : a.type === 'nudge' ? a.nudge : a.type;
   if (ACTION_SOUND[key]) play(ACTION_SOUND[key]);
+  const at = a.slot && GEO.slotInfo(a.slot);
+  const FX = { stones: 'dust', boulder: 'big', plant: 'sparkle', gift: 'sparkle', bless: 'sparkle', move: 'dust' };
+  if (FX[key]) {
+    const tgt = a.target && (lastRS.wobblins.find(x => x.id === a.target) || lastRS.objects.find(x => x.id === a.target));
+    const pos = at ? { x: at.x, y: at.y } : tgt ? { x: (puppets.position(tgt.id) || tgt).x, y: (puppets.position(tgt.id) || tgt).y - (key === 'bless' ? 40 : 0) } : null;
+    if (pos) fx.push({ kind: FX[key], x: pos.x, y: pos.y, at: Date.now() });
+  }
+  if (key === 'boulder') { const st = $('#stage'); st.classList.remove('thumped'); void st.offsetWidth; st.classList.add('thumped'); setTimeout(() => st.classList.remove('thumped'), 500); }
   if (key === 'quake') { const st = $('#stage'); st.classList.remove('shaking'); void st.offsetWidth; st.classList.add('shaking'); setTimeout(() => st.classList.remove('shaking'), 1300); }
   const follow = events.filter(e => !['keeper_power', 'keeper_nudge', 'keeper_gift', 'offerings_collected'].includes(e.kind));
   if (follow.length) setTimeout(() => soundForEvents(follow), ACTION_SOUND[key] ? 160 : 0);
@@ -695,7 +703,11 @@ function drawFx(svg) {
     g.setAttribute('transform', `translate(${e.x},${e.y})`);
     g.innerHTML = e.kind === 'splash'
       ? '<ellipse class="ring" rx="10" ry="4"/><ellipse class="ring r2" rx="10" ry="4"/><path class="drops" d="M-8 -4 q-6 -16 -12 -6 M0 -6 q0 -20 4 -22 M8 -4 q8 -14 12 -4"/>'
-      : '<circle class="puff" cx="-10" r="6"/><circle class="puff" cx="10" r="5"/><circle class="puff" cy="-4" r="5"/>';
+      : e.kind === 'sparkle'
+        ? [0, 60, 120, 180, 240, 300].map((a, i) => `<g transform="rotate(${a})"><path class="spk" style="animation-delay:${(i % 3) * 0.05}s" d="M0 -6 l1.6 3.4 3.6 .6 -2.6 2.4 .6 3.6 -3.2 -1.8 -3.2 1.8 .6 -3.6 -2.6 -2.4 3.6 -.6 Z" fill="${['#ffe36b', '#ffb3c7', '#bfe8ff'][i % 3]}"/></g>`).join('')
+        : e.kind === 'big'
+          ? '<circle class="puff" cx="-26" r="11"/><circle class="puff" cx="26" r="10"/><circle class="puff" cy="-8" r="12"/><circle class="puff" cx="-12" cy="4" r="9"/><circle class="puff" cx="14" cy="5" r="9"/>'
+          : '<circle class="puff" cx="-10" r="6"/><circle class="puff" cx="10" r="5"/><circle class="puff" cy="-4" r="5"/>';
     svg.append(g);
   }
 }
