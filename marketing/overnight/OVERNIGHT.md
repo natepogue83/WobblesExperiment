@@ -64,7 +64,7 @@ All of these replay exactly and never teach the Wobblins anything.
 
 ## Also added later in the night
 
-- **A painted icon for each of the 30 discoveries,** shown in the Discovery Book and on the eureka card.
+- **A painted icon for each of the 30 discoveries,** shown in the Discovery Book and on the eureka card. Undiscovered pages show a faint silhouette of the icon (never the name or how to find it).
 - **The Chronicle has a "Their story" tab** that leaves out your own acts and routine level-ups, and every line shows a face or an icon.
 - **A live ticker** in the bottom-left corner shows the day's most interesting happening while you watch.
 - **Poke a Wobblin over and over** and it giggles, then gets cross, then runs off.

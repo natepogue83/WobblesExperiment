@@ -108,7 +108,12 @@ export function showBook(panel, world) {
   for (const tier of [1, 2, 3, 4]) {
     for (const d of DISCOVERIES.filter(x => x.tier === tier)) {
       const rec = world.discoveries[d.id];
-      if (!rec) { grid.append(h('div', { class: 'page unknown', title: 'Not yet discovered' }, h('span', { class: 'sil' }, '?'), h('small', {}, 'Tier ' + tier))); continue; }
+      if (!rec) {
+        // A shadow of what's out there: the shape, never the name or the recipe.
+        const sil = h('span', { class: 'sil' }); sil.innerHTML = discoveryIcon(d.id, 34);
+        grid.append(h('div', { class: 'page unknown', title: 'Not yet discovered' }, h('div', { class: 'art' }, sil), h('b', {}, '?'), h('small', {}, 'Tier ' + tier)));
+        continue;
+      }
       const inv = world.wobblins.find(w => w.id === rec.inventor);
       const ic = h('span', { class: 'dicon' }); ic.innerHTML = discoveryIcon(d.id, 34);
       grid.append(h('div', { class: 'page' + (rec.forgotten ? ' forgotten' : '') + ' tier' + d.tier },
