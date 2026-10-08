@@ -786,7 +786,7 @@ const INTERACTION_TOAST = {
   bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
   zapped: 'ZAP! Frizzy.', boulder_rolled: 'Runaway boulder!', ask_granted: 'You answered! They glow with belief.', cradled: 'Shh. Fast asleep in your hand.', shaken: 'Shaken like a snow globe!', snowman_smashed: 'POOF. Snow everywhere.', snowman_zapped: 'Snowman to puddle in one zap.', stones_burst: 'KABOOM. Stones everywhere.', charged: 'It hums with your power. They think it is a sign.', static_shock: 'Static shock!', gift_caught: 'Caught it!', quake: 'RUMBLE! Hold on to something.', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
 };
-const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
+const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave', mural: 'into the mural', garden: 'into the garden', snowman: 'into the snowman' };
 function ontoLabel(id) {
   const w = lastRS.wobblins.find(x => x.id === id);
   if (w) return 'next to ' + w.name;
