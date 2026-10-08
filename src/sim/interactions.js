@@ -109,6 +109,14 @@ export function landOnto(world, w, a, causes) {
       return say('singed', {}, 3, [w.id], [{ object: o.id }]);
     }
     case 'pond': case 'fish': {
+      // Frozen: they slide right across, squealing (or flat on their face).
+      const pond = o.kind === 'pond' ? o : liveObjects(world).find(x => x.kind === 'pond');
+      if (pond && pond.state.frozen && o.kind === 'pond') {
+        const fun = w.traits.playfulness > 0.45 || thrown;
+        mood(w, fun ? 0.12 : -0.06);
+        laugh([w.id]);
+        return say(fun ? 'skating' : 'slipped', { flung: thrown }, 2, [w.id], [{ object: pond.id }]);
+      }
       const fish = liveObjects(world).find(x => x.kind === 'fish' && (x.zone === o.zone || x === o));
       if (fish && (w.knows.fishing || r() < 0.4)) {
         fish.state.gone = true; fish.hp = 0;
@@ -228,8 +236,17 @@ export function lightningOnto(world, target, strikeEvent) {
   return null;
 }
 
-// Lightning in the water: stunned fish bob up for anyone who wants them.
+// Lightning in the water: stunned fish bob up for anyone who wants them. On a
+// frozen pond the ice cracks instead, and anyone skating goes in.
 export function lightningInWater(world, zone, strikeEvent) {
+  const pond = zone === 'pondsite' && liveObjects(world).find(o => o.kind === 'pond');
+  if (pond && pond.state.frozen) {
+    delete pond.state.frozen;
+    pond.state.crackedTick = world.tick;
+    const dunked = alive(world).filter(x => x.zone === 'pondsite' && x.stage !== 'baby');
+    for (const x of dunked) { x.needs.warmth = r3(clamp01(x.needs.warmth - 0.35)); mood(x, -0.1); x.heldUntil = world.tick + 1; }
+    return emit(world, { kind: 'interaction', actors: dunked.map(x => x.id), target: pond.id, data: { what: 'ice_cracked', dunked: dunked.length }, salience: 3, causes: [{ event: strikeEvent.id }] });
+  }
   const n = 1 + (rngFor(world.seed, 'stunfish', world.tick)() < 0.5 ? 1 : 0);
   for (let i = 0; i < n; i++) makeObject(world, { kind: 'fish', slot: null, zone, origin: { event: strikeEvent.id }, state: { until: world.tick + 6, stunned: true } });
   return emit(world, { kind: 'interaction', data: { what: 'fish_stunned', zone, count: n }, salience: 3, causes: [{ event: strikeEvent.id }] });
@@ -259,7 +276,7 @@ export function socialStep(world) {
 export function iceStep(world) {
   const pond = liveObjects(world).find(o => o.kind === 'pond');
   if (!pond) return;
-  const frozen = world.climate.season === 'cold';
+  const frozen = world.climate.season === 'cold' && !(pond.state.crackedTick !== undefined && world.tick - pond.state.crackedTick < 6);
   if (frozen !== !!pond.state.frozen) {
     if (frozen) pond.state.frozen = true; else delete pond.state.frozen;
     emit(world, { kind: 'interaction', target: pond.id, data: { what: frozen ? 'pond_froze' : 'pond_thawed' }, salience: 2, causes: [{ object: pond.id }] });

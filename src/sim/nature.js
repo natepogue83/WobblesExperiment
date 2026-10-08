@@ -27,7 +27,7 @@ export function strike(world, slot, causes, data) {
     data: { ...data, slot }, salience: data.natural ? 2 : 2, causes });
   const zoneHit = slotInfo(slot).zone;
   if (target && burnableAt(world, slot)) igniteObject(world, target, ev.id).state.byKeeper = !data.natural;
-  else if (target) lightningOnto(world, target, ev);
+  else if (target && target.kind !== 'pond') lightningOnto(world, target, ev);
   else if (zoneHit === 'riverbank' || (zoneHit === 'pondsite' && liveObjects(world).some(o => o.kind === 'pond'))) lightningInWater(world, zoneHit, ev);
   else if (!target && !isWet(world) && slotInfo(slot).zone !== 'riverbank' && slotInfo(slot).zone !== 'pondsite') {
     // Dry grass catches: a small fire that burns out fast.

@@ -240,6 +240,7 @@ function templates(world, e, ctx) {
         zapped: [`You zapped ${name}. ` + (d.bold ? 'They loved it!' : 'They are frizzy and furious.') + (d.idea ? ' Then they had a bright idea.' : ''), `ZAP! ${name}'s fur is standing on end.` + (d.hurt ? ' It hurt.' : ''), `Lightning hit ${name} square on the head.` + (d.idea ? ' Something sparked in there.' : '')],
         gift_caught: [`${name} caught the ${item(d.item)} as it fell from the sky.`, `The ${item(d.item)} landed right in ${name}'s arms.`, `${name} won't let go of the ${item(d.item)} you gave them.`],
         slipped: [`${name} slipped on the ice and sat down hard.`, `${name} did not enjoy the frozen pond.`, `Whoops: ${name} went flat on the ice.`],
+        ice_cracked: [d.dunked ? `Your lightning cracked the ice and ${name} fell in. Brrr!` : 'Your lightning cracked the ice on the pond.', 'CRACK! The frozen pond split open.' + (d.dunked ? ` ${name} went in.` : ''), d.dunked ? `${name} was skating when the ice broke.` : 'The ice broke into floating pieces.'],
         pond_froze: [`The pond froze solid.`, `The cold snap turned the pond to ice.`, `Ice on the pond!`],
         pond_thawed: [`The pond thawed.`, `The ice on the pond melted.`, `The pond is water again.`],
         skating: [`${name} went skating on the frozen pond.`, `${name} slid across the ice, squealing.`, `The pond froze and ${name} discovered sliding.`]

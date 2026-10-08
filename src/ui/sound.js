@@ -127,7 +127,7 @@ const INTERACTION_SOUND = {
   hug: 'hug', bonk: 'bonk', bowled_over: 'bonk', bush_squashed: 'crunch', snack: 'pop', stuck_in_tree: 'boing', singed: 'uhoh',
   caught_fish: 'splash', scared_fish: 'splash', through_the_roof: 'crunch', made_a_cairn: 'thud', treasure: 'chime',
   bonked: 'bonk', bonk_idea: 'bonk', squashed: 'thump', flower_crown: 'sprout', zapped: 'zap', gift_caught: 'chime',
-  boulder_split: 'crunch', fish_stunned: 'splash', squabble: 'uhoh', skating: 'giggle', slipped: 'bonk'
+  boulder_split: 'crunch', fish_stunned: 'splash', squabble: 'uhoh', skating: 'giggle', slipped: 'bonk', ice_cracked: 'splash'
 };
 export function soundForEvents(events) {
   // One sound per batch, the most notable first.

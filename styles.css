@@ -439,3 +439,17 @@ h2 { font-weight: 600; letter-spacing: .2px; }
 .chip { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 9px; border-radius: 11px; background: #efe3c8; color: #5b3f26; font: 600 12px/1.5 var(--display); white-space: nowrap; }
 .knows { line-height: 1.9; }
 #panel { overflow-x: hidden; }
+
+/* First-time coach bubble */
+#coach { position: fixed; z-index: 65; transform: translateY(-100%); padding: 12px 14px 10px; border-radius: 16px; background: #fffaf0; color: #4a3a2a;
+  box-shadow: 0 0 0 3px #ffd86b, 0 12px 30px rgba(0,0,0,.3); font: 500 14px/1.35 var(--display); pointer-events: auto; }
+#coach.below { transform: none; }
+#coach.pop { animation: coach-pop .45s cubic-bezier(.2, 1.6, .4, 1); }
+#coach p { margin: 0 0 8px; }
+#coach button { border: 0; border-radius: 12px; padding: 5px 12px; background: #ffd86b; color: #4a3a12; font: 600 13px var(--display); }
+#coach .arrow { position: absolute; left: calc(var(--ax) - 9px); bottom: -9px; width: 18px; height: 18px; background: #fffaf0; transform: rotate(45deg); box-shadow: 3px 3px 0 #ffd86b; }
+#coach.below .arrow { bottom: auto; top: -9px; box-shadow: -3px -3px 0 #ffd86b; }
+#coach .hand { position: absolute; left: calc(var(--ax) - 12px); bottom: -46px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 216, 107, .85); box-shadow: 0 0 0 6px rgba(255, 216, 107, .35); animation: coach-tap 1.4s ease-in-out infinite; pointer-events: none; }
+#coach.below .hand { bottom: auto; top: -46px; }
+@keyframes coach-pop { from { opacity: 0; scale: .85; } to { opacity: 1; scale: 1; } }
+@keyframes coach-tap { 0%, 100% { transform: scale(.8); opacity: .5; } 50% { transform: scale(1.1); opacity: 1; } }

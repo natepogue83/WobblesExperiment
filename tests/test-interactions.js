@@ -139,6 +139,34 @@ section('Lightning on odd things');
   ok('lightning in the river stuns fish up to the surface');
 }
 
+section('Ice');
+{
+  const w = createWorld(17, { barren: true });
+  let seq = 0;
+  const go = a => applyAction(w, { seq: ++seq, t: w.tick, ...a });
+  assert.equal(go({ type: 'power', power: 'water' }).ok, true);
+  const pond = w.objects.find(o => o.kind === 'pond');
+  assert.equal(go({ type: 'power', power: 'season', variant: 'cold' }).ok, true);
+  tick(w);
+  assert.ok(pond.state.frozen);
+  assert.ok(last(w, 'pond_froze'));
+  const [a, b] = w.wobblins;
+  a.traits.playfulness = 0.9;
+  assert.equal(go({ type: 'nudge', nudge: 'carry', target: a.id, zone: 'pondsite', thrown: true, onto: pond.id }).ok, true);
+  assert.ok(last(w, 'skating'));
+  ok('a cold snap freezes the pond, and a Wobblin flung onto it goes skating');
+  for (let i = 0; i < 8; i++) tick(w);
+  b.zone = 'pondsite'; a.zone = 'pondsite';
+  assert.ok(pond.state.frozen);
+  assert.equal(go({ type: 'power', power: 'lightning', slot: 'pondsite.1' }).ok, true);
+  const crack = last(w, 'ice_cracked');
+  assert.ok(crack && crack.actors.includes(b.id));
+  assert.ok(!pond.state.frozen);
+  tick(w);
+  assert.ok(!pond.state.frozen, 'it does not refreeze straight away');
+  ok(`lightning on the frozen pond cracks the ice and dunks the skaters (${crack.actors.length} went in)`);
+}
+
 section('Friends and rivals form over time');
 {
   let friends = 0, rivals = 0, squabbles = 0;

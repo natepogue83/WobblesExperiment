@@ -22,6 +22,7 @@ import { emoteSVG, wobblinSVG } from '../render/sprites.js';
 import { press, toSvgPoint, overSvg, makeGhost, drawHint, clearHint } from './drag.js';
 import { initSound, play, soundForEvents, soundForReaction, isMuted, setMuted } from './sound.js';
 import { momentsFor } from './moments.js';
+import { coachStep, drawCoach } from './coach.js';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -584,7 +585,7 @@ const INTERACTION_TOAST = {
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',
   king_of_the_hill: 'King of the hill!', remembers: 'A quiet moment by the graves.',
   bonked: 'Bonk!', bonk_idea: 'Bonk! ...oh, an idea?', squashed: 'SQUASH. Flat as a pancake.', flower_crown: 'A crown of flowers!',
-  zapped: 'ZAP! Frizzy.', gift_caught: 'Caught it!'
+  zapped: 'ZAP! Frizzy.', gift_caught: 'Caught it!', skating: 'Wheee! Sliding on the ice.', slipped: 'Whoops. Flat on the ice.', ice_cracked: 'CRACK! Into the icy water.'
 };
 const ONTO_LABEL = { bush: 'onto the berry bush', tree: 'into the tree', fire: 'into the FIRE', hearth: 'onto the hearth', pond: 'into the pond', fish: 'onto the fish', hut: 'onto a hut', stones: 'onto the stones', gift: 'onto the gift', curio: 'onto the curio', boulder: 'up on the boulder', temple: 'up on the temple', totem: 'up the totem', wall: 'up on the wall', grave: 'by the grave' };
 function ontoLabel(id) {
@@ -712,6 +713,27 @@ function drawHud() {
     goal.append(b);
   } else if (next) goal.textContent = 'Goal: ' + next.text;
   hud.append(name, line, belief, goal, needLine, row);
+  placeCoach();
+}
+
+// Point the coach bubble at the tray tile, a Wobblin, or the goal line.
+function placeCoach() {
+  const step = coachStep(save, world);
+  if (!step) { drawCoach(null); return; }
+  let rect = null;
+  if (step.anchor.startsWith('tile:')) {
+    const label = { stones: 'Stones' }[step.anchor.slice(5)];
+    const tile = [...document.querySelectorAll('.tile')].find(t => t.textContent.includes(label));
+    rect = tile && tile.getBoundingClientRect();
+  } else if (step.anchor === 'wobblin') {
+    const svg = $('#world'), w = lastRS && lastRS.wobblins.find(x => x.stage !== 'baby');
+    const g = w && svg.querySelector('#' + w.id);
+    rect = g && g.getBoundingClientRect();
+  } else if (step.anchor === 'goal') {
+    const b = document.querySelector('.goal-line');
+    rect = b && b.getBoundingClientRect();
+  }
+  drawCoach(step, rect && rect.width ? rect : null);
 }
 
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
