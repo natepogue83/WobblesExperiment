@@ -9,12 +9,14 @@ import { renderState } from '../src/render/render.js';
 
 const MEANINGFUL = new Set(['discovery', 'rediscovery', 'built', 'birth', 'death', 'superstition', 'burned', 'forgotten', 'paired',
   'stranger_arrived', 'festival', 'ritual', 'wish', 'misfire', 'pondering', 'lost', 'seed_pod_hatched', 'tree_grown', 'pond_formed',
-  'fire_started', 'prowler', 'flood', 'learned_from_structure']);
+  'fire_started', 'prowler', 'flood', 'learned_from_structure',
+  // Overnight systems the recap reports too: friendships, grudges, growing up, injuries, squabbles.
+  'friends', 'rivals', 'grew_up', 'became_elder', 'injured', 'interaction']);
 
 // Meaningful changes in a window: salient events, plus one for "skills spread".
 export function changes(w, from) {
   const win = w.events.filter(e => e.t >= from);
-  return win.filter(e => MEANINGFUL.has(e.kind) && e.salience >= 2).length + (win.some(e => e.kind === 'taught') ? 1 : 0);
+  return win.filter(e => (MEANINGFUL.has(e.kind) && e.salience >= 2) || (e.kind === 'level_up' && e.salience >= 3)).length + (win.some(e => e.kind === 'taught') ? 1 : 0);
 }
 
 section('First session');
@@ -41,7 +43,7 @@ section('First session');
 section('Coming back after 6-8 hours');
 {
   const rows = [];
-  for (const [T0, minPct] of [[24, 85], [72, 40], [200, 40]]) {
+  for (const [T0, minPct] of [[24, 85], [72, 75], [200, 80]]) {
     let good = 0;
     for (let seed = 1; seed <= 100; seed++) {
       const w = createWorld(seed);
