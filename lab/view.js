@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { W, H, DAY, MATERIALS, cellAt, live, isNight, objectsAt, stackHeight, covered } from './world.js';
 import { newColony, step, keeperPlace, fireReport, fireStory } from './sim.js';
 import { beliefs } from './creature.js';
+import { rngFor } from '../src/sim/rng.js';
 
 const q = new URLSearchParams(location.search);
 const seed = Number(q.get('seed') || 2);
@@ -32,19 +33,43 @@ const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, flat
 const CELL = 1.0;
 const X = x => (x - W / 2 + 0.5) * CELL, Z = y => (y - H / 2 + 0.5) * CELL;
 
-// Ground tiles coloured by what they are; wet ones darken, hot ones glow a little.
+// Ground: one sculpted sheet, coloured per cell, with a soft river bed and a wooden rim.
+// Invisible tiles still sit on top for picking.
 const tiles = [];
+const SUB = 3;   // vertices per cell edge
+const groundGeo = new THREE.PlaneGeometry(W * CELL, H * CELL, W * SUB, H * SUB);
+groundGeo.rotateX(-Math.PI / 2);
+const groundColors = new Float32Array(groundGeo.attributes.position.count * 3);
+groundGeo.setAttribute('color', new THREE.BufferAttribute(groundColors, 3));
 {
-  const geo = new THREE.BoxGeometry(CELL, 0.4, CELL);
-  for (const c of world.cells) {
-    const m = new THREE.Mesh(geo, flat('#8fb35a'));
-    m.position.set(X(c.x), -0.2, Z(c.y)); m.receiveShadow = true; m.userData.cell = c; scene.add(m); tiles.push(m);
+  const pos = groundGeo.attributes.position, r = rngFor(seed, 'ground');
+  for (let i = 0; i < pos.count; i++) {
+    const cx = Math.min(W - 1, Math.max(0, Math.floor(pos.getX(i) / CELL + W / 2))), cy = Math.min(H - 1, Math.max(0, Math.floor(pos.getZ(i) / CELL + H / 2)));
+    const c = world.cells[cy * W + cx];
+    let y = (r() - 0.5) * 0.06;
+    if (c.water) y = -0.35; else if (c.stony) y += 0.12 + (r() - 0.5) * 0.08;
+    pos.setY(i, y);
   }
+  groundGeo.computeVertexNormals();
+  const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 }));
+  ground.receiveShadow = true; scene.add(ground);
+  const pickGeo = new THREE.PlaneGeometry(CELL, CELL); pickGeo.rotateX(-Math.PI / 2);
+  for (const c of world.cells) { const m = new THREE.Mesh(pickGeo, new THREE.MeshBasicMaterial({ visible: false })); m.position.set(X(c.x), 0.02, Z(c.y)); m.userData.cell = c; scene.add(m); tiles.push(m); }
   const rim = new THREE.Mesh(new THREE.BoxGeometry(W * CELL + 1.2, 1.2, H * CELL + 1.2), flat('#6b4a2e')); rim.position.y = -1.0; scene.add(rim);
+}
+const _tmpColor = new THREE.Color();
+function paintGround() {
+  const pos = groundGeo.attributes.position, col = groundGeo.attributes.color, r = rngFor(seed, 'tint');
+  for (let i = 0; i < pos.count; i++) {
+    const cx = Math.min(W - 1, Math.max(0, Math.floor(pos.getX(i) / CELL + W / 2))), cy = Math.min(H - 1, Math.max(0, Math.floor(pos.getZ(i) / CELL + H / 2)));
+    const c = tileColor(world.cells[cy * W + cx]); c.offsetHSL((r() - 0.5) * 0.015, 0, (r() - 0.5) * 0.05);
+    col.setXYZ(i, c.r, c.g, c.b);
+  }
+  col.needsUpdate = true;
 }
 function tileColor(c) {
   if (c.water) return new THREE.Color('#5c9fcf');
-  const base = new THREE.Color(c.stony ? '#a9a398' : c.grass ? '#8fb35a' : '#a6bb6a');
+  const base = new THREE.Color(c.stony ? '#a9a398' : c.grass ? '#86a95a' : '#9db36a');
   base.offsetHSL(0, 0, -c.wet * 0.12);
   if (c.heat > 0) base.lerp(new THREE.Color('#ffb060'), c.heat * 0.35);
   if (covered(world, c.x, c.y)) base.offsetHSL(0, 0, -0.08);
@@ -98,7 +123,7 @@ function makeCreature(c, i) {
 }
 
 function sync() {
-  for (const [i, c] of world.cells.entries()) tiles[i].material.color.copy(tileColor(c));
+  paintGround();
   const seen = new Set();
   for (const o of live(world)) {
     seen.add(o.id);
