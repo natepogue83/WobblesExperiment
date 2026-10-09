@@ -30,11 +30,12 @@ experiment overlay, replay verification and save export/import).
 
 ## The lab (where the game is going)
 
-`lab/` is an artificial-life simulation with no recipes: materials with hidden properties, a few physical rules (wet and dry, heat and fire, stacking and cover, growth), and creatures that see only what is visible, act with a handful of primitives, and learn from what happened. Knowledge spreads only by watching; children inherit how they learn, not what. The player's verbs are to put things down and make it rain.
+`lab/` is an artificial-life simulation with no recipes: materials with hidden properties (weight, hardness, sharpness, how they burn and soak), physical rules that compose (wet and dry, heat and fire, sparks, stacking and cover, walls, cutting and splitting, joining, growth, lean seasons), and creatures that see only what is visible, act with a handful of primitives (pick up, place, taste, strike, climb, watch, beckon, rest, flee), and learn from what happened. A prowler comes some nights from the edge; fire, walls and a crowd keep it off, and a hard enough blow drives it away. Knowledge spreads only by watching; children inherit how they learn and what they are made of, not what they know. The player's verbs are to put things down and make it rain.
 
 - `node lab/run.mjs` runs 8 colonies through the fire-keeping scenario, the spark scenario, the high-fruit scenario and the generations scenario, and prints the results.
 - `node lab/run.mjs 2` tells one colony's story and what each creature believes.
 - `lab/view.html?seed=2` watches a colony live in 3D (needs the dev server). Click the ground to put things down; click a creature to read its mind.
+- `node lab/run-deep.mjs` runs the deeper world: shards, felled trees, joined tools, walls and the prowler over 40 days. `EVOLVE=1 node lab/run-deep.mjs` also runs 120 days with and without the prowler and reports how caution and brawn drifted.
 - `tests/test-lab.js` guards the results.
 
 ## Test it

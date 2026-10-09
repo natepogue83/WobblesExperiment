@@ -257,6 +257,8 @@ function readLog() {
     if (e.kind === 'joined') log.lines.push(`Day ${day}: ${e.who} drove a shard into a stick. It stayed.`);
     if (e.kind === 'prowler_came' && !log.prowlerTold) { log.prowlerTold = true; log.lines.push(`Day ${day}: something came out of the dark at the edge.`); }
     if (e.kind === 'attacked') log.lines.push(`Day ${day}: the beast got ${e.who}.`);
+    if (e.kind === 'lean_began') log.lines.push(`Day ${day}: the meadow went lean. Little grows for a while.`);
+    if (e.kind === 'lean_ended') log.lines.push(`Day ${day}: the meadow came back.`);
     if (e.kind === 'drove_off') log.lines.push(`Day ${day}: ${e.who} drove the beast off with a ${e.material}.`);
   }
 }
@@ -268,7 +270,7 @@ function drawHud() {
   readLog();
   const source = world.objects.find(o => !o.gone && o.burning > 0 && o.fuel > 0);
   const living = world.creatures.reduce((n, c) => n + (c.alive ? 1 : 0), 0);
-  hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${living} alive, ${world.creatures.length - living} gone<br>` +
+  hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''}${world.weather.lean ? ', lean time' : ''} · ${living} alive, ${world.creatures.length - living} gone<br>` +
     (source ? `Fire burning, fuel ${source.fuel}, fed ${log.feeds} times` : log.feeds ? `No fire now; it was fed ${log.feeds} times` : 'No fire') +
     `<br><span class="muted">Click the ground to put down:</span><br>` +
     ['ember', 'stick', 'grass', 'stone', 'log', 'berry', 'tree', 'shard'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +

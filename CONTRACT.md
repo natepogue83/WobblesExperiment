@@ -333,6 +333,18 @@ inherit genomes, not memories. Success is judged by scenarios (`lab/run.mjs`) an
 `tests/test-lab.js`: a practice learned, spread by contact, and outliving its founders.
 The 2D game and its sim stay in the repo untouched until the lab replaces them.
 
+The deeper world (2026-10-09, overnight, on Nate's brief: pieces, tools, trees, shelter, an
+outside threat, evolution): everything is a piece with properties, and rules compose them.
+Stone on stone gives sparks or a sharp shard; a sharp thing notches and fells a tree into
+logs and sticks, splits a log into sticks, and driven into a stick stays there as a better
+cutter; stacks make footing, a trunk across a stack makes a roof, three closed sides make
+walls. A prowler comes on some nights from the edge for a creature alone in the open; fire,
+walls and a crowd keep it off; a hard enough blow drives it away; a weakened creature does not
+survive it. Lean seasons starve the meadow for a stretch. Creatures have brawn, flee toward
+safety, rest at kinds of place (fire, roof, walls, open) and remember attacks against what they
+were doing and where. The prowler never learns; it is weather with teeth. Nothing here tells a
+creature what to do with any of it.
+
 ## 12. Tuning deviations from the build plan
 
 - Pairing: the plan says both adults need sociability > 0.4. With only 3
