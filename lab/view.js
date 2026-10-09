@@ -47,11 +47,22 @@ const groundColors = new Float32Array(groundGeo.attributes.position.count * 3);
 groundGeo.setAttribute('color', new THREE.BufferAttribute(groundColors, 3));
 const vertexCell = new Int32Array(groundGeo.attributes.position.count);   // which cell each vertex belongs to
 const vertexTint = new Float32Array(groundGeo.attributes.position.count * 2);   // fixed per-vertex hue/light wobble
+const vertexBlend = [];   // per vertex: the four nearest cells and their weights, for smooth colour
+const targetColors = new Float32Array(groundGeo.attributes.position.count * 3);
 {
   const pos = groundGeo.attributes.position, r = rngFor(seed, 'ground'), rt = rngFor(seed, 'tint');
   for (let i = 0; i < pos.count; i++) {
     const cx = Math.min(W - 1, Math.max(0, Math.floor(pos.getX(i) / CELL + W / 2))), cy = Math.min(H - 1, Math.max(0, Math.floor(pos.getZ(i) / CELL + H / 2)));
     vertexCell[i] = cy * W + cx;
+    {
+      const fx = pos.getX(i) / CELL + W / 2 - 0.5, fz = pos.getZ(i) / CELL + H / 2 - 0.5;
+      const x0 = Math.floor(fx), z0 = Math.floor(fz), tx = fx - x0, tz = fz - z0, bl = [];
+      for (const [dx, dz, wgt] of [[0, 0, (1 - tx) * (1 - tz)], [1, 0, tx * (1 - tz)], [0, 1, (1 - tx) * tz], [1, 1, tx * tz]]) {
+        const xx = Math.min(W - 1, Math.max(0, x0 + dx)), zz = Math.min(H - 1, Math.max(0, z0 + dz));
+        if (wgt > 0.001) bl.push([zz * W + xx, wgt]);
+      }
+      vertexBlend.push(bl);
+    }
     vertexTint[i * 2] = (rt() - 0.5) * 0.015; vertexTint[i * 2 + 1] = (rt() - 0.5) * 0.05;
     const c = world.cells[vertexCell[i]];
     let y = (r() - 0.5) * 0.06;
@@ -69,24 +80,52 @@ const vertexTint = new Float32Array(groundGeo.attributes.position.count * 2);   
 const cellColors = world.cells.map(() => new THREE.Color());
 const _c = new THREE.Color(), _warm = new THREE.Color('#ffb060');
 function paintGround() {
-  // Colour each cell once, then spread it over that cell's vertices with their fixed wobble.
-  const night = isNight(world);
-  for (let i = 0; i < world.cells.length; i++) tileColor(world.cells[i], cellColors[i], night);
-  const col = groundGeo.attributes.color;
-  for (let i = 0; i < vertexCell.length; i++) {
-    _c.copy(cellColors[vertexCell[i]]).offsetHSL(vertexTint[i * 2], 0, vertexTint[i * 2 + 1]);
-    col.setXYZ(i, _c.r, _c.g, _c.b);
+  // Colour each cell once, blend the four nearest cells at every vertex, add its fixed wobble.
+  // This sets the target; the frame loop eases the real colours toward it.
+  for (let i = 0; i < world.cells.length; i++) tileColor(world.cells[i], cellColors[i]);
+  for (let i = 0; i < vertexBlend.length; i++) {
+    const self = world.cells[vertexCell[i]];
+    if (self.water) { _c.copy(cellColors[vertexCell[i]]); }
+    else {
+      _c.setRGB(0, 0, 0); let sum = 0;
+      for (const [k, wgt] of vertexBlend[i]) { if (world.cells[k].water) continue; const cc = cellColors[k]; _c.r += cc.r * wgt; _c.g += cc.g * wgt; _c.b += cc.b * wgt; sum += wgt; }
+      if (sum > 0) _c.multiplyScalar(1 / sum); else _c.copy(cellColors[vertexCell[i]]);
+      _c.offsetHSL(vertexTint[i * 2], 0, vertexTint[i * 2 + 1]);
+    }
+    targetColors[i * 3] = _c.r; targetColors[i * 3 + 1] = _c.g; targetColors[i * 3 + 2] = _c.b;
   }
-  col.needsUpdate = true;
+  if (!groundPainted) { groundColors.set(targetColors); groundGeo.attributes.color.needsUpdate = true; groundPainted = true; }
 }
-function tileColor(c, out, night) {
+let groundPainted = false;
+function easeGround() {
+  let moved = false;
+  for (let i = 0; i < groundColors.length; i++) { const d = targetColors[i] - groundColors[i]; if (Math.abs(d) > 0.002) { groundColors[i] += d * 0.08; moved = true; } }
+  if (moved) groundGeo.attributes.color.needsUpdate = true;
+}
+function tileColor(c, out) {
   if (c.water) return out.set('#5c9fcf');
   out.set(c.stony ? '#a9a398' : c.grass ? '#86a95a' : '#9db36a');
-  out.offsetHSL(0, 0, -c.wet * 0.12);
-  if (c.heat > 0) out.lerp(_warm, c.heat * 0.35);
-  if (covered(world, c.x, c.y)) out.offsetHSL(0, 0, -0.08);
-  if (night) out.offsetHSL(0, -0.1, -0.16);
+  out.offsetHSL(0, 0.02 * c.wet, -c.wet * 0.05);
+  if (c.heat > 0) out.lerp(_warm, c.heat * 0.3);
+  if (covered(world, c.x, c.y)) out.offsetHSL(0, 0, -0.06);
   return out;
+}
+// Daylight as a smooth curve over the day: dawn around hour 5, dusk around hour 16.
+function daylight() {
+  const h = world.tick % DAY;
+  const up = Math.min(1, Math.max(0, (h - 4.5) / 2)), down = Math.min(1, Math.max(0, (h - 15) / 2));
+  const d = up * (1 - down);
+  return d * d * (3 - 2 * d);
+}
+const SKY_DAY = new THREE.Color('#d8e9f1'), SKY_NIGHT = new THREE.Color('#34405e'), SUN_DAY = new THREE.Color('#fff1d6'), SUN_NIGHT = new THREE.Color('#8fa6d8');
+let lightNow = 1;
+function easeLight() {
+  lightNow += (daylight() - lightNow) * 0.06;
+  const d = lightNow;
+  sun.intensity = 0.7 + 1.3 * d; hemi.intensity = 0.5 + 0.4 * d;
+  sun.color.copy(SUN_NIGHT).lerp(SUN_DAY, d);
+  scene.background.copy(SKY_NIGHT).lerp(SKY_DAY, d); scene.fog.color.copy(scene.background);
+  renderer.toneMappingExposure = 0.9 + 0.15 * d;
 }
 
 // ---- things ----------------------------------------------------------------------------
@@ -193,9 +232,6 @@ function sync() {
     const kind = c.carrying ? c.carrying.kind : null;
     if (kind !== u.heldKind) { u.held.clear(); if (kind) { const m = makeBody(kind); m.scale.setScalar(0.7); m.position.set(0, 0, 0); m.castShadow = false; u.held.add(m); } u.heldKind = kind; }
   });
-  const night = isNight(world);
-  sun.intensity = night ? 0.8 : 2.0; hemi.intensity = night ? 0.55 : 0.9;
-  scene.background.set(night ? '#2b3550' : '#d8e9f1'); scene.fog.color.copy(scene.background);
 }
 
 // ---- story and fire report, read incrementally from the log ----------------------------------
@@ -279,8 +315,9 @@ function frame(t) {
   }
   for (const g of objMeshes.values()) { const f = g.userData.flame; if (f.visible) { f.scale.set(1 + Math.sin(s * 9) * 0.12, 1 + Math.sin(s * 13) * 0.2, 1); f.rotation.y = s * 2; } }
   for (const l of flameLights) if (l.visible) l.intensity = 1.8 + Math.sin(s * 11 + l.position.x) * 0.3;
+  easeLight(); easeGround();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 sync(); drawHud(); requestAnimationFrame(frame);
-window.__lab = { world, scene, renderer, camera, sync, drawHud };
+window.__lab = { world, scene, renderer, camera, sync, drawHud, easeLight, easeGround };
