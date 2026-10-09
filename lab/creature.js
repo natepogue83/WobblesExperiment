@@ -351,8 +351,8 @@ export function creatureStep(world, c) {
     }
     case 'rest': {
       c.needs.rest = Math.min(1, c.needs.rest + 0.1);
-      if (covered(world, c.x, c.y)) c.needs.warmth = Math.min(1, c.needs.warmth + 0.015);
-      else if (walled(world, c.x, c.y)) c.needs.warmth = Math.min(1, c.needs.warmth + 0.008);
+      if (covered(world, c.x, c.y)) c.needs.warmth = Math.min(1, c.needs.warmth + 0.02);
+      else if (walled(world, c.x, c.y)) c.needs.warmth = Math.min(1, c.needs.warmth + 0.012);
       outcome = cell && cell.heat > 0 ? 'cosy' : covered(world, c.x, c.y) ? 'sheltered' : walled(world, c.x, c.y) ? 'snug' : isNight(world) ? 'cold_rest' : 'rested';
       break;
     }

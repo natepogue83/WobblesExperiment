@@ -67,7 +67,7 @@ section('Lab: the deeper world holds together (tools, wood, the prowler)');
   assert.ok(visits >= 4, 'the prowler came ' + visits);
   assert.ok(shards >= 1, 'shards in ' + shards);
   assert.ok(alive >= 3, 'colonies with 3+ alive: ' + alive);
-  ok();
+  ok('30 days: the prowler came ' + visits + ' times and was driven off ' + drove + '; a shard was struck in ' + shards + '/4 colonies; 3+ alive at the end in ' + alive + '/4');
 }
 
 section('Lab: deterministic');

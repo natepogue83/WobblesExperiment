@@ -108,11 +108,17 @@ export function worldStep(world) {
   // Growth: grass tufts and berries come back slowly; tall bushes refruit.
   if (t % 12 === 0) {
     for (const ob of live(world)) if (ob.kind === 'tallbush' && (ob.fruit || 0) < 6 && r() < 0.5) ob.fruit = (ob.fruit || 0) + 1;
+    for (const ob of live(world)) if (ob.kind === 'grass' && !ob.held && ob.grown !== undefined && t - ob.grown > 15 * DAY && r() < 0.3) ob.gone = true;
     // Saplings grow into trees in about twelve days; a few saplings come up where nothing stands.
     for (const ob of live(world)) if (ob.kind === 'sapling' && t - (ob.planted || 0) > 12 * DAY) { ob.kind = 'tree'; ob.hp = 6; emit(world, { kind: 'grew', obj: ob.id, x: ob.x, y: ob.y }); }
     if (r() < 0.25 && live(world).filter(o => o.kind === 'tree' || o.kind === 'sapling').length < 9) { const c = world.cells[Math.floor(r() * world.cells.length)]; if (!c.water && !c.stony && !objectsAt(world, c.x, c.y).length) addObject(world, 'sapling', c.x, c.y, { planted: t }); }
     for (const c of world.cells) {
-      if (c.grass && r() < 0.22 && objectsAt(world, c.x, c.y).length < 2) addObject(world, r() < 0.45 ? 'grass' : 'berry', c.x, c.y);
+      if (!c.grass || r() >= 0.22) continue;
+      const here = objectsAt(world, c.x, c.y);
+      if (here.some(o => MATERIALS[o.kind].fixed) || here.length >= 4) continue;
+      // Berries come back where there are none; a tuft only where there is no tuft.
+      if (r() < 0.45) { if (!here.some(o => o.kind === 'grass')) addObject(world, 'grass', c.x, c.y, { grown: t }); }
+      else if (!here.some(o => o.kind === 'berry')) addObject(world, 'berry', c.x, c.y, { grown: t });
     }
   }
 }

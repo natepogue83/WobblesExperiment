@@ -180,6 +180,60 @@ export function tallbush(v, seed = 11) {
   }
   return g;
 }
+// A standing tree: a leaning trunk flaring at the root, a canopy of several lumps, a paler crown.
+// The notch (a pale wedge) shows once someone has cut into it.
+export function tree(v, seed = 11) {
+  const r = rngFor(seed, 'tree', v);
+  const g = new THREE.Group();
+  const lean = (r() - 0.5) * 0.3, h = 1.6 + v * 0.15;
+  const parts = [part(twig([[0, -0.05, 0], [lean * 0.3, h * 0.45, 0], [lean, h, 0]], 0.13, 8, 7), shadeBy(C.bark, (x, y) => y * 0.1 - 0.02), {})];
+  for (let i = 0; i < 4; i++) { const a = i * 1.57 + 0.4; parts.push(part(twig([[Math.cos(a) * 0.08, 0.02, Math.sin(a) * 0.08], [Math.cos(a) * 0.22, -0.02, Math.sin(a) * 0.22], [Math.cos(a) * 0.3, -0.06, Math.sin(a) * 0.3]], 0.06, 4, 5), C.barkDark, {})); }   // root flare
+  parts.push(part(twig([[lean * 0.6, h * 0.6, 0], [lean * 0.6 + 0.3, h * 0.72, 0.15], [lean * 0.6 + 0.5, h * 0.8, 0.25]], 0.05, 4, 5), C.bark, {}));
+  const blobs = [[0, h + 0.3, 0, 0.62], [-0.45, h + 0.1, 0.15, 0.42], [0.42, h + 0.15, -0.18, 0.45], [0.05, h + 0.75, 0.05, 0.42], [-0.15, h + 0.2, -0.45, 0.38], [0.2, h + 0.15, 0.45, 0.38]];
+  for (const [x, y, z, s] of blobs) parts.push(part(lump(s, r, 0.12, 1), shadeBy(C.bush[(v + 1) % 3], (px, py) => py * 0.4 - 0.04), { pos: [x + lean, y, z] }));
+  parts.push(part(lump(0.26, r, 0.1, 0), C.bushLight, { pos: [lean + 0.08, h + 1.05, 0.04] }));
+  const body = new THREE.Mesh(merged(parts), MAT.vc); body.castShadow = true; body.receiveShadow = true; g.add(body);
+  const notch = new THREE.Mesh(merged([part(new THREE.CylinderGeometry(0.0, 0.14, 0.16, 3), shadeBy(C.wood, (x, y) => y * 0.3), { pos: [lean * 0.2 + 0.1, 0.45, 0.03], rot: [0, 0, -Math.PI / 2] })]), MAT.vc);
+  notch.name = 'notch'; notch.visible = false; g.add(notch);
+  return g;
+}
+export function sapling(v, seed = 11) {
+  const r = rngFor(seed, 'sapling', v);
+  const parts = [part(twig([[0, 0, 0], [0.02, 0.3, 0.01], [(r() - 0.5) * 0.1, 0.6, 0]], 0.025, 5, 5), C.trunk, {})];
+  for (let i = 0; i < 3; i++) { const a = i * 2.1 + r(); parts.push(part(new THREE.SphereGeometry(0.1, 7, 5), shadeBy(C.bush[v % 3], (x) => x * 0.5), { pos: [Math.cos(a) * 0.1, 0.4 + i * 0.1, Math.sin(a) * 0.1], rot: [0, a, 0.4], scale: [1.6, 0.45, 0.9] })); }
+  return { geo: merged(parts) };
+}
+// A sharp shard: a flat, pointed flake of stone with a paler fresh edge.
+export function shard(v, seed = 11) {
+  const r = rngFor(seed, 'shard', v);
+  const parts = [part(new THREE.ConeGeometry(0.11, 0.3, 3), shadeBy(C.stone[2], (x, y, z) => y * 0.6 + (Math.abs(z) < 0.02 ? 0.1 : 0)), { pos: [0, 0.03, 0], rot: [Math.PI / 2 + 0.2, r() * 6, 0], scale: [1, 1, 0.35] })];
+  return { geo: merged(parts) };
+}
+// A shard on a stick: the stick, the shard wedged at one end, a wrap of pale fibre where it sits.
+export function axe(v, seed = 11) {
+  const r = rngFor(seed, 'axe', v);
+  const parts = [part(twig([[-0.3, 0.04, 0], [-0.05, 0.05, 0.02], [0.3, 0.045, 0]], 0.035, 8, 5), shadeBy(C.stick[v % 3], (x, y) => (y - 0.04) * 1.5), {})];
+  parts.push(part(new THREE.ConeGeometry(0.1, 0.26, 3), shadeBy(C.stone[2], (x, y) => y * 0.6), { pos: [0.28, 0.14, 0], rot: [0, 0, -0.3], scale: [1, 1, 0.35] }));
+  parts.push(part(new THREE.TorusGeometry(0.05, 0.016, 5, 8), C.seed, { pos: [0.27, 0.05, 0], rot: [0, Math.PI / 2 + 0.3, 0] }));
+  parts.push(part(new THREE.TorusGeometry(0.05, 0.014, 5, 8), shade(C.seed, -0.08), { pos: [0.23, 0.05, 0], rot: [0, Math.PI / 2 + 0.3, 0] }));
+  return { geo: merged(parts) };
+}
+// The prowler: low, long and dark, with a narrow head, pricked ears, a ragged tail and two pale eyes.
+export function prowler(seed = 11) {
+  const r = rngFor(seed, 'prowler');
+  const g = new THREE.Group();
+  const dark = '#2a2328', darker = '#1b171b';
+  const parts = [part(lump(0.26, r, 0.12, 1, [1.9, 0.9, 0.95]), shadeBy(dark, (x, y) => y * 0.35), { pos: [0, 0.42, 0] })];
+  parts.push(part(lump(0.16, r, 0.15, 1, [1.4, 0.9, 0.9]), shadeBy(dark, (x, y) => y * 0.3), { pos: [0.55, 0.5, 0] }));   // head
+  parts.push(part(new THREE.ConeGeometry(0.05, 0.3, 4), darker, { pos: [0.78, 0.46, 0], rot: [0, 0, -Math.PI / 2] }));   // muzzle
+  for (const sz of [-1, 1]) parts.push(part(new THREE.ConeGeometry(0.045, 0.16, 4), darker, { pos: [0.5, 0.68, sz * 0.09], rot: [sz * 0.3, 0, -0.2] }));   // ears
+  for (const [x, z] of [[0.35, 0.14], [0.35, -0.14], [-0.35, 0.15], [-0.35, -0.15]]) parts.push(part(new THREE.CylinderGeometry(0.035, 0.03, 0.42, 5), darker, { pos: [x, 0.21, z], rot: [0, 0, x > 0 ? 0.15 : -0.15] }));   // legs
+  parts.push(part(twig([[-0.5, 0.45, 0], [-0.75, 0.55, 0.05], [-0.95, 0.5, 0.1]], 0.035, 5, 4), darker, {}));   // tail
+  const body = new THREE.Mesh(merged(parts), MAT.vc); body.castShadow = true; g.add(body);
+  for (const sz of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 5), new THREE.MeshBasicMaterial({ color: '#f3e58a' })); e.position.set(0.66, 0.55, sz * 0.07); g.add(e); }
+  return g;
+}
+
 // The fire that sits on a burning ember: three nested flames and a few puffs of smoke.
 export function flames() {
   const g = new THREE.Group();
@@ -259,12 +313,13 @@ export function body(kind, v, seed = 11) {
   const key = kind + '#' + v;
   let made = cache.get(key);
   if (!made) {
-    const b = { stone, stick, grass, log, berry, root }[kind];
+    const b = { stone, stick, grass, log, berry, root, sapling, shard, axe }[kind];
     made = b ? b(v, seed) : null;
     cache.set(key, made || false);
   }
   if (made) { const m = new THREE.Mesh(made.geo, MAT.vc); m.castShadow = kind !== 'grass' && kind !== 'berry'; m.receiveShadow = true; m.userData.tintable = true; return m; }
   if (kind === 'ember') return ember(v, seed);
   if (kind === 'tallbush') return tallbush(v, seed);
+  if (kind === 'tree') return tree(v, seed);
   return new THREE.Mesh(lump(0.2, rngFor(seed, kind, v)), MAT.vc);
 }

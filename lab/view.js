@@ -162,7 +162,7 @@ function easeLight() {
 // Everything is modelled in props3d.js. A thing's variant and the way it lies come from its
 // id, so the same world always looks the same.
 const STEP = 0.32;   // how tall one unit of stacked footing is
-const objMeshes = new Map(), crMeshes = new Map();
+const objMeshes = new Map(), crMeshes = new Map(), prMeshes = new Map();
 const hashOf = id => { let h = 2166136261; for (const ch of id) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
 function makeBody(kind, h) { return P3.body(kind, h % 3, seed); }
 function makeObj(o) {
@@ -214,6 +214,7 @@ function sync() {
     // things lie at their own angle; a log on a stack lies square across it
     if (!MATERIALS[o.kind].fixed) b.rotation.y = idx > 0 && o.kind === 'log' ? 0.2 : ((h >> 3) % 628) / 100;
     if (o.kind === 'tallbush') b.userData.fruit.forEach((f, i) => { f.visible = i < (o.fruit || 0); });
+    if (o.kind === 'tree') { const n = b.getObjectByName('notch'); if (n) n.visible = (o.hp ?? 6) < 6; }
     const burning = o.burning > 0;
     u.fire.visible = burning;
     if (o.kind === 'ember') { const core = b.getObjectByName('core'); if (core) core.visible = burning || o.fuel > 0; }
@@ -230,6 +231,10 @@ function sync() {
     const kind = c.carrying ? c.carrying.kind : null;
     if (kind !== u.heldKind) { u.held.clear(); if (kind) { const m = makeBody(kind, hashOf(c.carrying.id)); m.scale.setScalar(0.7); m.position.set(0, 0, 0); m.traverse(x => { x.castShadow = false; }); u.held.add(m); } u.heldKind = kind; }
   });
+  // the prowler
+  const seenP = new Set();
+  for (const p of world.prowlers || []) { if (p.gone) continue; seenP.add(p.id); let g = prMeshes.get(p.id); if (!g) { g = P3.prowler(seed); scene.add(g); prMeshes.set(p.id, g); g.position.set(X(p.x), 0, Z(p.y)); } g.userData.tx = X(p.x); g.userData.tz = Z(p.y); }
+  for (const [id, g] of prMeshes) if (!seenP.has(id)) { scene.remove(g); prMeshes.delete(id); }
 }
 
 // ---- story and fire report, read incrementally from the log ----------------------------------
@@ -247,6 +252,12 @@ function readLog() {
     if (e.kind === 'fire_out') log.lines.push(`Day ${day}: the glow went out.`);
     if (e.kind === 'died') log.lines.push(`Day ${day}: ${e.who} died of ${e.cause}.`);
     if (e.kind === 'born') log.lines.push(`Day ${day}: ${e.who} was born.`);
+    if (e.kind === 'made_shard' && !log.shardTold) { log.shardTold = true; log.lines.push(`Day ${day}: ${e.who} struck stone on stone and a sharp shard broke off.`); }
+    if (e.kind === 'felled') log.lines.push(`Day ${day}: ${e.who} cut down a tree.`);
+    if (e.kind === 'joined') log.lines.push(`Day ${day}: ${e.who} drove a shard into a stick. It stayed.`);
+    if (e.kind === 'prowler_came' && !log.prowlerTold) { log.prowlerTold = true; log.lines.push(`Day ${day}: something came out of the dark at the edge.`); }
+    if (e.kind === 'attacked') log.lines.push(`Day ${day}: the beast got ${e.who}.`);
+    if (e.kind === 'drove_off') log.lines.push(`Day ${day}: ${e.who} drove the beast off with a ${e.material}.`);
   }
 }
 
@@ -260,7 +271,7 @@ function drawHud() {
   hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${living} alive, ${world.creatures.length - living} gone<br>` +
     (source ? `Fire burning, fuel ${source.fuel}, fed ${log.feeds} times` : log.feeds ? `No fire now; it was fed ${log.feeds} times` : 'No fire') +
     `<br><span class="muted">Click the ground to put down:</span><br>` +
-    ['ember', 'stick', 'grass', 'stone', 'log', 'berry'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +
+    ['ember', 'stick', 'grass', 'stone', 'log', 'berry', 'tree', 'shard'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +
     `<br><button data-act="rain">Rain</button><button data-act="pause">${running ? 'Pause' : 'Run'}</button><button data-act="fast">${speedMs < 200 ? 'Slow' : 'Fast'}</button>`;
   if (log.lines.length !== shownLines) { lines.innerHTML = log.lines.slice(-60).map(l => `<p>${l}</p>`).join(''); shownLines = log.lines.length; lines.scrollTop = lines.scrollHeight; }
   if (selected) {
@@ -313,6 +324,7 @@ function frame(t) {
     const blink = ((s * 0.7 + g.position.x * 0.37) % 1) < 0.06 ? 0.15 : 1; for (const e of u.eyes) { e.scale.y = blink; e.position.y = 0.38 - (1 - blink) * 0.02; }
     if (Math.abs(u.tx - g.position.x) + Math.abs(u.tz - g.position.z) > 0.02) g.lookAt(u.tx, g.position.y, u.tz);
   }
+  for (const g of prMeshes.values()) { const u = g.userData; g.position.x += (u.tx - g.position.x) * 0.1; g.position.z += (u.tz - g.position.z) * 0.1; if (Math.abs(u.tx - g.position.x) + Math.abs(u.tz - g.position.z) > 0.02) g.lookAt(u.tx, 0, u.tz); g.position.y = Math.abs(Math.sin(s * 6)) * 0.03; }
   for (const g of objMeshes.values()) if (g.userData.fire.visible) P3.animateFlames(g.userData.fire, s + g.userData.h % 7);
   for (const l of flameLights) if (l.visible) l.intensity = 1.8 + Math.sin(s * 11 + l.position.x) * 0.3;
   easeLight(); easeGround();
