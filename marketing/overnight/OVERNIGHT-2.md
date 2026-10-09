@@ -52,7 +52,11 @@ days. Fire-keeping, high fruit, cover and generations all still pass (15/15 test
 
 ## Evolution (`EVOLVE=1 node lab/run-deep.mjs`, 120 days, with and without the beast)
 
-See the line at the end of this file. Honest reading: the first settings emptied five of
+Final run: 7 of 8 colonies with the beast were still alive at day 120 (5 killed by it in all);
+caution rose in 1 of 8 with the beast and 5 of 8 without, and in several beast colonies it fell.
+So far the beast selects for boldness, not caution: the careful spend their nights fleeing and
+sheltering and forage less, so they have fewer children. That is a real result, not a bug, but
+it is not the pressure Nate had in mind yet. Honest reading: the first settings emptied five of
 eight colonies, not by killing but by draining them (lost nights and lost energy stopped
 births). Softened twice. A clear selection signal on caution is not there yet; it needs
 longer runs, larger populations, or a threat that singles out the careless more sharply.
