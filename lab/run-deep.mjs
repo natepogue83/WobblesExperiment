@@ -44,7 +44,7 @@ if (process.env.EVOLVE) {
   for (const s of SEEDS) {
     const rows = [];
     for (const threat of [true, false]) {
-      const w = newColony(s, 6, { threat, threatChance: 0.05 });
+      const w = newColony(s, 6, { threat });
       run(w, 48); keeperPlace(w, 'ember', 9, 5, { fuel: 120 }); run(w, 120 * 24 - 48);
       const dc = mean(w, 'caution') - start(w, 'caution'), db = mean(w, 'brawn') - start(w, 'brawn');
       const deaths = w.events.filter(e => e.kind === 'died'); const byBeast = deaths.filter(e => e.cause === 'the beast').length; killed += byBeast;

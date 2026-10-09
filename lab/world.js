@@ -38,7 +38,7 @@ export function createLab(seed, opts = {}) {
   }
   const world = {
     seed, tick: 0, cells, objects: [], creatures: [], events: [], nextId: 1,
-    weather: { rain: 0, lean: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, threat: true, leanEvery: 30 * DAY, leanFor: 8 * DAY, ...opts }
+    weather: { rain: 0, lean: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, threat: true, leanEvery: 30 * DAY, leanFor: 6 * DAY, ...opts }
   };
   // Scatter materials.
   const spawn = (kind, n, where) => { for (let i = 0; i < n; i++) { const c = where(); addObject(world, kind, c.x, c.y); } };
@@ -117,7 +117,7 @@ export function worldStep(world) {
     for (const ob of live(world)) if (ob.kind === 'sapling' && t - (ob.planted || 0) > 12 * DAY) { ob.kind = 'tree'; ob.hp = 6; emit(world, { kind: 'grew', obj: ob.id, x: ob.x, y: ob.y }); }
     if (r() < 0.25 && live(world).filter(o => o.kind === 'tree' || o.kind === 'sapling').length < 9) { const c = world.cells[Math.floor(r() * world.cells.length)]; if (!c.water && !c.stony && !objectsAt(world, c.x, c.y).length) addObject(world, 'sapling', c.x, c.y, { planted: t }); }
     for (const c of world.cells) {
-      if (!c.grass || r() >= (world.weather.lean ? 0.05 : 0.22)) continue;
+      if (!c.grass || r() >= (world.weather.lean ? 0.09 : 0.22)) continue;
       const here = objectsAt(world, c.x, c.y);
       if (here.some(o => MATERIALS[o.kind].fixed) || here.length >= 4) continue;
       // Berries come back where there are none; a tuft only where there is no tuft.
@@ -198,7 +198,7 @@ export function prowlerStep(world, r) {
   const night = isNight(world);
   // One at a time; it comes on some nights, from the edge, and goes at dawn.
   if (!world.prowlers.length) {
-    if (night && world.tick > 5 * DAY && r() < (world.opts.threatChance ?? 0.03)) {
+    if (night && world.tick > 5 * DAY && r() < (world.opts.threatChance ?? 0.02)) {
       const edges = world.cells.filter(c => !c.water && (c.x === 0 || c.y === 0 || c.x === W - 1 || c.y === H - 2));
       const c = edges[Math.floor(r() * edges.length)];
       world.prowlers.push({ id: 'p' + world.tick, x: c.x, y: c.y, came: world.tick, fed: 0 });
@@ -218,7 +218,7 @@ export function prowlerStep(world, r) {
       prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick };
       p.fed = 1;
       if (prey.needs.energy < 0.35 || (prey.hurt && world.tick - (prey.lastHurt || -999) < 2 * DAY)) { prey.alive = false; emit(world, { kind: 'died', who: prey.id, cause: 'the beast', x: prey.x, y: prey.y }); emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y, killed: true }); }
-      else { prey.needs.energy = Math.max(0.05, prey.needs.energy - 0.3); prey.lastHurt = world.tick; emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y }); }
+      else { prey.needs.energy = Math.max(0.05, prey.needs.energy - 0.15); prey.lastHurt = world.tick; emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y }); }
       continue;
     }
     const dx = Math.sign(prey.x - p.x), dy = Math.sign(prey.y - p.y);
