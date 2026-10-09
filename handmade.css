@@ -202,3 +202,29 @@ body { background: #2a2016; }
 
 /* Objects, thought bubbles and asks get the same inked outline as the Wobblins. */
 #world .obj:not(.obj-pond):not(.obj-scorch), #world #shrine, #world .wobblin .bubble, #world .wobblin .chat, #world .wobblin .want, #world .wobblin .ask { filter: url(#inked); }
+
+
+/* ---- small and light: a thin strip of HUD, a low tray ---------------------- */
+#hud { padding: 5px 10px 6px 10px; font-size: 12px; max-width: min(420px, calc(100vw - 24px)); transform: rotate(-.4deg); }
+#hud::before { display: none; }
+#hud .colony { font-size: 19px; display: flex; align-items: center; gap: 8px; }
+#hud .colony .age { font-size: 12px; }
+#hud .menu-btn { margin-left: auto; width: 28px; height: 26px; min-height: 0; padding: 0; font: 18px/1 var(--display); border: 1.5px solid var(--ink) !important; border-radius: var(--r-tag); background: none; box-shadow: none; color: var(--ink); }
+.stats-line, .keeper-title, .belief, .needs, .goal-line { font-size: 12px; margin-top: 1px; }
+.stats-line .stat svg { width: 11px; height: 11px; }
+.belief .bar { width: 90px; height: 8px; }
+.hud-buttons { margin-top: 5px; gap: 4px 5px; }
+.hud-buttons button { font-size: 13px; min-height: 26px; padding: 0 9px; }
+.hud-buttons a.waitlist { font-size: 12px; min-height: 26px; }
+.goal-line button.claim { font-size: 13px; min-height: 26px; padding: 0 10px; }
+#bars { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); gap: 6px; }
+#bars .bar { gap: 4px; }
+.tile { width: 52px; min-height: 46px; padding: 2px 1px 3px; }
+.tile .icon { width: 28px; height: 24px; }
+.tile .name { font-size: 11px; }
+.tile .note { font-size: 10px; padding: 0 4px; }
+@media (max-width: 700px) { .tile { width: calc((100% - 20px) / 5); max-width: 60px; } }
+.hud-buttons[hidden] { display: none; }
+/* Closed menu: just the name, the day and belief. Open it for the rest. */
+#hud.compact .keeper-title, #hud.compact .needs, #hud.compact .belief .next, #hud.compact .belief .devotion, #hud.compact .stats-line small { display: none; }
+#hud.compact .goal-line:not(:has(button)) { display: none; }

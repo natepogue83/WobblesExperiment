@@ -4,7 +4,7 @@
 // getScreenCTM.
 import { VIEW } from '../sim/geometry.js';
 
-const MIN_Z = 1, MAX_Z = 2.6;
+const MIN_Z = 1, MAX_Z = 4;
 
 export class Camera {
   constructor() { this.x = 0; this.y = 0; this.z = 1; this.tx = 0; this.ty = 0; this.tz = 1; this.last = ''; }

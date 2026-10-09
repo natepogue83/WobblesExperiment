@@ -234,7 +234,9 @@ export function wobblinMarkup(w, { emote = null, lookDx = 0 } = {}) {
   return `<title>${w.name} ${w.title || ''}</title>` + wobblinSVG({ ...w, face }, { lookDx }) + over;
 }
 
-export function wobblinScale(w) { return 1.7 * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1); }
+// Small creatures in a big quiet valley: about two thirds of the earlier size.
+export const WORLD_SCALE = 0.6;
+export function wobblinScale(w) { return 1.7 * WORLD_SCALE * (w.stage === 'baby' ? 0.62 : w.stage === 'elder' ? 0.95 : 1); }
 
 export function drawSVG(svg, rs, opts = {}) {
   svg.setAttribute('viewBox', `0 0 ${VIEW.w} ${VIEW.h}`);
@@ -252,12 +254,12 @@ export function drawSVG(svg, rs, opts = {}) {
   el('g', { id: 'art-defs' }, L.terrain).innerHTML = ART_DEFS;
   if (rs.trails && rs.trails.length) el('g', { id: 'trails', 'pointer-events': 'none' }, L.terrain).innerHTML = trailsSVG(rs.trails);
   const sh = ZONES.hill.shrine;
-  const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y}) scale(1.5)`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
+  const shrine = el('g', { id: 'shrine', transform: `translate(${sh.x},${sh.y}) scale(${1.5 * WORLD_SCALE})`, class: 'shrine' + (opts.offerings ? ' glowing' : '') }, L.structures);
   shrine.innerHTML = '<ellipse cx="0" cy="2" rx="18" ry="5" fill="rgba(0,0,0,.18)"/><rect x="-12" y="-26" width="24" height="26" rx="3" fill="#d6ccb5" stroke="#8f846f"/><path d="M-16 -26 L0 -38 L16 -26 Z" fill="#b9ab8e" stroke="#8f846f"/><circle cx="0" cy="-14" r="5" fill="#f3d36b"/>' +
     (opts.offerings ? '<circle class="halo-soft" cx="0" cy="-14" r="26" fill="#ffe28a" opacity=".35"/>' : '');
 
   for (const o of rs.objects.slice().sort((a, b) => a.y - b.y)) {
-    const k = OBJECT_SCALE[o.kind] || 1.3;
+    const k = (OBJECT_SCALE[o.kind] || 1.3) * WORLD_SCALE;
     const g = el('g', { id: o.id, transform: `translate(${o.x},${o.y}) scale(${k})`, class: 'obj obj-' + o.kind + (o.keeper && o.age < 1 ? ' fresh' : '') }, L[o.layer]);
     g.innerHTML = objectSVG(o);
     if (g.firstElementChild && g.firstElementChild.classList.contains('painted')) g.classList.add('painted');

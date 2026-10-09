@@ -2,7 +2,7 @@
 import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld, GEO, openAsk } from '../sim/index.js';
 import { unlockedCurios, hasPond } from '../sim/actions.js';
 import { experimentPreview, temperamentHints } from '../sim/experiment.js';
-import { renderState, drawSVG, OBJECT_SCALE } from '../render/render.js';
+import { renderState, drawSVG, OBJECT_SCALE, WORLD_SCALE } from '../render/render.js';
 import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clearSave,
          exportSave, importSave, DEBUG_OFFSET_KEY } from './save.js';
 import { nowTickFor, localDayIndex, localHour, setClockMode, heartbeat, msToNextTick } from './clock.js';
@@ -132,7 +132,7 @@ function greetHand(svg, p) {
   let best = null, bd = 70;
   for (const w of lastRS.wobblins) {
     const q = puppets.position(w.id) || w;
-    const d = Math.hypot(q.x - p.x, (q.y - 50 - p.y) * 0.8);
+    const d = Math.hypot(q.x - p.x, (q.y - 34 - p.y) * 0.8);
     if (d < bd) { bd = d; best = w; }
   }
   if (!best || now - (greeted[best.id] || 0) < 6000) return;
@@ -262,7 +262,7 @@ function beliefPop(delta, a) {
   if (!world.unlocked || Math.abs(delta) < 0.25) return;
   const at = a.slot && GEO.slotInfo(a.slot);
   const tgt = (a.onto || a.target) && lastRS && (lastRS.wobblins.find(x => x.id === (a.onto || a.target)) || lastRS.objects.find(x => x.id === a.target));
-  const pos = at ? { x: at.x, y: at.y - 40 } : tgt ? { x: (puppets.position(tgt.id) || tgt).x, y: (puppets.position(tgt.id) || tgt).y - 90 } : { x: 600, y: 300 };
+  const pos = at ? { x: at.x, y: at.y - 40 } : tgt ? { x: (puppets.position(tgt.id) || tgt).x, y: (puppets.position(tgt.id) || tgt).y - 62 } : { x: 600, y: 300 };
   const svg = $('#world');
   const m = svg.getScreenCTM();
   if (!m) return;
@@ -306,7 +306,7 @@ function statPops(before, delay = 0) {
     el.className = 'stat-pop ' + p.cls;
     el.textContent = p.text;
     el.style.left = (m.a * pos.x + m.e) + 'px';
-    el.style.top = (m.d * (pos.y - 96) + m.f) + 'px';
+    el.style.top = (m.d * (pos.y - 66) + m.f) + 'px';
     document.body.append(el);
     setTimeout(() => el.remove(), 2200);
   }, delay + j * 650));
@@ -602,7 +602,7 @@ function wireObjects(svg) {
       onStart: () => { dragging = true; base = g.getAttribute('transform'); g.classList.add('held'); g.parentNode.append(g); document.body.classList.add('is-dragging'); play('lift'); },
       onMove: ev => {
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
-        g.setAttribute('transform', `translate(${p.x},${p.y + 10}) scale(${(OBJECT_SCALE[o.kind] || 1.3) * 1.1})`);
+        g.setAttribute('transform', `translate(${p.x},${p.y + 10}) scale(${(OBJECT_SCALE[o.kind] || 1.3) * WORLD_SCALE * 1.1})`);
         const s = nearestFree(p, o);
         drawHint(svg, s ? { ...slotXY(s), r: 22, ok: true, label: zoneLabel(s.split('.')[0]) } : { x: p.x, y: p.y + 10, r: 22, ok: false, label: 'no room' });
       },
@@ -713,10 +713,10 @@ function wireWobblins(svg) {
             if (!held.shaken && held.flips.length >= 5) { held.shaken = true; g.classList.add('shook'); play('boing'); }
           }
         }
-        const s = w.stage === 'baby' ? 1.05 : 1.8;
-        g.setAttribute('transform', `translate(${p.x},${p.y + 30}) scale(${s})`);
+        const s = (w.stage === 'baby' ? 1.05 : 1.8) * WORLD_SCALE;
+        g.setAttribute('transform', `translate(${p.x},${p.y + 20}) scale(${s})`);
         const z = zoneAt(p);
-        const onto = landingTarget(w.id, p.x, p.y + 30);
+        const onto = landingTarget(w.id, p.x, p.y + 20);
         drawHint(svg, { x: p.x, y: p.y + 34, r: 30, ok: true, label: onto ? ontoLabel(onto) : zoneLabel(z) });
       },
       onDrop: ev => dropHeld(ev),
@@ -742,12 +742,12 @@ function wireWobblins(svg) {
         const p = toSvgPoint(svg, pt.x, pt.y);
         if (!overSvg(svg, pt.x, pt.y)) { juggles[w.id] = 0; g.setAttribute('transform', base); g.classList.remove('held'); puppets.pin(w.id, false); return; }
         const v = ev ? releaseVelocity(trail) : { x: 0, y: 0 };
-        if (Math.hypot(v.x, v.y) > FLING_SPEED) { fling(svg, g, w, { x: p.x, y: p.y + 30 }, v); return; }
-        const water = waterAt(p.x, p.y + 30);
+        if (Math.hypot(v.x, v.y) > FLING_SPEED) { fling(svg, g, w, { x: p.x, y: p.y + 20 }, v); return; }
+        const water = waterAt(p.x, p.y + 20);
         const zone = water || zoneAt(p);
-        const onto = landingTarget(w.id, p.x, p.y + 30);
+        const onto = landingTarget(w.id, p.x, p.y + 20);
         dropped[w.id] = { at: Date.now() };
-        puppets.place(w.id, p.x, p.y + 30);
+        puppets.place(w.id, p.x, p.y + 20);
         play(water ? 'splash' : 'drop');
         act({ type: 'nudge', nudge: 'carry', target: w.id, zone, ...(water ? { splash: true } : {}), ...(onto ? { onto } : {}), ...flags, ...juggledFlag(w.id) });
         const last = world.events[world.events.length - 1];
@@ -815,7 +815,7 @@ function fling(svg, g, w, start, v) {
   dragging = true;
   play('whoosh');
   g.classList.add('flying');
-  const s = w.stage === 'baby' ? 1.05 : 1.8;
+  const s = (w.stage === 'baby' ? 1.05 : 1.8) * WORLD_SCALE;
   // Thrown downward, it lands further down the valley (maybe in the river).
   const ground = Math.max(300, Math.min(640, start.y + 25 + Math.max(0, v.y) * 140));
   let x = start.x, y = start.y, vx = v.x, vy = v.y, spin = 0, bounces = 0, last = performance.now();
@@ -894,7 +894,7 @@ function riverAfter(w, x, water) {
 
 // What a dropped or flung Wobblin lands on: another Wobblin first, then a thing.
 function landingTarget(id, x, y) {
-  let best = null, bd = 42;
+  let best = null, bd = 32;
   for (const w of lastRS.wobblins) {
     if (w.id === id) continue;
     const p = puppets.position(w.id) || w;
@@ -902,10 +902,10 @@ function landingTarget(id, x, y) {
     if (d < bd) { bd = d; best = w.id; }
   }
   if (best) return best;
-  bd = 40;
+  bd = 30;
   for (const o of lastRS.objects) {
     if (o.kind === 'grave' && Math.hypot(o.x - x, o.y - y) > 14) continue;
-    const r = o.kind === 'boulder' || o.kind === 'temple' || o.kind === 'pond' ? 60 : o.kind === 'hut' ? 46 : 32;
+    const r = o.kind === 'boulder' || o.kind === 'temple' || o.kind === 'pond' ? 44 : o.kind === 'hut' ? 34 : 24;
     const d = Math.hypot(o.x - x, (o.y - 12 - y) * 1.2);
     if (d < Math.min(bd, r)) { bd = d; best = o.id; }
   }
@@ -1032,6 +1032,7 @@ const HUD_ICON = {
   disc: '<svg viewBox="-8 -8 16 16" width="14" height="14" aria-hidden="true"><path d="M0 -6.5 Q4.6 -6.5 4.6 -2 Q4.6 .8 2 2.6 V4.5 H-2 V2.6 Q-4.6 .8 -4.6 -2 Q-4.6 -6.5 0 -6.5 Z" fill="#ffe36b" stroke="#c9a23a" stroke-width=".9"/><rect x="-2" y="5" width="4" height="1.6" rx=".6" fill="#a8a29a"/></svg>'
 };
 
+let menuOpen = false;
 function drawHud() {
   const pop = world.wobblins.filter(w => w.alive).length;
   const n = Object.values(world.discoveries).filter(d => !d.forgotten).length;
@@ -1056,7 +1057,7 @@ function drawHud() {
   const needs = (asker ? `${asker.name} is asking for ${ASK_TEXT[ask.want]}` + (colonyNeeds() ? ' · ' : '') : '') + colonyNeeds();
   const needLine = document.createElement('div'); needLine.className = 'needs';
   needLine.textContent = needs || 'Everyone is doing fine.';
-  const row = document.createElement('div'); row.className = 'hud-buttons';
+  const row = document.createElement('div'); row.className = 'hud-buttons'; row.hidden = !menuOpen;
   const btn = (label, fn, cls = '', short = null) => { const b = document.createElement('button'); if (short) b.innerHTML = `<span class="full">${label}</span><span class="short">${short}</span>`; else b.textContent = label; b.className = cls; b.onclick = () => { document.querySelector('#panel').dataset.who = ''; fn(); }; row.append(b); };
   btn('Chronicle', () => { $('#panel').dataset.who = ''; showChronicle($('#panel'), world, { onPick: ids => highlightEvents(ids) }); });
   btn('Discovery Book', () => showBook($('#panel'), world), '', 'Book');
@@ -1082,6 +1083,9 @@ function drawHud() {
   const kt = keeperTitle(world);
   const k = document.createElement('div');
   if (kt) { k.className = 'keeper-title ' + kt.tone; k.textContent = (kt.tone === 'fond' ? 'They lovingly call you ' : kt.tone === 'wary' ? 'They whisper about ' : 'They call you ') + kt.name; }
+  hud.classList.toggle('compact', !menuOpen);
+  const menu = document.createElement('button'); menu.className = 'menu-btn'; menu.setAttribute('aria-label', 'Menu'); menu.textContent = menuOpen ? '×' : '☰'; menu.onclick = () => { menuOpen = !menuOpen; drawHud(); };
+  name.append(menu);
   hud.append(name, line, ...(kt ? [k] : []), belief, goal, needLine, row);
   placeCoach();
 }
