@@ -23,7 +23,7 @@ function whereOf(world, a) {
   if (a.onto) { const w = world.wobblins.find(x => x.id === a.onto); if (w) return w.zone; }
   if (a.nudge === 'carry') return a.zone;
   if (a.power === 'water' && !a.slot) return 'pondsite';
-  if (a.target) { const w = world.wobblins.find(x => x.id === a.target); return w ? w.zone : null; }
+  if (a.target) { const w = world.wobblins.find(x => x.id === a.target); if (w) return w.zone; const o = world.objects.find(x => x.id === a.target); return o ? o.zone : null; }
   if (a.targets) { const w = world.wobblins.find(x => x.id === a.targets[0]); return w ? w.zone : null; }
   return null;
 }
@@ -66,6 +66,7 @@ function feel(world, w, a, here, r) {
     case 'curio': s = (a.targets.includes(w.id) ? 0.4 : 0) + 0.5 * T.curiosity; break;
     case 'miracle': s = 0.8; break;
     case 'move': s = 0.1 + 0.4 * T.curiosity; break;
+    case 'poke': s = 0.15 + 0.4 * T.playfulness + 0.2 * T.curiosity; break;
     case 'rename': s = w.id === a.target ? 0.7 + 0.2 * T.sociability : 0.2 + 0.2 * T.curiosity; break;
     case 'gift': s = 0.3 + 0.5 * T.playfulness; break;
     case 'collect_offerings': s = w.faith > 0.3 ? 0.5 : 0.1; break;

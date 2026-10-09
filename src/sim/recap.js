@@ -40,6 +40,7 @@ export function actionName(ev) {
     case 'quake': return 'earthquake';
     case 'rename': return 'new name';
     case 'move': return 'tidy-up';
+    case 'poke': return 'poke at the ' + item(d.kind);
     case 'carry': return d.thrown ? 'throw' : 'lift';
   }
   return 'touch';
@@ -229,6 +230,21 @@ function templates(world, e, ctx) {
         trampled: [`You flung ${name} into the garden and flattened the crops.`, `${name} landed in the vegetable patch. The gardeners are cross.`, `The garden has a ${name}-shaped dent in it.`],
         weeded: [`You set ${name} down in the garden, and they pulled some weeds.`, `${name} tidied the garden.`, `${name} pottered about in the garden.`],
         repainted: [`${name} repainted the mural you smudged.`, `The mural is fixed. ${name} painted over the smudge.`, `${name} touched up the mural.`],
+        nut_bonk: [`You shook the tree and a nut landed on ${name}'s head.` + (d.idea ? ' It knocked an idea loose.' : ''), `Bonk. A nut from the tree, straight onto ${name}.`, `${name} was under the tree when you shook it.`],
+        seed_shaken: [`You shook a seed out of the tree. It took root nearby.`, `A seed fell when you shook the tree.`, `The tree dropped a seed.`],
+        tree_shaken: [`You shook the tree. Leaves everywhere.`, `The tree rustled.`, `You gave the tree a shake.`],
+        berry_shower: [`You shook the bush and ${d.berries} berries rained down. The hungry ate well.`, `A shower of berries from the bush you shook.`, `Berries everywhere. Nobody complained.`],
+        bush_rustled: [`You rustled a bare bush.`, `The bush had nothing to give.`, `You shook the bush. Just leaves.`],
+        flare: [`You stirred the fire and it flared. ${d.scattered ? d.scattered + ' scattered.' : 'The bold grinned.'}`, `The fire leapt up when you poked it.`, `A flare from the fire. Sparks and squeals.`],
+        splashed: [`You slapped the pond and splashed everyone near it.` + (d.fish ? ' A fish jumped.' : ''), `Splash! The pond went everywhere.`, `You poked the pond. Fish jumped, Wobblins got wet.`],
+        ice_knock: [`You knocked on the ice. Solid.`, `The frozen pond rang like a drum.`, `Knock knock. Ice.`],
+        peek: [`You knocked on the hut and ${name} peeked out${d.woken ? ', half asleep' : ''}.`, `${name} poked a head out of the hut.`, `Someone's home: ${name} looked out.`],
+        hut_knock: [`You knocked on an empty hut.`, `Nobody home.`, `The hut was empty.`],
+        hum: [`You touched the ${item(d.on)} and it hummed. The devout went quiet.`, `The ${item(d.on)} hummed under your hand.`, `A hum from the ${item(d.on)}. They noticed.`],
+        boulder_thump: [`You thumped the boulder. It did not move.`, `The boulder, as ever, stayed put.`, `Thump. Boulder.`],
+        cairn_toppled: [`You tapped the cairn and it toppled.`, `The stone tower came down.`, `The cairn fell over.`],
+        stones_clack: [`You clacked the stones together.`, `Clack. Stones.`, `You poked at the stones.`],
+        snowman_wobble: [`You poked the snowman. It wobbled.`, `The snowman wobbled but stood.`, `A poke, a wobble, still a snowman.`],
         comforted: [`${name} ran over and hugged ${other} better.`, `${name} looked after ${other} until the dizziness passed.`, `${other} was hurting, so ${name} sat with them.`],
         bonk: [`${name} bumped into ${other}. Neither was pleased.`, `Bonk! ${name} and ${other} are not speaking.`, `${name} landed on ${other}. Oops.`],
         bowled_over: [`You flung ${name} straight into ${other}. Both went down like skittles.`, `${name} bowled ${other} over. There are hard feelings.`, `STRIKE! ${name} knocked ${other} flat.`],

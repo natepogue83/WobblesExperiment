@@ -1,6 +1,6 @@
 // app.js — clock, input, panels. The only place real time and the DOM meet the sim.
 import { tick, applyAction, replay, stateHash, giftOptions, BLESS_TRAITS, CONST, createWorld, GEO, openAsk } from '../sim/index.js';
-import { unlockedCurios, hasPond } from '../sim/actions.js';
+import { unlockedCurios, hasPond, POKABLE } from '../sim/actions.js';
 import { experimentPreview, temperamentHints } from '../sim/experiment.js';
 import { renderState, drawSVG, OBJECT_SCALE, WORLD_SCALE } from '../render/render.js';
 import { newSave, randomSeed, appendAction, popAction, loadSave, storeSave, clearSave,
@@ -680,13 +680,19 @@ function wireValley() {
 const MOVABLE_UI = new Set(['stones', 'gift', 'curio', 'sprout', 'clay']);
 function wireObjects(svg) {
   for (const o of lastRS.objects) {
-    if (!MOVABLE_UI.has(o.kind) || !o.slot) continue;
     const g = svg.querySelector('#' + o.id);
     if (!g) continue;
+    if (POKABLE.has(o.kind) && !MOVABLE_UI.has(o.kind)) {
+      // Tap it and it does its trick (a replayed action, so the Wobblins remember).
+      g.classList.add('pokable');
+      press(g, { onTap: ev => { if (armed) { dropItem(armed, toSvgPoint(svg, ev.clientX, ev.clientY)); return; } pokeThing(o, g); } });
+      continue;
+    }
+    if (!MOVABLE_UI.has(o.kind) || !o.slot) continue;
     g.classList.add('movable');
     let base = null;
     press(g, {
-      onTap: () => {},
+      onTap: () => { if (POKABLE.has(o.kind)) pokeThing(o, g); },
       onStart: () => { dragging = true; base = g.getAttribute('transform'); g.classList.add('held'); g.parentNode.append(g); document.body.classList.add('is-dragging'); play('lift'); },
       onMove: ev => {
         const p = toSvgPoint(svg, ev.clientX, ev.clientY);
@@ -704,6 +710,23 @@ function wireObjects(svg) {
       },
       onCancel: () => { dragging = false; document.body.classList.remove('is-dragging'); clearHint(svg); g.setAttribute('transform', base); draw(); }
     });
+  }
+}
+function pokeThing(o, g) {
+  const live = world.objects.find(x => x.id === o.id);
+  if (!live || live.state.gone) return;
+  if (live.state.pokedTick !== undefined && world.tick - live.state.pokedTick < 4) {
+    g.classList.remove('shaken'); void g.getBBox(); g.classList.add('shaken'); play('thud');
+    toast('It needs a little while before it does that again.');
+    return;
+  }
+  g.classList.remove('shaken'); void g.getBBox(); g.classList.add('shaken');
+  const seen = world.events.length;
+  if (act({ type: 'nudge', nudge: 'poke', target: o.id })) {
+    const el = $('#' + o.id); if (el) { el.classList.add('shaken'); }
+    const ie = world.events.slice(seen).find(e => e.kind === 'interaction');
+    if (ie && interactionToast(ie)) toast(interactionToast(ie));
+    if (ie && ['splashed', 'flare', 'berry_shower', 'nut_bonk'].includes(ie.data.what)) fx.push({ kind: ie.data.what === 'splashed' ? 'splash' : ie.data.what === 'flare' ? 'big' : 'sparkle', x: o.x, y: o.y, at: Date.now() });
   }
 }
 function nearestFree(p, o) {
@@ -1003,7 +1026,7 @@ function landingTarget(id, x, y) {
 const INTERACTION_TOAST = {
   swam: 'Cannonball! And a happy paddle back.', rescued: 'A friend wades in to the rescue!', swept_downstream: 'Whoosh! Off down the river...',
   paint_splat: 'SPLAT. A Wobblin-shaped smudge.', trampled: 'Squish. Right in the vegetable patch.',
-  juggled: 'Up, down, up, down!',
+  juggled: 'Up, down, up, down!', nut_bonk: 'Bonk! A nut.', seed_shaken: 'A seed shook loose.', tree_shaken: 'Rustle rustle.', berry_shower: 'Berry shower!', bush_rustled: 'Just leaves.', flare: 'Whoosh! The fire flares.', splashed: 'Splash!', ice_knock: 'Knock knock. Solid.', peek: 'Someone peeks out.', hut_knock: 'Nobody home.', hum: 'Hmmmm. It hums.', boulder_thump: 'Thump. Not going anywhere.', cairn_toppled: 'Clatter. Down it goes.', stones_clack: 'Clack.', snowman_wobble: 'Wobble.',
   hug: 'Aww, a hug.', comforted: 'A friend rushes over to help.', bonk: 'Bonk!', bowled_over: 'STRIKE! Bowled right over.', bush_squashed: 'Splat. Every berry squashed.', snack: 'Snack time.',
   stuck_in_tree: 'Stuck in a tree!', fire_walk: 'Walked right through the fire...', singed: 'HOT HOT HOT! Off to the river.', caught_fish: 'Caught a fish!',
   scared_fish: 'Cannonball! The fish fled.', through_the_roof: 'Right through the roof. Oops.', made_a_cairn: 'A neat little cairn.', treasure: 'Ooh, treasure.',

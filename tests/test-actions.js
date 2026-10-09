@@ -231,7 +231,7 @@ section('Belief unlocks powers (new games)');
   const w = createWorld(8, { progression: true });
   rejects(w, { seq: 1, t: 0, type: 'power', power: 'lightning', slot: 'meadow.1' }, 'locked_power');
   rejects(w, { seq: 2, t: 0, type: 'nudge', nudge: 'miracle' }, 'locked_power');
-  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'move', 'plant', 'rename', 'stone']);
+  assert.deepEqual(w.unlocked.slice().sort(), ['carry', 'gift', 'move', 'plant', 'poke', 'rename', 'stone']);
   // Keep doing things they enjoy until Lightning opens up.
   let seq = 10;
   for (let i = 0; i < 200 && !w.unlocked.includes('lightning'); i++) {

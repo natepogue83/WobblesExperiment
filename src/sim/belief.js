@@ -14,6 +14,7 @@ export const UNLOCKS = [
   { key: 'gift', at: 0, name: 'the Daily Gift' },
   { key: 'rename', at: 0, name: 'Naming' },
   { key: 'move', at: 0, name: 'Moving things' },
+  { key: 'poke', at: 0, name: 'Poking things' },
   { key: 'rain', at: 3, name: 'Rain' },
   { key: 'bless', at: 6, name: 'Bless' },
   { key: 'lightning', at: 10, name: 'Lightning' },

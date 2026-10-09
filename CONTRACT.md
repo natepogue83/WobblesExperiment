@@ -202,7 +202,7 @@ Chronicle, murals and the week-2 AI.
                                   // season: "cold"|"warm"
 { seq, t, type: "nudge", nudge: "bless"|"curio"|"miracle"|"carry"|"rename"|"move",
   target?, trait?, curio?, targets?, zone?,     // carry: pick a Wobblin up, set it down in zone
-  thrown?, splash?, onto?, cradled?, shaken?, juggled?,  // juggled: catches in mid-air, 2-50 (no cooldown; it stays put 3 ticks; never adds knowledge)
+  thrown?, splash?, onto?, cradled?, shaken?, juggled?,  // poke: { nudge: "poke", target: objectId } taps a tree/bush/fire/hearth/pond/hut/temple/totem/boulder/stones/snowman (4-tick rest per object; interactions.js pokeObject)  // juggled: catches in mid-air, 2-50 (no cooldown; it stays put 3 ticks; never adds knowledge)
   name?, slot? }                               // rename: target + name (/^[A-Za-z][A-Za-z' -]{0,13}$/);
                                              // move: target object (stones, gift, curio, sprout, clay) to a free slot
                                              // cradled: held still (rest up); shaken: shaken about (rattled)

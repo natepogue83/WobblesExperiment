@@ -83,7 +83,10 @@ export const TRICKS = [
   T('paint', 'paint_splat', 'Art, the hard way', 'Fling one into a mural.'),
   T('zap', 'zapped', 'Frizz', 'Drop lightning right on a Wobblin. A brave one, ideally.'),
   T('skate', 'skating', 'On thin ice', 'A cold snap freezes the pond. Then set one on it.'),
-  T('snowman', 'snowman_smashed', 'Poof', 'Fling one through a snowman.')
+  T('snowman', 'snowman_smashed', 'Poof', 'Fling one through a snowman.'),
+  T('nut', 'nut_bonk', 'Nut on the noggin', 'Tap a tree while someone is under it.'),
+  T('splash', 'splashed', 'Pond slap', 'Tap the pond with Wobblins beside it.'),
+  T('flare', 'flare', 'Playing with fire', 'Tap the fire.')
 ];
 export const GOAL_BY_ID = Object.fromEntries([...GOALS, ...TRICKS].map(g => [g.id, g]));
 

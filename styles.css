@@ -709,3 +709,8 @@ ul.help li b { font: 600 14px var(--display); color: #5a3412; }
 #panel .tricks-head { margin: 14px 0 2px; font: 600 15px var(--display); color: #5a3412; }
 .goals.tricks .goal b { font-weight: 700; }
 #panel .goals { max-height: none; overflow: visible; }   /* one scroll for the whole panel, not one per list */
+
+/* Tapped things wobble. */
+.obj.pokable { cursor: pointer; }
+.obj.shaken { animation: obj-shake .5s ease-in-out; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes obj-shake { 0%, 100% { rotate: 0deg; } 20% { rotate: -5deg; } 45% { rotate: 4deg; } 70% { rotate: -2deg; } }

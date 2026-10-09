@@ -10,14 +10,17 @@ import { emit } from './events.js';
 import { makeObject } from './world.js';
 import { strike, digPond, flood, freeSlotIn } from './nature.js';
 import { grantWishes } from './culture.js';
-import { landOnto, powerOnto, quake, riverDunk } from './interactions.js';
+import { landOnto, powerOnto, quake, riverDunk, pokeObject } from './interactions.js';
 import { reactToAction } from './reactions.js';
 import { GOAL_BY_ID, progressOf } from './goals.js';
 import { grantAsks } from './asks.js';
 import { isUnlocked, addBelief, BELIEF } from './belief.js';
 
 export const POWERS = ['stone', 'plant', 'rain', 'lightning', 'water', 'season', 'quake'];
-export const NUDGES = ['bless', 'curio', 'miracle', 'carry', 'rename', 'move'];
+export const NUDGES = ['bless', 'curio', 'miracle', 'carry', 'rename', 'move', 'poke'];
+// Things that do something when the Keeper taps them (interactions.js pokeObject).
+export const POKABLE = new Set(['tree', 'bush', 'fire', 'hearth', 'pond', 'hut', 'temple', 'totem', 'boulder', 'stones', 'snowman']);
+const POKE_REST = 4;   // ticks before the same thing does its trick again
 export const MOVABLE = new Set(['stones', 'gift', 'curio', 'sprout', 'clay']);
 export const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,13}$/;
 export const BLESS_TRAITS = ['curiosity', 'boldness', 'sociability', 'patience', 'caution', 'playfulness', 'piety'];
@@ -156,6 +159,12 @@ export function validateAction(world, a) {
         if (!slotInfo(a.slot) || a.slot === o.slot) return bad('slot');
         if (objectAtSlot(world, a.slot)) return bad('occupied');
         if (o.kind === 'sprout' && slotInfo(a.slot).zone === 'riverbank' && o.state.grows === 'tree') return bad('slot');
+        return { ok: true };
+      }
+      case 'poke': {
+        const o = world.objects.find(x => x.id === a.target);
+        if (!o || o.state.gone || !POKABLE.has(o.kind)) return bad('target');
+        if (o.state.pokedTick !== undefined && world.tick - o.state.pokedTick < POKE_REST) return bad('cooldown');
         return { ok: true };
       }
       case 'rename': {
@@ -411,6 +420,12 @@ function applyActionEffects(world, a) {
       const from = o.zone;
       o.slot = a.slot; o.zone = slotInfo(a.slot).zone;
       emit(world, { kind: 'keeper_nudge', actors: witnesses(world, o.zone), target: o.id, data: { nudge: 'move', kind: o.kind, from, zone: o.zone, slot: a.slot }, salience: 1, causes });
+    } else if (a.nudge === 'poke') {
+      // The Keeper taps something in the valley and it does its trick.
+      const o = world.objects.find(x => x.id === a.target);
+      o.state.pokedTick = t;
+      const ev = emit(world, { kind: 'keeper_nudge', actors: witnesses(world, o.zone), target: o.id, data: { nudge: 'poke', kind: o.kind, zone: o.zone }, salience: 1, causes });
+      pokeObject(world, o, a, ev);
     } else if (a.nudge === 'rename') {
       // The Keeper gives them a name of your own choosing. They rather like it.
       const w = findWobblin(world, a.target);

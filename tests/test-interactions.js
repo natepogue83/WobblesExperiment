@@ -225,6 +225,40 @@ section('Matchmaking');
   ok(`hugging two Wobblins together makes a match sooner: first pair after ${matched.toFixed(1)} days, against ${alone.toFixed(1)} left alone`);
 }
 
+section('Poking things: every prop is a toy');
+{
+  const w = createWorld(21, { barren: true });
+  const [a, b] = w.wobblins;
+  for (const x of [a, b]) { x.zone = 'meadow'; x.needs.food = 0.3; }
+  const tree = makeObject(w, { kind: 'tree', slot: 'meadow.1', origin: { natural: true } });
+  const bush = makeObject(w, { kind: 'bush', slot: 'meadow.2', origin: { natural: true }, state: { berries: 3 } });
+  const fire = makeObject(w, { kind: 'fire', slot: 'meadow.3', origin: { natural: true }, state: { until: 99 } });
+  let seq = 0;
+  const K = knowledge(w);
+  const poke = o => applyAction(w, { seq: ++seq, t: w.tick, type: 'nudge', nudge: 'poke', target: o.id });
+  assert.equal(poke({ id: 'o999' }).ok, false);
+  assert.equal(poke(bush).ok, true);
+  assert.equal(bush.state.berries, 0);
+  assert.ok(last(w, 'berry_shower') && a.needs.food > 0.3);
+  assert.equal(poke(bush).reason, 'cooldown');
+  let nuts = 0, seeds = 0;
+  for (let i = 0; i < 20; i++) { for (let k = 0; k < 4; k++) tick(w); for (const x of [a, b]) { x.zone = 'meadow'; x.lifespan = 99999; } const res = poke(tree); assert.equal(res.ok, true, res.reason); const e = w.events[w.events.length - 1]; if (e.data.what === 'nut_bonk') nuts++; if (e.data.what === 'seed_shaken') seeds++; }
+  assert.ok(nuts > 0 && seeds > 0, `nuts ${nuts} seeds ${seeds}`);
+  for (let k = 0; k < 4; k++) tick(w);
+  a.traits.boldness = 0.2; b.traits.boldness = 0.9; for (const x of [a, b]) x.zone = 'meadow';
+  const s0 = a.needs.safety;
+  assert.equal(poke(fire).ok, true);
+  assert.ok(last(w, 'flare') && a.needs.safety < s0);
+  assert.equal(knowledge(w), K, 'poking never adds knowledge');
+  const save = newSave({ seed: 21, createdAt: 0 });
+  const live = createWorld(21);
+  const t0 = live.objects.find(o => o.kind === 'tree' || o.kind === 'bush');
+  if (t0) applyAction(live, appendAction(save, 0, { type: 'nudge', nudge: 'poke', target: t0.id }));
+  for (let i = 0; i < 4; i++) tick(live);
+  assert.equal(stateHash(replay(parseSave(serializeSave(save)), 4)), stateHash(live));
+  ok(`tap a bush: berry shower; a tree: ${nuts} nuts on heads and ${seeds} seeds over 20 taps; the fire flares and scatters the timid; a rest between taps; it replays`);
+}
+
 section('Cradled or shaken');
 {
   const w = createWorld(41, { barren: true });

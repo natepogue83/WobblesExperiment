@@ -236,6 +236,83 @@ export function riverDunk(world, w, a, causes) {
   return say('swept_downstream', [w.id], { fish });
 }
 
+// The Keeper taps something and it does its trick: a tree drops a nut on
+// whoever is under it, a bush scatters berries, the fire flares, the pond
+// splashes, a hut's sleeper peeks out, the temple hums. Small, funny, and
+// the Wobblins remember it. Never adds knowledge.
+export function pokeObject(world, o, a, ev) {
+  const t = world.tick;
+  const r = rngFor(world.seed, 'poke', t, a.seq);
+  const causes = [{ event: ev.id }, { object: o.id }];
+  const here = witnessesOf(world, o.zone, []);
+  const say = (what, actors, data = {}, salience = 2) =>
+    emit(world, { kind: 'interaction', actors, target: o.id, data: { what, ...data }, salience, causes });
+  const pickOne = list => list.length ? list[Math.floor(r() * list.length)] : null;
+  switch (o.kind) {
+    case 'tree': {
+      const under = pickOne(here);
+      if (under && r() < 0.6) {
+        // A nut on the head: a bonk that sometimes knocks an idea loose.
+        mood(under, -0.05); under.heldUntil = t + 1;
+        for (const x of here) if (x !== under) mood(x, 0.03);
+        const idea = r() < 0.3;
+        if (idea) { const cur = under.temp.curiosity; if (!cur || cur.until <= t || cur.add < 0.12) under.temp.curiosity = { add: 0.12, until: t + 3 }; }
+        return say('nut_bonk', [under.id], { idea });
+      }
+      // Or a seed shakes loose and takes root nearby.
+      const slot = freeSlotIn(world, o.zone);
+      if (slot) {
+        makeObject(world, { kind: 'sprout', slot, origin: { event: ev.id }, state: { grows: r() < 0.5 ? 'tree' : 'bush', plantedTick: t } });
+        return say('seed_shaken', here.slice(0, 3).map(w => w.id), { slot });
+      }
+      return say('tree_shaken', here.slice(0, 3).map(w => w.id), {}, 1);
+    }
+    case 'bush': {
+      const n = o.state.berries || 0;
+      if (!n) return say('bush_rustled', here.slice(0, 2).map(w => w.id), {}, 1);
+      o.state.berries = 0;
+      const hungry = here.filter(w => w.needs.food < 0.7).slice(0, n);
+      for (const w of hungry) { w.needs.food = r3(clamp01(w.needs.food + 0.25)); mood(w, 0.05); }
+      return say('berry_shower', hungry.map(w => w.id), { berries: n });
+    }
+    case 'fire': case 'hearth': {
+      // A flare: the bold grin, the timid scatter.
+      for (const w of here) {
+        if (w.traits.boldness > 0.6) mood(w, 0.05);
+        else { w.needs.safety = r3(clamp01(w.needs.safety - 0.1)); mood(w, -0.03); w.heldUntil = t + 1; }
+      }
+      return say('flare', here.slice(0, 4).map(w => w.id), { scattered: here.filter(w => w.traits.boldness <= 0.6).length });
+    }
+    case 'pond': {
+      if (o.state.frozen) return say('ice_knock', here.slice(0, 2).map(w => w.id), {}, 1);
+      // Fish jump, and everyone close gets splashed.
+      for (const w of here) { w.wetUntil = t + 1; mood(w, w.traits.playfulness > 0.5 ? 0.06 : -0.04); }
+      const fish = liveObjects(world).find(x => x.kind === 'fish');
+      if (!fish && r() < 0.35) makeObject(world, { kind: 'fish', slot: null, zone: o.zone, origin: { event: ev.id }, state: { until: t + 6 } });
+      return say('splashed', here.slice(0, 4).map(w => w.id), { fish: !fish && r() < 0.35 });
+    }
+    case 'hut': {
+      const sleeper = pickOne(here.filter(w => w.activity === 'rest')) || pickOne(here);
+      if (!sleeper) return say('hut_knock', [], {}, 1);
+      mood(sleeper, sleeper.activity === 'rest' ? -0.04 : 0.02);
+      return say('peek', [sleeper.id], { woken: sleeper.activity === 'rest' });
+    }
+    case 'temple': case 'totem': {
+      for (const w of here) if (w.traits.piety > 0.5) { w.faith = r3(clamp(w.faith + 0.02, -1, 1)); mood(w, 0.03); }
+      return say('hum', here.filter(w => w.traits.piety > 0.5).slice(0, 4).map(w => w.id), { on: o.kind });
+    }
+    case 'boulder': return say('boulder_thump', here.slice(0, 2).map(w => w.id), {}, 1);
+    case 'stones':
+      if (o.state.stacked && r() < 0.5) { o.state.stacked = false; return say('cairn_toppled', here.slice(0, 2).map(w => w.id), {}); }
+      return say('stones_clack', here.slice(0, 2).map(w => w.id), {}, 1);
+    case 'snowman': {
+      if (r() < 0.3) { o.state.gone = true; o.hp = 0; return say('snowman_smashed', here.slice(0, 2).map(w => w.id), { by: o.state.by }, 3); }
+      return say('snowman_wobble', here.slice(0, 2).map(w => w.id), {}, 1);
+    }
+  }
+  return null;
+}
+
 // A Keeper power dropped right on a Wobblin's head. Pocket God slapstick, with
 // consequences: bumps and grudges, a flower crown, a frizzy zap that sometimes
 // knocks an idea loose (a short curiosity boost; the idea itself still has to be
