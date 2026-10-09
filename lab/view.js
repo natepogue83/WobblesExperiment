@@ -181,4 +181,4 @@ function frame(t) {
   requestAnimationFrame(frame);
 }
 sync(); drawHud(); requestAnimationFrame(frame);
-window.__lab = { world, scene, renderer, camera };
+window.__lab = { world, scene, renderer, camera, sync, drawHud };
