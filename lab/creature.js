@@ -227,8 +227,9 @@ export function creatureStep(world, c) {
   for (const k of others(world, c, 2)) {
     const watching = k.plan && k.plan.action === 'watch' && k.plan.target === c;
     const w = watching ? 0.45 : 0.15;
-    if (watching || r() < 0.5) remember(k, p.key, outcome, delta, w);
-    if (watching) emit(world, { kind: 'saw', who: k.id, whom: c.id, key: p.key, outcome, x: k.x, y: k.y });
+    const noticed = watching || r() < 0.5;
+    if (noticed) remember(k, p.key, outcome, delta, w);
+    if (noticed && (watching || ['fire_grew', 'sparks', 'hurt', 'ate'].includes(outcome))) emit(world, { kind: 'saw', who: k.id, whom: c.id, key: p.key, outcome, x: k.x, y: k.y });
   }
   c.plan = null;
 }
