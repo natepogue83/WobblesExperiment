@@ -31,7 +31,7 @@ export function createLab(seed, opts = {}) {
   }
   const world = {
     seed, tick: 0, cells, objects: [], creatures: [], events: [], nextId: 1,
-    weather: { rain: 0 }, opts: { rainEvery: 60, rainFor: 5, nightCold: true, ...opts }
+    weather: { rain: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, ...opts }
   };
   // Scatter materials.
   const spawn = (kind, n, where) => { for (let i = 0; i < n; i++) { const c = where(); addObject(world, kind, c.x, c.y); } };
@@ -72,17 +72,17 @@ export function worldStep(world) {
     // Wetting and drying. Heat dries fast.
     if (!ob.held) {
       if (world.weather.rain) ob.wet = Math.min(1, ob.wet + 0.5 * (0.3 + m.absorb));
-      else ob.wet = Math.max(0, ob.wet - 0.04 - (c ? c.heat * 0.3 : 0));
+      else ob.wet = Math.max(0, ob.wet - (isNight(world) ? 0.03 : 0.07) - (c ? c.heat * 0.3 : 0));
       if (c && c.water) ob.wet = 1;
     }
     // Fire: a source burns its fuel down; rain and wetness smother it.
     if (ob.burning > 0) {
       ob.fuel -= 1;
-      if (world.weather.rain) ob.fuel -= 1.5;
+      if (world.weather.rain) ob.fuel -= 0.8;
       if (ob.fuel <= 0) { ob.burning = 0; ob.fuel = 0; emit(world, { kind: 'fire_out', obj: ob.id, x: ob.x, y: ob.y }); if (m.source) ob.kind = 'stone'; else ob.gone = true; }
     }
     // Dry burnable things in a hot cell catch and feed the fire there.
-    if (!ob.held && ob.burning === 0 && m.burn > 0 && c && c.heat >= 1 && ob.wet < 0.35) {
+    if (!ob.held && ob.burning === 0 && m.burn > 0 && c && c.heat >= 1 && ob.wet < 0.45) {
       const source = objectsAt(world, ob.x, ob.y).find(s => s.burning > 0);
       if (source && r() < m.burn) {
         const fuel = Math.round(9 * m.burn * Math.max(0.5, m.weight) * (1 - ob.wet));
@@ -90,7 +90,7 @@ export function worldStep(world) {
         emit(world, { kind: 'fed_fire', obj: ob.id, material: ob.kind, fuel, source: source.id, x: ob.x, y: ob.y });
       }
     }
-    if (!ob.held && ob.burning === 0 && m.burn > 0 && c && c.heat >= 1 && ob.wet >= 0.35 && objectsAt(world, ob.x, ob.y).some(s => s.burning > 0)) {
+    if (!ob.held && ob.burning === 0 && m.burn > 0 && c && c.heat >= 1 && ob.wet >= 0.45 && objectsAt(world, ob.x, ob.y).some(s => s.burning > 0)) {
       if (!ob.hissed || t - ob.hissed > 3) { ob.hissed = t; emit(world, { kind: 'hiss', obj: ob.id, material: ob.kind, x: ob.x, y: ob.y }); }
     }
   }

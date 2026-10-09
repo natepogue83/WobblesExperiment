@@ -33,7 +33,7 @@ export function keeperPlace(world, kind, x, y, state = {}) {
 export function clone(world) {
   const w = JSON.parse(JSON.stringify({ ...world, creatures: [], objects: world.objects.map(o => ({ ...o })) }));
   const byId = Object.fromEntries(w.objects.map(o => [o.id, o]));
-  w.creatures = world.creatures.map(c => ({ ...c, needs: { ...c.needs }, genome: { ...c.genome }, bonds: { ...c.bonds }, plan: null,
+  w.creatures = world.creatures.map(c => ({ ...c, needs: { ...c.needs }, genome: { ...c.genome }, bonds: { ...c.bonds }, places: JSON.parse(JSON.stringify(c.places || {})), plan: null,
     carrying: c.carrying ? byId[c.carrying.id] : null, episodes: c.episodes.slice(),
     exp: new Map([...c.exp].map(([k, e]) => [k, { ...e, outcomes: { ...e.outcomes } }])) }));
   return w;

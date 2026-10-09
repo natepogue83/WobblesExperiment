@@ -19,7 +19,7 @@ export function makeCreature(world, id, genome, x, y) {
     // Inherited: how they learn and what moves them. Changes slowly, by evolution only.
     genome: { curiosity: 0.5, patience: 0.5, sociability: 0.5, learnRate: 1, caution: 0.5, ...genome },
     // Learned: expectations about (seen features, action) -> outcomes, and a few episodes.
-    exp: new Map(), episodes: [],
+    exp: new Map(), episodes: [], places: {},
     plan: null, bonds: {}, born: world.tick, acted: 0
   };
   world.creatures.push(c);
@@ -46,9 +46,18 @@ function others(world, c, d = VIEW) { return world.creatures.filter(k => k !== c
 function needDelta(before, after) { return (after.energy - before.energy) * 1.0 + (after.warmth - before.warmth) * 1.2 + (after.rest - before.rest) * 0.6 + (after.social - before.social) * 0.5; }
 
 // ---- what could I do right now? ----------------------------------------------------------------
+const REMEMBER_FOR = 240;   // ticks a remembered place stays worth a trip
+function notePlaces(world, c) {
+  for (const o of visible(world, c)) c.places[featureKey(lookAt(world, o))] = { x: o.x, y: o.y, t: world.tick };
+}
+// Something I remember seeing somewhere, as a target I can walk to.
+function remembered(c, fk, p) { return { x: p.x, y: p.y, remembered: fk, kind: null }; }
+
 function options(world, c) {
   const out = [];
   const seen = visible(world, c);
+  notePlaces(world, c);
+  const seenKeys = new Set(seen.map(o => featureKey(lookAt(world, o))));
   const carryFk = c.carrying ? featureKey(lookAt(world, c.carrying)) : null;
   for (const o of seen) {
     const fk = featureKey(lookAt(world, o));
@@ -59,6 +68,13 @@ function options(world, c) {
       out.push({ action: 'place', target: o, key: expKey(fk, 'place', carryFk) });     // put what I carry where this is
       out.push({ action: 'strike', target: o, key: expKey(fk, 'strike', carryFk) });   // hit this with what I carry
     }
+  }
+  // Out of sight but remembered: worth fetching or carrying something to, if experience says so.
+  for (const [fk, p] of Object.entries(c.places)) {
+    if (seenKeys.has(fk) || world.tick - p.t > REMEMBER_FOR) continue;
+    const tgt = remembered(c, fk, p);
+    if (!c.carrying) out.push({ action: 'pickup', target: tgt, key: expKey(fk, 'pickup'), far: true });
+    else if (fk !== carryFk) { out.push({ action: 'place', target: tgt, key: expKey(fk, 'place', carryFk), far: true }); out.push({ action: 'strike', target: tgt, key: expKey(fk, 'strike', carryFk), far: true }); }
   }
   if (c.carrying) out.push({ action: 'place', target: null, key: expKey('ground', 'place', carryFk) });
   for (const k of others(world, c)) out.push({ action: 'watch', target: k, key: expKey('creature', 'watch') });
@@ -78,17 +94,18 @@ function score(world, c, opt, r) {
     s += e.value * 3;
     // Chains: if what I carry has led somewhere good when placed/struck, carrying it is worth something.
     if (opt.action === 'pickup') {
-      const fk = featureKey(lookAt(world, opt.target));
+      const fk = opt.target.remembered || featureKey(lookAt(world, opt.target));
       let best = 0;
       for (const [k, v] of c.exp) if (k.includes('+' + fk) && v.value > best) best = v.value;
       s += best * 2.2 * (0.5 + g.patience);
     }
   } else if (opt.action === 'pickup') {
-    const fk = featureKey(lookAt(world, opt.target));
+    const fk = opt.target.remembered || featureKey(lookAt(world, opt.target));
     let best = 0;
     for (const [k, v] of c.exp) if (k.includes('+' + fk) && v.value > best) best = v.value;
     s += best * 2.2 * (0.5 + g.patience);
   }
+  if (opt.far) { if (s <= 0.08 && (!e || e.value <= 0.02)) return -Infinity; s -= 0.4; }
   // Curiosity: things I have tried a few times but not settled are the most interesting.
   const tries = e ? e.n : 0;
   const unsettled = tries < 1 ? 0.7 : tries < 4 ? 1 : tries < 8 ? 0.5 : 0.1;
@@ -100,7 +117,7 @@ function score(world, c, opt, r) {
   if (opt.action === 'watch') s += g.sociability * (0.05 + (1 - n.social) * 0.7);
   if (opt.action === 'wander') s += 0.15 + (1 - n.energy) * 0.3;
   // Instinct: when cold, warm-looking things draw you (what happens there is still learned).
-  if (opt.action === 'approach') s += (opt.target.burning > 0 || (cellAt(world, opt.target.x, opt.target.y) || {}).heat > 0 ? (1 - n.warmth) * 1.8 : 0) - 0.35;
+  if (opt.action === 'approach') s += ((opt.target.burning > 0) || (cellAt(world, opt.target.x, opt.target.y) || {}).heat > 0 ? (1 - n.warmth) * 1.8 : 0) - 0.35;
   if (opt.action === 'rest' && cell0(world, c).heat > 0) s += (1 - n.warmth) * 1.2;
   // Distance costs effort.
   if (opt.target && !near(c, opt.target)) s -= 0.08 * Math.max(Math.abs(opt.target.x - c.x), Math.abs(opt.target.y - c.y));
@@ -156,7 +173,12 @@ export function creatureStep(world, c) {
 
   // Do it, see what happens, remember.
   let outcome = 'nothing';
-  const tgt = p.target;
+  let tgt = p.target;
+  if (tgt && tgt.remembered) {
+    const real = objectsAt(world, tgt.x, tgt.y).find(o => featureKey(lookAt(world, o)) === tgt.remembered);
+    if (!real) { outcome = 'gone'; delete c.places[tgt.remembered]; remember(c, p.key, outcome, -0.02, 0.5); c.plan = null; return; }
+    tgt = real;
+  }
   switch (p.action) {
     case 'pickup': {
       if (tgt && !tgt.gone && !tgt.held && MATERIALS[tgt.kind].weight <= 4) {
@@ -173,12 +195,12 @@ export function creatureStep(world, c) {
       const source = objectsAt(world, x, y).find(s => s.burning > 0 && s !== o);
       if (source) {
         const m = MATERIALS[o.kind];
-        if (m.burn > 0 && o.wet < 0.35 && r() < m.burn) {
+        if (m.burn > 0 && o.wet < 0.45 && r() < m.burn) {
           const fuel = Math.round(9 * m.burn * Math.max(0.5, m.weight) * (1 - o.wet));
           source.fuel += fuel; o.gone = true; outcome = 'fire_grew';
           emit(world, { kind: 'fed_fire', who: c.id, obj: o.id, material: o.kind, fuel, source: source.id, x, y });
           c.needs.warmth = Math.min(1, c.needs.warmth + 0.08);
-        } else if (m.burn > 0 && o.wet >= 0.35) { outcome = 'hiss'; emit(world, { kind: 'hiss', who: c.id, obj: o.id, material: o.kind, x, y }); }
+        } else if (m.burn > 0 && o.wet >= 0.45) { outcome = 'hiss'; emit(world, { kind: 'hiss', who: c.id, obj: o.id, material: o.kind, x, y }); }
         else outcome = 'placed';
       } else if (here && here.water) { o.wet = 1; outcome = 'splash'; }
       else outcome = 'placed';
