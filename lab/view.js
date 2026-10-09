@@ -38,61 +38,98 @@ const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, flat
 const CELL = 1.0;
 const X = x => (x - W / 2 + 0.5) * CELL, Z = y => (y - H / 2 + 0.5) * CELL;
 
-// Ground: one sculpted sheet, coloured per cell, with a soft river bed and a wooden rim.
-// Invisible tiles still sit on top for picking.
+// Ground: one smooth, rolling sheet. Hills from layered noise, banks that slope down into
+// the river with a sandy lip, the stony corner rising a little, and colours that drift
+// between two greens instead of changing per tile. Cells still tint it (wet, warm, covered),
+// blended across their corners so nothing shows as a block. Invisible tiles sit on top for picking.
 const tiles = [];
-const SUB = 3;   // vertices per cell edge
+const SUB = 6;   // vertices per cell edge
 const groundGeo = new THREE.PlaneGeometry(W * CELL, H * CELL, W * SUB, H * SUB);
 groundGeo.rotateX(-Math.PI / 2);
-const groundColors = new Float32Array(groundGeo.attributes.position.count * 3);
+const VCOUNT = groundGeo.attributes.position.count;
+const groundColors = new Float32Array(VCOUNT * 3);
 groundGeo.setAttribute('color', new THREE.BufferAttribute(groundColors, 3));
-const vertexCell = new Int32Array(groundGeo.attributes.position.count);   // which cell each vertex belongs to
-const vertexTint = new Float32Array(groundGeo.attributes.position.count * 2);   // fixed per-vertex hue/light wobble
-const vertexBlend = [];   // per vertex: the four nearest cells and their weights, for smooth colour
-const targetColors = new Float32Array(groundGeo.attributes.position.count * 3);
+const vertexCell = new Int32Array(VCOUNT);          // which cell each vertex belongs to
+const vertexBlend = [];                               // per vertex: the four nearest cells and their weights
+const baseColors = new Float32Array(VCOUNT * 3);     // the ground's own colour, before the cells tint it
+const vertexLand = new Float32Array(VCOUNT);         // 1 on land, 0 in the water, sloping between
+const targetColors = new Float32Array(VCOUNT * 3);
+// Seeded value noise: a lattice of random heights, smoothly interpolated.
+const NOISE = (() => { const r = rngFor(seed, 'noise'), n = 64, t = new Float32Array(n * n); for (let i = 0; i < t.length; i++) t[i] = r(); return (x, y) => {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const at = (i, j) => t[((j % n + n) % n) * n + ((i % n + n) % n)];
+  return (at(xi, yi) * (1 - sx) + at(xi + 1, yi) * sx) * (1 - sy) + (at(xi, yi + 1) * (1 - sx) + at(xi + 1, yi + 1) * sx) * sy; }; })();
+const noise2 = (x, y) => NOISE(x, y) * 0.65 + NOISE(x * 2.3 + 11, y * 2.3 + 7) * 0.35;
+// Distance from a point (in cell units) to the nearest cell of a kind.
+function nearest(fx, fz, test) { let best = 9; for (const c of world.cells) if (test(c)) { const dx = Math.max(0, Math.abs(fx - c.x) - 0.5), dz = Math.max(0, Math.abs(fz - c.y) - 0.5); best = Math.min(best, Math.hypot(dx, dz)); } return best; }
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const G_LIGHT = new THREE.Color('#b4cc72'), G_DARK = new THREE.Color('#86aa58'), G_MOSS = new THREE.Color('#6f9a4e'), SAND = new THREE.Color('#d8c590'), STONY = new THREE.Color('#a39d93'), STONY_DARK = new THREE.Color('#8b857c'), BED = new THREE.Color('#6b7c5a');
 {
-  const pos = groundGeo.attributes.position, r = rngFor(seed, 'ground'), rt = rngFor(seed, 'tint');
-  for (let i = 0; i < pos.count; i++) {
-    const cx = Math.min(W - 1, Math.max(0, Math.floor(pos.getX(i) / CELL + W / 2))), cy = Math.min(H - 1, Math.max(0, Math.floor(pos.getZ(i) / CELL + H / 2)));
+  const pos = groundGeo.attributes.position, _k = new THREE.Color();
+  for (let i = 0; i < VCOUNT; i++) {
+    const fx = pos.getX(i) / CELL + W / 2 - 0.5, fz = pos.getZ(i) / CELL + H / 2 - 0.5;   // cell coordinates, centre of cell (x,y) at (x,y)
+    const cx = Math.min(W - 1, Math.max(0, Math.round(fx))), cy = Math.min(H - 1, Math.max(0, Math.round(fz)));
     vertexCell[i] = cy * W + cx;
-    {
-      const fx = pos.getX(i) / CELL + W / 2 - 0.5, fz = pos.getZ(i) / CELL + H / 2 - 0.5;
-      const x0 = Math.floor(fx), z0 = Math.floor(fz), tx = fx - x0, tz = fz - z0, bl = [];
-      for (const [dx, dz, wgt] of [[0, 0, (1 - tx) * (1 - tz)], [1, 0, tx * (1 - tz)], [0, 1, (1 - tx) * tz], [1, 1, tx * tz]]) {
-        const xx = Math.min(W - 1, Math.max(0, x0 + dx)), zz = Math.min(H - 1, Math.max(0, z0 + dz));
-        if (wgt > 0.001) bl.push([zz * W + xx, wgt]);
-      }
-      vertexBlend.push(bl);
+    const x0 = Math.floor(fx), z0 = Math.floor(fz), tx = fx - x0, tz = fz - z0, bl = [];
+    for (const [dx, dz, wgt] of [[0, 0, (1 - tx) * (1 - tz)], [1, 0, tx * (1 - tz)], [0, 1, (1 - tx) * tz], [1, 1, tx * tz]]) {
+      const xx = Math.min(W - 1, Math.max(0, x0 + dx)), zz = Math.min(H - 1, Math.max(0, z0 + dz));
+      if (wgt > 0.001) bl.push([zz * W + xx, wgt]);
     }
-    vertexTint[i * 2] = (rt() - 0.5) * 0.015; vertexTint[i * 2 + 1] = (rt() - 0.5) * 0.05;
-    const c = world.cells[vertexCell[i]];
-    let y = (r() - 0.5) * 0.06;
-    if (c.water) y = -0.35; else if (c.stony) y += 0.12 + (r() - 0.5) * 0.08;
+    vertexBlend.push(bl);
+    const dWater = nearest(fx, fz, c => c.water), dStony = nearest(fx, fz, c => c.stony);
+    const land = smooth(0, 0.9, dWater + noise2(fx * 0.9, fz * 0.9) * 0.25 - 0.12);
+    const stony = 1 - smooth(0, 1.1, dStony + (noise2(fx * 1.3 + 5, fz * 1.3) - 0.5) * 0.6);
+    vertexLand[i] = land;
+    const hills = (noise2(fx * 0.35, fz * 0.35) - 0.5) * 0.28 + (noise2(fx * 1.1 + 3, fz * 1.1 + 9) - 0.5) * 0.06;
+    let y = hills + stony * 0.14;
+    const edge = Math.min(fx + 0.5, W - 0.5 - fx, fz + 0.5, H - 0.5 - fz);
+    if (edge < 0.6) y = Math.max(y, -0.02) * smooth(0, 0.6, edge) + 0.0 * (1 - smooth(0, 0.6, edge));   // flat and a little high at the rim
+    y = -0.42 * (1 - land) + y * land;
     pos.setY(i, y);
+    // colour: grass drifting between two greens with mossy patches, stony where it is stony, sand at the lip, dark bed under water
+    const g1 = noise2(fx * 0.5 + 20, fz * 0.5 + 4), g2 = noise2(fx * 1.7 + 40, fz * 1.7 + 2);
+    _k.copy(G_DARK).lerp(G_LIGHT, g1).lerp(G_MOSS, Math.max(0, g2 - 0.62) * 1.6);
+    _k.lerp(STONY.clone().lerp(STONY_DARK, g2), stony);
+    const sandy = smooth(0.08, 0.5, land) * (1 - smooth(0.5, 1.0, land));
+    _k.lerp(SAND, sandy * 0.85);
+    _k.lerp(BED, 1 - smooth(0, 0.12, land));
+    baseColors[i * 3] = _k.r; baseColors[i * 3 + 1] = _k.g; baseColors[i * 3 + 2] = _k.b;
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 }));
+  const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
   ground.receiveShadow = true; scene.add(ground);
+  // the water: a glassy sheet lying in the river bed
+  const waterGeo = new THREE.PlaneGeometry(W * CELL, H * CELL, 1, 1); waterGeo.rotateX(-Math.PI / 2);
+  const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: '#4f9bd2', transparent: true, opacity: 0.78, roughness: 0.25, metalness: 0.05 }));
+  water.position.y = -0.16; water.receiveShadow = true; scene.add(water);
   const pickGeo = new THREE.PlaneGeometry(CELL, CELL); pickGeo.rotateX(-Math.PI / 2);
   const pickMat = new THREE.MeshBasicMaterial({ visible: false });
   for (const c of world.cells) { const m = new THREE.Mesh(pickGeo, pickMat); m.position.set(X(c.x), 0.02, Z(c.y)); m.userData.cell = c; scene.add(m); tiles.push(m); }
-  const rim = new THREE.Mesh(new THREE.BoxGeometry(W * CELL + 1.2, 1.2, H * CELL + 1.2), flat('#6b4a2e')); rim.position.y = -1.0; scene.add(rim);
+  // the rim: four walls of earth round the board and a slab beneath it, with a darker topsoil
+  // band and paler clay below. A frame, not a block, so the river bed stays open.
+  const soil = new THREE.Color('#7a5538'), clay = new THREE.Color('#a3886a'), top = new THREE.Color('#6b4a30');
+  function earth(w, h, d, x, y, z) {
+    const geo = new THREE.BoxGeometry(w, h, d).toNonIndexed(), rp = geo.attributes.position, rc = new Float32Array(rp.count * 3);
+    for (let i = 0; i < rp.count; i++) { const yy = rp.getY(i) + y; _k.copy(yy > -0.2 ? top : yy > -0.55 ? soil : clay); rc[i * 3] = _k.r; rc[i * 3 + 1] = _k.g; rc[i * 3 + 2] = _k.b; }
+    geo.setAttribute('color', new THREE.BufferAttribute(rc, 3));
+    const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 })); m.position.set(x, y, z); m.receiveShadow = true; m.castShadow = true; scene.add(m);
+  }
+  const BW = W * CELL, BH = H * CELL, T = 0.7, RH = 1.3, RY = -0.02 - RH / 2;
+  earth(BW + 2 * T, RH, T, 0, RY, -BH / 2 - T / 2); earth(BW + 2 * T, RH, T, 0, RY, BH / 2 + T / 2);
+  earth(T, RH, BH, -BW / 2 - T / 2, RY, 0); earth(T, RH, BH, BW / 2 + T / 2, RY, 0);
+  earth(BW, 0.8, BH, 0, -0.9, 0);
 }
-const cellColors = world.cells.map(() => new THREE.Color());
+const cellTint = world.cells.map(() => ({ dark: 0, warm: 0 }));
 const _c = new THREE.Color(), _warm = new THREE.Color('#ffb060');
 function paintGround() {
-  // Colour each cell once, blend the four nearest cells at every vertex, add its fixed wobble.
-  // This sets the target; the frame loop eases the real colours toward it.
-  for (let i = 0; i < world.cells.length; i++) tileColor(world.cells[i], cellColors[i]);
-  for (let i = 0; i < vertexBlend.length; i++) {
-    const self = world.cells[vertexCell[i]];
-    if (self.water) { _c.copy(cellColors[vertexCell[i]]); }
-    else {
-      _c.setRGB(0, 0, 0); let sum = 0;
-      for (const [k, wgt] of vertexBlend[i]) { if (world.cells[k].water) continue; const cc = cellColors[k]; _c.r += cc.r * wgt; _c.g += cc.g * wgt; _c.b += cc.b * wgt; sum += wgt; }
-      if (sum > 0) _c.multiplyScalar(1 / sum); else _c.copy(cellColors[vertexCell[i]]);
-      _c.offsetHSL(vertexTint[i * 2], 0, vertexTint[i * 2 + 1]);
-    }
+  // Each cell says how much darker (wet, covered) and warmer (heat) it is; vertices blend their four nearest.
+  for (let i = 0; i < world.cells.length; i++) { const c = world.cells[i], t = cellTint[i]; t.dark = c.water ? 0 : c.wet * 0.09 + (covered(world, c.x, c.y) ? 0.08 : 0); t.warm = c.heat > 0 ? Math.min(0.4, c.heat * 0.35) : 0; }
+  for (let i = 0; i < VCOUNT; i++) {
+    let dark = 0, warm = 0;
+    for (const [k, wgt] of vertexBlend[i]) { dark += cellTint[k].dark * wgt; warm += cellTint[k].warm * wgt; }
+    _c.setRGB(baseColors[i * 3], baseColors[i * 3 + 1], baseColors[i * 3 + 2]);
+    if (dark > 0.001) _c.offsetHSL(0, 0.02, -dark * vertexLand[i]);
+    if (warm > 0.001) _c.lerp(_warm, warm * vertexLand[i]);
     targetColors[i * 3] = _c.r; targetColors[i * 3 + 1] = _c.g; targetColors[i * 3 + 2] = _c.b;
   }
   if (!groundPainted) { groundColors.set(targetColors); groundGeo.attributes.color.needsUpdate = true; groundPainted = true; }
@@ -102,14 +139,6 @@ function easeGround() {
   let moved = false;
   for (let i = 0; i < groundColors.length; i++) { const d = targetColors[i] - groundColors[i]; if (Math.abs(d) > 0.002) { groundColors[i] += d * 0.08; moved = true; } }
   if (moved) groundGeo.attributes.color.needsUpdate = true;
-}
-function tileColor(c, out) {
-  if (c.water) return out.set('#5c9fcf');
-  out.set(c.stony ? '#a9a398' : c.grass ? '#86a95a' : '#9db36a');
-  out.offsetHSL(0, 0.02 * c.wet, -c.wet * 0.05);
-  if (c.heat > 0) out.lerp(_warm, c.heat * 0.3);
-  if (covered(world, c.x, c.y)) out.offsetHSL(0, 0, -0.06);
-  return out;
 }
 // Daylight as a smooth curve over the day: dawn around hour 5, dusk around hour 16.
 function daylight() {
