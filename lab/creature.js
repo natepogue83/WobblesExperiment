@@ -20,7 +20,7 @@ export function makeCreature(world, id, genome, x, y) {
     genome: { curiosity: 0.5, patience: 0.5, sociability: 0.5, learnRate: 1, caution: 0.5, ...genome },
     // Learned: expectations about (seen features, action) -> outcomes, and a few episodes.
     exp: new Map(), episodes: [], places: {},
-    plan: null, bonds: {}, born: world.tick, acted: 0
+    plan: null, bonds: {}, born: world.tick, acted: 0, lifespan: 60 * 24, parents: null
   };
   world.creatures.push(c);
   return c;
@@ -117,7 +117,7 @@ function score(world, c, opt, r) {
   if (e && e.outcomes.fire_grew) s += (1 - n.warmth) * 2 * (e.outcomes.fire_grew / e.n);
   // Needs that bite.
   if (opt.action === 'rest') s += (1 - n.rest) * 1.6 + (isNight(world) ? 0.4 : 0) - 0.3;
-  if (opt.action === 'watch') s += g.sociability * (0.05 + (1 - n.social) * 0.7);
+  if (opt.action === 'watch') s += g.sociability * (0.05 + (1 - n.social) * 0.7) + (c.parents && c.parents.includes(opt.target.id) && world.tick - c.born < 10 * 24 ? 0.6 : 0);
   if (opt.action === 'wander') s += 0.15 + (1 - n.energy) * 0.3;
   if (opt.action === 'climb') s -= 0.1;
   // Instinct: when cold, warm-looking things draw you (what happens there is still learned).
@@ -142,6 +142,29 @@ function stepToward(world, c, tx, ty) {
   const alt2 = cellAt(world, c.x, c.y + dy); if (alt2 && !alt2.water && dy) { c.y += dy; }
 }
 
+// Two well-fed adults who like each other, side by side: now and then, a child.
+// It inherits a blend of how its parents learn and what moves them, with a
+// little mutation, and no memories at all. Culture has to be passed on.
+export function breedingStep(world) {
+  const live = world.creatures.filter(c => c.alive);
+  if (live.length >= (world.opts.popCap || 12)) return;
+  const r = rngFor(world.seed, 'breed', world.tick);
+  for (const a of live) {
+    if (world.tick - a.born < 8 * 24 || a.needs.energy < 0.7) continue;
+    const b = live.find(k => k !== a && k.id > a.id && Math.abs(k.x - a.x) <= 1 && Math.abs(k.y - a.y) <= 1 && world.tick - k.born >= 8 * 24 && k.needs.energy >= 0.7 && (a.bonds[k.id] || 0) + (k.bonds[a.id] || 0) >= 0.4);
+    if (!b || r() > 0.02) continue;
+    const g = {};
+    for (const key of Object.keys(a.genome)) { const v = r() < 0.5 ? a.genome[key] : b.genome[key]; g[key] = Math.max(0.05, Math.min(1.6, v + (r() - 0.5) * 0.16)); }
+    const id = 'c' + (world.creatures.length + 1);
+    const child = makeCreature(world, id, g, a.x, a.y);
+    child.parents = [a.id, b.id]; child.needs.energy = 0.6;
+    a.needs.energy -= 0.15; b.needs.energy -= 0.15;
+    a.bonds[id] = 0.4; b.bonds[id] = 0.4; child.bonds[a.id] = 0.3; child.bonds[b.id] = 0.3;
+    emit(world, { kind: 'born', who: id, parents: [a.id, b.id], x: a.x, y: a.y });
+    return;
+  }
+}
+
 export function creatureStep(world, c) {
   if (!c.alive) return;
   const r = rngFor(world.seed, 'cr', c.id, world.tick);
@@ -154,6 +177,7 @@ export function creatureStep(world, c) {
   const cold = isNight(world) && world.opts.nightCold ? 0.012 : 0.002;
   c.needs.warmth = Math.min(1, Math.max(0, c.needs.warmth - cold + (cell ? cell.heat * 0.07 : 0)));
   if (c.needs.warmth < 0.2) c.needs.energy = Math.max(0, c.needs.energy - 0.004);   // shivering burns food
+  if (world.tick - c.born > c.lifespan) { c.alive = false; emit(world, { kind: 'died', who: c.id, cause: 'old age', x: c.x, y: c.y }); return; }
   if (c.needs.energy <= 0) { c.alive = false; emit(world, { kind: 'died', who: c.id, cause: c.needs.warmth < 0.2 ? 'cold and hunger' : 'hunger', x: c.x, y: c.y }); return; }
 
   // Keep a plan until it is done or no longer makes sense (commitment).

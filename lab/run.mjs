@@ -77,6 +77,25 @@ console.log(`\n${SEEDS.length} colonies: fire kept to day ${DAYS + 2} in ${kept}
   console.log(`Scenario C (fruit up high), 20 days: someone reached it in ${reached}/${SEEDS.length}, standing on a step a creature had built in ${builders}/${SEEDS.length}`);
 }
 
+// Scenario D: generations. Founders die of old age around day 60. Is the fire still fed on day 70, by creatures who never met the Keeper's lump?
+{
+  let culture = 0, pops = [];
+  for (const s of SEEDS) {
+    const w = newColony(s, 6);
+    run(w, 48);
+    keeperPlace(w, 'ember', 9, 5, { fuel: 120 });
+    run(w, 70 * 24 - 48);
+    const founders = w.creatures.slice(0, 6);
+    const allGone = founders.every(c => !c.alive);
+    const lateFeeds = w.events.filter(e => e.kind === 'fed_fire' && e.who && e.t > 66 * 24 && !founders.some(f => f.id === e.who));
+    const rep = fireReport(w);
+    pops.push(rep.living);
+    if (allGone && rep.alive && lateFeeds.length) culture++;
+    if (SEEDS.length === 1) console.log('D:', `founders all dead: ${allGone}, fire alive: ${rep.alive}, feeds by later generations in the last 4 days: ${lateFeeds.length}, living: ${rep.living}, born: ${w.events.filter(e => e.kind === 'born').length}`);
+  }
+  console.log(`Scenario D (generations), 70 days: the fire outlived every founder and was fed by their descendants in ${culture}/${SEEDS.length}; populations ${pops.join(',')}`);
+}
+
 // Test 1: memory matters. Wipe the first feeder's memory mid-run; it should feed less afterwards than its unwiped twin.
 {
   let worse = 0, tried = 0;

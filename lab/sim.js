@@ -1,7 +1,7 @@
 // lab/sim.js — run the world: physics, then every creature in a fixed order.
 // The Keeper's only verbs: put something down, and make it rain.
 import { createLab, worldStep, addObject, live, emit } from './world.js';
-import { makeCreature, creatureStep } from './creature.js';
+import { makeCreature, creatureStep, breedingStep } from './creature.js';
 import { rngFor } from '../src/sim/rng.js';
 
 export function newColony(seed, n = 6, opts = {}) {
@@ -17,6 +17,7 @@ export function newColony(seed, n = 6, opts = {}) {
 export function step(world) {
   worldStep(world);
   for (const c of world.creatures) creatureStep(world, c);
+  breedingStep(world);
   world.tick++;
 }
 export function run(world, ticks) { for (let i = 0; i < ticks; i++) step(world); return world; }
