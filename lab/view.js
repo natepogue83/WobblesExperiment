@@ -11,6 +11,7 @@ import { W, H, DAY, MATERIALS, live, isNight, objectsAt, stackHeight, covered } 
 import { newColony, step, keeperPlace } from './sim.js';
 import { beliefs } from './creature.js';
 import { rngFor } from '../src/sim/rng.js';
+import * as P3 from './props3d.js';
 
 const q = new URLSearchParams(location.search);
 const seed = Number(q.get('seed') || 2);
@@ -129,64 +130,30 @@ function easeLight() {
 }
 
 // ---- things ----------------------------------------------------------------------------
-const OBJ_COLOR = { stone: '#9b948a', stick: '#8a5a34', grass: '#c9cf7a', log: '#7a4e2a', berry: '#c9435f', root: '#a07a4a', ember: '#ff9a3c', tallbush: '#5e9344' };
+// Everything is modelled in props3d.js. A thing's variant and the way it lies come from its
+// id, so the same world always looks the same.
 const STEP = 0.32;   // how tall one unit of stacked footing is
-// One geometry per kind, one dry and one wet material per kind, shared by every copy.
-const GEO = {
-  stone: new THREE.DodecahedronGeometry(0.2, 0), stick: new THREE.CylinderGeometry(0.04, 0.05, 0.7, 5), grass: new THREE.ConeGeometry(0.16, 0.35, 5),
-  log: new THREE.CylinderGeometry(0.14, 0.15, 0.9, 7), berry: new THREE.SphereGeometry(0.09, 7, 5), root: new THREE.DodecahedronGeometry(0.14, 0),
-  ember: new THREE.DodecahedronGeometry(0.22, 0), flame: new THREE.ConeGeometry(0.2, 0.55, 6),
-  trunk: new THREE.CylinderGeometry(0.06, 0.08, 0.7, 5), leaves: new THREE.IcosahedronGeometry(1, 0), fruit: new THREE.SphereGeometry(0.06, 6, 5)
-};
-const MAT = {};
-for (const [k, color] of Object.entries(OBJ_COLOR)) {
-  MAT[k] = k === 'ember' ? new THREE.MeshStandardMaterial({ color, emissive: '#ff5a1a', emissiveIntensity: 1.2, flatShading: true }) : flat(color);
-  MAT[k + '_wet'] = flat(new THREE.Color(color).offsetHSL(0, 0, -0.18));
-}
-MAT.flame = new THREE.MeshStandardMaterial({ color: '#ffb347', emissive: '#ff6a1a', emissiveIntensity: 1.6, flatShading: true });
-MAT.trunk = flat('#7a4e2a'); MAT.fruit = flat('#c9435f');
-const REST_Y = { stone: 0.16, stick: 0.05, grass: 0.17, log: 0.15, berry: 0.09, root: 0.1, ember: 0.18 };
 const objMeshes = new Map(), crMeshes = new Map();
-function makeBody(kind) {
-  if (kind === 'tallbush') {
-    const m = new THREE.Group();
-    const trunk = new THREE.Mesh(GEO.trunk, MAT.trunk); trunk.position.y = 0.35; trunk.castShadow = true; m.add(trunk);
-    for (const [x, y, z, s] of [[0, 0.95, 0, 0.42], [-0.3, 0.8, 0.1, 0.3], [0.28, 0.85, -0.1, 0.32], [0, 1.25, 0.05, 0.3]]) { const b = new THREE.Mesh(GEO.leaves, MAT.tallbush); b.scale.setScalar(s); b.position.set(x, y, z); b.castShadow = true; m.add(b); }
-    m.userData.fruit = [];
-    for (let i = 0; i < 6; i++) { const f = new THREE.Mesh(GEO.fruit, MAT.fruit); f.position.set(Math.cos(i * 1.05) * 0.38, 0.9 + (i % 3) * 0.18, Math.sin(i * 1.05) * 0.38); m.add(f); m.userData.fruit.push(f); }
-    return m;
-  }
-  const m = new THREE.Mesh(GEO[kind] || GEO.ember, MAT[kind] || MAT.ember);
-  m.position.y = REST_Y[kind] ?? 0.18;
-  if (kind === 'stick') { m.rotation.z = Math.PI / 2; m.rotation.y = 0.6; }
-  if (kind === 'log') m.rotation.z = Math.PI / 2;
-  m.castShadow = kind !== 'berry' && kind !== 'grass'; m.receiveShadow = true;
-  return m;
-}
+const hashOf = id => { let h = 2166136261; for (const ch of id) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
+function makeBody(kind, h) { return P3.body(kind, h % 3, seed); }
 function makeObj(o) {
   const g = new THREE.Group();
-  const body = makeBody(o.kind); g.add(body);
-  const flame = new THREE.Mesh(GEO.flame, MAT.flame); flame.position.y = 0.5; flame.visible = false; g.add(flame);
-  g.userData = { obj: o, kind: o.kind, body, flame };
+  const h = hashOf(o.id);
+  const body = makeBody(o.kind, h); g.add(body);
+  const fire = P3.flames(); fire.visible = false; g.add(fire);
+  g.userData = { obj: o, kind: o.kind, body, fire, h };
   return g;
 }
+function setWet(body, wet) { body.traverse(m => { if (m.userData.tintable) m.material = wet ? P3.MAT.vcWet : P3.MAT.vc; }); }
 // Three flame lights for the whole board, lent to whatever burns.
-const flameLights = [0, 1, 2].map(() => { const l = new THREE.PointLight('#ffa047', 0, 4, 2); l.visible = false; scene.add(l); return l; });
-
-const COATS = ['#a3c98c', '#f0cf7c', '#ecaa82', '#e8a3aa', '#c5a9d8', '#9fb7da', '#90c9c1', '#dcbd95'];
-const CR_GEO = { body: new THREE.SphereGeometry(0.3, 12, 9), eye: new THREE.SphereGeometry(0.04, 6, 5), stem: new THREE.CylinderGeometry(0.012, 0.015, 0.12, 4), leaf: new THREE.SphereGeometry(0.06, 6, 4) };
-const CR_MAT = { eye: new THREE.MeshStandardMaterial({ color: '#2a1d14' }), stem: flat('#5e8f3a'), leaf: flat('#8fd16b'), coats: COATS.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 })) };
+const flameLights = [0, 1, 2].map(() => { const l = new THREE.PointLight('#ffa047', 0, 4.5, 2); l.visible = false; scene.add(l); return l; });
 function makeCreature(c, i) {
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(CR_GEO.body, CR_MAT.coats[i % COATS.length]);
-  body.scale.set(1.05, 0.9, 1); body.position.y = 0.28; body.castShadow = true; g.add(body);
-  for (const sx of [-1, 1]) { const e = new THREE.Mesh(CR_GEO.eye, CR_MAT.eye); e.position.set(sx * 0.11, 0.35, 0.27); g.add(e); }
-  const stem = new THREE.Mesh(CR_GEO.stem, CR_MAT.stem); stem.position.y = 0.6; g.add(stem);
-  const leaf = new THREE.Mesh(CR_GEO.leaf, CR_MAT.leaf); leaf.scale.set(1.6, 0.5, 0.8); leaf.position.y = 0.66; g.add(leaf);
-  const held = new THREE.Group(); held.position.set(0.3, 0.3, 0.2); g.add(held);
-  g.userData = { creature: c, body, held, heldKind: null };
+  const g = P3.wobblin(i, seed);
+  g.userData = { creature: c, body: g.getObjectByName('body'), held: g.getObjectByName('held'), eyes: [g.getObjectByName('eyeL'), g.getObjectByName('eyeR')], heldKind: null };
   return g;
 }
+// Pebbles and wildflowers on the grass.
+{ const d = P3.dressing(world.cells, X, Z, seed, c => !c.water && !c.stony); if (d) scene.add(d); }
 
 function sync() {
   paintGround();
@@ -200,13 +167,13 @@ function sync() {
     let g = objMeshes.get(o.id);
     if (!g) { g = makeObj(o); scene.add(g); objMeshes.set(o.id, g); }
     const u = g.userData;
-    if (u.kind !== o.kind) { g.remove(u.body); u.body = makeBody(o.kind); g.add(u.body); u.kind = o.kind; }
+    if (u.kind !== o.kind) { g.remove(u.body); u.body = makeBody(o.kind, u.h); g.add(u.body); u.kind = o.kind; }
     g.visible = !o.held;
     if (o.held) continue;
-    const n = parseInt(o.id.slice(1));
-    g.position.set(X(o.x) + ((n * 7919) % 100 / 100 - 0.5) * 0.5, 0, Z(o.y) + ((n * 104729) % 100 / 100 - 0.5) * 0.5);
+    const h = u.h;
+    g.position.set(X(o.x) + ((h % 100) / 100 - 0.5) * 0.5, 0, Z(o.y) + (((h >> 7) % 100) / 100 - 0.5) * 0.5);
     const b = u.body;
-    if (b.isMesh) b.material = MAT[(o.wet > 0.45 && o.kind !== 'ember' ? o.kind + '_wet' : o.kind)] || MAT.ember;
+    setWet(b, o.wet > 0.45 && o.kind !== 'ember');
     // Footing stacks up; the thing on top of a stack sits higher.
     const all = byCell.get(o.y * W + o.x) || [];
     const here = all.filter(q => MATERIALS[q.kind].hard >= 0.6 && !MATERIALS[q.kind].fixed && !q.burning);
@@ -215,11 +182,13 @@ function sync() {
     if (idx > 0) { for (let i = 0; i < idx; i++) lift += (MATERIALS[here[i].kind].weight >= 3 ? 1 : 0.5) * STEP; }
     else if (idx < 0 && here.length) lift = stackHeight(world, o.x, o.y) * STEP;   // soft things lie on top of the footing
     g.position.y = lift;
-    if (o.kind === 'log') { b.rotation.set(0, idx > 0 ? 0.2 : 0, Math.PI / 2); }
+    // things lie at their own angle; a log on a stack lies square across it
+    if (!MATERIALS[o.kind].fixed) b.rotation.y = idx > 0 && o.kind === 'log' ? 0.2 : ((h >> 3) % 628) / 100;
     if (o.kind === 'tallbush') b.userData.fruit.forEach((f, i) => { f.visible = i < (o.fruit || 0); });
     const burning = o.burning > 0;
-    u.flame.visible = burning;
-    if (burning && lightsUsed < flameLights.length) { const l = flameLights[lightsUsed++]; l.visible = true; l.intensity = 2; l.position.set(g.position.x, lift + 0.6, g.position.z); }
+    u.fire.visible = burning;
+    if (o.kind === 'ember') { const core = b.getObjectByName('core'); if (core) core.visible = burning || o.fuel > 0; }
+    if (burning && lightsUsed < flameLights.length) { const l = flameLights[lightsUsed++]; l.visible = true; l.intensity = 2; l.position.set(g.position.x, lift + 0.7, g.position.z); }
   }
   for (let i = lightsUsed; i < flameLights.length; i++) { flameLights[i].visible = false; flameLights[i].intensity = 0; }
   for (const [id, g] of objMeshes) if (!seen.has(id)) { scene.remove(g); objMeshes.delete(id); }
@@ -230,7 +199,7 @@ function sync() {
     u.tx = X(c.x); u.tz = Z(c.y); u.ty = stackHeight(world, c.x, c.y) * STEP;
     g.visible = c.alive;
     const kind = c.carrying ? c.carrying.kind : null;
-    if (kind !== u.heldKind) { u.held.clear(); if (kind) { const m = makeBody(kind); m.scale.setScalar(0.7); m.position.set(0, 0, 0); m.castShadow = false; u.held.add(m); } u.heldKind = kind; }
+    if (kind !== u.heldKind) { u.held.clear(); if (kind) { const m = makeBody(kind, hashOf(c.carrying.id)); m.scale.setScalar(0.7); m.position.set(0, 0, 0); m.traverse(x => { x.castShadow = false; }); u.held.add(m); } u.heldKind = kind; }
   });
 }
 
@@ -310,10 +279,12 @@ function frame(t) {
     if (!g.visible) continue;
     const u = g.userData;
     g.position.x += (u.tx - g.position.x) * 0.15; g.position.z += (u.tz - g.position.z) * 0.15; g.position.y += ((u.ty || 0) - g.position.y) * 0.2;
-    const k = 1 + Math.sin(s * 3 + g.position.x) * 0.04; u.body.scale.set(1.05 / k, 0.9 * k, 1 / k);
+    const k = 1 + Math.sin(s * 3 + g.position.x) * 0.04; u.body.scale.set(1 / k, k, 1 / k);
+    // eyes glance toward where the creature is heading, and blink now and then
+    const blink = ((s * 0.7 + g.position.x * 0.37) % 1) < 0.06 ? 0.15 : 1; for (const e of u.eyes) { e.scale.y = blink; e.position.y = 0.38 - (1 - blink) * 0.02; }
     if (Math.abs(u.tx - g.position.x) + Math.abs(u.tz - g.position.z) > 0.02) g.lookAt(u.tx, g.position.y, u.tz);
   }
-  for (const g of objMeshes.values()) { const f = g.userData.flame; if (f.visible) { f.scale.set(1 + Math.sin(s * 9) * 0.12, 1 + Math.sin(s * 13) * 0.2, 1); f.rotation.y = s * 2; } }
+  for (const g of objMeshes.values()) if (g.userData.fire.visible) P3.animateFlames(g.userData.fire, s + g.userData.h % 7);
   for (const l of flameLights) if (l.visible) l.intensity = 1.8 + Math.sin(s * 11 + l.position.x) * 0.3;
   easeLight(); easeGround();
   renderer.render(scene, camera);
