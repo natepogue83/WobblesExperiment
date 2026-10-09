@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wobblins lab</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Patrick+Hand&display=swap">
+  <style>
+    html, body { margin: 0; height: 100%; background: #2a2016; overflow: hidden; font: 15px/1.3 "Patrick Hand", system-ui, sans-serif; color: #3a2717; }
+    canvas { display: block; }
+    #hud { position: fixed; left: 10px; top: 8px; width: 280px; padding: 8px 12px; background: #f4e8cf; border: 2px solid #3a2717; border-radius: 16px 5px 18px 7px / 7px 18px 5px 16px; box-shadow: 3px 4px 0 rgba(58,39,23,.3); }
+    #hud b { font: 24px/1 "Caveat Brush", cursive; display: block; margin-bottom: 4px; }
+    #hud button { font: 15px "Patrick Hand", sans-serif; border: 1.5px solid #3a2717; background: #fff8e6; border-radius: 12px 4px 10px 5px / 5px 10px 4px 12px; padding: 2px 10px; margin: 4px 4px 0 0; cursor: pointer; }
+    #hud button.on { background: #f6d873; }
+    #story { position: fixed; right: 10px; top: 8px; width: 300px; max-height: 60vh; overflow: auto; padding: 8px 12px; background: #f4e8cf; border: 2px solid #3a2717; border-radius: 16px 5px 18px 7px / 7px 18px 5px 16px; box-shadow: 3px 4px 0 rgba(58,39,23,.3); font-size: 14px; }
+    #story p { margin: 3px 0; }
+    #who { position: fixed; left: 10px; bottom: 10px; width: 340px; padding: 8px 12px; background: #f4e8cf; border: 2px solid #3a2717; border-radius: 16px 5px 18px 7px / 7px 18px 5px 16px; box-shadow: 3px 4px 0 rgba(58,39,23,.3); font-size: 14px; display: none; }
+    #who b { font: 22px/1 "Caveat Brush", cursive; }
+    #who small { color: #8a6d4f; }
+    .muted { color: #8a6d4f; }
+  </style>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
+</head>
+<body>
+  <div id="hud"></div>
+  <div id="story"><b>What happened</b><div id="lines"></div></div>
+  <div id="who"></div>
+  <script type="module" src="view.js"></script>
+</body>
+</html>
