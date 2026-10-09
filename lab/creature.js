@@ -6,9 +6,9 @@
 // Seeing another creature act gives a weaker memory than doing it yourself.
 // No recipes, no hidden property is ever read here.
 import { rngFor } from '../src/sim/rng.js';
-import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, sparksAt, W, H } from './world.js';
+import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, sparksAt, stackHeight, covered, W, H } from './world.js';
 
-export const ACTIONS = ['pickup', 'place', 'taste', 'strike', 'approach', 'watch', 'rest', 'wander'];
+export const ACTIONS = ['pickup', 'place', 'taste', 'strike', 'approach', 'climb', 'watch', 'rest', 'wander'];
 const VIEW = 3;             // how far they see
 const REACH = 1;            // adjacent cells
 
@@ -59,11 +59,12 @@ function options(world, c) {
   notePlaces(world, c);
   const seenKeys = new Set(seen.map(o => featureKey(lookAt(world, o))));
   const carryFk = c.carrying ? featureKey(lookAt(world, c.carrying)) : null;
+  const me = stackHeight(world, c.x, c.y) >= 1 ? 'high' : 'low';
   for (const o of seen) {
     const fk = featureKey(lookAt(world, o));
     if (!c.carrying) out.push({ action: 'pickup', target: o, key: expKey(fk, 'pickup') });
     out.push({ action: 'approach', target: o, key: expKey(fk, 'approach') });   // go and sit by it
-    out.push({ action: 'taste', target: o, key: expKey(fk, 'taste') });
+    out.push({ action: 'taste', target: o, key: expKey(fk, 'taste', MATERIALS[o.kind].tall ? me : undefined) });
     if (c.carrying && c.carrying !== o) {
       out.push({ action: 'place', target: o, key: expKey(fk, 'place', carryFk) });     // put what I carry where this is
       out.push({ action: 'strike', target: o, key: expKey(fk, 'strike', carryFk) });   // hit this with what I carry
@@ -77,6 +78,8 @@ function options(world, c) {
     else if (fk !== carryFk) { out.push({ action: 'place', target: tgt, key: expKey(fk, 'place', carryFk), far: true }); out.push({ action: 'strike', target: tgt, key: expKey(fk, 'strike', carryFk), far: true }); }
   }
   if (c.carrying) out.push({ action: 'place', target: null, key: expKey('ground', 'place', carryFk) });
+  // Climb onto a stack next to me.
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const cx = c.x + dx, cy = c.y + dy; if (stackHeight(world, cx, cy) >= 1) out.push({ action: 'climb', target: { x: cx, y: cy, kind: null, cell: true }, key: expKey('stack', 'climb') }); }
   for (const k of others(world, c)) out.push({ action: 'watch', target: k, key: expKey('creature', 'watch') });
   out.push({ action: 'rest', target: null, key: expKey(isNight(world) ? 'night' : 'day', 'rest') });
   out.push({ action: 'wander', target: null, key: 'wander' });
@@ -116,6 +119,7 @@ function score(world, c, opt, r) {
   if (opt.action === 'rest') s += (1 - n.rest) * 1.6 + (isNight(world) ? 0.4 : 0) - 0.3;
   if (opt.action === 'watch') s += g.sociability * (0.05 + (1 - n.social) * 0.7);
   if (opt.action === 'wander') s += 0.15 + (1 - n.energy) * 0.3;
+  if (opt.action === 'climb') s -= 0.1;
   // Instinct: when cold, warm-looking things draw you (what happens there is still learned).
   if (opt.action === 'approach') s += ((opt.target.burning > 0) || (cellAt(world, opt.target.x, opt.target.y) || {}).heat > 0 ? (1 - n.warmth) * 1.8 : 0) - 0.35;
   if (opt.action === 'rest' && cell0(world, c).heat > 0) s += (1 - n.warmth) * 1.2;
@@ -181,7 +185,7 @@ export function creatureStep(world, c) {
   }
   switch (p.action) {
     case 'pickup': {
-      if (tgt && !tgt.gone && !tgt.held && MATERIALS[tgt.kind].weight <= 4) {
+      if (tgt && !tgt.gone && !tgt.held && MATERIALS[tgt.kind].weight <= 4 && !MATERIALS[tgt.kind].fixed) {
         if (tgt.burning > 0) { outcome = 'hurt'; c.needs.warmth = Math.min(1, c.needs.warmth + 0.05); }
         else { tgt.held = c.id; c.carrying = tgt; outcome = MATERIALS[tgt.kind].weight >= 3 ? 'heavy' : 'held'; }
       }
@@ -190,7 +194,7 @@ export function creatureStep(world, c) {
     case 'place': {
       const o = c.carrying; if (!o) break;
       const x = tgt ? tgt.x : c.x, y = tgt ? tgt.y : c.y;
-      o.held = null; o.x = x; o.y = y; c.carrying = null;
+      o.held = null; o.x = x; o.y = y; c.carrying = null; o.placedBy = c.id; o.placedAt = world.tick;
       const here = cellAt(world, x, y);
       const source = objectsAt(world, x, y).find(s => s.burning > 0 && s !== o);
       if (source) {
@@ -208,10 +212,16 @@ export function creatureStep(world, c) {
       emit(world, { kind: 'placed', who: c.id, obj: o.id, material: o.kind, x, y, outcome });
       break;
     }
+    case 'climb': { if (tgt && stackHeight(world, tgt.x, tgt.y) >= 1) { c.x = tgt.x; c.y = tgt.y; outcome = 'high'; } break; }
     case 'taste': {
       if (tgt && !tgt.gone) {
         const m = MATERIALS[tgt.kind];
         if (tgt.burning > 0) { outcome = 'hurt'; }
+        else if (m.tall) {
+          if (stackHeight(world, c.x, c.y) < 1) outcome = 'out_of_reach';
+          else if ((tgt.fruit || 0) > 0) { tgt.fruit--; c.needs.energy = Math.min(1, c.needs.energy + m.nourish * 0.6); outcome = 'ate'; const built = objectsAt(world, c.x, c.y).filter(o => o.placedBy).map(o => o.placedBy); emit(world, { kind: 'ate', who: c.id, material: 'tallbush', high: true, built: built.length ? built : null, x: tgt.x, y: tgt.y }); }
+          else outcome = 'bare';
+        }
         else if (m.nourish > 0.3) { c.needs.energy = Math.min(1, c.needs.energy + m.nourish * 0.6); if (m.weight < 1) tgt.gone = true; outcome = 'ate'; emit(world, { kind: 'ate', who: c.id, material: tgt.kind, x: tgt.x, y: tgt.y }); }
         else outcome = 'bitter';
       }
@@ -239,13 +249,15 @@ export function creatureStep(world, c) {
     }
     case 'rest': {
       c.needs.rest = Math.min(1, c.needs.rest + 0.1);
-      outcome = cell && cell.heat > 0 ? 'cosy' : isNight(world) ? 'cold_rest' : 'rested';
+      if (covered(world, c.x, c.y)) c.needs.warmth = Math.min(1, c.needs.warmth + 0.015);
+      outcome = cell && cell.heat > 0 ? 'cosy' : covered(world, c.x, c.y) ? 'sheltered' : isNight(world) ? 'cold_rest' : 'rested';
       break;
     }
   }
   if (outcome === 'hurt') c.needs.warmth = Math.max(0, c.needs.warmth - 0.05);
   const delta = needDelta(before, c.needs) + (outcome === 'fire_grew' ? 0.15 : 0) + (outcome === 'hurt' ? -0.2 : 0) + (outcome === 'sparks' ? 0.05 : 0);
   remember(c, p.key, outcome, delta, 1);
+  if (delta > 0.08) { let w = 0.5; for (let i = c.episodes.length - 1; i >= 0 && i >= c.episodes.length - 3; i--) { const ep = c.episodes[i]; if (world.tick - ep.t > 10 || ep.key === p.key) continue; remember(c, ep.key, 'led_on', delta * w, 0.4); w *= 0.6; } }
   c.episodes.push({ t: world.tick, key: p.key, outcome, delta }); if (c.episodes.length > 60) c.episodes.shift();
   c.acted++;
   emit(world, { kind: 'acted', who: c.id, action: p.action, key: p.key, outcome, x: c.x, y: c.y });

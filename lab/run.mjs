@@ -61,6 +61,22 @@ console.log(`\n${SEEDS.length} colonies: fire kept to day ${DAYS + 2} in ${kept}
   console.log(`Scenario B (no ember given), 20 days: fire made from sparks in ${made}/${SEEDS.length}, still burning at day 20 in ${kept}`);
 }
 
+// Scenario C: scarce ground food, fruit up high on tall bushes, stones about. Does anyone stack a step and reach it?
+{
+  let reached = 0, builders = 0;
+  for (const s of SEEDS) {
+    const w = newColony(s, 6, { berries: 8, tallbushes: 3 });
+    run(w, 24 * 20);
+    const high = w.events.filter(e => e.kind === 'ate' && e.high);
+    if (high.length) reached++;
+    const onBuilt = high.filter(e => e.built);
+    if (onBuilt.length) builders++;
+
+    if (SEEDS.length === 1) console.log('C:', high.length ? `${high.length} high fruits eaten (${onBuilt.length} from a step someone built), first by ${high[0].who} on day ${Math.floor(high[0].t / 24) + 1}` : 'nobody reached the high fruit', '| living', w.creatures.filter(c => c.alive).length);
+  }
+  console.log(`Scenario C (fruit up high), 20 days: someone reached it in ${reached}/${SEEDS.length}, standing on a step a creature had built in ${builders}/${SEEDS.length}`);
+}
+
 // Test 1: memory matters. Wipe the first feeder's memory mid-run; it should feed less afterwards than its unwiped twin.
 {
   let worse = 0, tried = 0;
