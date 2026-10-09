@@ -1,10 +1,14 @@
 // lab/view.js — watch the lab world live in 3D. The sim runs in the page; the
-// scene is rebuilt from it every step. Click ground to put down what you have
-// chosen (a glowing lump, sticks, grass, stones); click a creature to read what
-// it believes. Nothing here changes the sim except the Keeper verbs.
+// scene is brought up to date from it every step. Click ground to put down what
+// you have chosen (a glowing lump, sticks, grass, stones); click a creature to
+// read what it believes. Nothing here changes the sim except the Keeper verbs.
+//
+// Kept cheap on purpose: one geometry and material per kind of thing, shared by
+// every copy; three flame lights in all, lent to whatever burns; the story and
+// the fire report read only the events that arrived since last time.
 import * as THREE from 'three';
-import { W, H, DAY, MATERIALS, cellAt, live, isNight, objectsAt, stackHeight, covered } from './world.js';
-import { newColony, step, keeperPlace, fireReport, fireStory } from './sim.js';
+import { W, H, DAY, MATERIALS, live, isNight, objectsAt, stackHeight, covered } from './world.js';
+import { newColony, step, keeperPlace } from './sim.js';
 import { beliefs } from './creature.js';
 import { rngFor } from '../src/sim/rng.js';
 
@@ -15,8 +19,8 @@ let speedMs = 350, running = true, tool = 'ember';
 
 // ---- scene ------------------------------------------------------------------------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });   // so a frame can be saved as a picture
-renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(1.5, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 document.body.append(renderer.domElement);
 const scene = new THREE.Scene();
@@ -28,7 +32,7 @@ function placeCamera() { camera.position.set(target.x + Math.sin(yaw) * Math.cos
 placeCamera();
 const hemi = new THREE.HemisphereLight('#dff0ff', '#6b7a3a', 0.9); scene.add(hemi);
 const sun = new THREE.DirectionalLight('#fff1d6', 2.0); sun.position.set(-12, 20, 10); sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 1, far: 60 }); sun.shadow.bias = -0.0008; scene.add(sun);
+sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 12, bottom: -12, near: 1, far: 60 }); sun.shadow.bias = -0.0008; scene.add(sun);
 const flat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.95, ...extra });
 const CELL = 1.0;
 const X = x => (x - W / 2 + 0.5) * CELL, Z = y => (y - H / 2 + 0.5) * CELL;
@@ -41,11 +45,15 @@ const groundGeo = new THREE.PlaneGeometry(W * CELL, H * CELL, W * SUB, H * SUB);
 groundGeo.rotateX(-Math.PI / 2);
 const groundColors = new Float32Array(groundGeo.attributes.position.count * 3);
 groundGeo.setAttribute('color', new THREE.BufferAttribute(groundColors, 3));
+const vertexCell = new Int32Array(groundGeo.attributes.position.count);   // which cell each vertex belongs to
+const vertexTint = new Float32Array(groundGeo.attributes.position.count * 2);   // fixed per-vertex hue/light wobble
 {
-  const pos = groundGeo.attributes.position, r = rngFor(seed, 'ground');
+  const pos = groundGeo.attributes.position, r = rngFor(seed, 'ground'), rt = rngFor(seed, 'tint');
   for (let i = 0; i < pos.count; i++) {
     const cx = Math.min(W - 1, Math.max(0, Math.floor(pos.getX(i) / CELL + W / 2))), cy = Math.min(H - 1, Math.max(0, Math.floor(pos.getZ(i) / CELL + H / 2)));
-    const c = world.cells[cy * W + cx];
+    vertexCell[i] = cy * W + cx;
+    vertexTint[i * 2] = (rt() - 0.5) * 0.015; vertexTint[i * 2 + 1] = (rt() - 0.5) * 0.05;
+    const c = world.cells[vertexCell[i]];
     let y = (r() - 0.5) * 0.06;
     if (c.water) y = -0.35; else if (c.stony) y += 0.12 + (r() - 0.5) * 0.08;
     pos.setY(i, y);
@@ -54,124 +62,173 @@ groundGeo.setAttribute('color', new THREE.BufferAttribute(groundColors, 3));
   const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 }));
   ground.receiveShadow = true; scene.add(ground);
   const pickGeo = new THREE.PlaneGeometry(CELL, CELL); pickGeo.rotateX(-Math.PI / 2);
-  for (const c of world.cells) { const m = new THREE.Mesh(pickGeo, new THREE.MeshBasicMaterial({ visible: false })); m.position.set(X(c.x), 0.02, Z(c.y)); m.userData.cell = c; scene.add(m); tiles.push(m); }
+  const pickMat = new THREE.MeshBasicMaterial({ visible: false });
+  for (const c of world.cells) { const m = new THREE.Mesh(pickGeo, pickMat); m.position.set(X(c.x), 0.02, Z(c.y)); m.userData.cell = c; scene.add(m); tiles.push(m); }
   const rim = new THREE.Mesh(new THREE.BoxGeometry(W * CELL + 1.2, 1.2, H * CELL + 1.2), flat('#6b4a2e')); rim.position.y = -1.0; scene.add(rim);
 }
-const _tmpColor = new THREE.Color();
+const cellColors = world.cells.map(() => new THREE.Color());
+const _c = new THREE.Color(), _warm = new THREE.Color('#ffb060');
 function paintGround() {
-  const pos = groundGeo.attributes.position, col = groundGeo.attributes.color, r = rngFor(seed, 'tint');
-  for (let i = 0; i < pos.count; i++) {
-    const cx = Math.min(W - 1, Math.max(0, Math.floor(pos.getX(i) / CELL + W / 2))), cy = Math.min(H - 1, Math.max(0, Math.floor(pos.getZ(i) / CELL + H / 2)));
-    const c = tileColor(world.cells[cy * W + cx]); c.offsetHSL((r() - 0.5) * 0.015, 0, (r() - 0.5) * 0.05);
-    col.setXYZ(i, c.r, c.g, c.b);
+  // Colour each cell once, then spread it over that cell's vertices with their fixed wobble.
+  const night = isNight(world);
+  for (let i = 0; i < world.cells.length; i++) tileColor(world.cells[i], cellColors[i], night);
+  const col = groundGeo.attributes.color;
+  for (let i = 0; i < vertexCell.length; i++) {
+    _c.copy(cellColors[vertexCell[i]]).offsetHSL(vertexTint[i * 2], 0, vertexTint[i * 2 + 1]);
+    col.setXYZ(i, _c.r, _c.g, _c.b);
   }
   col.needsUpdate = true;
 }
-function tileColor(c) {
-  if (c.water) return new THREE.Color('#5c9fcf');
-  const base = new THREE.Color(c.stony ? '#a9a398' : c.grass ? '#86a95a' : '#9db36a');
-  base.offsetHSL(0, 0, -c.wet * 0.12);
-  if (c.heat > 0) base.lerp(new THREE.Color('#ffb060'), c.heat * 0.35);
-  if (covered(world, c.x, c.y)) base.offsetHSL(0, 0, -0.08);
-  if (isNight(world)) base.offsetHSL(0, -0.1, -0.22);
-  return base;
+function tileColor(c, out, night) {
+  if (c.water) return out.set('#5c9fcf');
+  out.set(c.stony ? '#a9a398' : c.grass ? '#86a95a' : '#9db36a');
+  out.offsetHSL(0, 0, -c.wet * 0.12);
+  if (c.heat > 0) out.lerp(_warm, c.heat * 0.35);
+  if (covered(world, c.x, c.y)) out.offsetHSL(0, 0, -0.08);
+  if (night) out.offsetHSL(0, -0.1, -0.16);
+  return out;
 }
 
 // ---- things ----------------------------------------------------------------------------
 const OBJ_COLOR = { stone: '#9b948a', stick: '#8a5a34', grass: '#c9cf7a', log: '#7a4e2a', berry: '#c9435f', root: '#a07a4a', ember: '#ff9a3c', tallbush: '#5e9344' };
 const STEP = 0.32;   // how tall one unit of stacked footing is
+// One geometry per kind, one dry and one wet material per kind, shared by every copy.
+const GEO = {
+  stone: new THREE.DodecahedronGeometry(0.2, 0), stick: new THREE.CylinderGeometry(0.04, 0.05, 0.7, 5), grass: new THREE.ConeGeometry(0.16, 0.35, 5),
+  log: new THREE.CylinderGeometry(0.14, 0.15, 0.9, 7), berry: new THREE.SphereGeometry(0.09, 7, 5), root: new THREE.DodecahedronGeometry(0.14, 0),
+  ember: new THREE.DodecahedronGeometry(0.22, 0), flame: new THREE.ConeGeometry(0.2, 0.55, 6),
+  trunk: new THREE.CylinderGeometry(0.06, 0.08, 0.7, 5), leaves: new THREE.IcosahedronGeometry(1, 0), fruit: new THREE.SphereGeometry(0.06, 6, 5)
+};
+const MAT = {};
+for (const [k, color] of Object.entries(OBJ_COLOR)) {
+  MAT[k] = k === 'ember' ? new THREE.MeshStandardMaterial({ color, emissive: '#ff5a1a', emissiveIntensity: 1.2, flatShading: true }) : flat(color);
+  MAT[k + '_wet'] = flat(new THREE.Color(color).offsetHSL(0, 0, -0.18));
+}
+MAT.flame = new THREE.MeshStandardMaterial({ color: '#ffb347', emissive: '#ff6a1a', emissiveIntensity: 1.6, flatShading: true });
+MAT.trunk = flat('#7a4e2a'); MAT.fruit = flat('#c9435f');
+const REST_Y = { stone: 0.16, stick: 0.05, grass: 0.17, log: 0.15, berry: 0.09, root: 0.1, ember: 0.18 };
 const objMeshes = new Map(), crMeshes = new Map();
+function makeBody(kind) {
+  if (kind === 'tallbush') {
+    const m = new THREE.Group();
+    const trunk = new THREE.Mesh(GEO.trunk, MAT.trunk); trunk.position.y = 0.35; trunk.castShadow = true; m.add(trunk);
+    for (const [x, y, z, s] of [[0, 0.95, 0, 0.42], [-0.3, 0.8, 0.1, 0.3], [0.28, 0.85, -0.1, 0.32], [0, 1.25, 0.05, 0.3]]) { const b = new THREE.Mesh(GEO.leaves, MAT.tallbush); b.scale.setScalar(s); b.position.set(x, y, z); b.castShadow = true; m.add(b); }
+    m.userData.fruit = [];
+    for (let i = 0; i < 6; i++) { const f = new THREE.Mesh(GEO.fruit, MAT.fruit); f.position.set(Math.cos(i * 1.05) * 0.38, 0.9 + (i % 3) * 0.18, Math.sin(i * 1.05) * 0.38); m.add(f); m.userData.fruit.push(f); }
+    return m;
+  }
+  const m = new THREE.Mesh(GEO[kind] || GEO.ember, MAT[kind] || MAT.ember);
+  m.position.y = REST_Y[kind] ?? 0.18;
+  if (kind === 'stick') { m.rotation.z = Math.PI / 2; m.rotation.y = 0.6; }
+  if (kind === 'log') m.rotation.z = Math.PI / 2;
+  m.castShadow = kind !== 'berry' && kind !== 'grass'; m.receiveShadow = true;
+  return m;
+}
 function makeObj(o) {
   const g = new THREE.Group();
-  let m;
-  switch (o.kind) {
-    case 'stone': m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.2, 0), flat(OBJ_COLOR.stone)); m.position.y = 0.16; break;
-    case 'stick': m = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.7, 5), flat(OBJ_COLOR.stick)); m.rotation.z = Math.PI / 2; m.rotation.y = 0.6; m.position.y = 0.05; break;
-    case 'grass': m = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.35, 5), flat(OBJ_COLOR.grass)); m.position.y = 0.17; break;
-    case 'log': m = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.9, 7), flat(OBJ_COLOR.log)); m.rotation.z = Math.PI / 2; m.position.y = 0.15; break;
-    case 'berry': m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 7, 5), flat(OBJ_COLOR.berry)); m.position.y = 0.09; break;
-    case 'root': m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.14, 0), flat(OBJ_COLOR.root)); m.position.y = 0.1; break;
-    case 'tallbush': {
-      m = new THREE.Group();
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.7, 5), flat('#7a4e2a')); trunk.position.y = 0.35; trunk.castShadow = true; m.add(trunk);
-      for (const [x, y, z, s] of [[0, 0.95, 0, 0.42], [-0.3, 0.8, 0.1, 0.3], [0.28, 0.85, -0.1, 0.32], [0, 1.25, 0.05, 0.3]]) { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(s, 0), flat(OBJ_COLOR.tallbush)); b.position.set(x, y, z); b.castShadow = true; m.add(b); }
-      for (let i = 0; i < 6; i++) { const f = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), flat('#c9435f')); f.position.set(Math.cos(i * 1.05) * 0.38, 0.9 + (i % 3) * 0.18, Math.sin(i * 1.05) * 0.38); f.name = 'fruit' + i; m.add(f); }
-      break;
-    }
-    default: m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.22, 0), new THREE.MeshStandardMaterial({ color: '#ff9a3c', emissive: '#ff5a1a', emissiveIntensity: 1.2, flatShading: true })); m.position.y = 0.18;
-  }
-  m.castShadow = true; m.receiveShadow = true; m.name = 'body'; g.add(m);
-  const flame = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.55, 6), new THREE.MeshStandardMaterial({ color: '#ffb347', emissive: '#ff6a1a', emissiveIntensity: 1.6, flatShading: true }));
-  flame.position.y = 0.5; flame.name = 'flame'; flame.visible = false; g.add(flame);
-  const light = new THREE.PointLight('#ffa047', 0, 4, 2); light.position.y = 0.6; light.name = 'light'; g.add(light);
-  g.userData.obj = o;
+  const body = makeBody(o.kind); g.add(body);
+  const flame = new THREE.Mesh(GEO.flame, MAT.flame); flame.position.y = 0.5; flame.visible = false; g.add(flame);
+  g.userData = { obj: o, kind: o.kind, body, flame };
   return g;
 }
+// Three flame lights for the whole board, lent to whatever burns.
+const flameLights = [0, 1, 2].map(() => { const l = new THREE.PointLight('#ffa047', 0, 4, 2); l.visible = false; scene.add(l); return l; });
+
 const COATS = ['#a3c98c', '#f0cf7c', '#ecaa82', '#e8a3aa', '#c5a9d8', '#9fb7da', '#90c9c1', '#dcbd95'];
+const CR_GEO = { body: new THREE.SphereGeometry(0.3, 12, 9), eye: new THREE.SphereGeometry(0.04, 6, 5), stem: new THREE.CylinderGeometry(0.012, 0.015, 0.12, 4), leaf: new THREE.SphereGeometry(0.06, 6, 4) };
+const CR_MAT = { eye: new THREE.MeshStandardMaterial({ color: '#2a1d14' }), stem: flat('#5e8f3a'), leaf: flat('#8fd16b'), coats: COATS.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 })) };
 function makeCreature(c, i) {
   const g = new THREE.Group();
-  const coat = COATS[i % COATS.length];
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 9), new THREE.MeshStandardMaterial({ color: coat, roughness: 0.85 }));
-  body.scale.set(1.05, 0.9, 1); body.position.y = 0.28; body.castShadow = true; body.name = 'body'; g.add(body);
-  const eyeMat = new THREE.MeshStandardMaterial({ color: '#2a1d14' });
-  for (const sx of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 5), eyeMat); e.position.set(sx * 0.11, 0.35, 0.27); g.add(e); }
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.015, 0.12, 4), flat('#5e8f3a')); stem.position.y = 0.6; g.add(stem);
-  const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 4), flat('#8fd16b')); leaf.scale.set(1.6, 0.5, 0.8); leaf.position.y = 0.66; g.add(leaf);
-  const held = new THREE.Group(); held.position.set(0.3, 0.3, 0.2); held.name = 'held'; g.add(held);
-  g.userData.creature = c;
+  const body = new THREE.Mesh(CR_GEO.body, CR_MAT.coats[i % COATS.length]);
+  body.scale.set(1.05, 0.9, 1); body.position.y = 0.28; body.castShadow = true; g.add(body);
+  for (const sx of [-1, 1]) { const e = new THREE.Mesh(CR_GEO.eye, CR_MAT.eye); e.position.set(sx * 0.11, 0.35, 0.27); g.add(e); }
+  const stem = new THREE.Mesh(CR_GEO.stem, CR_MAT.stem); stem.position.y = 0.6; g.add(stem);
+  const leaf = new THREE.Mesh(CR_GEO.leaf, CR_MAT.leaf); leaf.scale.set(1.6, 0.5, 0.8); leaf.position.y = 0.66; g.add(leaf);
+  const held = new THREE.Group(); held.position.set(0.3, 0.3, 0.2); g.add(held);
+  g.userData = { creature: c, body, held, heldKind: null };
   return g;
 }
 
 function sync() {
   paintGround();
   const seen = new Set();
+  let lightsUsed = 0;
+  // Group what lies where once, instead of filtering every object for every object.
+  const byCell = new Map();
+  for (const o of world.objects) if (!o.gone && !o.held) { const k = o.y * W + o.x; let a = byCell.get(k); if (!a) byCell.set(k, a = []); a.push(o); }
   for (const o of live(world)) {
     seen.add(o.id);
     let g = objMeshes.get(o.id);
     if (!g) { g = makeObj(o); scene.add(g); objMeshes.set(o.id, g); }
-    const body = g.getObjectByName('body');
-    if (g.userData.kind !== o.kind) { g.userData.kind = o.kind; const n = makeObj(o); g.remove(body); n.getObjectByName('body').name = 'body'; g.add(n.getObjectByName('body')); }
+    const u = g.userData;
+    if (u.kind !== o.kind) { g.remove(u.body); u.body = makeBody(o.kind); g.add(u.body); u.kind = o.kind; }
     g.visible = !o.held;
-    const jitter = ((parseInt(o.id.slice(1)) * 7919) % 100) / 100 - 0.5;
-    g.position.set(X(o.x) + jitter * 0.5, 0, Z(o.y) + ((parseInt(o.id.slice(1)) * 104729) % 100 / 100 - 0.5) * 0.5);
-    const b = g.getObjectByName('body'); if (b && b.material && b.material.color) { b.material.color.set(OBJ_COLOR[o.kind] || '#999'); if (o.wet > 0.45) b.material.color.offsetHSL(0, 0, -0.18); }
+    if (o.held) continue;
+    const n = parseInt(o.id.slice(1));
+    g.position.set(X(o.x) + ((n * 7919) % 100 / 100 - 0.5) * 0.5, 0, Z(o.y) + ((n * 104729) % 100 / 100 - 0.5) * 0.5);
+    const b = u.body;
+    if (b.isMesh) b.material = MAT[(o.wet > 0.45 && o.kind !== 'ember' ? o.kind + '_wet' : o.kind)] || MAT.ember;
     // Footing stacks up; the thing on top of a stack sits higher.
-    const here = objectsAt(world, o.x, o.y).filter(q => MATERIALS[q.kind].hard >= 0.6 && !MATERIALS[q.kind].fixed && !q.burning);
+    const all = byCell.get(o.y * W + o.x) || [];
+    const here = all.filter(q => MATERIALS[q.kind].hard >= 0.6 && !MATERIALS[q.kind].fixed && !q.burning);
     const idx = here.indexOf(o);
     let lift = 0;
     if (idx > 0) { for (let i = 0; i < idx; i++) lift += (MATERIALS[here[i].kind].weight >= 3 ? 1 : 0.5) * STEP; }
     else if (idx < 0 && here.length) lift = stackHeight(world, o.x, o.y) * STEP;   // soft things lie on top of the footing
     g.position.y = lift;
-    if (o.kind === 'log' && idx > 0) { b.rotation.set(0, 0, Math.PI / 2); b.rotation.y = 0.2; }
-    if (o.kind === 'tallbush') for (let i = 0; i < 6; i++) { const f = b.getObjectByName('fruit' + i); if (f) f.visible = i < (o.fruit || 0); }
-    g.getObjectByName('flame').visible = o.burning > 0;
-    g.getObjectByName('light').intensity = o.burning > 0 ? 2 : 0;
+    if (o.kind === 'log') { b.rotation.set(0, idx > 0 ? 0.2 : 0, Math.PI / 2); }
+    if (o.kind === 'tallbush') b.userData.fruit.forEach((f, i) => { f.visible = i < (o.fruit || 0); });
+    const burning = o.burning > 0;
+    u.flame.visible = burning;
+    if (burning && lightsUsed < flameLights.length) { const l = flameLights[lightsUsed++]; l.visible = true; l.intensity = 2; l.position.set(g.position.x, lift + 0.6, g.position.z); }
   }
+  for (let i = lightsUsed; i < flameLights.length; i++) { flameLights[i].visible = false; flameLights[i].intensity = 0; }
   for (const [id, g] of objMeshes) if (!seen.has(id)) { scene.remove(g); objMeshes.delete(id); }
   world.creatures.forEach((c, i) => {
     let g = crMeshes.get(c.id);
     if (!g) { g = makeCreature(c, i); scene.add(g); crMeshes.set(c.id, g); }
-    g.userData.tx = X(c.x); g.userData.tz = Z(c.y); g.userData.ty = stackHeight(world, c.x, c.y) * STEP;
+    const u = g.userData;
+    u.tx = X(c.x); u.tz = Z(c.y); u.ty = stackHeight(world, c.x, c.y) * STEP;
     g.visible = c.alive;
-    const held = g.getObjectByName('held'); held.clear();
-    if (c.carrying) { const m = makeObj(c.carrying).getObjectByName('body'); m.scale.setScalar(0.7); m.position.set(0, 0, 0); held.add(m); }
+    const kind = c.carrying ? c.carrying.kind : null;
+    if (kind !== u.heldKind) { u.held.clear(); if (kind) { const m = makeBody(kind); m.scale.setScalar(0.7); m.position.set(0, 0, 0); m.castShadow = false; u.held.add(m); } u.heldKind = kind; }
   });
-  sun.intensity = isNight(world) ? 0.5 : 2.0; hemi.intensity = isNight(world) ? 0.35 : 0.9;
-  scene.background.set(isNight(world) ? '#2b3550' : '#d8e9f1'); scene.fog.color.copy(scene.background);
+  const night = isNight(world);
+  sun.intensity = night ? 0.8 : 2.0; hemi.intensity = night ? 0.55 : 0.9;
+  scene.background.set(night ? '#2b3550' : '#d8e9f1'); scene.fog.color.copy(scene.background);
+}
+
+// ---- story and fire report, read incrementally from the log ----------------------------------
+const log = { read: 0, feeds: 0, byWho: {}, first: null, lines: [], seenFeed: new Set(), saw: new Map(), lumpSeen: false };
+function readLog() {
+  const ev = world.events;
+  for (; log.read < ev.length; log.read++) {
+    const e = ev[log.read], day = Math.floor(e.t / DAY) + 1;
+    if (e.kind === 'saw' && e.outcome === 'fire_grew' && !log.saw.has(e.who)) log.saw.set(e.who, e.whom);
+    if (e.kind === 'keeper_placed' && e.material === 'ember' && !log.lumpSeen) { log.lumpSeen = true; log.lines.push(`Day ${day}: a glowing lump appeared.`); }
+    if (e.kind === 'fed_fire' && e.who) {
+      log.feeds++; log.byWho[e.who] = (log.byWho[e.who] || 0) + 1; if (!log.first) log.first = e.who;
+      if (!log.seenFeed.has(e.who)) { log.seenFeed.add(e.who); const saw = log.saw.get(e.who); log.lines.push(`Day ${day}: ${e.who} put a ${e.material} on the glow and it grew` + (saw ? `, after watching ${saw} do it.` : '. First to do it.')); }
+    }
+    if (e.kind === 'fire_out') log.lines.push(`Day ${day}: the glow went out.`);
+    if (e.kind === 'died') log.lines.push(`Day ${day}: ${e.who} died of ${e.cause}.`);
+    if (e.kind === 'born') log.lines.push(`Day ${day}: ${e.who} was born.`);
+  }
 }
 
 // ---- hud ---------------------------------------------------------------------------------
 const hud = document.getElementById('hud'), lines = document.getElementById('lines'), who = document.getElementById('who');
 let shownLines = 0, selected = null;
 function drawHud() {
-  const rep = fireReport(world);
-  hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${rep.living} alive, ${world.creatures.length - rep.living} gone<br>` +
-    (rep.alive ? `Fire burning, fuel ${rep.fuel}, fed ${rep.feeds} times` : rep.feeds ? `No fire now; it was fed ${rep.feeds} times` : 'No fire') +
+  readLog();
+  const source = world.objects.find(o => !o.gone && o.burning > 0 && o.fuel > 0);
+  const living = world.creatures.reduce((n, c) => n + (c.alive ? 1 : 0), 0);
+  hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${living} alive, ${world.creatures.length - living} gone<br>` +
+    (source ? `Fire burning, fuel ${source.fuel}, fed ${log.feeds} times` : log.feeds ? `No fire now; it was fed ${log.feeds} times` : 'No fire') +
     `<br><span class="muted">Click the ground to put down:</span><br>` +
     ['ember', 'stick', 'grass', 'stone', 'log', 'berry'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +
     `<br><button data-act="rain">Rain</button><button data-act="pause">${running ? 'Pause' : 'Run'}</button><button data-act="fast">${speedMs < 200 ? 'Slow' : 'Fast'}</button>`;
-  const story = fireStory(world);
-  if (story.length !== shownLines) { lines.innerHTML = story.map(l => `<p>${l}</p>`).join(''); shownLines = story.length; lines.scrollTop = lines.scrollHeight; }
+  if (log.lines.length !== shownLines) { lines.innerHTML = log.lines.slice(-60).map(l => `<p>${l}</p>`).join(''); shownLines = log.lines.length; lines.scrollTop = lines.scrollHeight; }
   if (selected) {
     const c = selected, n = c.needs;
     const top = beliefs(c, 5).map(b => `<li>${b.key.replace(/\|/g, ' ').replace('>', ' → ')} <small>(${Object.entries(b.outcomes).map(([k, v]) => k + ' ' + v.toFixed(1)).join(', ')}${b.seen ? ', ' + b.seen + ' seen' : ''})</small></li>`).join('');
@@ -200,7 +257,7 @@ window.addEventListener('pointermove', e => { if (!down) return; const dx = e.cl
 window.addEventListener('pointerup', e => {
   if (!down) return; const wasClick = !down.moved; down = null; if (!wasClick) return;
   mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(mouse, camera);
-  const hitC = ray.intersectObjects([...crMeshes.values()], true)[0];
+  const hitC = ray.intersectObjects([...crMeshes.values()].filter(g => g.visible), true)[0];
   if (hitC) { let g = hitC.object; while (g && !g.userData.creature) g = g.parent; selected = g.userData.creature; drawHud(); return; }
   const hitT = ray.intersectObjects(tiles)[0];
   if (hitT) { const c = hitT.object.userData.cell; if (!c.water) { keeperPlace(world, tool, c.x, c.y, tool === 'ember' ? { fuel: 120 } : {}); sync(); drawHud(); } }
@@ -214,12 +271,14 @@ function frame(t) {
   if (running && t - last > speedMs) { step(world); sync(); drawHud(); last = t; }
   const s = t / 1000;
   for (const g of crMeshes.values()) {
-    g.position.x += (g.userData.tx - g.position.x) * 0.15; g.position.z += (g.userData.tz - g.position.z) * 0.15; g.position.y += ((g.userData.ty || 0) - g.position.y) * 0.2;
-    const b = g.getObjectByName('body'); const k = 1 + Math.sin(s * 3 + g.position.x) * 0.04; b.scale.set(1.05 / k, 0.9 * k, 1 / k);
-    const moving = Math.abs(g.userData.tx - g.position.x) + Math.abs(g.userData.tz - g.position.z) > 0.02;
-    if (moving) g.lookAt(g.userData.tx, g.position.y, g.userData.tz);
+    if (!g.visible) continue;
+    const u = g.userData;
+    g.position.x += (u.tx - g.position.x) * 0.15; g.position.z += (u.tz - g.position.z) * 0.15; g.position.y += ((u.ty || 0) - g.position.y) * 0.2;
+    const k = 1 + Math.sin(s * 3 + g.position.x) * 0.04; u.body.scale.set(1.05 / k, 0.9 * k, 1 / k);
+    if (Math.abs(u.tx - g.position.x) + Math.abs(u.tz - g.position.z) > 0.02) g.lookAt(u.tx, g.position.y, u.tz);
   }
-  for (const g of objMeshes.values()) { const f = g.getObjectByName('flame'); if (f.visible) { f.scale.set(1 + Math.sin(s * 9) * 0.12, 1 + Math.sin(s * 13) * 0.2, 1); f.rotation.y = s * 2; } }
+  for (const g of objMeshes.values()) { const f = g.userData.flame; if (f.visible) { f.scale.set(1 + Math.sin(s * 9) * 0.12, 1 + Math.sin(s * 13) * 0.2, 1); f.rotation.y = s * 2; } }
+  for (const l of flameLights) if (l.visible) l.intensity = 1.8 + Math.sin(s * 11 + l.position.x) * 0.3;
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
