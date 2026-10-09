@@ -6,7 +6,7 @@
 // Seeing another creature act gives a weaker memory than doing it yourself.
 // No recipes, no hidden property is ever read here.
 import { rngFor } from '../src/sim/rng.js';
-import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, W, H } from './world.js';
+import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, sparksAt, W, H } from './world.js';
 
 export const ACTIONS = ['pickup', 'place', 'taste', 'strike', 'approach', 'watch', 'rest', 'wander'];
 const VIEW = 3;             // how far they see
@@ -198,7 +198,11 @@ export function creatureStep(world, c) {
     case 'strike': {
       const o = c.carrying; if (!o || !tgt || tgt.gone) break;
       const mo = MATERIALS[o.kind], mt = MATERIALS[tgt.kind];
-      if (mo.hard >= 0.9 && mt.hard >= 0.9 && r() < 0.5) { outcome = 'sparks'; emit(world, { kind: 'sparks', who: c.id, x: tgt.x, y: tgt.y }); }
+      if (mo.hard >= 0.9 && mt.hard >= 0.9 && r() < 0.5) {
+        outcome = 'sparks'; emit(world, { kind: 'sparks', who: c.id, x: tgt.x, y: tgt.y });
+        const lit = sparksAt(world, tgt.x, tgt.y, r);
+        if (lit) { outcome = 'fire_grew'; lit.litBy = c.id; emit(world, { kind: 'made_fire', who: c.id, obj: lit.id, material: lit.kind, x: lit.x, y: lit.y }); }
+      }
       else if (mo.hard > mt.hard + 0.3 && mt.nourish > 0.3) { outcome = 'cracked'; tgt.kind = 'berry'; }   // a cracked root is easy eating
       else outcome = 'thud';
       break;

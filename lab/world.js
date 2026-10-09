@@ -79,7 +79,7 @@ export function worldStep(world) {
     if (ob.burning > 0) {
       ob.fuel -= 1;
       if (world.weather.rain) ob.fuel -= 1.5;
-      if (ob.fuel <= 0) { ob.burning = 0; ob.fuel = 0; if (m.source) { ob.kind = 'stone'; emit(world, { kind: 'fire_out', obj: ob.id, x: ob.x, y: ob.y }); } else ob.gone = true; }
+      if (ob.fuel <= 0) { ob.burning = 0; ob.fuel = 0; emit(world, { kind: 'fire_out', obj: ob.id, x: ob.x, y: ob.y }); if (m.source) ob.kind = 'stone'; else ob.gone = true; }
     }
     // Dry burnable things in a hot cell catch and feed the fire there.
     if (!ob.held && ob.burning === 0 && m.burn > 0 && c && c.heat >= 1 && ob.wet < 0.35) {
@@ -100,6 +100,20 @@ export function worldStep(world) {
       if (c.grass && r() < 0.22 && objectsAt(world, c.x, c.y).length < 2) addObject(world, r() < 0.45 ? 'grass' : 'berry', c.x, c.y);
     }
   }
+}
+
+// Sparks struck at (x, y): dry tinder there (or right next to it) may catch and
+// become a small fire of its own. Nobody is told this; it is just how the world is.
+export function sparksAt(world, x, y, r) {
+  const here = world.objects.filter(o => !o.gone && !o.held && o.burning === 0 && Math.max(Math.abs(o.x - x), Math.abs(o.y - y)) <= 1);
+  const tinder = here.filter(o => MATERIALS[o.kind].burn >= 0.75 && o.wet < 0.2);
+  if (!tinder.length) return null;
+  const o = tinder[0];
+  const m = MATERIALS[o.kind];
+  if (r() > 0.35 * m.burn) return null;
+  o.burning = 1; o.fuel = Math.round(9 * m.burn * Math.max(0.5, m.weight)) + 4;
+  emit(world, { kind: 'caught_fire', obj: o.id, material: o.kind, x: o.x, y: o.y });
+  return o;
 }
 
 // Visible features of an object, from a creature's point of view.

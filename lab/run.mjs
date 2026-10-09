@@ -46,6 +46,21 @@ for (const s of SEEDS) {
 }
 console.log(`\n${SEEDS.length} colonies: fire kept to day ${DAYS + 2} in ${kept}, practice spread to 2+ doers in ${spread}, outlived the discoverer in ${survived}`);
 
+// Scenario B: no glowing lump at all. Does anyone make fire from sparks?
+{
+  let made = 0, kept = 0;
+  for (const s of SEEDS) {
+    const w = newColony(s, 6);
+    run(w, 24 * 20);
+    const first = w.events.find(e => e.kind === 'made_fire');
+    if (first) made++;
+    const rep = fireReport(w);
+    if (rep.alive) kept++;
+    if (SEEDS.length === 1) console.log('B:', first ? `${first.who} made fire on day ${Math.floor(first.t / 24) + 1} with ${first.material}` : 'nobody made fire', '| feeds', rep.feeds, '| alive at day 20:', rep.alive);
+  }
+  console.log(`Scenario B (no ember given), 20 days: fire made from sparks in ${made}/${SEEDS.length}, still burning at day 20 in ${kept}`);
+}
+
 // Test 1: memory matters. Wipe the first feeder's memory mid-run; it should feed less afterwards than its unwiped twin.
 {
   let worse = 0, tried = 0;
