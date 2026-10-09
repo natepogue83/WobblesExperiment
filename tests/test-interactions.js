@@ -232,7 +232,6 @@ section('Poking things: every prop is a toy');
   for (const x of [a, b]) { x.zone = 'meadow'; x.needs.food = 0.3; }
   const tree = makeObject(w, { kind: 'tree', slot: 'meadow.1', origin: { natural: true } });
   const bush = makeObject(w, { kind: 'bush', slot: 'meadow.2', origin: { natural: true }, state: { berries: 3 } });
-  const fire = makeObject(w, { kind: 'fire', slot: 'meadow.3', origin: { natural: true }, state: { until: 99 } });
   let seq = 0;
   const K = knowledge(w);
   const poke = o => applyAction(w, { seq: ++seq, t: w.tick, type: 'nudge', nudge: 'poke', target: o.id });
@@ -246,8 +245,9 @@ section('Poking things: every prop is a toy');
   assert.ok(nuts > 0 && seeds > 0, `nuts ${nuts} seeds ${seeds}`);
   for (let k = 0; k < 4; k++) tick(w);
   a.traits.boldness = 0.2; b.traits.boldness = 0.9; for (const x of [a, b]) x.zone = 'meadow';
+  const fire2 = makeObject(w, { kind: 'fire', slot: 'meadow.4', origin: { natural: true }, state: { until: w.tick + 50 } });   // the first one burned out meanwhile
   const s0 = a.needs.safety;
-  assert.equal(poke(fire).ok, true);
+  assert.equal(poke(fire2).ok, true);
   assert.ok(last(w, 'flare') && a.needs.safety < s0);
   assert.equal(knowledge(w), K, 'poking never adds knowledge');
   const save = newSave({ seed: 21, createdAt: 0 });
