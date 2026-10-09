@@ -3,7 +3,7 @@
 // chosen (a glowing lump, sticks, grass, stones); click a creature to read what
 // it believes. Nothing here changes the sim except the Keeper verbs.
 import * as THREE from 'three';
-import { W, H, DAY, MATERIALS, cellAt, live, isNight } from './world.js';
+import { W, H, DAY, MATERIALS, cellAt, live, isNight, objectsAt, stackHeight, covered } from './world.js';
 import { newColony, step, keeperPlace, fireReport, fireStory } from './sim.js';
 import { beliefs } from './creature.js';
 
@@ -47,12 +47,14 @@ function tileColor(c) {
   const base = new THREE.Color(c.stony ? '#a9a398' : c.grass ? '#8fb35a' : '#a6bb6a');
   base.offsetHSL(0, 0, -c.wet * 0.12);
   if (c.heat > 0) base.lerp(new THREE.Color('#ffb060'), c.heat * 0.35);
+  if (covered(world, c.x, c.y)) base.offsetHSL(0, 0, -0.08);
   if (isNight(world)) base.offsetHSL(0, -0.1, -0.22);
   return base;
 }
 
 // ---- things ----------------------------------------------------------------------------
-const OBJ_COLOR = { stone: '#9b948a', stick: '#8a5a34', grass: '#c9cf7a', log: '#7a4e2a', berry: '#c9435f', root: '#a07a4a', ember: '#ff9a3c' };
+const OBJ_COLOR = { stone: '#9b948a', stick: '#8a5a34', grass: '#c9cf7a', log: '#7a4e2a', berry: '#c9435f', root: '#a07a4a', ember: '#ff9a3c', tallbush: '#5e9344' };
+const STEP = 0.32;   // how tall one unit of stacked footing is
 const objMeshes = new Map(), crMeshes = new Map();
 function makeObj(o) {
   const g = new THREE.Group();
@@ -64,6 +66,13 @@ function makeObj(o) {
     case 'log': m = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.9, 7), flat(OBJ_COLOR.log)); m.rotation.z = Math.PI / 2; m.position.y = 0.15; break;
     case 'berry': m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 7, 5), flat(OBJ_COLOR.berry)); m.position.y = 0.09; break;
     case 'root': m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.14, 0), flat(OBJ_COLOR.root)); m.position.y = 0.1; break;
+    case 'tallbush': {
+      m = new THREE.Group();
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.7, 5), flat('#7a4e2a')); trunk.position.y = 0.35; trunk.castShadow = true; m.add(trunk);
+      for (const [x, y, z, s] of [[0, 0.95, 0, 0.42], [-0.3, 0.8, 0.1, 0.3], [0.28, 0.85, -0.1, 0.32], [0, 1.25, 0.05, 0.3]]) { const b = new THREE.Mesh(new THREE.IcosahedronGeometry(s, 0), flat(OBJ_COLOR.tallbush)); b.position.set(x, y, z); b.castShadow = true; m.add(b); }
+      for (let i = 0; i < 6; i++) { const f = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), flat('#c9435f')); f.position.set(Math.cos(i * 1.05) * 0.38, 0.9 + (i % 3) * 0.18, Math.sin(i * 1.05) * 0.38); f.name = 'fruit' + i; m.add(f); }
+      break;
+    }
     default: m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.22, 0), new THREE.MeshStandardMaterial({ color: '#ff9a3c', emissive: '#ff5a1a', emissiveIntensity: 1.2, flatShading: true })); m.position.y = 0.18;
   }
   m.castShadow = true; m.receiveShadow = true; m.name = 'body'; g.add(m);
@@ -100,7 +109,16 @@ function sync() {
     g.visible = !o.held;
     const jitter = ((parseInt(o.id.slice(1)) * 7919) % 100) / 100 - 0.5;
     g.position.set(X(o.x) + jitter * 0.5, 0, Z(o.y) + ((parseInt(o.id.slice(1)) * 104729) % 100 / 100 - 0.5) * 0.5);
-    const b = g.getObjectByName('body'); if (b && b.material.color) { b.material.color.set(OBJ_COLOR[o.kind] || '#999'); if (o.wet > 0.35) b.material.color.offsetHSL(0, 0, -0.18); }
+    const b = g.getObjectByName('body'); if (b && b.material && b.material.color) { b.material.color.set(OBJ_COLOR[o.kind] || '#999'); if (o.wet > 0.45) b.material.color.offsetHSL(0, 0, -0.18); }
+    // Footing stacks up; the thing on top of a stack sits higher.
+    const here = objectsAt(world, o.x, o.y).filter(q => MATERIALS[q.kind].hard >= 0.6 && !MATERIALS[q.kind].fixed && !q.burning);
+    const idx = here.indexOf(o);
+    let lift = 0;
+    if (idx > 0) { for (let i = 0; i < idx; i++) lift += (MATERIALS[here[i].kind].weight >= 3 ? 1 : 0.5) * STEP; }
+    else if (idx < 0 && here.length) lift = stackHeight(world, o.x, o.y) * STEP;   // soft things lie on top of the footing
+    g.position.y = lift;
+    if (o.kind === 'log' && idx > 0) { b.rotation.set(0, 0, Math.PI / 2); b.rotation.y = 0.2; }
+    if (o.kind === 'tallbush') for (let i = 0; i < 6; i++) { const f = b.getObjectByName('fruit' + i); if (f) f.visible = i < (o.fruit || 0); }
     g.getObjectByName('flame').visible = o.burning > 0;
     g.getObjectByName('light').intensity = o.burning > 0 ? 2 : 0;
   }
@@ -108,7 +126,7 @@ function sync() {
   world.creatures.forEach((c, i) => {
     let g = crMeshes.get(c.id);
     if (!g) { g = makeCreature(c, i); scene.add(g); crMeshes.set(c.id, g); }
-    g.userData.tx = X(c.x); g.userData.tz = Z(c.y);
+    g.userData.tx = X(c.x); g.userData.tz = Z(c.y); g.userData.ty = stackHeight(world, c.x, c.y) * STEP;
     g.visible = c.alive;
     const held = g.getObjectByName('held'); held.clear();
     if (c.carrying) { const m = makeObj(c.carrying).getObjectByName('body'); m.scale.setScalar(0.7); m.position.set(0, 0, 0); held.add(m); }
@@ -125,7 +143,7 @@ function drawHud() {
   hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${rep.living}/6 alive<br>` +
     (rep.alive ? `Fire burning, fuel ${rep.fuel}, fed ${rep.feeds} times` : rep.feeds ? `No fire now; it was fed ${rep.feeds} times` : 'No fire') +
     `<br><span class="muted">Click the ground to put down:</span><br>` +
-    ['ember', 'stick', 'grass', 'stone', 'berry'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +
+    ['ember', 'stick', 'grass', 'stone', 'log', 'berry'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +
     `<br><button data-act="rain">Rain</button><button data-act="pause">${running ? 'Pause' : 'Run'}</button><button data-act="fast">${speedMs < 200 ? 'Slow' : 'Fast'}</button>`;
   const story = fireStory(world);
   if (story.length !== shownLines) { lines.innerHTML = story.map(l => `<p>${l}</p>`).join(''); shownLines = story.length; lines.scrollTop = lines.scrollHeight; }
@@ -171,7 +189,7 @@ function frame(t) {
   if (running && t - last > speedMs) { step(world); sync(); drawHud(); last = t; }
   const s = t / 1000;
   for (const g of crMeshes.values()) {
-    g.position.x += (g.userData.tx - g.position.x) * 0.15; g.position.z += (g.userData.tz - g.position.z) * 0.15;
+    g.position.x += (g.userData.tx - g.position.x) * 0.15; g.position.z += (g.userData.tz - g.position.z) * 0.15; g.position.y += ((g.userData.ty || 0) - g.position.y) * 0.2;
     const b = g.getObjectByName('body'); const k = 1 + Math.sin(s * 3 + g.position.x) * 0.04; b.scale.set(1.05 / k, 0.9 * k, 1 / k);
     const moving = Math.abs(g.userData.tx - g.position.x) + Math.abs(g.userData.tz - g.position.z) > 0.02;
     if (moving) g.lookAt(g.userData.tx, g.position.y, g.userData.tz);
