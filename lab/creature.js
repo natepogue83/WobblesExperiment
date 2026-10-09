@@ -85,7 +85,12 @@ function options(world, c) {
     if (!c.carrying) out.push({ action: 'pickup', target: tgt, key: expKey(fk, 'pickup'), far: true });
     else if (fk !== carryFk) { out.push({ action: 'place', target: tgt, key: expKey(fk, 'place', carryFk), far: true }); out.push({ action: 'strike', target: tgt, key: expKey(fk, 'strike', carryFk), far: true }); }
   }
-  if (c.carrying) out.push({ action: 'place', target: null, key: expKey('ground', 'place', carryFk) });
+  if (c.carrying) {
+    out.push({ action: 'place', target: null, key: expKey('ground', 'place', carryFk) });
+    // or just beside me (that is how a wall goes up around a sleeping place)
+    const side = [[1, 0], [-1, 0], [0, 1], [0, -1]][(c.acted + c.x) % 4], bc = cellAt(world, c.x + side[0], c.y + side[1]);
+    if (bc && !bc.water && !objectsAt(world, bc.x, bc.y).some(o => MATERIALS[o.kind].fixed)) out.push({ action: 'place', target: { x: bc.x, y: bc.y, cell: true, kind: null }, key: expKey('beside', 'place', carryFk) });
+  }
   // Climb onto a stack next to me.
   for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const cx = c.x + dx, cy = c.y + dy; if (stackHeight(world, cx, cy) >= 1) out.push({ action: 'climb', target: { x: cx, y: cy, kind: null, cell: true }, key: expKey('stack', 'climb') }); }
   for (const k of others(world, c)) { out.push({ action: 'watch', target: k, key: expKey('creature', 'watch') }); if ((c.bonds[k.id] || 0) > 0.1) out.push({ action: 'beckon', target: k, key: expKey('creature', 'beckon') }); }
@@ -147,7 +152,9 @@ function score(world, c, opt, r) {
   if (opt.action === 'rest') {
     s += (1 - n.rest) * 1.6 + (isNight(world) ? 0.4 : 0) - 0.3;
     // Instinct after a fright: for some days, the careful want to sleep somewhere closed in or by a fire.
-    if (c.attackedAt && world.tick - c.attackedAt.t < 10 * 24 && isNight(world)) { const pk = opt.key.split('+')[1]; s += pk && pk !== 'open' ? g.caution * 0.8 : -g.caution * 0.6; }
+    const pk = opt.key.split('+')[1];
+    if (isNight(world) && pk && pk !== 'open') s += g.caution * 0.25;
+    if (c.attackedAt && world.tick - c.attackedAt.t < 10 * 24 && isNight(world)) s += pk && pk !== 'open' ? g.caution * 0.8 : -g.caution * 0.6;
     if (e && e.outcomes.attacked) s -= 1.5 * (e.outcomes.attacked / e.n);
   }
   if (opt.action === 'flee') { const d = Math.max(Math.abs(opt.beast.x - c.x), Math.abs(opt.beast.y - c.y)); s += 1.2 + g.caution * 1.5 - d * 0.12 + (e ? e.value : 0); if (protectedAt(world, c.x, c.y, world.creatures)) s -= 1.6; }
@@ -219,6 +226,7 @@ export function creatureStep(world, c) {
   if (c.needs.energy <= 0) { c.alive = false; emit(world, { kind: 'died', who: c.id, cause: c.needs.warmth < 0.2 ? 'cold and hunger' : 'hunger', x: c.x, y: c.y }); return; }
 
   // Mauled since my last step: remember it against what I was doing, and where.
+  if (!c.alive) return;
   if (c.attackedAt && !c.attackNoted) {
     c.attackNoted = true;
     const last = c.plan ? c.plan.key : c.episodes.length ? c.episodes[c.episodes.length - 1].key : null;
@@ -266,6 +274,7 @@ export function creatureStep(world, c) {
     case 'place': {
       const o = c.carrying; if (!o) break;
       const x = tgt ? tgt.x : c.x, y = tgt ? tgt.y : c.y;
+      if (tgt && tgt.cell) tgt = null;   // an empty spot beside me, not a thing
       o.held = null; o.x = x; o.y = y; c.carrying = null; o.placedBy = c.id; o.placedAt = world.tick;
       c.builds.push({ x, y, key: p.key, t: world.tick }); if (c.builds.length > 20) c.builds.shift();
       const here = cellAt(world, x, y);

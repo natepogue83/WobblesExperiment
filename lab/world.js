@@ -38,7 +38,7 @@ export function createLab(seed, opts = {}) {
   }
   const world = {
     seed, tick: 0, cells, objects: [], creatures: [], events: [], nextId: 1,
-    weather: { rain: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, threat: true, ...opts }
+    weather: { rain: 0, lean: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, threat: true, leanEvery: 30 * DAY, leanFor: 8 * DAY, ...opts }
   };
   // Scatter materials.
   const spawn = (kind, n, where) => { for (let i = 0; i < n; i++) { const c = where(); addObject(world, kind, c.x, c.y); } };
@@ -71,6 +71,10 @@ export function worldStep(world) {
   const o = world.opts;
   // Rain comes in spells.
   world.weather.rain = (t % o.rainEvery) < o.rainFor && t > 10 ? 1 : 0;
+  // Lean seasons: for a stretch every so often, little grows. Then what was learned about high fruit, roots and stores matters.
+  const lean = o.leanEvery && t > 12 * DAY && (t % o.leanEvery) < o.leanFor ? 1 : 0;
+  if (lean && !world.weather.lean) emit(world, { kind: 'lean_began', x: 0, y: 0 }); if (!lean && world.weather.lean) emit(world, { kind: 'lean_ended', x: 0, y: 0 });
+  world.weather.lean = lean;
   for (const c of world.cells) { c.heat = 0; if (world.weather.rain) c.wet = 1; else if (!c.water) c.wet = Math.max(0, c.wet - 0.05); }
   // Heat from burning things.
   for (const ob of live(world)) if (ob.burning > 0 && !ob.held) {
@@ -107,13 +111,13 @@ export function worldStep(world) {
   prowlerStep(world, r);
   // Growth: grass tufts and berries come back slowly; tall bushes refruit.
   if (t % 12 === 0) {
-    for (const ob of live(world)) if (ob.kind === 'tallbush' && (ob.fruit || 0) < 6 && r() < 0.5) ob.fruit = (ob.fruit || 0) + 1;
+    for (const ob of live(world)) if (ob.kind === 'tallbush' && (ob.fruit || 0) < 6 && r() < (world.weather.lean ? 0.3 : 0.5)) ob.fruit = (ob.fruit || 0) + 1;
     for (const ob of live(world)) if (ob.kind === 'grass' && !ob.held && ob.grown !== undefined && t - ob.grown > 15 * DAY && r() < 0.3) ob.gone = true;
     // Saplings grow into trees in about twelve days; a few saplings come up where nothing stands.
     for (const ob of live(world)) if (ob.kind === 'sapling' && t - (ob.planted || 0) > 12 * DAY) { ob.kind = 'tree'; ob.hp = 6; emit(world, { kind: 'grew', obj: ob.id, x: ob.x, y: ob.y }); }
     if (r() < 0.25 && live(world).filter(o => o.kind === 'tree' || o.kind === 'sapling').length < 9) { const c = world.cells[Math.floor(r() * world.cells.length)]; if (!c.water && !c.stony && !objectsAt(world, c.x, c.y).length) addObject(world, 'sapling', c.x, c.y, { planted: t }); }
     for (const c of world.cells) {
-      if (!c.grass || r() >= 0.22) continue;
+      if (!c.grass || r() >= (world.weather.lean ? 0.05 : 0.22)) continue;
       const here = objectsAt(world, c.x, c.y);
       if (here.some(o => MATERIALS[o.kind].fixed) || here.length >= 4) continue;
       // Berries come back where there are none; a tuft only where there is no tuft.
@@ -211,9 +215,10 @@ export function prowlerStep(world, r) {
       continue;
     }
     if (Math.max(Math.abs(prey.x - p.x), Math.abs(prey.y - p.y)) <= 1) {
-      prey.needs.energy = Math.max(0.02, prey.needs.energy - 0.3); prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick };
+      prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick };
       p.fed = 1;
-      emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y });
+      if (prey.needs.energy < 0.35 || (prey.hurt && world.tick - (prey.lastHurt || -999) < 2 * DAY)) { prey.alive = false; emit(world, { kind: 'died', who: prey.id, cause: 'the beast', x: prey.x, y: prey.y }); emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y, killed: true }); }
+      else { prey.needs.energy = Math.max(0.05, prey.needs.energy - 0.3); prey.lastHurt = world.tick; emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y }); }
       continue;
     }
     const dx = Math.sign(prey.x - p.x), dy = Math.sign(prey.y - p.y);

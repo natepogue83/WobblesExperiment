@@ -36,4 +36,24 @@ for (const s of SEEDS) {
     for (const e of w.events.filter(e => ['made_shard', 'felled', 'joined', 'split', 'prowler_came', 'attacked', 'drove_off', 'died'].includes(e.kind)).slice(0, 60)) console.log('  ' + tell(e));
   }
 }
+// Scenario G: evolution. 120 days, with and without the prowler. Does caution rise where there is something to be careful of?
+if (process.env.EVOLVE) {
+  const mean = (w, k) => { const l = w.creatures.filter(c => c.alive); return l.length ? l.reduce((a, c) => a + c.genome[k], 0) / l.length : NaN; };
+  const start = (w, k) => w.creatures.slice(0, 6).reduce((a, c) => a + c.genome[k], 0) / 6;
+  let up = 0, upNo = 0, killed = 0;
+  for (const s of SEEDS) {
+    const rows = [];
+    for (const threat of [true, false]) {
+      const w = newColony(s, 6, { threat, threatChance: 0.05 });
+      run(w, 48); keeperPlace(w, 'ember', 9, 5, { fuel: 120 }); run(w, 120 * 24 - 48);
+      const dc = mean(w, 'caution') - start(w, 'caution'), db = mean(w, 'brawn') - start(w, 'brawn');
+      const deaths = w.events.filter(e => e.kind === 'died'); const byBeast = deaths.filter(e => e.cause === 'the beast').length; killed += byBeast;
+      if (threat && dc > 0.03) up++; if (!threat && dc > 0.03) upNo++;
+      rows.push(`${threat ? 'with beast' : 'no beast  '}: caution ${start(w, 'caution').toFixed(2)}→${mean(w, 'caution').toFixed(2)} brawn ${start(w, 'brawn').toFixed(2)}→${mean(w, 'brawn').toFixed(2)} | born ${w.events.filter(e => e.kind === 'born').length}, died ${deaths.length} (${byBeast} to the beast), alive ${w.creatures.filter(c => c.alive).length}`);
+    }
+    console.log(`seed ${s}  ${rows.join('  ||  ')}`);
+  }
+  console.log(`\nEvolution over 120 days: caution rose (>0.03) in ${up}/${SEEDS.length} colonies with the beast and ${upNo}/${SEEDS.length} without; ${killed} killed by it in all`);
+}
+
 console.log(`\n${SEEDS.length} colonies, ${DAYS} days: shards ${tot.shards}, trees felled ${tot.felled}, tools joined ${tot.joined}, logs split ${tot.split}; beast visits ${tot.visits}, attacks ${tot.attacks}, driven off ${tot.drove}; safer nights later in ${tot.learned}, walls built in ${tot.walls}, roofs in ${tot.roofs}, 4+ alive at the end in ${tot.survived}`);
