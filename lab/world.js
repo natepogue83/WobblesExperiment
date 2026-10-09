@@ -10,11 +10,17 @@ export const W = 18, H = 12;
 export const DAY = 24;              // ticks per day; nights are cold
 
 // Materials: hidden truths. 'look' is what a creature perceives.
+// sharp: cuts wood. long: can be held and swung; a sharp thing can be wedged into it.
+// hp: how much cutting a standing thing takes before it comes down.
 export const MATERIALS = {
+  tree: { look: 'tall tree', weight: 30, hard: 0.6, burn: 0.3, absorb: 0.4, nourish: 0, fixed: true, tall: true, hp: 6 },
+  sapling: { look: 'thin sapling', weight: 5, hard: 0.3, burn: 0.5, absorb: 0.6, nourish: 0, fixed: true },
+  shard: { look: 'sharp shard', weight: 0.5, hard: 1, burn: 0, absorb: 0, nourish: 0, sharp: 1 },
+  axe: { look: 'shard on a stick', weight: 1.5, hard: 0.9, burn: 0.3, absorb: 0.3, nourish: 0, sharp: 1, long: 1 },
   stone: { look: 'grey lump', weight: 3, hard: 1, burn: 0, absorb: 0, nourish: 0 },
-  stick: { look: 'brown stick', weight: 1, hard: 0.4, burn: 0.8, absorb: 0.5, nourish: 0 },
+  stick: { look: 'brown stick', weight: 1, hard: 0.4, burn: 0.8, absorb: 0.5, nourish: 0, long: 1 },
   grass: { look: 'pale tuft', weight: 0.3, hard: 0, burn: 0.9, absorb: 0.9, nourish: 0.05 },
-  log: { look: 'brown trunk', weight: 4, hard: 0.6, burn: 0.7, absorb: 0.3, nourish: 0 },
+  log: { look: 'brown trunk', weight: 4, hard: 0.6, burn: 0.7, absorb: 0.3, nourish: 0, long: 1 },
   berry: { look: 'red bead', weight: 0.2, hard: 0, burn: 0.2, absorb: 0.2, nourish: 0.6 },
   root: { look: 'knobbly lump', weight: 0.8, hard: 0.7, burn: 0.3, absorb: 0.3, nourish: 0.4 },
   ember: { look: 'glowing lump', weight: 2, hard: 0.5, burn: 0, absorb: 0, nourish: 0, source: true },
@@ -32,7 +38,7 @@ export function createLab(seed, opts = {}) {
   }
   const world = {
     seed, tick: 0, cells, objects: [], creatures: [], events: [], nextId: 1,
-    weather: { rain: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, ...opts }
+    weather: { rain: 0 }, opts: { rainEvery: 96, rainFor: 4, nightCold: true, threat: true, ...opts }
   };
   // Scatter materials.
   const spawn = (kind, n, where) => { for (let i = 0; i < n; i++) { const c = where(); addObject(world, kind, c.x, c.y); } };
@@ -41,6 +47,8 @@ export function createLab(seed, opts = {}) {
   spawn('stick', 14, land); spawn('grass', 12, grassy); spawn('log', 4, land); spawn('stone', 8, () => { for (;;) { const c = land(); if (c.stony || r() < 0.2) return c; } });
   spawn('berry', opts.berries ?? 24, grassy); spawn('root', 8, land);
   for (let i = 0; i < (opts.tallbushes ?? 2); i++) { const c = grassy(); addObject(world, 'tallbush', c.x, c.y, { fruit: 6 }); }
+  for (let i = 0; i < (opts.trees ?? 5); i++) { const c = land(); if (objectsAt(world, c.x, c.y).some(o => MATERIALS[o.kind].fixed)) continue; addObject(world, 'tree', c.x, c.y, { hp: 6 }); }
+  world.prowlers = [];
   return world;
 }
 
@@ -96,9 +104,13 @@ export function worldStep(world) {
       if (!ob.hissed || t - ob.hissed > 3) { ob.hissed = t; emit(world, { kind: 'hiss', obj: ob.id, material: ob.kind, x: ob.x, y: ob.y }); }
     }
   }
+  prowlerStep(world, r);
   // Growth: grass tufts and berries come back slowly; tall bushes refruit.
   if (t % 12 === 0) {
     for (const ob of live(world)) if (ob.kind === 'tallbush' && (ob.fruit || 0) < 6 && r() < 0.5) ob.fruit = (ob.fruit || 0) + 1;
+    // Saplings grow into trees in about twelve days; a few saplings come up where nothing stands.
+    for (const ob of live(world)) if (ob.kind === 'sapling' && t - (ob.planted || 0) > 12 * DAY) { ob.kind = 'tree'; ob.hp = 6; emit(world, { kind: 'grew', obj: ob.id, x: ob.x, y: ob.y }); }
+    if (r() < 0.25 && live(world).filter(o => o.kind === 'tree' || o.kind === 'sapling').length < 9) { const c = world.cells[Math.floor(r() * world.cells.length)]; if (!c.water && !c.stony && !objectsAt(world, c.x, c.y).length) addObject(world, 'sapling', c.x, c.y, { planted: t }); }
     for (const c of world.cells) {
       if (c.grass && r() < 0.22 && objectsAt(world, c.x, c.y).length < 2) addObject(world, r() < 0.45 ? 'grass' : 'berry', c.x, c.y);
     }
@@ -131,11 +143,84 @@ export function covered(world, x, y) {
   return stackHeight(world, x, y) >= 1 && here.some(o => o.kind === 'log') && here.filter(o => MATERIALS[o.kind].hard >= 0.6 && MATERIALS[o.kind].weight >= 3).length >= 2;
 }
 
+// A cell is walled when three or more of its four sides are blocked by a stack, a standing
+// tree or bush, or water. Nothing big can get in; it is also a little warmer out of the wind.
+export function walled(world, x, y) {
+  let sides = 0;
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const c = cellAt(world, x + dx, y + dy);
+    if (!c || c.water || stackHeight(world, x + dx, y + dy) >= 1 || objectsAt(world, x + dx, y + dy).some(o => MATERIALS[o.kind].fixed)) sides++;
+  }
+  return sides >= 3;
+}
+// Cutting into a standing tree with something sharp. Enough cuts and it comes down as wood.
+export function cutTree(world, tree, power, who) {
+  tree.hp = (tree.hp ?? MATERIALS.tree.hp) - power;
+  if (tree.hp > 0) return 'chipped';
+  tree.gone = true;
+  const spots = [[0, 0], [1, 0], [0, 1], [-1, 0], [0, -1], [1, 1]].map(([dx, dy]) => cellAt(world, tree.x + dx, tree.y + dy)).filter(c => c && !c.water);
+  const drops = ['log', 'log', 'stick', 'stick', 'stick'];
+  drops.forEach((k, i) => { const c = spots[i % spots.length]; addObject(world, k, c.x, c.y, { felledBy: who }); });
+  emit(world, { kind: 'felled', who, obj: tree.id, x: tree.x, y: tree.y });
+  return 'felled';
+}
+// A trunk struck with something sharp splits into sticks.
+export function splitLog(world, log, who) {
+  log.gone = true;
+  for (let i = 0; i < 3; i++) addObject(world, 'stick', log.x, log.y, { splitBy: who });
+  emit(world, { kind: 'split', who, obj: log.id, x: log.x, y: log.y });
+  return 'split';
+}
+
+// ---- the prowler: a hungry thing that comes out of the dark ------------------------------------
+// It wants a creature on its own, in the open. Fire, walls and a crowd keep it off. It never
+// learns; it is weather with teeth. What the creatures make of it, they make themselves.
+export function protectedAt(world, x, y, creatures) {
+  const c = cellAt(world, x, y);
+  if (!c) return true;
+  if (c.heat > 0 || walled(world, x, y)) return true;
+  let company = 0; for (const k of creatures) if (k.alive && Math.max(Math.abs(k.x - x), Math.abs(k.y - y)) <= 1) company++;
+  return company >= 3;
+}
+export function prowlerStep(world, r) {
+  if (!world.opts.threat) return;
+  world.prowlers = world.prowlers || [];
+  const night = isNight(world);
+  // One at a time; it comes on some nights, from the edge, and goes at dawn.
+  if (!world.prowlers.length) {
+    if (night && world.tick > 5 * DAY && r() < (world.opts.threatChance ?? 0.03)) {
+      const edges = world.cells.filter(c => !c.water && (c.x === 0 || c.y === 0 || c.x === W - 1 || c.y === H - 2));
+      const c = edges[Math.floor(r() * edges.length)];
+      world.prowlers.push({ id: 'p' + world.tick, x: c.x, y: c.y, came: world.tick, fed: 0 });
+      emit(world, { kind: 'prowler_came', x: c.x, y: c.y });
+    }
+    return;
+  }
+  for (const p of world.prowlers) {
+    if (!night || p.fed >= 1 || p.fled) { p.gone = true; emit(world, { kind: 'prowler_left', x: p.x, y: p.y, fed: p.fed, fled: !!p.fled }); continue; }
+    const prey = world.creatures.filter(k => k.alive && Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= 7 && !protectedAt(world, k.x, k.y, world.creatures))
+      .sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
+    if (!prey) { // wander the edge, slowly
+      if (r() < 0.5) { const dx = Math.floor(r() * 3) - 1, dy = Math.floor(r() * 3) - 1; const c = cellAt(world, p.x + dx, p.y + dy); if (c && !c.water && c.heat === 0) { p.x = c.x; p.y = c.y; } }
+      continue;
+    }
+    if (Math.max(Math.abs(prey.x - p.x), Math.abs(prey.y - p.y)) <= 1) {
+      prey.needs.energy = Math.max(0.02, prey.needs.energy - 0.3); prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick };
+      p.fed = 1;
+      emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y });
+      continue;
+    }
+    const dx = Math.sign(prey.x - p.x), dy = Math.sign(prey.y - p.y);
+    for (const [mx, my] of [[dx, dy], [dx, 0], [0, dy]]) { const c = cellAt(world, p.x + mx, p.y + my); if (c && !c.water && c.heat === 0 && !walled(world, c.x, c.y) && (mx || my)) { p.x = c.x; p.y = c.y; break; } }
+  }
+  world.prowlers = world.prowlers.filter(p => !p.gone);
+}
+
 // Visible features of an object, from a creature's point of view.
 export function lookAt(world, o) {
   const m = MATERIALS[o.kind], c = cellAt(world, o.x, o.y);
   return {
-    look: m.tall ? (o.fruit > 0 ? m.look : 'tall bare bush') : m.look, size: m.weight >= 3 ? 'big' : m.weight >= 0.8 ? 'mid' : 'small',
+    look: o.kind === 'tallbush' ? (o.fruit > 0 ? m.look : 'tall bare bush') : o.kind === 'tree' && (o.hp ?? 6) < 6 ? 'notched tree' : m.look, size: m.weight >= 3 ? 'big' : m.weight >= 0.8 ? 'mid' : 'small',
     wet: o.wet >= 0.35, glowing: o.burning > 0, warm: !!(c && c.heat > 0)
   };
 }

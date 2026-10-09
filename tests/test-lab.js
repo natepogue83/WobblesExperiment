@@ -52,6 +52,24 @@ section('Lab: culture outlives its founders');
   ok(`the fire outlived every founder and was fed by their descendants in ${culture}/4`);
 }
 
+
+section('Lab: the deeper world holds together (tools, wood, the prowler)');
+{
+  let shards = 0, drove = 0, visits = 0, alive = 0;
+  for (const s of SEEDS) {
+    const w = newColony(s, 6);
+    run(w, 48); keeperPlace(w, 'ember', 9, 5, { fuel: 120 }); run(w, 30 * 24);
+    if (w.events.some(e => e.kind === 'made_shard')) shards++;
+    drove += w.events.filter(e => e.kind === 'drove_off').length;
+    visits += w.events.filter(e => e.kind === 'prowler_came').length;
+    if (w.creatures.filter(c => c.alive).length >= 3) alive++;
+  }
+  assert.ok(visits >= 4, 'the prowler came ' + visits);
+  assert.ok(shards >= 1, 'shards in ' + shards);
+  assert.ok(alive >= 3, 'colonies with 3+ alive: ' + alive);
+  ok();
+}
+
 section('Lab: deterministic');
 {
   const a = newColony(7, 6), b = newColony(7, 6);

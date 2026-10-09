@@ -8,7 +8,7 @@ export function newColony(seed, n = 6, opts = {}) {
   const world = createLab(seed, opts);
   const r = rngFor(seed, 'genomes');
   for (let i = 0; i < n; i++) {
-    const g = { curiosity: 0.25 + r() * 0.6, patience: 0.25 + r() * 0.6, sociability: 0.25 + r() * 0.6, learnRate: 0.8 + r() * 0.5, caution: 0.2 + r() * 0.6 };
+    const g = { curiosity: 0.25 + r() * 0.6, patience: 0.25 + r() * 0.6, sociability: 0.25 + r() * 0.6, learnRate: 0.8 + r() * 0.5, caution: 0.2 + r() * 0.6, brawn: 0.3 + r() * 0.5 };
     makeCreature(world, 'c' + (i + 1), g, 6 + (i % 3) * 2, 4 + Math.floor(i / 3) * 2);
   }
   return world;
@@ -26,6 +26,7 @@ export function run(world, ticks) { for (let i = 0; i < ticks; i++) step(world);
 export function keeperPlace(world, kind, x, y, state = {}) {
   const o = addObject(world, kind, x, y, state);
   if (kind === 'ember') { o.burning = 1; o.fuel = state.fuel ?? 40; }
+  if (kind === 'tree') o.hp = 6;
   emit(world, { kind: 'keeper_placed', material: kind, x, y, obj: o.id });
   return o;
 }
@@ -34,7 +35,7 @@ export function keeperPlace(world, kind, x, y, state = {}) {
 export function clone(world) {
   const w = JSON.parse(JSON.stringify({ ...world, creatures: [], objects: world.objects.map(o => ({ ...o })) }));
   const byId = Object.fromEntries(w.objects.map(o => [o.id, o]));
-  w.creatures = world.creatures.map(c => ({ ...c, needs: { ...c.needs }, genome: { ...c.genome }, bonds: { ...c.bonds }, places: JSON.parse(JSON.stringify(c.places || {})), builds: (c.builds || []).map(b => ({ ...b })), plan: null,
+  w.creatures = world.creatures.map(c => ({ ...c, needs: { ...c.needs }, genome: { ...c.genome }, bonds: { ...c.bonds }, places: JSON.parse(JSON.stringify(c.places || {})), builds: (c.builds || []).map(b => ({ ...b })), attackedAt: c.attackedAt ? { ...c.attackedAt } : null, plan: null,
     carrying: c.carrying ? byId[c.carrying.id] : null, episodes: c.episodes.slice(),
     exp: new Map([...c.exp].map(([k, e]) => [k, { ...e, outcomes: { ...e.outcomes } }])) }));
   return w;
