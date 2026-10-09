@@ -13,7 +13,7 @@ const world = newColony(seed, 6);
 let speedMs = 350, running = true, tool = 'ember';
 
 // ---- scene ------------------------------------------------------------------------
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });   // so a frame can be saved as a picture
 renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
@@ -181,4 +181,4 @@ function frame(t) {
   requestAnimationFrame(frame);
 }
 sync(); drawHud(); requestAnimationFrame(frame);
-window.__lab = { world, scene };
+window.__lab = { world, scene, renderer, camera };
