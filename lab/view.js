@@ -15,7 +15,7 @@ import { rngFor } from '../src/sim/rng.js';
 const q = new URLSearchParams(location.search);
 const seed = Number(q.get('seed') || 2);
 const world = newColony(seed, 6);
-let speedMs = 350, running = true, tool = 'ember';
+let speedMs = 600, running = true, tool = 'ember';
 
 // ---- scene ------------------------------------------------------------------------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });   // so a frame can be saved as a picture
@@ -117,15 +117,15 @@ function daylight() {
   const d = up * (1 - down);
   return d * d * (3 - 2 * d);
 }
-const SKY_DAY = new THREE.Color('#d8e9f1'), SKY_NIGHT = new THREE.Color('#34405e'), SUN_DAY = new THREE.Color('#fff1d6'), SUN_NIGHT = new THREE.Color('#8fa6d8');
+const SKY_DAY = new THREE.Color('#d8e9f1'), SKY_NIGHT = new THREE.Color('#5a6a8c'), SUN_DAY = new THREE.Color('#fff1d6'), SUN_NIGHT = new THREE.Color('#8fa6d8');
 let lightNow = 1;
 function easeLight() {
   lightNow += (daylight() - lightNow) * 0.06;
   const d = lightNow;
-  sun.intensity = 0.7 + 1.3 * d; hemi.intensity = 0.5 + 0.4 * d;
+  sun.intensity = 1.0 + 1.0 * d; hemi.intensity = 0.6 + 0.3 * d;
   sun.color.copy(SUN_NIGHT).lerp(SUN_DAY, d);
   scene.background.copy(SKY_NIGHT).lerp(SKY_DAY, d); scene.fog.color.copy(scene.background);
-  renderer.toneMappingExposure = 0.9 + 0.15 * d;
+  renderer.toneMappingExposure = 0.95 + 0.1 * d;
 }
 
 // ---- things ----------------------------------------------------------------------------
@@ -281,7 +281,7 @@ hud.addEventListener('click', e => {
   if (b.dataset.tool) tool = b.dataset.tool;
   if (b.dataset.act === 'rain') { world.weather.rain = 1; for (const c of world.cells) c.wet = 1; for (const o of live(world)) if (!o.held) o.wet = Math.min(1, o.wet + 0.6); }
   if (b.dataset.act === 'pause') running = !running;
-  if (b.dataset.act === 'fast') speedMs = speedMs < 200 ? 350 : 80;
+  if (b.dataset.act === 'fast') speedMs = speedMs < 200 ? 600 : 80;
   drawHud();
 });
 
