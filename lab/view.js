@@ -140,7 +140,7 @@ const hud = document.getElementById('hud'), lines = document.getElementById('lin
 let shownLines = 0, selected = null;
 function drawHud() {
   const rep = fireReport(world);
-  hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${rep.living}/6 alive<br>` +
+  hud.innerHTML = `<b>Wobblins lab · seed ${seed}</b>Day ${Math.floor(world.tick / DAY) + 1}, ${isNight(world) ? 'night' : 'day'}${world.weather.rain ? ', raining' : ''} · ${rep.living} alive, ${world.creatures.length - rep.living} gone<br>` +
     (rep.alive ? `Fire burning, fuel ${rep.fuel}, fed ${rep.feeds} times` : rep.feeds ? `No fire now; it was fed ${rep.feeds} times` : 'No fire') +
     `<br><span class="muted">Click the ground to put down:</span><br>` +
     ['ember', 'stick', 'grass', 'stone', 'log', 'berry'].map(k => `<button data-tool="${k}" class="${tool === k ? 'on' : ''}">${k === 'ember' ? 'glowing lump' : k}</button>`).join('') +
