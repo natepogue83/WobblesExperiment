@@ -8,7 +8,7 @@
 import { rngFor } from '../src/sim/rng.js';
 import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, sparksAt, stackHeight, covered, W, H } from './world.js';
 
-export const ACTIONS = ['pickup', 'place', 'taste', 'strike', 'approach', 'climb', 'watch', 'rest', 'wander'];
+export const ACTIONS = ['pickup', 'place', 'taste', 'strike', 'approach', 'climb', 'watch', 'beckon', 'rest', 'wander'];
 const VIEW = 3;             // how far they see
 const REACH = 1;            // adjacent cells
 
@@ -20,7 +20,7 @@ export function makeCreature(world, id, genome, x, y) {
     genome: { curiosity: 0.5, patience: 0.5, sociability: 0.5, learnRate: 1, caution: 0.5, ...genome },
     // Learned: expectations about (seen features, action) -> outcomes, and a few episodes.
     exp: new Map(), episodes: [], places: {},
-    plan: null, bonds: {}, born: world.tick, acted: 0, lifespan: 60 * 24, parents: null
+    plan: null, bonds: {}, born: world.tick, acted: 0, lifespan: 60 * 24, parents: null, builds: []
   };
   world.creatures.push(c);
   return c;
@@ -80,7 +80,7 @@ function options(world, c) {
   if (c.carrying) out.push({ action: 'place', target: null, key: expKey('ground', 'place', carryFk) });
   // Climb onto a stack next to me.
   for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const cx = c.x + dx, cy = c.y + dy; if (stackHeight(world, cx, cy) >= 1) out.push({ action: 'climb', target: { x: cx, y: cy, kind: null, cell: true }, key: expKey('stack', 'climb') }); }
-  for (const k of others(world, c)) out.push({ action: 'watch', target: k, key: expKey('creature', 'watch') });
+  for (const k of others(world, c)) { out.push({ action: 'watch', target: k, key: expKey('creature', 'watch') }); if ((c.bonds[k.id] || 0) > 0.1) out.push({ action: 'beckon', target: k, key: expKey('creature', 'beckon') }); }
   out.push({ action: 'rest', target: null, key: expKey(isNight(world) ? 'night' : 'day', 'rest') });
   out.push({ action: 'wander', target: null, key: 'wander' });
   return out;
@@ -120,6 +120,7 @@ function score(world, c, opt, r) {
   if (opt.action === 'watch') s += g.sociability * (0.05 + (1 - n.social) * 0.7) + (c.parents && c.parents.includes(opt.target.id) && world.tick - c.born < 10 * 24 ? 0.6 : 0);
   if (opt.action === 'wander') s += 0.15 + (1 - n.energy) * 0.3;
   if (opt.action === 'climb') s -= 0.1;
+  if (opt.action === 'beckon') { if (world.tick - (c.lastBeckon || -99) < 36 || (opt.target.plan && opt.target.plan.action === 'watch')) return -Infinity; let known = 0; for (const v of c.exp.values()) if (v.n >= 4 && v.value > 0.08) known++; s += known ? g.sociability * 0.3 + (1 - n.social) * 0.2 - 0.4 : -1; }
   // Instinct: when cold, warm-looking things draw you (what happens there is still learned).
   if (opt.action === 'approach') s += ((opt.target.burning > 0) || (cellAt(world, opt.target.x, opt.target.y) || {}).heat > 0 ? (1 - n.warmth) * 1.8 : 0) - 0.35;
   if (opt.action === 'rest' && cell0(world, c).heat > 0) s += (1 - n.warmth) * 1.2;
@@ -219,6 +220,7 @@ export function creatureStep(world, c) {
       const o = c.carrying; if (!o) break;
       const x = tgt ? tgt.x : c.x, y = tgt ? tgt.y : c.y;
       o.held = null; o.x = x; o.y = y; c.carrying = null; o.placedBy = c.id; o.placedAt = world.tick;
+      c.builds.push({ x, y, key: p.key, t: world.tick }); if (c.builds.length > 20) c.builds.shift();
       const here = cellAt(world, x, y);
       const source = objectsAt(world, x, y).find(s => s.burning > 0 && s !== o);
       if (source) {
@@ -267,6 +269,11 @@ export function creatureStep(world, c) {
       if (tgt && !tgt.gone) outcome = cell0(world, c).heat > 0 ? 'warmer' : 'nearby';
       break;
     }
+    case 'beckon': {
+      // A friend comes to watch; what they see of me next, they remember better.
+      if (tgt && tgt.alive && (!tgt.plan || ['wander', 'watch', 'rest'].includes(tgt.plan.action))) { tgt.plan = { action: 'watch', target: c, key: expKey('creature', 'watch'), since: world.tick, invited: true }; outcome = 'company'; c.lastBeckon = world.tick; c.needs.social = Math.min(1, c.needs.social + 0.05); emit(world, { kind: 'beckoned', who: c.id, whom: tgt.id, x: c.x, y: c.y }); }
+      break;
+    }
     case 'watch': {
       if (tgt && tgt.alive) { c.needs.social = Math.min(1, c.needs.social + 0.08); c.bonds[tgt.id] = (c.bonds[tgt.id] || 0) + 0.05; outcome = 'company'; }
       break;
@@ -281,6 +288,7 @@ export function creatureStep(world, c) {
   if (outcome === 'hurt') c.needs.warmth = Math.max(0, c.needs.warmth - 0.05);
   const delta = needDelta(before, c.needs) + (outcome === 'fire_grew' ? 0.15 : 0) + (outcome === 'hurt' ? -0.2 : 0) + (outcome === 'sparks' ? 0.05 : 0);
   remember(c, p.key, outcome, delta, 1);
+  if (outcome === 'sheltered' || outcome === 'cosy' || outcome === 'ate') for (const b of c.builds) if (b.x === c.x && b.y === c.y && world.tick - b.t < 400) remember(c, b.key, 'paid_off', Math.max(0.05, delta) * 0.8, 0.5);
   if (delta > 0.08) { let w = 0.5; for (let i = c.episodes.length - 1; i >= 0 && i >= c.episodes.length - 3; i--) { const ep = c.episodes[i]; if (world.tick - ep.t > 10 || ep.key === p.key) continue; remember(c, ep.key, 'led_on', delta * w, 0.4); w *= 0.6; } }
   c.episodes.push({ t: world.tick, key: p.key, outcome, delta }); if (c.episodes.length > 60) c.episodes.shift();
   c.acted++;
@@ -288,7 +296,7 @@ export function creatureStep(world, c) {
   // Others nearby who were watching (or just looking that way) pick up a weaker memory.
   for (const k of others(world, c, 2)) {
     const watching = k.plan && k.plan.action === 'watch' && k.plan.target === c;
-    const w = watching ? 0.45 : 0.15;
+    const w = watching ? (k.plan.invited ? 0.6 : 0.45) : 0.15;
     const noticed = watching || r() < 0.5;
     if (noticed) remember(k, p.key, outcome, delta, w);
     if (noticed && (watching || ['fire_grew', 'sparks', 'hurt', 'ate'].includes(outcome))) emit(world, { kind: 'saw', who: k.id, whom: c.id, key: p.key, outcome, x: k.x, y: k.y });

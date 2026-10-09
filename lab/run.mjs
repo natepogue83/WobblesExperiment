@@ -96,6 +96,22 @@ console.log(`\n${SEEDS.length} colonies: fire kept to day ${DAYS + 2} in ${kept}
   console.log(`Scenario D (generations), 70 days: the fire outlived every founder and was fed by their descendants in ${culture}/${SEEDS.length}; populations ${pops.join(',')}`);
 }
 
+// Scenario E: cover. 40 days of ordinary life: does anyone build a roof and sleep under it?
+{
+  let roofs = 0, slept = 0, beckons = 0;
+  for (const s of SEEDS) {
+    const w = newColony(s, 6);
+    run(w, 40 * 24);
+    const sheltered = w.events.filter(e => e.kind === 'acted' && e.outcome === 'sheltered');
+    const anyCover = w.cells.some(c => { const here = w.objects.filter(o => !o.gone && !o.held && o.x === c.x && o.y === c.y); return here.some(o => o.kind === 'log') && here.filter(o => (o.kind === 'stone' || o.kind === 'log')).length >= 3; });
+    if (anyCover) roofs++;
+    if (sheltered.length) slept++;
+    beckons += w.events.filter(e => e.kind === 'beckoned').length;
+    if (SEEDS.length === 1) console.log('E:', `cover somewhere: ${anyCover}, sheltered rests: ${sheltered.length}, beckons: ${w.events.filter(e => e.kind === 'beckoned').length}`);
+  }
+  console.log(`Scenario E (cover), 40 days: a roof stood somewhere in ${roofs}/${SEEDS.length}, someone slept under one in ${slept}/${SEEDS.length}; ${beckons} beckons in all`);
+}
+
 // Test 1: memory matters. Wipe the first feeder's memory mid-run; it should feed less afterwards than its unwiped twin.
 {
   let worse = 0, tried = 0;
