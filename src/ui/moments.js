@@ -6,7 +6,7 @@ import { wobblinSVG } from '../render/sprites.js';
 import { discoveryIcon } from '../render/icons.js';
 
 // What changes for them once they know it (never how to find it).
-const BLURB = {
+export const BLURB = {
   fire_warmth: 'They will gather round a fire to keep warm now.',
   stone_stacking: 'Stacked stones: their first idea of building.',
   foraging: 'They know which berries are good. Fewer hungry days.',

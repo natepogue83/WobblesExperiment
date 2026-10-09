@@ -27,6 +27,8 @@ import { momentsFor, queueBanner, momentShowing } from './moments.js';
 import { coachStep, drawCoach } from './coach.js';
 import { tickerFor } from './ticker.js';
 import { keeperTitle } from './keeper.js';
+import { showMenu, closeMenu, longPress } from './contextmenu.js';
+import { objectLore, tileLore, zoneLore, wobblinLore } from './lore.js';
 import { SKILLS, SKILL_NAMES, skillLevel } from '../sim/growth.js';
 
 const params = new URLSearchParams(location.search);
@@ -428,6 +430,7 @@ function drawTray() {
         (st.note ? `<span class="note">${st.note}</span>` : '');
       tile.setAttribute('aria-label', item.label + (st.note ? ', ' + st.note : ''));
       tile.title = TILE_TIP[item.id] || item.label;
+      tile.addEventListener('contextmenu', ev => { ev.preventDefault(); tileMenu(item, ev.clientX, ev.clientY); });
       wireTile(tile, item);
       bar.append(tile);
     }
@@ -530,8 +533,93 @@ function endDrag(ghost) {
 }
 
 // Taps on empty valley drop an armed item there.
+// ------------------------------------------------------------ right-click menus
+// Everything in the valley answers a right-click (or a press and hold) with
+// what it is, what it might lead to, and what you can do to it.
+function readyItem(id) { const it = TRAY.find(i => i.id === id); if (!it) return null; const st = itemState(it); return st.ready && !st.locked ? it : null; }
+function dropAct(label, id, pt, hint) {
+  const it = readyItem(id);
+  if (!it) return null;
+  return { label, hint, onClick: () => dropItem(it, pt) };
+}
+function contextAt(clientX, clientY) {
+  closeMenu();
+  const svg = $('#world');
+  if (!world || !lastRS || !overSvg(svg, clientX, clientY)) return;
+  const el = document.elementFromPoint(clientX, clientY);
+  const pt = toSvgPoint(svg, clientX, clientY);
+  const wg = el && el.closest('.wobblin'), og = el && el.closest('.obj');
+  if (wg) {
+    const w = world.wobblins.find(x => x.id === wg.id);
+    if (w) return wobblinMenu(w, clientX, clientY);
+  }
+  if (og) {
+    const o = world.objects.find(x => x.id === og.id);
+    if (o) return objectMenu(o, clientX, clientY);
+  }
+  groundMenu(pt, clientX, clientY);
+}
+function wobblinMenu(w, x, y) {
+  const lonely = !world.wobblins.some(o => o !== w && o.alive && o.zone === w.zone);
+  const want = wantOf(world, w, lonely);
+  const wantText = want ? WANT_TEXT[want.kind](w.name, ITEM_WORD[want.item] || want.item) : null;
+  const lore = wobblinLore(world, w, wantText);
+  const pos = puppets.position(w.id) || { x: 600, y: 400 };
+  const head = { x: pos.x, y: pos.y - 30 * WORLD_SCALE };
+  showMenu(x, y, { ...lore, items: [
+    { label: 'Open ' + w.name + "'s card", hint: 'stats, skills, what they could work out', onClick: () => showWobblin(w) },
+    { label: 'Rename', onClick: () => { showWobblin(w); setTimeout(() => $('#panel .name-btn')?.click(), 50); } },
+    isUnlocked(world, 'bless') ? { label: 'Bless', hint: 'lift one trait for a while', onClick: () => blessMenu(w.id) } : null,
+    dropAct('Stones on the head', 'stones', head, 'a bonk, maybe an idea'),
+    dropAct('Seed on the head', 'bush', head, 'a flower crown'),
+    dropAct('Lightning on the head', 'lightning', head, 'frizz, maybe a bright idea'),
+    dropAct('Give the daily gift', 'gift', head, 'they catch it'),
+    { label: 'Pick up: drag them', hint: 'let go while moving to fling', disabled: true }
+  ] });
+}
+function objectMenu(o, x, y) {
+  const lore = objectLore(world, o);
+  const ro = lastRS.objects.find(q => q.id === o.id) || { x: 600, y: 400 };
+  const pt = { x: ro.x, y: ro.y - 6 };
+  const items = [
+    dropAct('Strike it with lightning', 'lightning', pt, o.kind === 'boulder' ? 'splits it into stones' : o.kind === 'stones' && o.state.stacked ? 'bursts the cairn' : o.kind === 'pond' ? 'stuns the fish, or cracks the ice' : o.kind === 'totem' ? 'makes it hum' : 'fire, probably'),
+    dropAct('Rain here', 'rain', pt, o.kind === 'fire' ? 'puts it out' : 'wets the ground'),
+    MOVABLE_KINDS.has(o.kind) ? { label: 'Move it: drag it somewhere else', disabled: true } : null,
+    { label: 'Drop a Wobblin on it: pick one up and let go here', disabled: true }
+  ];
+  showMenu(x, y, { ...lore, items });
+}
+const MOVABLE_KINDS = new Set(['stones', 'gift', 'curio', 'sprout', 'clay']);
+function groundMenu(pt, x, y) {
+  const zone = zoneAt(pt);
+  const lore = zoneLore(world, zone, world.objects);
+  showMenu(x, y, { ...lore, items: [
+    dropAct('Drop stones here', 'stones', pt),
+    dropAct('Drop a boulder here', 'boulder', pt),
+    dropAct('Plant a berry seed here', 'bush', pt),
+    dropAct('Plant a tree seed here', 'tree', pt),
+    dropAct('Strike here with lightning', 'lightning', pt),
+    dropAct('Rain', 'rain', pt, 'over the whole valley'),
+    dropAct('Shake the valley', 'quake', pt),
+    { label: 'Zoom: wheel or pinch; drag the ground to pan; double-tap to zoom in', disabled: true }
+  ] });
+}
+function tileMenu(item, x, y) {
+  const lore = tileLore(world, item.id, item.label);
+  const st = itemState(item);
+  showMenu(x, y, { ...lore, items: [
+    st.locked ? { label: 'Locked: unlocks at belief ' + (st.note || '').split(' ')[1], disabled: true }
+      : st.ready ? { label: 'Arm it, then tap where it should go', onClick: () => { armed = item; drawTray(); toast('Tap the valley where ' + item.label.toLowerCase() + ' should go.'); } }
+      : { label: 'Not ready: ' + st.note, disabled: true },
+    { label: 'Or drag it from the tray onto the valley', disabled: true }
+  ] });
+}
+
 function wireValley() {
   const svg = $('#world');
+  svg.addEventListener('contextmenu', ev => { ev.preventDefault(); contextAt(ev.clientX, ev.clientY); });
+  longPress(svg, ev => contextAt(ev.clientX, ev.clientY));
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeMenu(); });
   // Pan by dragging empty ground, pinch or wheel to zoom, double-tap to zoom.
   const pointers = new Map();
   let panning = false, pinch = null, downAt = null, lastTap = 0;

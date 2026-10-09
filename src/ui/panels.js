@@ -166,6 +166,7 @@ export function showFamily(panel, world, { onPick }) {
 // ---- how to play ----------------------------------------------------------------
 export function showHelp(panel) {
   const rows = [
+    ['Right-click anything', 'A Wobblin, a hut, a bush, the ground, a tray tile: a note says what it is, what it might lead to, and what you can do to it. On a phone, press and hold.'],
     ['Drag from your tray', 'Stones, seeds, rain, lightning and the rest go wherever you drop them. Drop one right on a Wobblin\'s head and see what happens.'],
     ['Pick a Wobblin up', 'Set it down somewhere new, or let go while moving to fling it. Whatever it lands on reacts: a friend, a bush, the fire, a hut roof, the river, a mural, the garden... Catch a flung one in mid-air to juggle it.'],
     ['Hover your hand', 'Their eyes follow it. The ones who trust you wave hello; the ones you have scared cover their heads.'],

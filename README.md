@@ -15,6 +15,7 @@ experiment overlay, replay verification and save export/import).
 
 ## How to play
 
+- **Right-click anything** (press and hold on a phone) for what it is, what it might lead to, and what you can do to it.
 - **Drag from the tray** onto the valley: stones, a boulder, seeds, rain, lightning, water, seasons, Shake, a blessing, a curio, the daily gift, a miracle. Drop one on a Wobblin's head for a reaction.
 - **Pick a Wobblin up** and set it down, or **fling** it (let go while moving). Things it lands on react: friends, bushes, trees, the fire, hut roofs, the river, murals, the garden, the frozen pond, snowmen. **Catch a flung one in mid-air** to juggle it.
 - **Hold it still** in your hand and it dozes off. **Shake it** and it gets rattled.
