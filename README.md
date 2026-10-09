@@ -28,6 +28,15 @@ experiment overlay, replay verification and save export/import).
 - Dev: `?debug=1&fresh=1` starts over, `?debug=1&devload=/_dev_save.json` loads a prepared village (`node tests/_mkdev.mjs <seed> <ticks>` makes one).
 - Art: the game draws everything in vector, and swaps in hand-painted PNGs for anything listed in `art/manifest.json` (see `art/manifest.example.json` and `marketing/art-brief.md`). The dev server also accepts `POST /_dev/save?name=x.png` from the page, which saves into `art/_test/`.
 
+## The lab (where the game is going)
+
+`lab/` is an artificial-life simulation with no recipes: materials with hidden properties, a few physical rules (wet and dry, heat and fire, stacking and cover, growth), and creatures that see only what is visible, act with a handful of primitives, and learn from what happened. Knowledge spreads only by watching; children inherit how they learn, not what. The player's verbs are to put things down and make it rain.
+
+- `node lab/run.mjs` runs 8 colonies through the fire-keeping scenario, the spark scenario, the high-fruit scenario and the generations scenario, and prints the results.
+- `node lab/run.mjs 2` tells one colony's story and what each creature believes.
+- `lab/view.html?seed=2` watches a colony live in 3D (needs the dev server). Click the ground to put things down; click a creature to read its mind.
+- `tests/test-lab.js` guards the results.
+
 ## Test it
 
 ```bash

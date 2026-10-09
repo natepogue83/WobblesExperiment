@@ -323,6 +323,16 @@ faces, moods, blinks and accessories over a painted body. No manifest means no c
 Sizes are in the piece's own units with an anchor on the ground point; see
 `art/manifest.example.json` and `marketing/art-brief.md`. The sim never sees any of it.
 
+## 11b. The lab (decided 2026-10-09)
+
+Direction change: the authored discovery graph is being replaced by a world of general
+causes in `lab/`. Rules there: no recipes; creatures never read hidden properties;
+every change of knowledge comes from an action's outcome, or from watching one (weaker);
+no LLM or decision API in creature brains; deterministic through rngFor; children
+inherit genomes, not memories. Success is judged by scenarios (`lab/run.mjs`) and
+`tests/test-lab.js`: a practice learned, spread by contact, and outliving its founders.
+The 2D game and its sim stay in the repo untouched until the lab replaces them.
+
 ## 12. Tuning deviations from the build plan
 
 - Pairing: the plan says both adults need sociability > 0.4. With only 3
