@@ -1,6 +1,7 @@
 // render3d/props.js — the low-poly props: trees, huts, rocks, fire, temple...
 // Shared by the valley look test and the lab view. Pure builders: call, get a Mesh or Group.
 import * as THREE from 'three';
+import { rngFor } from '../sim/rng.js';
 
 // ---- palette: gouache, not plastic.
 export const P = {
