@@ -20,7 +20,8 @@ export function makeCreature(world, id, genome, x, y) {
     genome: { curiosity: 0.5, patience: 0.5, sociability: 0.5, learnRate: 1, caution: 0.5, brawn: 0.5, ...genome },
     // Learned: expectations about (seen features, action) -> outcomes, and a few episodes.
     exp: new Map(), episodes: [], places: {},
-    plan: null, bonds: {}, born: world.tick, acted: 0, lifespan: 60 * 24, parents: null, builds: []
+    plan: null, bonds: {}, born: world.tick, acted: 0, lifespan: 60 * 24, parents: null, builds: [],
+    offspring: 0, nightActs: { flee: 0, rest_closed: 0, rest_open: 0, eat: 0, other: 0 }
   };
   world.creatures.push(c);
   return c;
@@ -192,6 +193,7 @@ function stepToward(world, c, tx, ty) {
 // It inherits a blend of how its parents learn and what moves them, with a
 // little mutation, and no memories at all. Culture has to be passed on.
 export function breedingStep(world) {
+  if (world.opts.noBreed) return;
   const live = world.creatures.filter(c => c.alive);
   if (live.length >= (world.opts.popCap || 12)) return;
   const r = rngFor(world.seed, 'breed', world.tick);
@@ -203,7 +205,7 @@ export function breedingStep(world) {
     for (const key of Object.keys(a.genome)) { const v = r() < 0.5 ? a.genome[key] : b.genome[key]; g[key] = Math.max(0.05, Math.min(1.6, v + (r() - 0.5) * 0.16)); }
     const id = 'c' + (world.creatures.length + 1);
     const child = makeCreature(world, id, g, a.x, a.y);
-    child.parents = [a.id, b.id]; child.needs.energy = 0.6;
+    child.parents = [a.id, b.id]; child.needs.energy = 0.6; a.offspring++; b.offspring++;
     a.needs.energy -= 0.15; b.needs.energy -= 0.15;
     a.bonds[id] = 0.4; b.bonds[id] = 0.4; child.bonds[a.id] = 0.3; child.bonds[b.id] = 0.3;
     emit(world, { kind: 'born', who: id, parents: [a.id, b.id], x: a.x, y: a.y });
@@ -228,12 +230,13 @@ export function creatureStep(world, c) {
 
   // Mauled since my last step: remember it against what I was doing, and where.
   if (!c.alive) return;
+  if (world.opts.wipeDaily && world.tick % 24 === 5) { c.exp.clear(); c.episodes = []; c.places = {}; c.builds = []; c.plan = null; }
   if (c.attackedAt && !c.attackNoted) {
     c.attackNoted = true;
     const last = c.plan ? c.plan.key : c.episodes.length ? c.episodes[c.episodes.length - 1].key : null;
     if (last) remember(c, last, 'attacked', -0.5, 1);
     c.plan = null;
-    for (const k of others(world, c, 3)) { if (last) remember(k, last, 'attacked', -0.5, 0.3); emit(world, { kind: 'saw', who: k.id, whom: c.id, key: last, outcome: 'attacked', x: k.x, y: k.y }); }
+    if (!world.opts.noWatch) for (const k of others(world, c, 3)) { if (last) remember(k, last, 'attacked', -0.5, 0.3); emit(world, { kind: 'saw', who: k.id, whom: c.id, key: last, outcome: 'attacked', x: k.x, y: k.y }); }
   }
   if (c.attackedAt && world.tick - c.attackedAt.t > 1) c.attackNoted = false;
   // Keep a plan until it is done or no longer makes sense (commitment).
@@ -251,6 +254,7 @@ export function creatureStep(world, c) {
     c.plan = { ...best, since: world.tick };
   }
   const p = c.plan;
+  if (isNight(world)) { const na = c.nightActs; if (p.action === 'flee') na.flee++; else if (p.action === 'rest') { const pk = p.key.split('+')[1]; if (pk && pk !== 'open') na.rest_closed++; else na.rest_open++; } else if (p.action === 'taste') na.eat++; else na.other++; }
   // Walk there first.
   if (p.target && p.target.cell && (p.action === 'rest' || p.action === 'flee') && (c.x !== p.target.x || c.y !== p.target.y)) { stepToward(world, c, p.target.x, p.target.y); if (p.action === 'flee') stepToward(world, c, p.target.x, p.target.y); c.needs.energy -= 0.002; if (p.action === 'flee' && (c.x !== p.target.x || c.y !== p.target.y)) return; if (p.action === 'rest') return; }
   else if (p.target && !near(c, p.target)) { stepToward(world, c, p.target.x, p.target.y); c.needs.energy -= 0.002; return; }
@@ -378,7 +382,7 @@ export function creatureStep(world, c) {
   c.acted++;
   emit(world, { kind: 'acted', who: c.id, action: p.action, key: p.key, outcome, x: c.x, y: c.y });
   // Others nearby who were watching (or just looking that way) pick up a weaker memory.
-  for (const k of others(world, c, 2)) {
+  if (!world.opts.noWatch) for (const k of others(world, c, 2)) {
     const watching = k.plan && k.plan.action === 'watch' && k.plan.target === c;
     const w = watching ? (k.plan.invited ? 0.6 : 0.45) : 0.15;
     const noticed = watching || r() < 0.5;
