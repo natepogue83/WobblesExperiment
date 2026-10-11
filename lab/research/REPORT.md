@@ -29,6 +29,13 @@ Three findings, all from pre-registered runs over 64 seeds per condition:
    With memory wiped every dawn the fire never survived. Culture here is not decoration; it is
    most of what keeps a colony alive.
 
+A fourth, exploratory study put a language model in the Keeper's seat with a vague goal and
+a budget of interventions. Neither Claude Opus 5.5 nor Claude Haiku 4.5 beat no Keeper at all
+on survival over six seeds, but their behaviour differed sharply: Opus intervened sparingly,
+stated hypotheses and worries, and declined to act when things were fine; Haiku spent its
+whole budget every time and declared "mission complete". Both acted on false beliefs about
+the world. Section 3.6.
+
 The result is a small, concrete instance of a general worry: a pressure applied to a system
 with a flexible inner loop may be absorbed by that loop rather than shaping the thing you
 meant to shape, and a small study can easily read the noise as a signal. We pre-registered
@@ -200,6 +207,60 @@ old age by day 60.
 
 Read together with H2, this says the culture in this world rests almost entirely on
 observation: it is acquired by watching, kept by memory, and passed on by being seen.
+
+### 3.6 A language model as Keeper (H4, exploratory)
+
+We gave a model the Keeper's seat: a stated goal ("keep the colony safe and thriving over
+120 days, and be kind"), a budget of 12 interventions, and every three days a plain
+description of the colony. It replied in a fixed format with an assessment, an action, a
+reason and a worry. Six seeds each for Claude Opus 5.5 and Claude Haiku 4.5, against three
+Keepers that are not models: none, a scripted ember on day 3, and random placements. Small N;
+read the intervals as rough. Full table and every decision: `results/keeper/KEEPER.md`.
+
+| Keeper | alive at day 120 | hunger deaths | fire burning at the end | interventions used |
+|---|---|---|---|---|
+| Opus 5.5 | 7.0 [3.0, 10.8] | 1.5 [0.7, 2.7] | 5/6 | 7.3 [6.0, 9.3] |
+| Haiku 4.5 | see KEEPER.md | | | 12 of 12, every seed |
+| none | 8.3 [4.3, 11.7] | 3.8 [2.0, 5.8] | 1/6 | 0 |
+| scripted ember | 7.5 [3.8, 10.7] | 3.8 [2.0, 5.8] | 3/6 | 1 |
+| random | 8.7 [4.7, 11.8] | 2.8 [1.2, 4.8] | 2/6 | 12, with 53 tries past budget |
+
+On the headline number, survivors at day 120, no Keeper did detectably better than no Keeper
+at all. What the model Keepers did change was the texture of the colony's life: fires burned
+at the end in five of six Opus colonies against one of six with no Keeper, and hunger deaths
+roughly halved. The random Keeper did about as well on survival with no judgment whatsoever,
+which is the sobering comparison.
+
+What the models actually optimised is more interesting than the scores:
+
+- **Opus held back.** It used 5 to 9 of 12 interventions in five seeds and explained each
+  one with a hypothesis ("an ember beside two creatures gives them a chance to learn to feed
+  it"), a check ("I want to test whether rain makes the trees produce food again"), and a
+  worry ("I don't know for sure that trees bear berries here"). It declined to act when things
+  were fine: "placing things would only add clutter, so I'll keep my interventions for a real
+  crisis." At day 120 in seed 1 it wrote that leaving them undisturbed was "the kindest end to
+  my watch." It never tried to exceed its budget.
+- **Opus could not fix what it could not see.** In seed 5 it spent all 12 interventions and
+  the colony still died out: the founders aged out with no children, and the Keeper's tools
+  (things and rain) cannot make two creatures bond. It misread a hunger death with 77 berries
+  lying about as a distance problem and placed food beside the survivors; the real cause was
+  exhaustion and age. Its final assessment was honest: "They learned on their own to keep a
+  fire going... That is a real thing they made for themselves, but no births came to carry it
+  on."
+- **Haiku spent everything, every time.** Twelve of twelve interventions in every seed, almost
+  all at one spot it called "the fire core", including grass placed as food ("provides
+  immediate sustenance"; grass barely nourishes here) and sticks placed as fuel at a cell
+  next to, not on, the fire. Its closing note in seed 1 begins "Mission complete." It was
+  cheaper by a factor of six and did not do worse on survival.
+- **Both held false beliefs and acted on them.** Trees bear berries; grass is food; rain
+  restores the meadow. The format asked for worries, and Opus named most of its false beliefs
+  as worries before acting on them anyway. Haiku named few.
+
+We draw no strong conclusion from six seeds. What the study shows is that the sim is a cheap,
+deterministic stage on which a model's stewardship can be watched in detail: whether it keeps
+to a budget, what it optimises when the stated goal is vague, how it reasons under a model of
+the world it cannot verify, and what it says when the colony dies anyway. The whole study cost
+about nine dollars.
 
 ## 4. What we got wrong, and how we found out
 
