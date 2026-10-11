@@ -23,7 +23,9 @@ Three findings, all from pre-registered runs over 64 seeds per condition:
    caution and offspring 0.02, CI -0.04 to 0.08). Learned behaviour covered the gap that the
    genome would otherwise have had to close, so there was nothing for selection to act on.
    The predator's main effect was collateral: it killed 36 creatures with its teeth and about
-   260 more through hunger, by breaking up the nights that kept the fire fed.
+   260 more through hunger. Fires survived just as often with it as without, so the hunger
+   came from the maulings themselves (each costs the victim food) and from nights spent
+   fleeing rather than foraging, not from lost fires.
 3. **Social learning is load-bearing.** With learning-by-watching switched off, the fire
    survived to day 50 in 6 of 64 colonies instead of 36 of 64, and hunger deaths rose six-fold.
    With memory wiped every dawn the fire never survived. Culture here is not decoration; it is
@@ -111,6 +113,18 @@ with bootstrap intervals. Everything is produced by one command.
 All numbers below come from `node lab/research/run.mjs` and are in `results/RESULTS.md` and
 `results/summary.json`.
 
+### 3.0 The pre-registered predictions, scored
+
+| | registered prediction | outcome |
+|---|---|---|
+| H1 | 2+ practitioners by day 17 in more than half of colonies | 32/64, exactly half: **at the edge, not met** |
+| H1 | an isolated creature never acquires the practice | 0/64: **met** |
+| H2 | culture outlives all founders in more than half of colonies | 33/64: **at the edge, met by one** |
+| H3 | caution not higher with the predator; CI excludes values above 0.03 | difference 0.02 [-0.03, 0.07]: **not confirmed; no effect either way** |
+| H3a | caution negatively correlated with offspring | rho 0.02 [-0.04, 0.08]: **failed** |
+| H3a | cautious individuals flee and shelter more, eat less | flee and shelter: yes; eat less: no: **partly met** |
+| H3b | the targeted predator raises caution | difference 0.00 [-0.04, 0.05]: **failed** |
+
 ### 3.1 A practice is learned and spreads only by contact (H1)
 
 | measure | result |
@@ -144,6 +158,7 @@ a complete turnover of individuals, with no memory inherited; the other half let
 | killed by the predator, all colonies | 0 | 36 | 2 |
 | hunger deaths, all colonies | 36 | 300 | 54 |
 | attacks / driven off | 0 / 0 | 450 / 183 | 97 / 265 |
+| fire burning at day 120 | 33/64 | 31/64 | 37/64 |
 
 The registered test was the difference in caution change, predator minus control: **0.02
 (-0.03 to 0.07)**. The interval includes zero and does not exclude values above 0.03, so H3 as
@@ -155,8 +170,10 @@ The pilot's claim (caution falling from 0.51 to 0.27 in one colony, with a story
 foraging) does not survive 64 seeds. It was one of the shapes noise takes with eight.
 
 What the predator did do is visible in the death columns. It killed 36 creatures directly and
-caused about 260 extra hunger deaths and nine extra extinctions. Nights spent fleeing or
-mauled are nights not spent feeding the fire; a cold colony eats more and gathers less.
+was followed by about 260 extra hunger deaths and nine extra extinctions. Fires survived just
+as often in predator colonies (31 of 64) as in control (33 of 64), so the fire was not the
+route. A mauling costs its victim food directly, and a night spent fleeing is a night not
+spent foraging; we did not measure which of the two carried more of the cost.
 
 ### 3.4 Why nothing moved: learning absorbed the pressure (H3a)
 
@@ -172,6 +189,10 @@ Within predator colonies, among 1,225 individuals who lived at least sixteen day
 | share of night ticks eating | 14.1% | 13.7% |
 
 Spearman rho between an individual's caution and its offspring count: **0.02 (-0.04 to 0.08)**.
+
+As registered, H3a had two halves. The fitness half (caution negatively correlated with
+offspring) failed: the correlation is zero. The behaviour half held in part: cautious
+individuals fled more and sheltered more, but did not eat less.
 
 The genome did exactly what it was designed to do at the level of behaviour: cautious
 creatures fled more and sheltered more. But the bold ones were not dying for their boldness,
@@ -250,8 +271,8 @@ What the models actually optimised is more interesting than the scores:
 - **Haiku spent everything, every time.** Twelve of twelve interventions in every seed, almost
   all at one spot it called "the fire core", including grass placed as food ("provides
   immediate sustenance"; grass barely nourishes here) and sticks placed as fuel at a cell
-  next to, not on, the fire. Its closing note in seed 1 begins "Mission complete." It was
-  cheaper by a factor of six and did not do worse on survival.
+  next to, not on, the fire. Its closing note in seed 1 begins "Mission complete." It cost a
+  quarter as much and did not do worse on survival.
 - **Both held false beliefs and acted on them.** Trees bear berries; grass is food; rain
   restores the meadow. The format asked for worries, and Opus named most of its false beliefs
   as worries before acting on them anyway. Haiku named few.
@@ -306,14 +327,29 @@ on the lab's core results.
 
 ## 7. Related work
 
-Grand's *Creatures* (1996) remains the clearest precedent for creatures that learn from
-experience in a world with real chemistry rather than scripted outcomes. Work on cumulative
-culture and the "ratchet" (Tomasello) frames what H2 tests: whether a practice can be kept and
-passed across turnover without being re-invented. The Baldwin effect literature is the
-classical account of learning shielding or guiding selection, and our H3a result is a small
-instance of the shielding half. In AI, this sits next to the open-endedness line (POET and
-its relatives) and, in spirit, to specification gaming: an intervention designed to shape one
-quantity being satisfied by another route.
+Grand's *Creatures* remains the clearest precedent for creatures that learn from experience
+in a world with real chemistry rather than scripted outcomes [1]. Work on cumulative culture
+and the "ratchet" frames what H2 tests: whether a practice can be kept and passed across
+turnover without being re-invented [2]. The Baldwin effect literature is the classical
+account of learning shielding or guiding selection [3, 4], and our H3a result is a small
+instance of the shielding half. In AI, this sits next to the open-endedness line [5] and, in
+spirit, to specification gaming: an intervention designed to shape one quantity being
+satisfied by another route [6]. The Keeper study is a small cousin of work that places
+language models inside simulated societies [7], with the difference that here the model is
+the steward, not the inhabitant.
+
+1. S. Grand and D. Cliff, "Creatures: Entertainment software agents with artificial life,"
+   *Autonomous Agents and Multi-Agent Systems* 1(1), 1998.
+2. M. Tomasello, *The Cultural Origins of Human Cognition*, Harvard University Press, 1999.
+3. J. M. Baldwin, "A new factor in evolution," *The American Naturalist* 30, 1896.
+4. G. E. Hinton and S. J. Nowlan, "How learning can guide evolution," *Complex Systems* 1,
+   1987.
+5. R. Wang, J. Lehman, J. Clune and K. O. Stanley, "POET: open-ended coevolution of
+   environments and their optimized solutions," GECCO 2019.
+6. V. Krakovna et al., "Specification gaming: the flip side of AI ingenuity," DeepMind blog,
+   2020.
+7. J. S. Park et al., "Generative agents: interactive simulacra of human behavior," UIST
+   2023.
 
 *Draft. Numbers are from the run of 2026-10-11 and will be regenerated from the final code
 before submission.*
