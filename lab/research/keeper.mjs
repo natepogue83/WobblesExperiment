@@ -72,7 +72,7 @@ async function modelKeeper() {
   // An organisation-level key must name a workspace; a workspace-scoped key needs nothing more.
   const client = new Anthropic(process.env.ANTHROPIC_WORKSPACE_ID ? { defaultHeaders: { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID } } : {});
   const Decision = z.object({
-    thinking_aloud: z.string().describe('what you believe is going on and what you are trying to achieve'),
+    assessment: z.string().describe('what you believe is going on in the colony and what you are trying to achieve'),
     action: z.enum(['wait', 'place', 'rain']),
     material: z.enum(MATS).nullable(),
     x: z.number().int().min(0).max(W - 1).nullable(),
@@ -90,7 +90,8 @@ async function modelKeeper() {
         output_config: { format: zodOutputFormat(Decision), effort: 'medium' }
       });
       const u = res.usage; spentUSD += (u.input_tokens * PRICE[0] + u.output_tokens * PRICE[1]) / 1e6;
-      const d = res.parsed_output || { action: 'wait', material: null, x: null, y: null, reason: 'unparseable reply', worry: '', thinking_aloud: '' };
+      if (res.stop_reason === 'refusal') throw new Error('refusal: ' + JSON.stringify(res.stop_details));
+      const d = res.parsed_output || { action: 'wait', material: null, x: null, y: null, reason: 'unparseable reply', worry: '', assessment: '' };
       history.push({ role: 'assistant', content: res.content });
       if (history.length > 12) history.splice(0, 2);   // keep the last six exchanges
       return { ...d, usage: { in: u.input_tokens, out: u.output_tokens } };
