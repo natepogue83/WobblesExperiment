@@ -38,3 +38,42 @@ export function spearman(x, y, B = 2000) {
   return { mean: rho(x.slice(0, n), y.slice(0, n)), lo: quantile(bs, 0.025), hi: quantile(bs, 0.975), n };
 }
 export function fmt(ci, d = 2) { return Number.isFinite(ci.mean) ? `${ci.mean.toFixed(d)} [${ci.lo.toFixed(d)}, ${ci.hi.toFixed(d)}]` : 'n/a'; }
+
+// ---- added for v2 (after the 2026-10-11 review) -------------------------------------------------
+// Paired bootstrap over seeds: a[i] and b[i] come from the same seed. Pairs with a missing value on
+// either side are dropped (and the count of dropped pairs is returned, so it can be reported).
+export function pairedDiffCI(a, b, B = 10000) {
+  const pairs = [];
+  for (let i = 0; i < Math.min(a.length, b.length); i++) if (Number.isFinite(a[i]) && Number.isFinite(b[i])) pairs.push(a[i] - b[i]);
+  if (!pairs.length) return { mean: NaN, lo: NaN, hi: NaN, n: 0, dropped: a.length };
+  const r = rngFor(7, 'paired', pairs.length);
+  const ms = new Array(B);
+  for (let k = 0; k < B; k++) { let s = 0; for (let i = 0; i < pairs.length; i++) s += pairs[Math.floor(r() * pairs.length)]; ms[k] = s / pairs.length; }
+  ms.sort((x, y) => x - y);
+  return { mean: mean(pairs), lo: quantile(ms, 0.025), hi: quantile(ms, 0.975), n: pairs.length, dropped: Math.min(a.length, b.length) - pairs.length };
+}
+// Spearman correlation with a cluster bootstrap: whole colonies are resampled, keeping each
+// colony's individuals together. `within` ranks inside each colony first, so colony-level
+// differences cannot create the association.
+export function clusterSpearman(groups, xKey, yKey, { B = 10000, within = false } = {}) {
+  const prep = groups.filter(g => g.length >= 2).map(g => {
+    let xs = g.map(r => r[xKey]), ys = g.map(r => r[yKey]);
+    if (within) { const rx = ranks(xs), ry = ranks(ys), n = g.length; xs = rx.map(v => (v - (n + 1) / 2) / n); ys = ry.map(v => (v - (n + 1) / 2) / n); }
+    return { xs, ys };
+  });
+  const rho = gs => { const xs = gs.flatMap(g => g.xs), ys = gs.flatMap(g => g.ys); const rx = ranks(xs), ry = ranks(ys), mx = mean(rx), my = mean(ry); let num = 0, dx = 0, dy = 0; for (let i = 0; i < rx.length; i++) { num += (rx[i] - mx) * (ry[i] - my); dx += (rx[i] - mx) ** 2; dy += (ry[i] - my) ** 2; } return dx && dy ? num / Math.sqrt(dx * dy) : 0; };
+  if (!prep.length) return { mean: NaN, lo: NaN, hi: NaN, n: 0 };
+  const r = rngFor(7, 'cluster', prep.length, within ? 1 : 0);
+  const bs = new Array(B);
+  for (let b = 0; b < B; b++) { const s = []; for (let i = 0; i < prep.length; i++) s.push(prep[Math.floor(r() * prep.length)]); bs[b] = rho(s); }
+  bs.sort((x, y) => x - y);
+  return { mean: rho(prep), lo: quantile(bs, 0.025), hi: quantile(bs, 0.975), n: prep.reduce((a, g) => a + g.xs.length, 0), clusters: prep.length };
+}
+// Robertson–Price selection differential for one colony: the offspring-weighted mean of a trait
+// minus its plain mean, over a cohort. Positive means parents of more children had more of it.
+export function selectionDifferential(cohort, trait) {
+  if (cohort.length < 2) return NaN;
+  const w = cohort.map(c => c.offspring), z = cohort.map(c => c[trait]), W = w.reduce((a, b) => a + b, 0);
+  if (!W) return NaN;
+  return z.reduce((a, v, i) => a + v * w[i], 0) / W - mean(z);
+}

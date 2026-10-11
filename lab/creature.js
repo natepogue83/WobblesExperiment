@@ -21,7 +21,10 @@ export function makeCreature(world, id, genome, x, y) {
     // Learned: expectations about (seen features, action) -> outcomes, and a few episodes.
     exp: new Map(), episodes: [], places: {},
     plan: null, bonds: {}, born: world.tick, acted: 0, lifespan: 60 * 24, parents: null, builds: [],
-    offspring: 0, nightActs: { flee: 0, rest_closed: 0, rest_open: 0, eat: 0, other: 0 }
+    offspring: 0,
+    // Measured at night, after acting (see sim.js): where it was and what it actually did.
+    night: { ticks: 0, fire: 0, walls: 0, roof: 0, crowd: 0, open: 0, exposed: 0, rested: 0, restedProtected: 0, ate: 0, fled: 0, attacked: 0 },
+    noProtLearn: !!world.opts.noProtLearn, noObserve: false, did: null, didOutcome: null, attackProcessed: -1
   };
   world.creatures.push(c);
   return c;
@@ -30,6 +33,7 @@ export function makeCreature(world, id, genome, x, y) {
 // ---- memory ----------------------------------------------------------------------------
 function expKey(fk, action, with_) { return `${fk}>${action}${with_ ? '+' + with_ : ''}`; }
 export function remember(c, key, outcome, delta, weight = 1) {
+  if (c.noProtLearn && (/>(rest|flee)/.test(key) || outcome === 'attacked')) return;
   let e = c.exp.get(key);
   if (!e) { e = { n: 0, seen: 0, outcomes: {}, value: 0 }; c.exp.set(key, e); }
   e.n += weight; if (weight < 1) e.seen += 1;
@@ -156,11 +160,11 @@ function score(world, c, opt, r) {
     // Instinct after a fright: for some days, the careful want to sleep somewhere closed in or by a fire.
     const pk = opt.key.split('+')[1];
     if (isNight(world) && pk && pk !== 'open') s += g.caution * 0.25;
-    if (c.attackedAt && world.tick - c.attackedAt.t < 10 * 24 && isNight(world)) s += pk && pk !== 'open' ? g.caution * 0.8 : -g.caution * 0.6;
+    if (!c.noProtLearn && c.attackedAt && world.tick - c.attackedAt.t < 10 * 24 && isNight(world)) s += pk && pk !== 'open' ? g.caution * 0.8 : -g.caution * 0.6;
     if (e && e.outcomes.attacked) s -= 1.5 * (e.outcomes.attacked / e.n);
   }
   if (opt.action === 'flee') { const d = Math.max(Math.abs(opt.beast.x - c.x), Math.abs(opt.beast.y - c.y)); s += 1.2 + g.caution * 1.5 - d * 0.12 + (e ? e.value : 0); if (protectedAt(world, c.x, c.y, world.creatures)) s -= 1.6; }
-  if (opt.action === 'strike' && opt.target && opt.target.came !== undefined) { const m = MATERIALS[c.carrying.kind]; s += (m.weight * m.hard + (m.sharp || 0) * 2 + g.brawn * 1.5) * 0.25 - g.caution * 0.8 + (e ? e.value : 0); }
+  if (opt.action === 'strike' && opt.target && opt.target.came !== undefined) { const sz = lookAt(world, c.carrying).size; s += ({ big: 0.5, mid: 0.3, small: 0.1 }[sz] || 0) + g.brawn * 0.35 - g.caution * 0.8 + (e ? e.value * 2 : 0); }
   if (opt.action === 'watch') s += g.sociability * (0.05 + (1 - n.social) * 0.7) + (c.parents && c.parents.includes(opt.target.id) && world.tick - c.born < 10 * 24 ? 0.6 : 0);
   if (opt.action === 'wander') s += 0.15 + (1 - n.energy) * 0.3;
   if (opt.action === 'climb') s -= 0.1;
@@ -169,7 +173,7 @@ function score(world, c, opt, r) {
   if (opt.action === 'approach') s += ((opt.target.burning > 0) || (cellAt(world, opt.target.x, opt.target.y) || {}).heat > 0 ? (1 - n.warmth) * 1.8 : 0) - 0.35;
   if (opt.action === 'rest' && cell0(world, c).heat > 0) s += (1 - n.warmth) * 1.2;
   // The place where a beast got me stays frightening for a while.
-  if (c.attackedAt && world.tick - c.attackedAt.t < 6 * 24 && (opt.action === 'rest' || opt.action === 'wander')) { const px = opt.target ? opt.target.x : c.x, py = opt.target ? opt.target.y : c.y; if (Math.max(Math.abs(px - c.attackedAt.x), Math.abs(py - c.attackedAt.y)) <= 1) s -= g.caution * 0.9; }
+  if (!c.noProtLearn && c.attackedAt && world.tick - c.attackedAt.t < 6 * 24 && (opt.action === 'rest' || opt.action === 'wander')) { const px = opt.target ? opt.target.x : c.x, py = opt.target ? opt.target.y : c.y; if (Math.max(Math.abs(px - c.attackedAt.x), Math.abs(py - c.attackedAt.y)) <= 1) s -= g.caution * 0.9; }
   // Distance costs effort.
   if (opt.target && !near(c, opt.target)) s -= 0.08 * Math.max(Math.abs(opt.target.x - c.x), Math.abs(opt.target.y - c.y));
   // Caution: things that hurt before are avoided by the careful.
@@ -197,9 +201,10 @@ export function breedingStep(world) {
   const live = world.creatures.filter(c => c.alive);
   if (live.length >= (world.opts.popCap || 12)) return;
   const r = rngFor(world.seed, 'breed', world.tick);
+  for (let i = live.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [live[i], live[j]] = [live[j], live[i]]; }
   for (const a of live) {
     if (world.tick - a.born < 8 * 24 || a.needs.energy < 0.7) continue;
-    const b = live.find(k => k !== a && k.id > a.id && Math.abs(k.x - a.x) <= 1 && Math.abs(k.y - a.y) <= 1 && world.tick - k.born >= 8 * 24 && k.needs.energy >= 0.7 && (a.bonds[k.id] || 0) + (k.bonds[a.id] || 0) >= 0.4);
+    const b = live.find(k => k !== a && Math.abs(k.x - a.x) <= 1 && Math.abs(k.y - a.y) <= 1 && world.tick - k.born >= 8 * 24 && k.needs.energy >= 0.7 && (a.bonds[k.id] || 0) + (k.bonds[a.id] || 0) >= 0.4);
     if (!b || r() > 0.02) continue;
     const g = {};
     for (const key of Object.keys(a.genome)) { const v = r() < 0.5 ? a.genome[key] : b.genome[key]; g[key] = Math.max(0.05, Math.min(1.6, v + (r() - 0.5) * 0.16)); }
@@ -228,17 +233,17 @@ export function creatureStep(world, c) {
   if (world.tick - c.born > c.lifespan) { c.alive = false; emit(world, { kind: 'died', who: c.id, cause: 'old age', x: c.x, y: c.y }); return; }
   if (c.needs.energy <= 0) { c.alive = false; emit(world, { kind: 'died', who: c.id, cause: c.needs.warmth < 0.2 ? 'cold and hunger' : 'hunger', x: c.x, y: c.y }); return; }
 
-  // Mauled since my last step: remember it against what I was doing, and where.
+  // Mauled since my last step: remember it, once, against what I was doing, and where.
   if (!c.alive) return;
-  if (world.opts.wipeDaily && world.tick % 24 === 5) { c.exp.clear(); c.episodes = []; c.places = {}; c.builds = []; c.plan = null; }
-  if (c.attackedAt && !c.attackNoted) {
-    c.attackNoted = true;
+  c.did = 'nothing'; c.didOutcome = null;
+  if (world.opts.wipeDaily && world.tick % 24 === 5) { c.exp.clear(); c.episodes = []; c.places = {}; c.builds = []; c.plan = null; c.attackedAt = null; }
+  if (c.attackedAt && c.attackedAt.t !== c.attackProcessed) {
+    c.attackProcessed = c.attackedAt.t;
     const last = c.plan ? c.plan.key : c.episodes.length ? c.episodes[c.episodes.length - 1].key : null;
     if (last) remember(c, last, 'attacked', -0.5, 1);
     c.plan = null;
-    if (!world.opts.noWatch) for (const k of others(world, c, 3)) { if (last) remember(k, last, 'attacked', -0.5, 0.3); emit(world, { kind: 'saw', who: k.id, whom: c.id, key: last, outcome: 'attacked', x: k.x, y: k.y }); }
+    if (!world.opts.noWatch) for (const k of others(world, c, 3)) { if (k.noObserve) continue; if (last) remember(k, last, 'attacked', -0.5, 0.3); emit(world, { kind: 'saw', who: k.id, whom: c.id, key: last, outcome: 'attacked', x: k.x, y: k.y }); }
   }
-  if (c.attackedAt && world.tick - c.attackedAt.t > 1) c.attackNoted = false;
   // Keep a plan until it is done or no longer makes sense (commitment).
   if (c.plan) {
     const tgt = c.plan.target;
@@ -254,18 +259,17 @@ export function creatureStep(world, c) {
     c.plan = { ...best, since: world.tick };
   }
   const p = c.plan;
-  if (isNight(world)) { const na = c.nightActs; if (p.action === 'flee') na.flee++; else if (p.action === 'rest') { const pk = p.key.split('+')[1]; if (pk && pk !== 'open') na.rest_closed++; else na.rest_open++; } else if (p.action === 'taste') na.eat++; else na.other++; }
   // Walk there first.
-  if (p.target && p.target.cell && (p.action === 'rest' || p.action === 'flee') && (c.x !== p.target.x || c.y !== p.target.y)) { stepToward(world, c, p.target.x, p.target.y); if (p.action === 'flee') stepToward(world, c, p.target.x, p.target.y); c.needs.energy -= 0.002; if (p.action === 'flee' && (c.x !== p.target.x || c.y !== p.target.y)) return; if (p.action === 'rest') return; }
-  else if (p.target && !near(c, p.target)) { stepToward(world, c, p.target.x, p.target.y); c.needs.energy -= 0.002; return; }
-  if (p.action === 'wander') { const tx = Math.floor(r() * W), ty = Math.floor(r() * (H - 1)); stepToward(world, c, tx, ty); c.plan = null; return; }
+  if (p.target && p.target.cell && (p.action === 'rest' || p.action === 'flee') && (c.x !== p.target.x || c.y !== p.target.y)) { stepToward(world, c, p.target.x, p.target.y); if (p.action === 'flee') stepToward(world, c, p.target.x, p.target.y); c.needs.energy -= 0.002; c.did = p.action === 'flee' ? 'flee' : 'move'; if (p.action === 'flee' && (c.x !== p.target.x || c.y !== p.target.y)) return; if (p.action === 'rest') return; }
+  else if (p.target && !near(c, p.target)) { stepToward(world, c, p.target.x, p.target.y); c.needs.energy -= 0.002; c.did = 'move'; return; }
+  if (p.action === 'wander') { const tx = Math.floor(r() * W), ty = Math.floor(r() * (H - 1)); stepToward(world, c, tx, ty); c.plan = null; c.did = 'move'; return; }
 
   // Do it, see what happens, remember.
   let outcome = 'nothing';
   let tgt = p.target;
   if (tgt && tgt.remembered) {
     const real = objectsAt(world, tgt.x, tgt.y).find(o => featureKey(lookAt(world, o)) === tgt.remembered);
-    if (!real) { outcome = 'gone'; delete c.places[tgt.remembered]; remember(c, p.key, outcome, -0.02, 0.5); c.plan = null; return; }
+    if (!real) { outcome = 'gone'; delete c.places[tgt.remembered]; remember(c, p.key, outcome, -0.02, 0.5); c.plan = null; c.did = 'move'; return; }
     tgt = real;
   }
   switch (p.action) {
@@ -320,7 +324,7 @@ export function creatureStep(world, c) {
         // A beast. Hit hard enough and it runs; too soft and it turns on me.
         const m = MATERIALS[o.kind], power = m.weight * m.hard + (m.sharp || 0) * 2 + c.genome.brawn * 1.5;
         if (power >= 2.5 || (power >= 1.5 && r() < 0.4)) { tgt.fled = true; outcome = 'drove_off'; emit(world, { kind: 'drove_off', who: c.id, material: o.kind, x: c.x, y: c.y }); }
-        else { outcome = 'mauled'; c.needs.energy = Math.max(0.02, c.needs.energy - 0.25); c.hurt = world.tick; tgt.fed = 1; emit(world, { kind: 'attacked', who: c.id, x: c.x, y: c.y, struckBack: true }); }
+        else { outcome = 'mauled'; c.needs.energy = Math.max(0.02, c.needs.energy - 0.25); c.hurt = world.tick; c.lastHurt = world.tick; c.attackedAt = { x: c.x, y: c.y, t: world.tick }; c.attackProcessed = world.tick; tgt.fed = 1; emit(world, { kind: 'attacked', who: c.id, x: c.x, y: c.y, struckBack: true }); }
         break;
       }
       const mo = MATERIALS[o.kind], mt = MATERIALS[tgt.kind];
@@ -379,10 +383,11 @@ export function creatureStep(world, c) {
   if (outcome === 'sheltered' || outcome === 'cosy' || outcome === 'ate' || outcome === 'snug' || outcome === 'safe') for (const b of c.builds) if (Math.max(Math.abs(b.x - c.x), Math.abs(b.y - c.y)) <= (outcome === 'snug' || outcome === 'safe' ? 1 : 0) && world.tick - b.t < 400) remember(c, b.key, 'paid_off', Math.max(0.05, delta) * 0.8, 0.5);
   if (delta > 0.08) { let w = 0.5; for (let i = c.episodes.length - 1; i >= 0 && i >= c.episodes.length - 3; i--) { const ep = c.episodes[i]; if (world.tick - ep.t > 10 || ep.key === p.key) continue; remember(c, ep.key, 'led_on', delta * w, 0.4); w *= 0.6; } }
   c.episodes.push({ t: world.tick, key: p.key, outcome, delta }); if (c.episodes.length > 60) c.episodes.shift();
-  c.acted++; c.lastAction = p.action;
+  c.acted++; c.did = p.action; c.didOutcome = outcome;
   emit(world, { kind: 'acted', who: c.id, action: p.action, key: p.key, outcome, x: c.x, y: c.y });
   // Others nearby who were watching (or just looking that way) pick up a weaker memory.
   if (!world.opts.noWatch) for (const k of others(world, c, 2)) {
+    if (k.noObserve) continue;
     const watching = k.plan && k.plan.action === 'watch' && k.plan.target === c;
     const w = watching ? (k.plan.invited ? 0.6 : 0.45) : 0.15;
     const noticed = watching || r() < 0.5;

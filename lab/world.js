@@ -73,7 +73,7 @@ export function worldStep(world) {
   const t = world.tick, r = rngFor(world.seed, 'phys', t);
   const o = world.opts;
   // Rain comes in spells.
-  world.weather.rain = (t % o.rainEvery) < o.rainFor && t > 10 ? 1 : 0;
+  world.weather.rain = ((t % o.rainEvery) < o.rainFor && t > 10) || t < (world.weather.forcedUntil || 0) ? 1 : 0;
   // Lean seasons: for a stretch every so often, little grows. Then what was learned about high fruit, roots and stores matters.
   const lean = o.leanEvery && t > 12 * DAY && (t % o.leanEvery) < o.leanFor ? 1 : 0;
   if (lean && !world.weather.lean) emit(world, { kind: 'lean_began', x: 0, y: 0 }); if (!lean && world.weather.lean) emit(world, { kind: 'lean_ended', x: 0, y: 0 });
@@ -192,17 +192,42 @@ export function protectedAt(world, x, y, creatures) {
   const c = cellAt(world, x, y);
   if (!c) return true;
   if (c.heat > 0 || walled(world, x, y)) return true;
-  if (world.opts.threatMode === 'targeted') return false;   // numbers do not help against this one
+  if (world.opts.threatMode === 'targeted' || world.opts.threatMode === 'exposure') return false;   // numbers do not help against these
   let company = 0; for (const k of creatures) if (k.alive && Math.max(Math.abs(k.x - x), Math.abs(k.y - y)) <= 1) company++;
   return company >= 3;
 }
 export function prowlerStep(world, r) {
   if (!world.opts.threat) return;
   world.prowlers = world.prowlers || [];
+  // Positive control ('exposure'): no chase, no fleeing. At night, a creature that rested last tick
+  // in the open (no fire, no walls) is taken with a fixed chance. The cost lands exactly on the
+  // behaviour caution is meant to change, so this regime should select for caution if anything does.
+  // Assay check ('direct'): no behaviour involved. At night every creature outside fire or walls is taken
+  // with a chance that falls with its caution gene. If the selection measure cannot see this, it can see nothing.
+  if (world.opts.threatMode === 'direct') {
+    if (!isNight(world) || world.tick <= 5 * DAY) return;
+    for (const k of world.creatures) {
+      if (!k.alive) continue;
+      const c = cellAt(world, k.x, k.y);
+      if (c.heat > 0 || walled(world, k.x, k.y)) continue;
+      if (r() < (world.opts.directChance ?? 0.002) * Math.max(0, 1 - k.genome.caution / 1.6)) { k.alive = false; emit(world, { kind: 'attacked', who: k.id, x: k.x, y: k.y, killed: true }); emit(world, { kind: 'died', who: k.id, cause: 'the beast', x: k.x, y: k.y }); }
+    }
+    return;
+  }
+  if (world.opts.threatMode === 'exposure') {
+    if (!isNight(world) || world.tick <= 5 * DAY) return;
+    for (const k of world.creatures) {
+      if (!k.alive || k.lastAction !== 'rest') continue;
+      const c = cellAt(world, k.x, k.y);
+      if (c.heat > 0 || walled(world, k.x, k.y)) continue;
+      if (r() < (world.opts.exposureChance ?? 0.05)) { k.alive = false; k.attackedAt = { x: k.x, y: k.y, t: world.tick }; emit(world, { kind: 'attacked', who: k.id, x: k.x, y: k.y, killed: true }); emit(world, { kind: 'died', who: k.id, cause: 'the beast', x: k.x, y: k.y }); }
+    }
+    return;
+  }
   const night = isNight(world);
   // One at a time; it comes on some nights, from the edge, and goes at dawn.
   if (!world.prowlers.length) {
-    if (night && world.tick > 5 * DAY && r() < (world.opts.threatChance ?? 0.02)) {
+    if (night && world.tick > 5 * DAY && (world.opts.threatMode === 'exposure' || r() < (world.opts.threatChance ?? 0.02))) {
       const edges = world.cells.filter(c => !c.water && (c.x === 0 || c.y === 0 || c.x === W - 1 || c.y === H - 2));
       const c = edges[Math.floor(r() * edges.length)];
       world.prowlers.push({ id: 'p' + world.tick, x: c.x, y: c.y, came: world.tick, fed: 0 });
@@ -212,8 +237,8 @@ export function prowlerStep(world, r) {
   }
   for (const p of world.prowlers) {
     if (!night || p.fed >= 1 || p.fled) { p.gone = true; emit(world, { kind: 'prowler_left', x: p.x, y: p.y, fed: p.fed, fled: !!p.fled }); continue; }
-    const targeted = world.opts.threatMode === 'targeted';
-    const prey = world.creatures.filter(k => k.alive && Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= (targeted ? 9 : 7) && !protectedAt(world, k.x, k.y, world.creatures) && (!targeted || k.lastAction === 'rest'))
+    const targeted = world.opts.threatMode === 'targeted' || world.opts.threatMode === 'exposure';
+    const prey = world.creatures.filter(k => k.alive && Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= 7 && !protectedAt(world, k.x, k.y, world.creatures) && (!targeted || k.lastAction === 'rest'))
       .sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
     if (!prey) { // wander the edge, slowly
       if (r() < 0.5) { const dx = Math.floor(r() * 3) - 1, dy = Math.floor(r() * 3) - 1; const c = cellAt(world, p.x + dx, p.y + dy); if (c && !c.water && c.heat === 0) { p.x = c.x; p.y = c.y; } }
@@ -222,7 +247,7 @@ export function prowlerStep(world, r) {
     if (Math.max(Math.abs(prey.x - p.x), Math.abs(prey.y - p.y)) <= 1) {
       prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick };
       p.fed = 1;
-      if (prey.needs.energy < 0.35 || (prey.hurt && world.tick - (prey.lastHurt || -999) < 2 * DAY)) { prey.alive = false; emit(world, { kind: 'died', who: prey.id, cause: 'the beast', x: prey.x, y: prey.y }); emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y, killed: true }); }
+      if (world.opts.threatMode === 'exposure' || prey.needs.energy < 0.35 || world.tick - (prey.lastHurt || -999) < 2 * DAY) { prey.alive = false; emit(world, { kind: 'died', who: prey.id, cause: 'the beast', x: prey.x, y: prey.y }); emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y, killed: true }); }
       else { prey.needs.energy = Math.max(0.05, prey.needs.energy - 0.15); prey.lastHurt = world.tick; emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y }); }
       continue;
     }
