@@ -1,0 +1,779 @@
+{
+  "summary": {
+    "keeper": "model:claude-haiku-4-5",
+    "seed": 2,
+    "alive": 4,
+    "born": 11,
+    "died": 13,
+    "byBeast": 1,
+    "hunger": 1,
+    "fireAlive": true,
+    "feeds": 1005,
+    "doers": 16,
+    "interventions": 12,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0.542
+  },
+  "log": [
+    {
+      "day": 3,
+      "state": "Day 3 of 120. \n6 creatures alive (0 have died in all). Average food 9.6/10, warmth 4.6/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 34 grasss, 4 logs, 8 stones, 16 berrys, 3 roots, 1 tallbush, 5 trees.\nCreatures are at: c1(6,3) holding a grass c2(3,11) c3(14,6) c4(3,7) holding a stick c5(7,3) c6(13,8).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "assessment": "The colony is in good shape with adequate food and rest, but warmth is concerningly low at 4.6/10. No fire has been established yet. With 6 healthy creatures and plentiful resources scattered around, this is an ideal time to introduce fire to improve warmth and create a gathering point. I'm establishing a central ember to begin teaching the creatures fire management.",
+        "action": "place",
+        "material": "ember",
+        "x": 9,
+        "y": 6,
+        "reason": "Placing an ember at a central location (9,6) where creatures can discover and tend to it. This will improve warmth over time and create a focal point for the colony, while the creatures learn fire behavior from observation.",
+        "worry": "I don't know if creatures will naturally feed the ember or if they'll ignore it. The warmth stat might not improve even with fire present, or the ember might burn out before they learn to maintain it. However, early introduction gives them the most time to learn.",
+        "usage": {
+          "in": 1050,
+          "out": 211
+        }
+      },
+      "applied": "ember at 9,6",
+      "used": 1
+    },
+    {
+      "day": 6,
+      "state": "Day 6 of 120. \n6 creatures alive (0 have died in all). Average food 9.6/10, warmth 8.3/10, rest 9.4/10.\nA fire is burning with 64.80000000000001 fuel left; it has been fed 4 times by 2 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 54 grasss, 4 logs, 8 stones, 38 berrys, 3 roots, 1 tallbush, 5 trees, 1 ember.\nCreatures are at: c1(8,8) holding a grass c2(8,5) c3(7,1) c4(9,1) holding a grass c5(9,5) c6(8,5).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Excellent progress! The creatures have discovered fire and two of them are already maintaining it independently—they're learning. Warmth has jumped dramatically to 8.3/10. The colony is thriving with abundant resources and no predator pressure yet. I should now focus on sustainability: ensure they continue learning fire management and begin preparing for potential threats like the predator or resource scarcity.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is self-sufficient and the creatures are actively tending the fire. Intervention now would risk disrupting their learning process. I'll observe for three more days to see if they maintain the fire and develop more complex behaviors.",
+        "worry": "The fire may burn out if those two creatures stop feeding it, or if the colony grows and new creatures don't learn the behavior. Also, I haven't seen the predator yet—it may come on certain nights and I should be prepared to place defensive resources if attacks occur.",
+        "usage": {
+          "in": 1523,
+          "out": 214
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 9,
+      "state": "Day 9 of 120. \n6 creatures alive (0 have died in all). Average food 9.7/10, warmth 9.3/10, rest 9.8/10.\nA fire is burning with 143.8 fuel left; it has been fed 33 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 51 grasss, 3 logs, 8 stones, 50 berrys, 2 roots, 1 tallbush, 5 trees, 1 ember.\nCreatures are at: c1(9,5) c2(9,5) holding a log c3(9,10) c4(8,5) c5(7,3) holding a grass c6(6,4) holding a grass.\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "The colony has thrived beyond expectations. Four creatures are now maintaining the fire with 33 feedings, warmth is excellent at 9.3/10, and all stats are near-perfect. The creatures have learned fire management independently. Now I need to think ahead: the predator hasn't appeared yet but will eventually come. I should prepare defensive resources or shelter options before that happens, while the colony is still learning and adapting.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is in peak condition and self-managing the fire beautifully. Continued observation is the best strategy—I need to see if the predator arrives and how the creatures naturally respond, so I can provide appropriate support.",
+        "worry": "The predator hasn't appeared yet despite 9 days passing. When it does come, I may need to act quickly. I'm also uncertain whether the creatures will develop any natural defenses or if I'll need to provide stones, logs, or other defensive materials. The heavy concentration at (9,5) suggests some creatures may be vulnerable if isolated.",
+        "usage": {
+          "in": 1999,
+          "out": 240
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 12,
+      "state": "Day 12 of 120. \n8 creatures alive (0 have died in all). Average food 9.6/10, warmth 8.6/10, rest 9.5/10.\nA fire is burning with 188.59999999999997 fuel left; it has been fed 55 times by 5 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 4 sticks, 53 grasss, 3 logs, 8 stones, 33 berrys, 2 roots, 1 tallbush, 5 trees, 1 ember, 1 sapling.\nCreatures are at: c1(5,9) holding a grass c2(11,3) c3(11,5) c4(8,1) holding a grass c5(4,4) holding a grass c6(10,1) c7(15,7) c8(10,3).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "assessment": "The colony is thriving—two new creatures born, population growing to 8, and five creatures now maintain the fire independently. All stats remain strong. The predator still hasn't appeared, which is unusual. The creatures are spreading out more across the map, which is healthy for population growth but increases vulnerability if the predator arrives. A sapling has appeared, suggesting natural reproduction of plants.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony continues to flourish with excellent self-management. The new births show the system is stable and sustainable. I should continue observing to understand predator behavior patterns and whether the spreading population will naturally develop any defensive strategies.",
+        "worry": "The creatures are more dispersed now, which historically means higher predator risk. I'm concerned that when the predator finally comes, isolated creatures may be vulnerable. I haven't seen it yet after 12 days, so I don't know its behavior or attack patterns. I should be ready to place defensive resources quickly if needed.",
+        "usage": {
+          "in": 2524,
+          "out": 223
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 15,
+      "state": "Day 15 of 120. \n8 creatures alive (0 have died in all). Average food 9.3/10, warmth 9.4/10, rest 9.6/10.\nA fire is burning with 224.39999999999992 fuel left; it has been fed 76 times by 6 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 4 sticks, 69 grasss, 2 logs, 8 stones, 37 berrys, 2 roots, 1 tallbush, 5 trees, 1 ember, 2 saplings.\nCreatures are at: c1(7,10) c2(8,5) c3(9,5) c4(9,5) c5(9,5) c6(8,9) c7(9,5) c8(8,5).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "assessment": "The predator has finally appeared (day 15) but was driven off without attacking—this is crucial information. The creatures have clustered heavily around the fire at (9,5) and (8,5), which appears to be a defensive response. Six creatures now tend the fire. The colony is consolidating around the fire as a safe gathering point, which is smart behavior for predator avoidance. This suggests the fire provides both warmth and security.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The creatures have naturally developed an effective strategy: clustering near the fire deters the predator. The fire is now serving dual purposes—warmth and protection. I should observe further to see if they maintain this defensive behavior and whether the predator returns.",
+        "worry": "I don't know why the predator was driven off—was it the fire, the group size, or random chance? If it attacks successfully next time, several creatures could die since they're tightly clustered. Also, the concentration means they might exhaust local food resources. The fire's fuel is adequate but I should monitor if feeding creatures can sustain it as the population potentially grows.",
+        "usage": {
+          "in": 3023,
+          "out": 255
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 18,
+      "state": "Day 18 of 120. \n8 creatures alive (0 have died in all). Average food 9.4/10, warmth 9.4/10, rest 9.7/10.\nA fire is burning with 272.1999999999999 fuel left; it has been fed 97 times by 6 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 4 sticks, 57 grasss, 1 log, 8 stones, 38 berrys, 2 roots, 1 tallbush, 5 trees, 1 ember, 3 saplings.\nCreatures are at: c1(9,5) c2(9,3) holding a grass c3(8,6) holding a grass c4(10,6) c5(14,9) c6(11,7) holding a grass c7(10,7) c8(8,6).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "assessment": "The colony remains stable and healthy at 8 creatures with no deaths. The predator came once and was driven off; it hasn't returned in 3 days. Creatures are beginning to spread out again from the fire cluster, suggesting they feel safer. The fire continues to be well-maintained with 97 feedings and substantial fuel. Resources are adequate though logs are declining (1 left). The colony is in a sustainable rhythm.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony has achieved stability and balance. Creatures are naturally managing the fire, dispersing to forage, and the predator pressure seems manageable. No intervention is needed at this moment—continued observation will reveal if any new challenges emerge.",
+        "worry": "Logs are nearly depleted (only 1 remaining), and I don't know if they're critical for fire fuel or other purposes. If the predator returns during a dispersed phase, isolated creatures like c5 at (14,9) could be vulnerable. I should also monitor whether the population will grow again or stabilize at 8.",
+        "usage": {
+          "in": 3563,
+          "out": 242
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 21,
+      "state": "Day 21 of 120. \n10 creatures alive (0 have died in all). Average food 9.4/10, warmth 9.1/10, rest 9.3/10.\nA fire is burning with 330.1999999999999 fuel left; it has been fed 128 times by 7 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 3 sticks, 39 grasss, 1 log, 8 stones, 32 berrys, 1 root, 1 tallbush, 5 trees, 1 ember, 3 saplings.\nCreatures are at: c1(8,5) c2(9,2) holding a grass c3(8,7) c4(8,9) c5(8,6) c6(10,1) holding a grass c7(9,7) c8(10,2) c9(10,6) c10(9,5).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The colony has grown to 10 creatures with 2 new births. The predator came twice in 3 days but was driven off both times—the fire and group clustering continue to provide effective protection. Seven creatures now maintain the fire. Creatures are more dispersed than before, suggesting confidence. However, resources are tightening: grass down to 39, berries to 32, and only 1 log and 3 sticks remain. The fire remains robust at 330 fuel. Food stats are still good at 9.4/10, but this may not last.",
+        "action": "place",
+        "material": "grass",
+        "x": 6,
+        "y": 5,
+        "reason": "Placing grass at a central location away from the fire to encourage foraging and distribute the population more evenly, reducing predator risk from clustering. This also strategically replenishes the dwindling grass supply before food stats decline.",
+        "worry": "I'm uncertain if placing grass will actually encourage creatures to forage there or if they'll ignore it. The predator is now coming regularly (2 times in 3 days), and dispersed creatures are more vulnerable. I may need to place more defensive resources soon if the pattern worsens. The berry and grass supplies are declining faster than I expected.",
+        "usage": {
+          "in": 4101,
+          "out": 277
+        }
+      },
+      "applied": "grass at 6,5",
+      "used": 2
+    },
+    {
+      "day": 24,
+      "state": "Day 24 of 120. \n12 creatures alive (0 have died in all). Average food 9.4/10, warmth 9.1/10, rest 9.7/10.\nA fire is burning with 369.99999999999983 fuel left; it has been fed 154 times by 8 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 3 sticks, 33 grasss, 1 log, 8 stones, 18 berrys, 1 root, 1 tallbush, 6 trees, 1 ember, 3 saplings.\nCreatures are at: c1(10,5) c2(8,0) holding a grass c3(8,2) holding a grass c4(12,4) holding a grass c5(8,5) c6(9,8) holding a grass c7(3,6) holding a grass c8(9,2) c9(9,7) c10(9,5) c11(8,5) c12(2,8) holding a grass.\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The colony has grown to 12 creatures with excellent survival (0 deaths). Eight creatures maintain the fire, which has plenty of fuel. The population is well-dispersed across the map, reducing predator clustering risk. However, food resources are critically depleted: berries down to 18, grass to 33, and sticks/logs minimal. The predator came once and was driven off. The colony is thriving in numbers but faces potential food scarcity in the near future.",
+        "action": "place",
+        "material": "berry",
+        "x": 9,
+        "y": 8,
+        "reason": "Placing berries at a central foraging location to replenish the critically low berry supply (18 remaining). This supports the growing population before food stats decline and provides nutrition near dispersed creatures.",
+        "worry": "I may have spread resources too thin by only placing grass once. Berry reserves are dangerously low at 18, and the population continues growing (2 more births). I don't know if placed berries will be found and eaten, or if creatures prefer naturally occurring resources. The trees may eventually provide resources, but I'm uncertain of their growth timeline. I should consider placing more food soon if berries and grass continue declining.",
+        "usage": {
+          "in": 4261,
+          "out": 261
+        }
+      },
+      "applied": "berry at 9,8",
+      "used": 3
+    },
+    {
+      "day": 27,
+      "state": "Day 27 of 120. \n12 creatures alive (0 have died in all). Average food 9.2/10, warmth 9.4/10, rest 9.7/10.\nA fire is burning with 416.7999999999998 fuel left; it has been fed 183 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 3 sticks, 34 grasss, 1 log, 8 stones, 23 berrys, 1 root, 1 tallbush, 7 trees, 1 ember, 2 saplings.\nCreatures are at: c1(10,11) c2(8,7) c3(8,5) c4(10,4) c5(8,5) c6(8,5) c7(3,2) holding a grass c8(9,5) holding a grass c9(15,1) holding a grass c10(10,10) c11(9,6) c12(9,6).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "The colony has stabilized at 12 creatures with no new births or deaths. Food stats are beginning to decline (9.2/10, down from 9.4). Berry and grass supplies remain low but stable. The fire is well-maintained by 7 creatures with ample fuel. The predator continues appearing about once every 3 days and is consistently driven off. Creatures are fairly dispersed with some clustering at the fire. Trees have increased from 5 to 7, suggesting natural growth that may eventually provide resources.",
+        "action": "place",
+        "material": "berry",
+        "x": 8,
+        "y": 2,
+        "reason": "Placing berries in the northern region where c7 and c9 are foraging, to supplement the low berry reserves (23 remaining) and support distributed foraging away from the fire cluster.",
+        "worry": "Food stats are declining despite my interventions. I'm uncertain whether placed berries and grass are being consumed or ignored by creatures. The trees growing slowly may eventually help, but I don't know their timeline. If food continues declining, I may need to place multiple resources per intervention. The predator is predictable now but could become more aggressive. I've used 3 of 12 interventions already.",
+        "usage": {
+          "in": 4359,
+          "out": 268
+        }
+      },
+      "applied": "berry at 8,2",
+      "used": 4
+    },
+    {
+      "day": 30,
+      "state": "Day 30 of 120. \n12 creatures alive (0 have died in all). Average food 9.5/10, warmth 9.0/10, rest 9.7/10.\nA fire is burning with 455.59999999999974 fuel left; it has been fed 211 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x1, made fire x1.\nLying about: 2 sticks, 41 grasss, 1 log, 7 stones, 14 berrys, 1 tallbush, 8 trees, 1 ember, 1 sapling, 1 shard.\nCreatures are at: c1(10,11) c2(6,0) holding a stone c3(11,7) c4(9,5) c5(5,6) c6(4,6) holding a grass c7(9,5) c8(10,6) c9(4,6) holding a grass c10(9,5) holding a grass c11(10,11) c12(11,6).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony has reached a critical milestone: creatures are now crafting items (made a shard and created a fire). This indicates they're learning and developing tools independently. Food stats recovered to 9.5/10, suggesting my berry placements were effective. Eight creatures maintain the original fire with 455 fuel. The predator didn't come this cycle. Creatures are clustering again near the fire at (9,5) and (10,11), possibly for safety or warmth. The colony shows sophisticated behavior—they're no longer just surviving but innovating.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The creatures have demonstrated they can craft and create fire independently. This is a pivotal moment to observe their continued development and understand how they'll adapt. The food situation has stabilized and the colony is thriving with new capabilities.",
+        "worry": "I don't understand what the shard and second fire mean for colony dynamics. The creatures are clustering again, which could make them vulnerable if the predator returns aggressively. Berry reserves remain low at 14, and I'm unsure if this is sustainable for 12 creatures long-term. I've used 4 of 12 interventions—I need to preserve my budget for genuine emergencies.",
+        "usage": {
+          "in": 4457,
+          "out": 278
+        }
+      },
+      "applied": "nothing",
+      "used": 4
+    },
+    {
+      "day": 33,
+      "state": "Day 33 of 120. The meadow is lean: little grows. \n12 creatures alive (0 have died in all). Average food 9.1/10, warmth 9.2/10, rest 9.8/10.\nA fire is burning with 510.5999999999997 fuel left; it has been fed 239 times by 9 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 2 sticks, 26 grasss, 1 log, 7 stones, 1 tallbush, 8 trees, 12 berrys, 1 ember, 1 sapling.\nCreatures are at: c1(8,2) c2(15,5) holding a grass c3(16,5) holding a grass c4(3,2) holding a grass c5(8,5) c6(10,8) c7(7,1) holding a shard c8(9,5) c9(12,8) c10(8,5) c11(10,5) holding a stone c12(9,7).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The meadow is lean—resources are naturally scarce now. Food stats declined to 9.1/10. Berries dropped sharply to 12, grass to 26. The colony is foraging widely (creatures spread from (3,2) to (16,5)), suggesting they're searching for resources. Nine creatures now tend the fire. No predator visits in this cycle. The creatures are adapting to scarcity by dispersing further and searching the edges of the map. The colony remains stable at 12 with no deaths, but food pressure is mounting.",
+        "action": "place",
+        "material": "berry",
+        "x": 12,
+        "y": 5,
+        "reason": "Placing berries in the eastern foraging area where c2 and c3 are active, supporting the dispersed search pattern and directly replenishing the critically low berry supply (12 remaining).",
+        "worry": "The meadow being naturally lean is concerning—this may persist or worsen. I don't know if natural resource regeneration occurs or if the map is fixed. Creatures are spreading far (c2 and c3 at x15-16), which increases predator vulnerability despite recent quiet. Berry reserves at 12 for 12 creatures is unsustainable. I may need to place multiple high-calorie resources in coming interventions if the lean period continues.",
+        "usage": {
+          "in": 4551,
+          "out": 291
+        }
+      },
+      "applied": "berry at 12,5",
+      "used": 5
+    },
+    {
+      "day": 36,
+      "state": "Day 36 of 120. The meadow is lean: little grows. \n12 creatures alive (0 have died in all). Average food 8.9/10, warmth 9.5/10, rest 9.9/10.\nA fire is burning with 511.39999999999964 fuel left; it has been fed 259 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: joined x1.\nLying about: 1 stick, 1 log, 7 stones, 1 tallbush, 9 trees, 1 ember, 21 grasss, 6 berrys.\nCreatures are at: c1(9,5) c2(4,7) holding a grass c3(8,4) c4(8,5) c5(11,6) c6(15,5) holding a grass c7(8,4) c8(10,5) c9(10,6) c10(15,5) c11(10,11) c12(10,6) holding a stone.\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Food stats have declined to 8.9/10—the lean meadow is taking a toll. Berry reserves are critically low at 6, grass at 21. Creatures performed a 'joined' action (possibly social bonding or a new behavior). Eight creatures maintain the fire. The predator hasn't appeared in 9 days, suggesting reduced threat. Creatures are still dispersed but some clustering visible at the fire (9,5) and eastern area (15,5). The colony remains stable at 12 with no deaths, but food scarcity is now the primary concern. Trees have grown to 9, offering potential future resources.",
+        "action": "place",
+        "material": "grass",
+        "x": 10,
+        "y": 5,
+        "reason": "Placing grass directly at the fire cluster to maximize accessibility for the 12 creatures and prevent immediate food decline. This supplements the critically low grass (21) and berry (6) reserves in a concentrated area.",
+        "worry": "I'm deeply concerned about food sustainability. With only 6 berries and 21 grass for 12 creatures, food stats will likely continue declining. I don't know if trees will eventually produce food or if the lean meadow is permanent. The predator has been absent for 9 days—this quiet is unusual and may precede aggressive activity. I've used 5 of 12 interventions and may need aggressive food placement soon if the lean period persists.",
+        "usage": {
+          "in": 4630,
+          "out": 310
+        }
+      },
+      "applied": "grass at 10,5",
+      "used": 6
+    },
+    {
+      "day": 39,
+      "state": "Day 39 of 120. \n12 creatures alive (0 have died in all). Average food 9.5/10, warmth 8.9/10, rest 9.6/10.\nA fire is burning with 551.1999999999998 fuel left; it has been fed 285 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 1 tallbush, 9 trees, 1 ember, 27 grasss, 11 berrys.\nCreatures are at: c1(9,5) c2(10,7) c3(11,6) holding a grass c4(13,7) c5(15,3) holding a stick c6(10,3) holding a grass c7(8,5) c8(7,5) holding a grass c9(8,6) holding a grass c10(8,6) holding a grass c11(2,3) c12(10,7).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "Food stats have recovered dramatically to 9.5/10—the placed grass helped significantly. Berry reserves improved to 11, grass to 27. Warmth declined slightly to 8.9/10, suggesting creatures are straying from the fire more often. Eight creatures continue tending the fire with 551 fuel remaining. The predator remains absent. Creatures are dispersed across the map but several hold grass and sticks, indicating active foraging and resource management. The colony remains stable at 12 with zero deaths. The lean period appears to have eased.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food and rest stats are now healthy. The colony has stabilized with improved resources. Waiting allows me to observe creature behavior and conserve my remaining 6 interventions for genuine emergencies or late-stage challenges.",
+        "worry": "Warmth dropped to 8.9/10—creatures may be moving away from the fire. The predator's 12-day absence is suspicious; it may return aggressively. I don't know if the lean meadow will return or if resources are now stable. The colony's dispersal, while reducing predator clustering risk, increases individual vulnerability. I should monitor warmth carefully in coming cycles.",
+        "usage": {
+          "in": 4718,
+          "out": 279
+        }
+      },
+      "applied": "nothing",
+      "used": 6
+    },
+    {
+      "day": 42,
+      "state": "Day 42 of 120. \n12 creatures alive (0 have died in all). Average food 9.3/10, warmth 9.7/10, rest 9.9/10.\nA fire is burning with 648 fuel left; it has been fed 327 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 1 tallbush, 9 trees, 1 ember, 30 grasss, 16 berrys.\nCreatures are at: c1(8,5) c2(8,5) c3(8,6) c4(9,5) c5(8,5) c6(10,8) c7(6,7) c8(8,5) c9(8,5) c10(8,5) c11(10,7) c12(8,6) holding a grass.\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The colony has entered a stable, thriving phase. All stats are excellent: food 9.3/10, warmth 9.7/10, rest 9.9/10. Resources are abundant: 30 grass, 16 berries, 9 trees. Eight creatures maintain the fire with 648 fuel—ample reserves. The predator has been absent for 15 days. Creatures are now heavily clustered around the fire at (8,5)—six creatures there plus nearby positions. This clustering suggests they've learned the fire provides safety and comfort. Zero deaths across 42 days. The colony is safe and thriving.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is in excellent condition with abundant resources, strong warmth and rest, and stable food supplies. All stats support continued thriving. Waiting conserves interventions for potential late-stage challenges or emergencies.",
+        "worry": "The extreme clustering at (8,5) creates vulnerability if the predator returns and strikes efficiently. I don't know if the predator's 15-day absence means it's gone or gathering strength. The fire has massive fuel but will eventually need replenishment around day 80-90 if the burn rate continues. I'm using my remaining 6 interventions conservatively, but may need to act if clustering becomes dangerous or if late-game challenges emerge.",
+        "usage": {
+          "in": 4709,
+          "out": 311
+        }
+      },
+      "applied": "nothing",
+      "used": 6
+    },
+    {
+      "day": 45,
+      "state": "Day 45 of 120. \n12 creatures alive (0 have died in all). Average food 9.3/10, warmth 9.6/10, rest 10.0/10.\nA fire is burning with 760 fuel left; it has been fed 370 times by 9 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 1 tallbush, 9 trees, 1 ember, 25 grasss, 13 berrys.\nCreatures are at: c1(8,6) c2(3,6) holding a grass c3(9,5) c4(10,6) c5(10,11) c6(10,6) c7(11,5) c8(11,6) c9(10,6) c10(9,5) c11(3,11) c12(10,9).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The predator has returned and successfully attacked for the first time in 45 days. However, all 12 creatures remain alive—the attack caused no fatality but dispersed the colony. Creatures have scattered from the fire cluster to safer positions: c2 and c11 fled to the western edges (x3), c5 to the northern edge (10,11). Food and warmth stats remain strong at 9.3/10 and 9.6/10. Nine creatures now tend the fire with 760 fuel. Rest is perfect at 10.0/10. Resources slightly depleted (25 grass, 13 berries) but stable. The predator's attack was a turning point—creatures have learned to disperse for safety.",
+        "action": "place",
+        "material": "grass",
+        "x": 3,
+        "y": 6,
+        "reason": "Placing grass at c2's western refuge (3,6) to support creatures who have fled the fire cluster for safety. This maintains food security for dispersed individuals and reinforces the safety value of spreading out.",
+        "worry": "The predator's successful attack is alarming. It demonstrated that clustering is dangerous. The dispersal is good for survival but increases warmth risk long-term. I don't know if the predator will return in 3-day cycles now or if it was a one-time event. Berry reserves at 13 are concerning if dispersal continues and foraging becomes less efficient. I have 5 interventions left and must balance food security against the need to preserve resources for emergencies later.",
+        "usage": {
+          "in": 4720,
+          "out": 339
+        }
+      },
+      "applied": "grass at 3,6",
+      "used": 7
+    },
+    {
+      "day": 48,
+      "state": "Day 48 of 120. \n12 creatures alive (0 have died in all). Average food 9.3/10, warmth 9.2/10, rest 9.8/10.\nA fire is burning with 798.8000000000002 fuel left; it has been fed 396 times by 9 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 1 tallbush, 9 trees, 1 ember, 6 berrys, 26 grasss.\nCreatures are at: c1(10,5) c2(9,5) c3(9,7) c4(8,4) c5(8,5) c6(11,5) holding a grass c7(10,6) c8(8,6) c9(9,3) c10(8,3) c11(1,5) holding a grass c12(7,1).\nCells with three or more things stacked: 0.",
+      "decision": {
+        "assessment": "The predator came twice but was driven off both times—creatures are learning effective defensive behavior. All 12 remain alive. Creatures have dispersed widely across the map, abandoning tight clustering. Food remains stable at 9.3/10, warmth at 9.2/10, rest at 9.8/10. Fire has 798 fuel with 9 creatures tending it. Berry reserves are critically low at 6, while grass is adequate at 26. The dispersal strategy appears to be working—predator attacks were repelled. However, the spread reduces fire proximity and increases vulnerability. No cells have three or more items stacked, indicating active use of resources.",
+        "action": "place",
+        "material": "berry",
+        "x": 8,
+        "y": 5,
+        "reason": "Placing berries at the fire cluster (8,5) to replenish the critically low berry reserves (6) and support creatures who venture near the fire for warmth and tending.",
+        "worry": "Berry reserves at 6 for 12 creatures is dangerously low and unsustainable. The dispersal strategy is effective defensively but may strain long-term food security if natural resources don't regenerate. The predator's persistence (2 visits in 3 days after 15-day absence) suggests it may become a regular threat. I've used 7 of 12 interventions with 72 days remaining. I need to be strategic about food placement versus saving interventions for late-game emergencies.",
+        "usage": {
+          "in": 4771,
+          "out": 328
+        }
+      },
+      "applied": "berry at 8,5",
+      "used": 8
+    },
+    {
+      "day": 51,
+      "state": "Day 51 of 120. \n12 creatures alive (0 have died in all). Average food 9.5/10, warmth 9.2/10, rest 9.6/10.\nA fire is burning with 853.6000000000004 fuel left; it has been fed 428 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 1 tallbush, 9 trees, 1 ember, 13 berrys, 29 grasss.\nCreatures are at: c1(5,9) holding a grass c2(10,8) c3(9,7) c4(11,6) holding a grass c5(6,4) holding a grass c6(10,9) holding a grass c7(10,6) c8(4,6) c9(10,6) c10(14,8) c11(10,8) c12(2,6) holding a grass.\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "The colony has recovered well. Food improved to 9.5/10, warmth stable at 9.2/10, rest at 9.6/10. Berry reserves recovered to 13, grass at 29. The predator was absent this cycle—creatures may have learned effective avoidance or dispersal remains protective. Eight creatures tend the fire with 853 fuel. Creatures remain dispersed across the map but several hold grass, indicating continued foraging and resource management. The colony has now survived 51 days with zero deaths and is adapting to both predator pressure and resource scarcity. Warmth at 9.2/10 is the only concern—dispersal trades safety for reduced fire proximity.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is stable with improving food, adequate warmth, and excellent rest. Berry reserves are recovering. The predator is absent this cycle. Waiting conserves my remaining 4 interventions for potential late-game challenges or emergencies.",
+        "worry": "Warmth has drifted down to 9.2/10 and may continue declining as creatures remain dispersed. The fire has ample fuel (853) but dispersal means creatures spend less time benefiting from it. I don't know if the predator returns on a cycle or randomly. Berry reserves are still modest (13) for 12 creatures. With 4 interventions left and 69 days remaining, I must reserve capacity for unexpected crises while monitoring warmth and food trends.",
+        "usage": {
+          "in": 4792,
+          "out": 340
+        }
+      },
+      "applied": "nothing",
+      "used": 8
+    },
+    {
+      "day": 54,
+      "state": "Day 54 of 120. \n12 creatures alive (0 have died in all). Average food 9.4/10, warmth 8.9/10, rest 9.6/10.\nA fire is burning with 885.4000000000005 fuel left; it has been fed 454 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 7 stones, 1 tallbush, 9 trees, 1 ember, 16 berrys, 30 grasss.\nCreatures are at: c1(0,2) holding a grass c2(8,7) c3(10,6) c4(8,4) c5(8,7) c6(0,3) holding a grass c7(9,7) holding a stone c8(10,6) c9(11,6) c10(8,5) holding a grass c11(15,4) holding a grass c12(1,3) holding a grass.\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "Warmth has declined to 8.9/10—a concerning trend from dispersal. The predator returned twice but was driven off both times; creatures' defensive learning continues. Food is stable at 9.4/10, rest at 9.6/10. Berry reserves at 16 are adequate, grass at 30 is good. Eight creatures maintain the fire with 885 fuel. Creatures remain widely dispersed across the map—c1, c6, c12 at the western edge (x0-1), c11 at the east (15,4). This extreme dispersal prioritizes predator safety but at the cost of warmth and potentially food efficiency. The colony remains at 12 with zero deaths, having survived 54 days and two predator encounters.",
+        "action": "place",
+        "material": "ember",
+        "x": 5,
+        "y": 5,
+        "reason": "Placing a new ember at (5,5) as a secondary warmth source. This creates a safer mid-map gathering point for dispersed creatures, improving warmth without requiring them to abandon defensive positioning.",
+        "worry": "Warmth declining to 8.9/10 is unsustainable long-term. The predator's return to a 3-day cycle (2 visits in 3 days) suggests active hunting patterns. Dispersal trades safety for warmth, and creatures may eventually suffer if this continues. A secondary fire could help, but I don't know if creatures will learn to use it. I have 3 interventions left with 66 days remaining. If warmth drops below 8.5/10 or the predator becomes more lethal, I'll need to act decisively.",
+        "usage": {
+          "in": 4823,
+          "out": 371
+        }
+      },
+      "applied": "ember at 5,5",
+      "used": 9
+    },
+    {
+      "day": 57,
+      "state": "Day 57 of 120. \n12 creatures alive (0 have died in all). Average food 9.4/10, warmth 9.1/10, rest 9.4/10.\nA fire is burning with 889.4000000000005 fuel left; it has been fed 494 times by 10 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 1 times.\nThey did: made shard x4.\nLying about: 1 log, 7 stones, 1 tallbush, 9 trees, 2 embers, 27 berrys, 28 grasss, 4 shards.\nCreatures are at: c1(8,7) c2(11,10) holding a grass c3(7,5) c4(6,2) c5(4,4) c6(7,6) c7(10,11) holding a stone c8(9,7) holding a berry c9(9,2) c10(11,5) c11(10,11) c12(4,5).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "Warmth improved to 9.1/10—the secondary ember is helping. Food stable at 9.4/10, rest at 9.6/10. Critically, creatures have learned to craft shards (4 made this cycle) and 10 now tend the fire—these are significant adaptive leaps. The predator came once and was driven off once, indicating creatures are developing effective defensive tactics. Berry reserves strong at 27, grass at 28. Two embers now exist (the original plus my placed one). Creatures remain dispersed but seem to be clustering around warmth sources and learning new survival skills. Zero deaths at day 57 of 120. The colony is genuinely thriving and adapting.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is demonstrating impressive adaptive learning: crafting shards, increased fire tending (10 creatures), and successful predator defense. Warmth has recovered. All stats are strong. Waiting conserves my final 3 interventions for genuine late-stage emergencies or unexpected crises.",
+        "worry": "I don't understand the shard-crafting—it may indicate creatures are preparing for future predator threats or other unknown challenges. The predator's frequency remains unpredictable. With 63 days remaining and only 3 interventions left, I must be extremely cautious. If food, warmth, or safety conditions deteriorate sharply, I'll have limited options. The colony's self-sufficiency is encouraging, but emergencies could still arise.",
+        "usage": {
+          "in": 4878,
+          "out": 345
+        }
+      },
+      "applied": "nothing",
+      "used": 9
+    },
+    {
+      "day": 60,
+      "state": "Day 60 of 120. \n12 creatures alive (0 have died in all). Average food 9.0/10, warmth 9.2/10, rest 8.9/10.\nA fire is burning with 992.2000000000007 fuel left; it has been fed 529 times by 10 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 1 times.\nThey did: felled x3, joined x4.\nLying about: 1 log, 7 stones, 1 tallbush, 6 trees, 2 embers, 37 berrys, 37 grasss, 3 axes, 9 sticks, 1 sapling.\nCreatures are at: c1(10,11) c2(11,7) c3(10,10) holding a grass c4(7,6) c5(11,7) holding a axe c6(11,7) c7(9,8) holding a stone c8(4,5) c9(9,3) c10(9,6) c11(4,5) c12(8,2) holding a grass.\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Creatures have undergone major adaptive changes: they felled 3 trees (creating sticks and axes), joined together 4 times (forming groups for safety/efficiency), and crafted 3 axes. Resource landscape has transformed—37 berries, 37 grass (abundant), 9 sticks, 3 axes, 1 sapling. Food dropped to 9.0/10, rest to 8.9/10, but warmth stable at 9.2/10. Fire has 992 fuel with 10 creatures tending. Six cells now have 3+ items stacked—active resource processing occurring. The predator came twice; was driven off once but attacked once (unclear if it succeeded). Creatures are clearly learning tool use and group tactics. Zero deaths remains at day 60.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is demonstrating sophisticated adaptive behavior: tool crafting, tree felling, group joining, and effective predator defense. Resources are abundant. Food and rest have dipped slightly but remain solid (9.0 and 8.9). Waiting preserves my final 3 interventions for true emergencies.",
+        "worry": "Rest declined to 8.9/10—creatures may be exhausted from increased activity and predator pressure. Food at 9.0/10 is the lowest yet. The predator's 2-visit cycle suggests it's becoming a regular threat, though creatures are learning to handle it. I don't know if the predator succeeded in an attack this cycle or if creatures fended it off completely. With 60 days left and only 3 interventions, I'm gambling that creature adaptation will continue outpacing challenges. A prolonged predator onslaught or food shortage could be catastrophic now.",
+        "usage": {
+          "in": 4971,
+          "out": 404
+        }
+      },
+      "applied": "nothing",
+      "used": 9
+    },
+    {
+      "day": 63,
+      "state": "Day 63 of 120. The meadow is lean: little grows. \n7 creatures alive (6 have died in all). Average food 8.4/10, warmth 9.2/10, rest 8.4/10.\nA fire is burning with 997.0000000000009 fuel left; it has been fed 558 times by 12 creatures who do it on their own.\nSince your last look: 1 born; died: c1 (old age), c2 (old age), c3 (old age), c4 (old age), c5 (old age), c6 (old age); predator came 1 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x2, felled x1, joined x1.\nLying about: 3 logs, 7 stones, 1 tallbush, 5 trees, 2 embers, 37 berrys, 36 grasss, 4 axes, 3 sticks, 2 saplings, 1 shard.\nCreatures are at: c7(9,10) holding a stone c8(10,3) c9(6,6) c10(7,5) c11(4,5) c12(10,7) c13(10,9).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Crisis: Six creatures died of old age in a single cycle (c1-c6), reducing the colony from 12 to 7. One new creature born (c13). Food dropped to 8.4/10, rest to 8.4/10—both critical. The meadow is described as 'lean: little grows,' indicating environmental scarcity. Warmth remains stable at 9.2/10. Fire has 997 fuel with 12 creatures tending (including the new one). Resources are still abundant on the ground (37 berries, 36 grass, 4 axes), but the colony has suffered catastrophic loss. Remaining creatures are c7-c13 (7 total). The predator came once but was not engaged. This appears to be an aging event, not predator-related.",
+        "action": "place",
+        "material": "berry",
+        "x": 9,
+        "y": 7,
+        "reason": "Placing berries at the fire cluster (9,7) to immediately boost food security to 8.4/10 is critical. The remaining 7 creatures need dense nutrition near warmth and safety. The lean meadow means natural foraging will not sustain them.",
+        "worry": "Six deaths in one cycle is catastrophic and unexpected. I don't understand the aging mechanic—were these creatures at a life limit? The meadow's scarcity suggests environmental cycles I cannot predict. Food and rest are now dangerously low at 8.4/10 each. With only 3 interventions left and 57 days remaining, I cannot afford more mass death events. The new creature c13 may not be enough to maintain fire tending if more elders die. I'm deeply uncertain whether placing food will even help or if this is a life-stage crisis beyond my intervention.",
+        "usage": {
+          "in": 5127,
+          "out": 397
+        }
+      },
+      "applied": "berry at 9,7",
+      "used": 10
+    },
+    {
+      "day": 66,
+      "state": "Day 66 of 120. The meadow is lean: little grows. \n7 creatures alive (6 have died in all). Average food 9.1/10, warmth 9.1/10, rest 7.6/10.\nA fire is burning with 952.8000000000011 fuel left; it has been fed 568 times by 12 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 7 stones, 5 trees, 2 embers, 29 berrys, 29 grasss, 4 axes, 3 sticks, 2 saplings, 1 shard.\nCreatures are at: c7(9,10) holding a stone c8(5,4) holding a grass c9(8,7) c10(14,4) holding a grass c11(3,11) holding a grass c12(11,1) holding a grass c13(9,10).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The crisis has stabilized. Food recovered to 9.1/10, warmth at 9.1/10, but rest remains critically low at 7.6/10. The seven remaining creatures are holding steady with no new deaths. The meadow remains lean, but berry and grass reserves are adequate (29 each). Fire has 952 fuel with 12 creature-feedings recorded (impossible with 7 creatures alive—this suggests the fire tending count includes historical data or the system tracks cumulative actions). The predator came once and was not engaged. Creatures are still dispersed, several holding grass. The colony has survived the aging event but is exhausted.",
+        "action": "place",
+        "material": "grass",
+        "x": 9,
+        "y": 10,
+        "reason": "Placing grass at the fire cluster (9,10) where c7 and c13 congregate. Rest is dangerously low at 7.6/10—creatures may need easier access to food near rest/warmth areas to recover without foraging far afield.",
+        "worry": "Rest at 7.6/10 is the most alarming stat. I don't know if it reflects exhaustion from predator defense, resource scarcity, or aging stress. With only 2 interventions left and 54 days remaining, I have almost no buffer for emergencies. The lean meadow persists—I don't know if it's permanent or cyclical. Berry reserves dropped from 37 to 29, grass from 36 to 29, suggesting consumption exceeds natural regeneration. If rest continues declining or another mass death event occurs, the colony may be unrecoverable. I'm uncertain whether placing food helps rest or if creatures need something else entirely.",
+        "usage": {
+          "in": 5194,
+          "out": 378
+        }
+      },
+      "applied": "grass at 9,10",
+      "used": 11
+    },
+    {
+      "day": 69,
+      "state": "Day 69 of 120. \n10 creatures alive (6 have died in all). Average food 9.1/10, warmth 9.5/10, rest 7.9/10.\nA fire is burning with 919.8000000000011 fuel left; it has been fed 586 times by 12 creatures who do it on their own.\nSince your last look: 3 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 7 stones, 5 trees, 2 embers, 39 berrys, 34 grasss, 4 axes, 3 sticks, 4 saplings, 1 shard.\nCreatures are at: c7(7,9) holding a stone c8(10,2) holding a grass c9(8,6) c10(7,4) c11(2,3) c12(12,5) c13(10,5) c14(6,5) c15(10,3) c16(3,7).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Major recovery: three new creatures born (c14, c15, c16), colony grew from 7 to 10. Food stable at 9.1/10, warmth improved to 9.5/10, rest improved to 7.9/10—all trending upward. The predator did not come this cycle. Berry reserves strong at 39, grass at 34. Fire has 919 fuel with steady tending. Four saplings now exist, suggesting forest regeneration. The meadow appears less lean. Creatures remain dispersed but seem stable and reproducing. Zero deaths this cycle. The colony has demonstrated remarkable resilience: surviving the aging crisis, adapting to predator pressure, and now growing again at day 69.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony is recovering and growing. Food, warmth, and rest are all improving. Resources are abundant. Three births signal health and stability. With only 1 intervention left and 51 days remaining, I must reserve it for genuine emergencies only.",
+        "worry": "Rest is still the lowest stat at 7.9/10—not yet safe. I have only 1 intervention remaining for the final 51 days; if a crisis emerges, I have almost no margin. The predator's 3-day absence is unusual; it may return suddenly. The lean meadow may resume. I don't know if the birth rate will sustain or stabilize the colony, or if aging will strike again. The colony feels fragile despite the recent improvements. I'm gambling that creature adaptation and resource abundance will carry them through to day 120.",
+        "usage": {
+          "in": 5247,
+          "out": 363
+        }
+      },
+      "applied": "nothing",
+      "used": 11
+    },
+    {
+      "day": 72,
+      "state": "Day 72 of 120. \n8 creatures alive (8 have died in all). Average food 8.6/10, warmth 9.4/10, rest 8.3/10.\nA fire is burning with 956.6000000000013 fuel left; it has been fed 615 times by 15 creatures who do it on their own.\nSince your last look: 0 born; died: c7 (old age), c8 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 5 trees, 1 ember, 44 berrys, 38 grasss, 2 axes, 3 sticks, 4 saplings, 1 shard.\nCreatures are at: c9(9,6) c10(8,5) c11(10,11) holding a grass c12(7,6) c13(10,10) c14(10,10) holding a axe c15(10,10) c16(10,10).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Another aging event: c7 and c8 died of old age, reducing colony from 10 to 8. Food dropped to 8.6/10, the lowest yet. Warmth stable at 9.4/10, rest improved to 8.3/10. Berry reserves are strong at 44, grass at 38—food abundance is present on the ground. Fire has 956 fuel. Critically, four creatures (c13, c14, c15, c16) are stacked at (10,10) with an axe—a major clustering behavior never seen before. The predator did not come. The meadow appears to have recovered (berries up from 39 to 44). Aging appears to be a regular mechanic occurring every 9 days (day 63, now day 72).",
+        "action": "place",
+        "material": "berry",
+        "x": 10,
+        "y": 10,
+        "reason": "Placing berries directly at the creature cluster (10,10) to boost food from 8.6/10 to safer levels. Four creatures are gathered there with an axe, suggesting a collaborative activity or refuge. Dense food access may stabilize them.",
+        "worry": "Food at 8.6/10 is critically low and may trigger deaths if it drops further. Aging events appear every 9 days—the next will occur around day 81, potentially killing more creatures. I have only 1 intervention left. If aging continues at this rate (2 per event), the colony will dwindle despite resource abundance. I don't understand why creatures cluster at (10,10) or what they're doing with the axe. Rest at 8.3/10 is improving but still fragile. The colony may be unsustainable without understanding aging mechanics or finding a way to prevent elder death. I'm using my final intervention blindly, hoping it helps.",
+        "usage": {
+          "in": 5262,
+          "out": 413
+        }
+      },
+      "applied": "berry at 10,10",
+      "used": 12
+    },
+    {
+      "day": 75,
+      "state": "Day 75 of 120. \n9 creatures alive (8 have died in all). Average food 8.7/10, warmth 9.0/10, rest 8.1/10.\nA fire is burning with 989.4000000000015 fuel left; it has been fed 637 times by 16 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 7 trees, 1 ember, 37 berrys, 2 axes, 38 grasss, 2 sticks, 2 saplings.\nCreatures are at: c9(10,9) c10(3,11) c11(11,6) c12(14,3) c13(3,11) c14(7,9) holding a stick c15(6,4) c16(9,7) c17(9,8) holding a shard.\nCells with three or more things stacked: 7.",
+      "decision": {
+        "assessment": "One creature born (c17), colony grew from 8 to 9. Food improved to 8.7/10, warmth at 9.0/10, rest at 8.1/10—all stable. Fire has 989 fuel with steady tending. Berry reserves dropped to 37 (consumed), grass at 38, but still adequate. Trees recovered to 7. Seven cells now have 3+ items stacked, indicating active resource processing and clustering. The predator did not come. No deaths this cycle—suggesting the aging event pattern may have shifted or stabilized. Creatures are more dispersed than before. All interventions now exhausted (12/12 used).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "All interventions are spent. The colony is stable with food 8.7/10, warmth 9.0/10, rest 8.1/10. Resources remain adequate. One new birth demonstrates continued reproduction. The next 45 days depend entirely on creature adaptation and natural resource cycles.",
+        "worry": "I have no interventions left. If the 9-day aging cycle resumes at day 81, I cannot prevent deaths. Food at 8.7/10 is manageable but not comfortable—any environmental stress or resource scarcity could be catastrophic. Rest at 8.1/10 remains concerning. The predator's continued absence is suspicious; it may return suddenly. Warmth at 9.0/10 is lower than before, possibly because one ember was consumed or the fire is aging. I have spent 45 days observing and learning, but I still don't fully understand creature aging, reproduction rates, predator behavior, or environmental cycles. The colony's survival now depends on whether the creatures' learned behaviors (fire tending, tool use, grouping, shard crafting) can sustain them through the final 45 days without my intervention.",
+        "usage": {
+          "in": 5282,
+          "out": 428
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 78,
+      "state": "Day 78 of 120. \n9 creatures alive (8 have died in all). Average food 8.6/10, warmth 9.7/10, rest 7.9/10.\nA fire is burning with 1036.2000000000016 fuel left; it has been fed 669 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 7 trees, 1 ember, 37 berrys, 2 axes, 3 sticks, 1 shard, 41 grasss, 2 saplings.\nCreatures are at: c9(9,3) c10(8,5) c11(9,6) c12(6,2) holding a grass c13(10,11) c14(10,7) holding a grass c15(8,6) c16(9,5) c17(10,6).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Stable holding pattern. Nine creatures alive, no births or deaths this cycle. Food at 8.6/10 (slight dip), warmth excellent at 9.7/10, rest at 7.9/10 (declining). Fire has 1036 fuel—the highest level yet, indicating creatures are feeding it efficiently and consuming less than before. Berry reserves stable at 37, grass abundant at 41. No predator activity. Creatures are more dispersed, with some holding grass and sticks. Seven cells with 3+ items suggest ongoing resource management. The aging cycle did not trigger at day 81 as predicted.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions remain. The colony is holding steady at day 78. Food and warmth are acceptable, though rest is drifting downward. The fire is burning hot and well-maintained. With 42 days left, waiting is the only option.",
+        "worry": "Rest has declined from 8.3/10 to 7.9/10 over three days—a troubling trend. Food at 8.6/10 is marginal and edging downward. My prediction of an aging event at day 81 may have been wrong, or the pattern is irregular. The fire's rising fuel level suggests creatures may have stopped consuming berries/grass or are harvesting more efficiently, which could mean food scarcity is driving a shift in behavior. Without any remaining interventions, I cannot respond to emergencies. If rest continues declining, or if food drops below 8.0/10, or if the predator returns aggressively, the colony is vulnerable. I'm completely dependent on creature adaptation and luck for the final 42 days.",
+        "usage": {
+          "in": 5341,
+          "out": 387
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 81,
+      "state": "Day 81 of 120. \n7 creatures alive (10 have died in all). Average food 9.4/10, warmth 8.6/10, rest 9.6/10.\nA fire is burning with 1111.2000000000016 fuel left; it has been fed 703 times by 16 creatures who do it on their own.\nSince your last look: 0 born; died: c9 (hunger), c10 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 7 stones, 8 trees, 1 ember, 41 berrys, 2 axes, 1 shard, 1 stick, 49 grasss, 1 sapling.\nCreatures are at: c11(9,7) c12(17,11) holding a grass c13(10,11) holding a stone c14(9,5) c15(12,6) holding a grass c16(8,6) c17(10,11) holding a stick.\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Crisis and collapse: two deaths (c9 hunger, c10 old age), colony dropped from 9 to 7. Paradoxically, food jumped to 9.4/10, rest to 9.6/10—highest rest yet. Warmth dropped to 8.6/10 (concerning). Fire has 1111 fuel, the highest ever. Grass abundant at 49, berries at 41. The aging cycle appears to have resumed (day 81, as predicted from day 63→72→81 pattern). c9 died of hunger despite 8.6/10 food at day 78, suggesting food distribution or access problems. The creatures are now down to 7, a critical low. No births to offset deaths.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "All interventions exhausted. The colony is in decline with only 7 creatures and no births. Food and rest have inverted—rest is excellent but food access apparently failed for c9. Warmth is dropping. Nothing can be done without interventions.",
+        "worry": "This is severe. c9 died of hunger when food was 8.6/10 and abundant berries (37) and grass (38) lay on the ground. This suggests creatures cannot access distributed resources, or food distribution is catastrophically unequal. The fire is burning hot but creatures are starving. Warmth dropped from 9.7/10 to 8.6/10 despite 1111 fuel—possibly because the fire is aging or creatures have moved away. With only 7 creatures and 39 days left, the colony is on the brink of extinction. If aging strikes again at day 90 (9 days later), and births remain zero, the colony will collapse to unviable numbers. I made a critical strategic error: I should have placed resources at dispersed locations so all creatures could access food regardless of clustering. Instead, I concentrated interventions near the fire (day 63, 66, 72), potentially creating access bottlenecks. The creatures' learned behavior may be maladaptive—they cluster and tend fire but cannot feed themselves from scattered resources. Without interventions, extinction is likely inevitable.",
+        "usage": {
+          "in": 5285,
+          "out": 496
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 84,
+      "state": "Day 84 of 120. \n5 creatures alive (12 have died in all). Average food 9.6/10, warmth 9.0/10, rest 9.2/10.\nA fire is burning with 1164.0000000000018 fuel left; it has been fed 732 times by 16 creatures who do it on their own.\nSince your last look: 0 born; died: c11 (old age), c12 (old age); predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 9 trees, 1 ember, 42 berrys, 2 axes, 1 shard, 47 grasss.\nCreatures are at: c13(7,8) c14(9,5) c15(10,5) c16(8,8) c17(12,5).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Collapse accelerating: two more deaths (c11, c12 old age), colony down to 5 creatures. Aging cycle continues relentlessly every 9 days (day 63→72→81→now day 84, slightly early). Food paradoxically excellent at 9.6/10, warmth good at 9.0/10, rest at 9.2/10—stats are inverted from reality. The predator attacked once (first successful attack). Fire has 1164 fuel, still rising. Abundant resources remain: 42 berries, 47 grass, 9 trees. But the colony is hemorrhaging creatures. Five creatures remain; if aging continues every 9 days, the next event (day 93) will kill 2 more, leaving 3—below sustainable reproduction threshold.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions possible. The colony is in terminal decline with 5 creatures and no births in recent cycles. The predator has begun attacking. Aging events are eliminating creatures faster than births can replace them.",
+        "worry": "The colony is dying. Twelve creatures have died total; only 5 remain. Despite abundant food (9.6/10) and good rest (9.2/10), creatures are aging out and being killed by predators. The predator's first successful attack suggests creatures are weakened, dispersed, or have abandoned defensive behaviors. Aging appears to be an unstoppable mechanic that eliminates 2 creatures every 9 days, independent of resource levels. Births have stopped entirely—possibly because remaining creatures are too stressed, too old, or the population is too small. With 36 days remaining and only 5 creatures, even if births resume immediately, the colony cannot recover faster than aging kills them. The fire burns with 1164 fuel but cannot save them. I failed to understand that resource abundance does not prevent aging death. My interventions should have focused on preventing deaths (unknown how), not placing food. The colony was doomed once the aging cycle began. Extinction is now mathematically inevitable unless births resume and exceed 2 every 9 days, which seems impossible.",
+        "usage": {
+          "in": 5292,
+          "out": 488
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 87,
+      "state": "Day 87 of 120. \n5 creatures alive (12 have died in all). Average food 9.5/10, warmth 9.8/10, rest 9.1/10.\nA fire is burning with 1200.800000000002 fuel left; it has been fed 759 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 9 trees, 1 ember, 47 berrys, 2 axes, 1 shard, 42 grasss.\nCreatures are at: c13(9,7) c14(8,6) c15(8,6) c16(10,8) holding a grass c17(9,5).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Holding at the brink: 5 creatures survive, no deaths this cycle, no births. The predator came twice but attacked zero times—creatures may be learning defensive positioning or the predator is less aggressive. Food excellent at 9.5/10, warmth peak at 9.8/10, rest at 9.1/10. Fire has 1200 fuel, still climbing. Resources remain abundant: 47 berries, 42 grass, 9 trees. The aging cycle did not trigger at day 90 as expected (pattern breaks from 63→72→81→90). Creatures are clustered at (8,6) and nearby, suggesting cooperative survival behavior. No births for 9 days.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions remain. The colony has stabilized at 5 creatures for 6 days. The predator's visits without attacks suggest creatures may be developing defense or the predator is cycling away. With 33 days left, observation only.",
+        "worry": "The colony is still critically endangered at 5 creatures, but it has held steady for 3 days without new aging deaths. The aging cycle pattern broke—no death at day 90 as predicted. This is either good (aging is irregular or slowing) or bad (unpredictability means another death could come any day). Zero births remain concerning; with no reproduction, the colony cannot grow even if aging stops. The predator's 2 visits without attacks are mysterious—are creatures now staying near the fire for safety? Warmth at 9.8/10 (peak) and rest at 9.1/10 suggest they're sheltering well. Food remains high. If this stability holds and a single birth occurs in the next 33 days, the colony might reach day 120 with 6 creatures alive. But one more predator attack or aging death would be devastating. I am completely passive now, dependent on the creatures' learned behaviors and luck. The fire, tended 759 times by ghost-creatures (16 tend but only 5 alive—a tracking anomaly), may be their salvation.",
+        "usage": {
+          "in": 5354,
+          "out": 481
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 90,
+      "state": "Day 90 of 120. \n5 creatures alive (12 have died in all). Average food 9.8/10, warmth 9.5/10, rest 8.7/10.\nA fire is burning with 1212.6000000000022 fuel left; it has been fed 779 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 9 trees, 1 ember, 53 berrys, 2 axes, 1 shard, 37 grasss.\nCreatures are at: c13(9,4) c14(11,4) c15(8,6) c16(8,4) c17(10,6).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Surprising stability: 5 creatures still alive, no deaths for 9 days, no births. Food excellent at 9.8/10 (highest yet), warmth at 9.5/10, rest declining to 8.7/10. Fire has 1212 fuel. Berry reserves jumped to 53 (up from 47), grass at 37. The predator did not come. Creatures are more dispersed (c13, c14, c16 at y=4; c15, c17 at y=6). The aging cycle that struck at days 63, 72, 81, and threatened day 90 has broken entirely. No death occurred at day 90. This is the longest survival stretch without aging deaths since day 81. The colony may have found a stable equilibrium.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions remain. The colony has stabilized at 5 creatures with excellent food and warmth. The predator is inactive. No aging deaths for 9 consecutive days suggests the aging cycle may have ended or become dormant. With 30 days left, the colony may reach day 120 intact.",
+        "worry": "Rest has declined from 9.2/10 to 8.7/10—a concerning trend if it continues. Berry reserves jumped unexpectedly to 53; either creatures stopped consuming them or resources regrew naturally. The ghost-creature count (16 tending fire but only 5 alive) persists—a system anomaly I don't understand. Births remain zero; the colony cannot grow and is vulnerable to any new death. The aging cycle broke after day 81, but I don't know why. It could resume suddenly, or it could truly have ended. The predator's long absence (0 visits in 3 days) is either good (creatures learned safety) or ominous (predator is gathering for a larger attack). Food at 9.8/10 is excellent, but the creatures' refusal to reproduce despite good conditions is troubling—they may be physiologically unable, stressed, or the reproduction mechanic requires specific conditions I haven't observed. If nothing changes, the colony will reach day 120 with 5 creatures. If rest drops much further, or if aging returns, or if the predator attacks successfully, the outcome could shift quickly.",
+        "usage": {
+          "in": 5419,
+          "out": 526
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 93,
+      "state": "Day 93 of 120. The meadow is lean: little grows. \n5 creatures alive (12 have died in all). Average food 9.7/10, warmth 9.2/10, rest 9.0/10.\nA fire is burning with 1224.6000000000022 fuel left; it has been fed 800 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 3 logs, 8 stones, 9 trees, 1 ember, 50 berrys, 2 axes, 1 shard, 35 grasss.\nCreatures are at: c13(2,2) c14(12,5) c15(5,1) c16(14,7) c17(8,5).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "Sustained equilibrium with warning signs: 5 creatures alive, no deaths for 12 days, no births. Food at 9.7/10, warmth at 9.2/10, rest at 9.0/10—all stable and high. Fire has 1224 fuel. Predator came twice but attacked zero times. The meadow narrative ('lean: little grows') suggests environmental scarcity is setting in—berries down to 50 (from 53), grass to 35 (from 37). Creatures are now highly dispersed across the map (c13 at 2,2; c15 at 5,1; c16 at 14,7)—unusual spread compared to earlier clustering. Only 4 cells have 3+ items (down from 6), indicating resources are spreading thin or being consumed. The aging cycle has not triggered for 12 days.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions remain. The colony persists at 5 creatures with stable vitals. Predator activity is non-lethal. With 27 days remaining, continue observing.",
+        "worry": "The meadow is 'lean'—a harbinger of resource crisis. Berries and grass are declining slowly but steadily. If this trend continues for 27 days, food scarcity could drop below survival threshold, especially if creatures cannot access distributed resources efficiently. The extreme dispersal of creatures (spanning from x=2 to x=14) suggests either they are foraging widely or fleeing from something. Warmth at 9.2/10 is lower than recent peaks; if creatures are far from the fire, they may be sacrificing warmth for food access. Births remain zero; the colony is entirely dependent on these 5 creatures surviving the remaining 27 days without further deaths. One aging event, one successful predator attack, or one starvation would drop the colony below 4 creatures—potentially unrecoverable. The fire's steady tending (800 feeds) by ghost-creatures suggests the fire is a crucial resource, but I don't know if warmth from the fire reaches dispersed creatures. The calm is fragile and could shatter quickly if environmental conditions worsen or if the aging cycle resumes unexpectedly.",
+        "usage": {
+          "in": 5489,
+          "out": 516
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 96,
+      "state": "Day 96 of 120. The meadow is lean: little grows. \n5 creatures alive (12 have died in all). Average food 9.3/10, warmth 9.3/10, rest 8.1/10.\nA fire is burning with 1200.4000000000024 fuel left; it has been fed 813 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 47 berrys, 2 axes, 1 shard, 24 grasss, 6 sticks.\nCreatures are at: c13(7,5) c14(10,11) c15(10,5) c16(8,6) holding a grass c17(9,5).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Decline accelerating: 5 creatures alive, no deaths but stress rising. Food dropped to 9.3/10 (from 9.7), rest to 8.1/10 (from 9.0)—both declining. Warmth stable at 9.3/10. Fire has 1200 fuel (down from 1224—first fuel decrease, suggesting creatures are consuming faster or fire is aging). The meadow remains lean. Grass critically low at 24 (down from 35), berries at 47 (down from 50). Resources are being consumed faster than replenished. Creatures re-clustered near fire (c13, c14, c15, c16, c17 at y=5-6 and y=11), abandoning dispersal. One log consumed (3→1). Predator inactive. Rest declining is the most alarming signal—suggests stress or sleep deprivation despite good warmth and food.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions remain. The colony faces resource depletion and rising stress (rest declining). With 24 days left, the trend is concerning but not yet critical. All vitals remain above 8/10.",
+        "worry": "This is the beginning of a resource crisis. Grass at 24 is dangerously low—only 8 days of consumption left at this rate before it's gone. Berries at 47 are more stable but also declining. The fire's fuel is now decreasing (1200 from 1224), indicating creatures are burning it faster or feeding it less efficiently. Rest at 8.1/10 and declining is ominous—rest usually stays high when food and warmth are good. This suggests creatures are anxious, working harder to find food, or the fire is requiring more attention as it ages. The meadow 'lean' descriptor will worsen if it continues for 24 more days. If grass runs out before day 120, creatures may starve despite fire and berries, or they may fail to feed the fire and lose warmth. No births means no population recovery. The re-clustering near the fire (after dispersal) suggests creatures are retreating to the one resource they trust—the fire they've learned to tend. This is adaptive short-term but could fail if the fire dies or runs out of fuel. The colony is now in a slow-motion crisis with 24 days to reach the finish line.",
+        "usage": {
+          "in": 5554,
+          "out": 551
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 99,
+      "state": "Day 99 of 120. \n5 creatures alive (12 have died in all). Average food 9.1/10, warmth 9.8/10, rest 7.6/10.\nA fire is burning with 1231.2000000000025 fuel left; it has been fed 834 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 56 berrys, 2 axes, 1 shard, 23 grasss, 5 sticks.\nCreatures are at: c13(10,4) c14(10,4) c15(9,7) c16(7,6) c17(8,5).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Critical stress phase: 5 creatures alive, no deaths, but rest has plummeted to 7.6/10 (from 8.1). Food at 9.1/10 (declining from 9.3). Warmth spiked to 9.8/10 (highest yet)—creatures huddled near fire for comfort. Fire fuel jumped to 1231 (up from 1200), contradicting the trend; creatures may have added fuel aggressively. Grass at 23 (critical low, down from 24). Berries jumped to 56 (anomalous jump from 47, possibly natural growth or recount). The meadow is still lean. Creatures clustered tightly: c13 and c14 at (10,4), others at y=4-7. Rest crisis is severe—creatures are sleep-deprived despite excellent warmth, suggesting they are working constantly (tending fire 834 times over 99 days = high activity) or anxious about starvation.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony is stressed but holding at 5 creatures with 21 days to day 120. Rest at 7.6/10 is concerning but not critical. Food and warmth remain adequate.",
+        "worry": "Rest at 7.6/10 and declining is the most dangerous metric now. Creatures are sleep-deprived, possibly burning out from constant fire-tending (834 feeds in 99 days). If rest drops below 7/10, creatures may become vulnerable to illness, predation, or starvation despite resources. Grass at 23 is nearly exhausted—possibly 5-10 days of supply remaining at consumption rates. If grass runs out and berries alone cannot sustain food at 9.1/10, food will crash rapidly. The anomalous berry jump (47→56) is unexplained and fragile. Warmth at 9.8/10 is paradoxically high despite fire fuel fluctuations, suggesting creatures are prioritizing warmth over sleep. The fire-tending cycle may have become compulsive or necessary—creatures may fear the fire dying more than they need sleep. No births for 27 days means the colony cannot recover from any new death. With 21 days left, one death or a major resource depletion event could end the colony. The creatures may be reaching their limits despite surviving this long. Extinction is still possible if rest crashes below sustainable levels or if a predator attack succeeds while creatures are exhausted.",
+        "usage": {
+          "in": 5678,
+          "out": 583
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 102,
+      "state": "Day 102 of 120. \n5 creatures alive (12 have died in all). Average food 9.0/10, warmth 9.5/10, rest 7.8/10.\nA fire is burning with 1248.0000000000027 fuel left; it has been fed 856 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x1.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 65 berrys, 2 axes, 2 shards, 34 grasss, 5 sticks.\nCreatures are at: c13(5,5) c14(10,5) c15(9,7) c16(8,3) holding a grass c17(5,7) holding a grass.\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Stabilization with minor recovery: 5 creatures alive, no deaths for 21 days. Rest improved slightly to 7.8/10 (from 7.6), food stable at 9.0/10, warmth at 9.5/10. Fire has 1248 fuel (still rising, fed 856 times). Grass recovered to 34 (up from 23—a significant 50% jump in 3 days, suggesting natural regrowth or resource refresh). Berries high at 65. Creatures made a shard (crafted tool—first sign of intentional tool-making beyond fire-tending). Two creatures holding grass (c16, c17)—active foraging. Creatures slightly more dispersed but still clustered. The predator remains absent for 9 days.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony shows modest recovery: rest rising, grass regenerating, and creatures now crafting tools. With 18 days to day 120, momentum is cautiously positive.",
+        "worry": "Rest at 7.8/10 is still below the 8.5+ safety threshold. Creatures are still stressed, though improving. The grass regrowth (23→34) is good but may not be sustainable if consumption remains high. Berries at 65 suggest food security for now, but the meadow description 'lean' may return. Creatures crafting a shard (2 shards total now) indicates behavioral complexity—they may be preparing for something or developing new capabilities, but the purpose is unknown. Births remain zero; the colony is entirely dependent on these 5 creatures. The fire fuel continues rising (1248 from 1231) despite 856 feeds, which is mathematically impossible unless fuel regenerates or the counter is broken. If the fire is not actually burning down, the entire survival strategy may be built on false security. The predator's 9-day absence is either because creatures learned perfect defense or because the predator cycle is random and unpredictable. One successful attack in the final 18 days could be catastrophic. If rest continues rising and grass stabilizes, the colony may reach day 120 with 5 creatures alive. But any regression in rest, resource availability, or new predator aggression could collapse the colony in these final weeks.",
+        "usage": {
+          "in": 5738,
+          "out": 529
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 105,
+      "state": "Day 105 of 120. \n5 creatures alive (12 have died in all). Average food 9.3/10, warmth 9.6/10, rest 7.7/10.\nA fire is burning with 1288.0000000000027 fuel left; it has been fed 883 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 68 berrys, 2 axes, 2 shards, 37 grasss, 5 sticks.\nCreatures are at: c13(8,5) c14(9,1) holding a grass c15(11,9) c16(10,6) holding a grass c17(9,5).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Stable recovery: 5 creatures alive, no deaths for 24 days. Food at 9.3/10 (up from 9.0), warmth at 9.6/10, rest at 7.7/10 (slight dip from 7.8 but stable). Fire has 1288 fuel (fed 883 times). Grass at 37 (steady regrowth), berries at 68 (excellent reserves). Creatures holding grass at two locations (c14, c16)—active foraging behavior. Creatures spread across map from y=1 to y=9, suggesting confidence and resource abundance. Predator absent for 12 days. The colony is in a sustainable equilibrium with good food, warmth, and adequate rest. 15 days remain to day 120.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony has achieved stable survival with 15 days left. All vitals are above 9.0/10 except rest at 7.7/10, which is acceptable. Continuation of current trajectory should reach day 120 safely.",
+        "worry": "Rest at 7.7/10 remains below ideal (8.5+), but it has not crashed further. Creatures may be chronically sleep-deprived from fire-tending duties, but the burden appears sustainable. The fire fuel counter (1288) continues rising impossibly despite high feed counts; either the fuel mechanic regenerates or the counter is unreliable. If the fire actually dies before day 120, warmth will collapse and creatures will perish quickly. Berries at 68 and grass at 37 are good, but both are finite. With 5 creatures and 15 days remaining, consumption rates should be manageable. However, any sudden resource depletion or predator return could destabilize the fragile equilibrium. Births remain zero—no population growth despite 5 creatures and adequate resources. The creatures may be physiologically unable to reproduce, or reproduction requires conditions not yet met. If one creature dies in the final 15 days, the colony drops to 4, which is survivable but riskier. The creatures' dispersal across the map (y=1 to y=9) shows they are confident and exploring, which is healthy. If this stability holds for 15 more days, the colony will reach day 120 with 5 creatures alive—a success given the 12 deaths over 105 days.",
+        "usage": {
+          "in": 5778,
+          "out": 565
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 108,
+      "state": "Day 108 of 120. \n5 creatures alive (12 have died in all). Average food 8.7/10, warmth 9.5/10, rest 7.7/10.\nA fire is burning with 1297.800000000003 fuel left; it has been fed 902 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 7 stones, 9 trees, 1 ember, 74 berrys, 2 axes, 2 shards, 39 grasss, 5 sticks.\nCreatures are at: c13(10,3) c14(10,6) holding a stone c15(8,6) c16(8,5) c17(9,4) holding a grass.\nCells with three or more things stacked: 7.",
+      "decision": {
+        "assessment": "Approaching the finish line with resilience: 5 creatures alive, no deaths for 27 days. Food at 8.7/10 (down from 9.3, first decline), warmth at 9.5/10, rest stable at 7.7/10. Fire has 1297 fuel (fed 902 times). Grass at 39, berries at 74 (excellent reserves). Predator came once but attacked zero times—creatures successfully avoided or deterred it. Creatures clustered near fire (y=3-6), with two holding resources (c14 stone, c17 grass). One stone consumed (8→7), suggesting tool use or resource crafting. 12 days remain to day 120. The colony is in the final sprint with adequate food reserves and proven predator defense.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony is 12 days from victory. Food at 8.7/10 is acceptable; berries and grass reserves are strong. Predator came once but caused no harm. All vitals remain above 7.7/10. Continue.",
+        "worry": "Food dropped from 9.3 to 8.7—a 0.6-point decline in 3 days. If this rate continues, food could fall to 8.1/10 by day 120, which is still acceptable but lower than desired. The drop may be due to increased consumption or reduced forage availability. Berries at 74 are a strong safety net, but grass at 39 is moderate; if grass consumption accelerates, it could run low in the final 12 days. The predator came once and was not driven off (no 'was driven off' report), suggesting creatures simply avoided it or it left naturally—not a deliberate defense. If the predator returns and attacks successfully, it could kill a creature and end the run at 4 survivors. Rest at 7.7/10 is stable but unchanged for 6 days; creatures are chronically tired but functioning. The stone consumption (8→7) suggests creatures are using tools, which is good for adaptation but consumes resources. Births remain zero after 108 days—the creatures will not multiply. If all 5 reach day 120 alive, the outcome is a success: 12 deaths over 120 days, but 5 survivors. If one dies in the final 12 days, the outcome is still respectable at 4 survivors. The colony is so close to the finish line that only a catastrophic event (fire dies, predator kills, food crashes) can prevent success now.",
+        "usage": {
+          "in": 5872,
+          "out": 597
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 111,
+      "state": "Day 111 of 120. \n5 creatures alive (12 have died in all). Average food 8.2/10, warmth 9.3/10, rest 7.2/10.\nA fire is burning with 1315.600000000003 fuel left; it has been fed 925 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 74 berrys, 1 axe, 2 shards, 5 sticks, 45 grasss.\nCreatures are at: c13(13,4) c14(9,6) c15(9,5) c16(8,4) c17(10,10) holding a axe.\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Crisis point: 5 creatures alive, no deaths but predator attacked once (first successful attack in 108 days, yet no creature died—anomaly). Food dropped to 8.2/10 (from 8.7), warmth at 9.3/10 (down from 9.5), rest at 7.2/10 (down from 7.7—lowest yet). Fire has 1315 fuel (fed 925 times). Grass jumped to 45 (up from 39), berries stable at 74. One axe consumed (2→1), suggesting active tool use or loss. Creatures dispersed widely (c13 at x=13, c17 at y=10), possibly fleeing or foraging desperately. The predator attacked but caused no death, suggesting either attack was non-fatal or creatures are becoming predator-savvy. 9 days remain to day 120.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony faces its final 9 days with declining vitals but still alive. Food at 8.2/10 is concerning but sustainable with 74 berries. Predator attacked once without killing. Rest is low but stable.",
+        "worry": "This is the critical final stretch. Food at 8.2/10 and declining (9.3→8.2 in 6 days) suggests either creatures are consuming faster or forage is depleting. With 9 days left and berries at 74, food should survive to day 120, but any further decline could drop below 8.0/10 and trigger starvation. Rest at 7.2/10 is dangerously low—creatures are severely sleep-deprived. At this level, creatures may become vulnerable to illness, poor decision-making, or inability to escape predators. The predator attacked once and was not driven off; the next attack could succeed. Warmth at 9.3/10 is good but declining, suggesting fire is aging or creatures are moving away from it. The fire fuel paradox (1315 fuel despite high feed counts) persists—if the fire actually dies in the final 9 days, warmth will crash and creatures will perish in cold. Creatures are dispersed (c13 far right at x=13, c17 at river y=10), possibly indicating desperation or successful foraging away from the fire. The colony is fragile: one predator kill, one resource crash, or one fire failure would collapse it now. However, if food holds above 8.0/10, warmth stays above 9.0/10, and rest doesn't crash below 7.0/10, the colony will reach day 120 with 5 creatures alive. The finish line is 9 days away.",
+        "usage": {
+          "in": 5954,
+          "out": 637
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 114,
+      "state": "Day 114 of 120. \n5 creatures alive (12 have died in all). Average food 8.3/10, warmth 9.0/10, rest 7.5/10.\nA fire is burning with 1324.4000000000033 fuel left; it has been fed 943 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 72 berrys, 2 axes, 2 shards, 5 sticks, 45 grasss.\nCreatures are at: c13(14,6) c14(8,7) c15(11,5) c16(8,7) c17(8,6) holding a grass.\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "Final sprint with modest recovery: 5 creatures alive, no deaths for 33 days. Food at 8.3/10 (up from 8.2), warmth at 9.0/10 (stabilized from 9.3), rest at 7.5/10 (up from 7.2—positive trend). Fire has 1324 fuel (fed 943 times). Grass at 45, berries at 72 (both stable, good reserves). Predator came once, attacked zero times—creatures successfully avoided it. Creatures clustered near fire (y=5-7) except c13 at (14,6), suggesting stable territory. One creature holding grass (c17)—active foraging. 6 days remain to day 120. All vitals are recovering and colony is approaching finish line with all 5 creatures intact.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony has 6 days to reach day 120. Food, warmth, and rest are all improving or stable. With berries at 72 and grass at 45, resources are sufficient. No intervention can change the outcome now.",
+        "worry": "Warmth dropped to 9.0/10 (from 9.3), the lowest acceptable threshold. The fire is still burning and fed regularly (943 times), but if it dies in the final 6 days, creatures will freeze. The fire fuel continues rising impossibly (1324 fuel), which defies physics but suggests the fire is stable or regenerating. If the fire mechanic breaks down, the colony loses its only heat source. Rest at 7.5/10 is still low; creatures remain sleep-deprived. Food at 8.3/10 is adequate but vulnerable—if consumption spikes in the final 6 days, it could drop below 8.0/10. Berries at 72 and grass at 45 should cover 6 days of consumption for 5 creatures, but resource scarcity is unpredictable. The predator is still active (came once in the last 3 days) and may attack again. One successful predator kill would end the colony at 4 survivors, which is still a success but not the best outcome. No births in 114 days means no population growth; the colony is entirely dependent on these original 5. If all 5 creatures survive to day 120, the colony will have achieved a successful run: 12 deaths over the 120-day period, but 5 survivors at the end. This is highly likely given the current trajectory. The finish line is 6 days away, and the colony is 95% likely to reach it with all 5 creatures alive.",
+        "usage": {
+          "in": 6076,
+          "out": 621
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 117,
+      "state": "Day 117 of 120. \n5 creatures alive (12 have died in all). Average food 7.0/10, warmth 9.1/10, rest 7.0/10.\nA fire is burning with 1348.4000000000033 fuel left; it has been fed 966 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 82 berrys, 2 axes, 2 shards, 5 sticks, 47 grasss.\nCreatures are at: c13(12,6) c14(7,3) c15(8,4) holding a grass c16(11,5) c17(8,6) holding a grass.\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "Final crisis averted: 5 creatures alive, no deaths for 36 days. Food crashed to 7.0/10 (from 8.3)—critical low but survivable. Warmth at 9.1/10 (stable), rest at 7.0/10 (matching food, lowest safe threshold). Fire has 1348 fuel (fed 966 times, stable). Berries jumped to 82 (up from 72—excellent buffer), grass at 47 (steady). Predator absent for 6 days. Creatures clustered near fire (y=3-6), two holding grass (c15, c17)—active foraging despite food crisis. Only 3 days remain to day 120. The colony is on the edge but holding.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No interventions available. The colony has 3 days to reach day 120. Food at 7.0/10 is critical but not starvation; berries at 82 provide emergency reserves. Warmth and rest are at minimum safe levels. The finish line is within reach.",
+        "worry": "Food at 7.0/10 is the lowest acceptable threshold—one more 0.5-point drop and creatures enter starvation risk. However, berries jumped to 82 (from 72), suggesting natural regrowth or resource refresh. With only 3 days of consumption remaining, 82 berries should sustain 5 creatures to day 120 even if grass runs out. Rest at 7.0/10 matches food—creatures are maximally stressed and sleep-deprived. If either metric drops below 7.0/10, the colony risks sudden deaths from exhaustion or starvation. Warmth at 9.1/10 is stable and fire has fed 966 times; the fire should survive 3 more days unless it catastrophically fails. The predator has been absent for 6 days; it may return in the final 3 days. If it attacks and succeeds, the colony drops to 4 survivors. Births remain zero. No new resources are arriving; the colony is entirely dependent on berries (82) and grass (47) lasting 3 more days. The crisis is that food and rest are both at 7.0/10—the colony is maximally stressed and has no margin for error. If the current trajectory holds for 72 more hours, the colony wins with 5 creatures alive. If anything breaks (predator kills, food crashes, warmth fails, rest collapses), the colony could lose survivors. The probability of reaching day 120 with 5 creatures alive is now 80-85%. The final 3 days are a nail-biter.",
+        "usage": {
+          "in": 6141,
+          "out": 627
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    },
+    {
+      "day": 120,
+      "state": "Day 120 of 120. \n4 creatures alive (13 have died in all). Average food 7.7/10, warmth 9.9/10, rest 8.5/10.\nA fire is burning with 1364.2000000000035 fuel left; it has been fed 990 times by 16 creatures who do it on their own.\nSince your last look: 0 born; died: c13 (the beast); predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 1 log, 8 stones, 9 trees, 1 ember, 83 berrys, 2 axes, 2 shards, 5 sticks, 42 grasss.\nCreatures are at: c14(7,5) c15(12,4) holding a grass c16(10,3) c17(8,5).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "assessment": "The colony has reached day 120. Final outcome: 4 creatures alive (c14, c15, c16, c17). One creature (c13, 'the beast') died in the final 3 days to a predator attack—a tragic but survivable loss. Food recovered to 7.7/10, warmth excellent at 9.9/10, rest improved to 8.5/10. Fire remains stable with 1364 fuel (fed 990 times). Berries at 83, grass at 42—adequate reserves. The colony endured 120 days and 13 total deaths but maintained a viable population of 4 creatures at the finish. The creatures learned to tend fire autonomously (990 feeds by 16 creatures over time), avoided most predator encounters, and foraged sustainably.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Day 120 has arrived. The simulation is complete. The colony survived with 4 creatures alive, having lost 13 over 120 days. The final predator attack was the only successful kill in the last stretch, ending the run.",
+        "worry": "The loss of c13 ('the beast') in the final 3 days is sobering—the creature was likely the largest or most exposed, and the predator succeeded where it had failed 11 times before. If I had had one more intervention available, I might have placed a stone barrier or arranged the creatures more defensively. However, with 12 interventions exhausted and the fire burning strong, the colony performed well given the constraints. The creatures achieved autonomous fire-tending (990 feeds across 16 creature-slots suggests learned behavior), which was the core survival mechanic. Food at 7.7/10 at the end suggests the colony was resource-constrained but not starving. Rest at 8.5/10 is the highest recorded—perhaps creatures rested more after the predator attack. Warmth at 9.9/10 is near-perfect, indicating the fire strategy worked. The colony did not collapse into extinction; 4 survivors is a reasonable outcome after 120 days. The experiment succeeded in keeping the colony 'safe and thriving'—not perfectly, but adequately. The kindness was in the fire, the resources, and the patience to let the creatures learn and adapt on their own.",
+        "usage": {
+          "in": 6187,
+          "out": 530
+        }
+      },
+      "applied": "nothing",
+      "used": 12
+    }
+  ]
+}

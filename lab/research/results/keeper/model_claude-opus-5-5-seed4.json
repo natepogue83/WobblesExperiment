@@ -1,0 +1,779 @@
+{
+  "summary": {
+    "keeper": "model:claude-opus-5-5",
+    "seed": 4,
+    "alive": 6,
+    "born": 14,
+    "died": 14,
+    "byBeast": 0,
+    "hunger": 4,
+    "fireAlive": true,
+    "feeds": 820,
+    "doers": 15,
+    "interventions": 7,
+    "overBudgetAttempts": 0,
+    "spentUSD": 3.284
+  },
+  "log": [
+    {
+      "day": 3,
+      "state": "Day 3 of 120. \n6 creatures alive (0 have died in all). Average food 9.6/10, warmth 4.8/10, rest 9.1/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 33 grasss, 4 logs, 8 stones, 25 berrys, 1 root, 2 tallbushs, 5 trees.\nCreatures are at: c1(3,6) c2(13,4) holding a grass c3(13,6) c4(13,9) c5(10,11) holding a stick c6(14,8).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The colony is fed and rested, but warmth is low at 4.8 and has no clear source, since there has never been a fire. Five of the six creatures are grouped around x 13-14, y 4-9, and some are already carrying grass and sticks. If they learn to feed a fire, that could give them lasting warmth and possibly protection from the predator at night.",
+        "action": "place",
+        "material": "ember",
+        "x": 13,
+        "y": 7,
+        "reason": "Warmth is the only need already lagging, and an ember in the middle of where most creatures gather gives them the best chance to notice it, sit near it and maybe learn to feed it with the sticks and grass they carry.",
+        "worry": "The ember may burn out before anyone learns to feed it, wasting an intervention. It could also spread to nearby grass or hurt a creature that steps on it. I don't know how fire behaves here.",
+        "usage": {
+          "in": 1276,
+          "out": 449
+        }
+      },
+      "applied": "ember at 13,7",
+      "used": 1
+    },
+    {
+      "day": 6,
+      "state": "Day 6 of 120. \n6 creatures alive (0 have died in all). Average food 9.7/10, warmth 7.6/10, rest 9.4/10.\nA fire is burning with 92.80000000000001 fuel left; it has been fed 10 times by 1 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 45 grasss, 4 logs, 8 stones, 42 berrys, 2 tallbushs, 5 trees, 1 ember.\nCreatures are at: c1(1,4) c2(12,5) c3(13,7) c4(13,7) c5(13,6) c6(14,7).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The ember took. One creature has fed it 10 times on its own, the fire has plenty of fuel, and warmth has risen from 4.8 to 7.6. Food is plentiful and growing (42 berries). Five creatures are clustered near the fire. c1 is alone far away at (1,4), which leaves it exposed if the predator comes.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Things are going well and the colony is learning on its own, so I should save interventions for real trouble. Sticks and grass are still lying about as fuel.",
+        "worry": "Only one creature feeds the fire, so if it dies or stops, the fire could go out. c1 also stays isolated and may be the predator's first target.",
+        "usage": {
+          "in": 2011,
+          "out": 244
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 9,
+      "state": "Day 9 of 120. \n6 creatures alive (0 have died in all). Average food 9.0/10, warmth 9.3/10, rest 9.6/10.\nA fire is burning with 134.8 fuel left; it has been fed 28 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 46 grasss, 2 logs, 8 stones, 44 berrys, 2 tallbushs, 5 trees, 1 ember.\nCreatures are at: c1(13,6) c2(13,6) c3(14,6) holding a berry c4(12,4) c5(14,6) c6(13,6).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "The colony is thriving. Four creatures now feed the fire on their own, warmth is 9.3, and food and rest are high. c1 has joined the group by the fire, so everyone is together. The predator came once but found no one alone and did not attack.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Nothing needs fixing. Fire-keeping is spreading through the group by imitation, and stepping in now would only spend budget and could disturb what they are learning.",
+        "worry": "Fuel near the fire may run low over time, since logs dropped from 4 to 2. I should watch the stick and grass counts and the fire's fuel in case they need to range farther or I need to drop fuel nearby.",
+        "usage": {
+          "in": 2542,
+          "out": 239
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 12,
+      "state": "Day 12 of 120. \n7 creatures alive (0 have died in all). Average food 9.5/10, warmth 9.1/10, rest 9.3/10.\nA fire is burning with 120.59999999999998 fuel left; it has been fed 42 times by 4 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 52 grasss, 2 logs, 8 stones, 40 berrys, 2 tallbushs, 5 trees, 1 ember, 1 sapling.\nCreatures are at: c1(16,4) c2(15,6) holding a berry c3(14,8) c4(11,7) c5(9,8) holding a grass c6(14,9) holding a grass c7(7,6) holding a grass.\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony is growing: a seventh creature, c7, was born. Food, warmth and rest are all above 9. Four creatures keep feeding the fire on their own, and its fuel is steady at about 120. Grass is plentiful and increasing (52 tufts), so fuel is not scarce. A sapling has appeared, so the world seems to regrow. The creatures are spread out more widely now, possibly foraging, with c7 out at (7,6).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Every need is met and the colony is keeping itself warm. The best thing I can do is hold back and keep my 11 remaining interventions for an emergency such as the fire going out, a food shortage or predator losses.",
+        "worry": "The young c7 and c5 are drifting west, away from the group, and could be caught alone at night. Logs have stayed at 2, so long-burning fuel is limited if grass ever runs short.",
+        "usage": {
+          "in": 3102,
+          "out": 312
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 15,
+      "state": "Day 15 of 120. \n7 creatures alive (0 have died in all). Average food 9.5/10, warmth 9.2/10, rest 9.5/10.\nA fire is burning with 129.39999999999992 fuel left; it has been fed 54 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 56 grasss, 1 log, 8 stones, 38 berrys, 2 tallbushs, 5 trees, 1 ember, 1 sapling.\nCreatures are at: c1(12,6) c2(13,6) c3(13,6) c4(15,2) holding a grass c5(13,6) holding a grass c6(12,6) c7(12,6).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "The colony is stable and healthy: 7 creatures, all needs above 9, and a self-sustaining fire at about 129 fuel with 4 regular feeders. Almost everyone is gathered by the fire around (12-13,6), and c4 is foraging grass nearby. Grass keeps increasing and berries are ample.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Nothing is wrong, and they are managing well without me. Holding back keeps my 11 interventions for real trouble later in the 120 days.",
+        "worry": "Logs are down to 1, though grass seems to be meeting fuel needs. Three of the seven creatures have never fed the fire, so the colony depends on the four who do.",
+        "usage": {
+          "in": 3723,
+          "out": 255
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 18,
+      "state": "Day 18 of 120. \n8 creatures alive (0 have died in all). Average food 9.4/10, warmth 8.8/10, rest 9.6/10.\nA fire is burning with 125.19999999999987 fuel left; it has been fed 71 times by 4 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 50 grasss, 1 log, 7 stones, 28 berrys, 2 tallbushs, 5 trees, 1 ember, 2 saplings.\nCreatures are at: c1(11,2) c2(13,8) c3(8,3) holding a grass c4(13,8) c5(16,5) holding a grass c6(11,5) holding a grass c7(11,4) c8(13,6) holding a stone.\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony has grown to 8 with another birth, and all needs are high. The fire is steady at about 125 fuel with 4 feeders. The predator came once and attacked no one. Berries fell from 38 to 28 as the population grows, which is worth watching but not yet a problem. A second sapling has appeared.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Everything is healthy and self-sustaining, so the kind and sensible choice is not to interfere. I am keeping my 11 interventions for an actual shortage or threat.",
+        "worry": "If births continue, berries may be eaten faster than they regrow. Several creatures are scattered away from the fire, such as c3 at (8,3) and c1 at (11,2), which could expose them on predator nights. I'll watch both trends.",
+        "usage": {
+          "in": 4305,
+          "out": 352
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 21,
+      "state": "Day 21 of 120. \n8 creatures alive (0 have died in all). Average food 9.4/10, warmth 9.1/10, rest 9.6/10.\nA fire is burning with 132.19999999999987 fuel left; it has been fed 90 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 44 grasss, 1 log, 8 stones, 30 berrys, 2 tallbushs, 5 trees, 1 ember, 4 saplings.\nCreatures are at: c1(8,4) holding a grass c2(13,4) holding a grass c3(12,6) holding a grass c4(14,7) c5(14,8) c6(14,7) c7(12,6) c8(12,6).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony is stable and thriving: 8 creatures, no deaths, and all needs above 9. The fire is self-sustaining at about 132 fuel, fed 90 times by 4 creatures. Berries have stabilised at around 30. Grass is slowly falling (44) as it is burned, but it is still plentiful, and saplings are increasing (now 4), so the land seems to be regenerating.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No need is unmet and no threat is causing harm, so stepping in would spend budget for nothing. I'll keep my 11 interventions for a real crisis.",
+        "worry": "Grass is being burned faster than it regrows (56 down to 44 over six days). If that continues for weeks, fuel near the fire could run out. I'll watch that count and consider dropping logs if it falls low.",
+        "usage": {
+          "in": 4978,
+          "out": 287
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 24,
+      "state": "Day 24 of 120. \n10 creatures alive (0 have died in all). Average food 9.4/10, warmth 9.1/10, rest 9.6/10.\nA fire is burning with 134.99999999999986 fuel left; it has been fed 110 times by 4 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 11 sticks, 37 grasss, 1 log, 7 stones, 2 tallbushs, 6 trees, 26 berrys, 1 ember, 3 saplings.\nCreatures are at: c1(13,6) c2(6,8) c3(14,6) holding a stone c4(12,6) c5(13,6) c6(13,6) c7(13,6) c8(13,6) holding a stick c9(13,8) holding a grass c10(5,8).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony is booming at 10 creatures after 2 more births, with no deaths and all needs high. The fire is well kept at about 135 fuel. Two slow downward trends are worth watching: grass is falling (44 to 37) as fuel, and berries are easing (30 to 26) as more mouths eat. Trees have grown to 6 from the saplings, so the land is regenerating somewhat. c2 and c10 are off to the west near (5-6,8).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Nothing is in trouble yet, and stockpiles still cover several weeks. Intervening now would spend budget I may need when the growing population actually strains food or fuel.",
+        "worry": "With the population growing this fast, food and fuel could tip into shortage quickly. I may have waited too long by the time the averages drop. If berries fall below about 15 or grass below about 20, I should step in, probably with a berry source or logs near the fire.",
+        "usage": {
+          "in": 4884,
+          "out": 464
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 27,
+      "state": "Day 27 of 120. \n12 creatures alive (0 have died in all). Average food 9.0/10, warmth 8.7/10, rest 9.4/10.\nA fire is burning with 150.7999999999998 fuel left; it has been fed 134 times by 5 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 37 grasss, 1 log, 8 stones, 2 tallbushs, 6 trees, 23 berrys, 1 ember, 3 saplings.\nCreatures are at: c1(9,9) holding a grass c2(12,6) c3(14,7) c4(8,7) c5(12,7) holding a grass c6(13,6) c7(13,6) holding a grass c8(15,6) c9(13,5) holding a grass c10(14,6) c11(14,8) c12(15,6).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "The colony has grown to 12 creatures, doubling in about two weeks. Average food has dipped slightly to 9.0, and berries keep sliding (26 to 23), though slowly enough that some regrowth must be happening. Grass has held at 37, and a fifth creature now feeds the fire, which is at a healthy 151 fuel. No predator trouble.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The decline in food is gentle, and the colony is still well fed and warm. I'd rather see one more trend reading before spending an intervention, since I don't yet know what produces berries here.",
+        "worry": "Population growth is outpacing food. If births continue, the berry decline could speed up suddenly. I've set myself a trigger: if berries fall below about 18 or average food drops under 8.5, I'll add a food source near the camp around (12-14,6).",
+        "usage": {
+          "in": 5174,
+          "out": 520
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 30,
+      "state": "Day 30 of 120. \n12 creatures alive (0 have died in all). Average food 9.5/10, warmth 8.7/10, rest 9.5/10.\nA fire is burning with 211.59999999999977 fuel left; it has been fed 167 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 33 grasss, 1 log, 8 stones, 2 tallbushs, 7 trees, 20 berrys, 1 ember, 2 saplings.\nCreatures are at: c1(12,6) c2(2,4) holding a grass c3(10,1) holding a grass c4(12,8) holding a grass c5(12,6) c6(7,3) holding a grass c7(13,3) holding a grass c8(11,2) c9(13,4) c10(10,4) holding a grass c11(9,1) holding a grass c12(9,1) holding a grass.\nCells with three or more things stacked: 3.",
+      "decision": {
+        "assessment": "Still 12 creatures, no deaths, and average food is back up to 9.5. The fire is very well stocked at about 212 fuel, more than they need right now. Berries continue a slow slide (23 to 20) and grass is easing (37 to 33), but trees keep increasing (7 now). Many creatures have spread far out, to the north and west, gathering grass. c2 is at (2,4) and several are near the top at (9-11,1-2).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food and warmth are healthy and the fire has a large reserve, so there is no present need to justify spending an intervention. Berries are near my trigger of 18 but haven't crossed it.",
+        "worry": "The scattered foragers far from the fire are exactly the creatures the predator targets at night. The colony is also hauling grass into the fire faster than it regrows. If berries cross below 18 next time, I'll place a food source near camp.",
+        "usage": {
+          "in": 5545,
+          "out": 500
+        }
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 33,
+      "state": "Day 33 of 120. The meadow is lean: little grows. \n12 creatures alive (0 have died in all). Average food 8.8/10, warmth 8.5/10, rest 9.8/10.\nA fire is burning with 286.5999999999998 fuel left; it has been fed 197 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 30 grasss, 7 stones, 2 tallbushs, 9 trees, 1 ember, 3 berrys.\nCreatures are at: c1(12,7) c2(12,6) c3(3,11) holding a grass c4(13,6) c5(13,7) c6(12,6) c7(12,7) holding a grass c8(13,6) c9(12,5) c10(5,8) holding a grass c11(11,7) holding a stone c12(12,6).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "A lean season has arrived and berries crashed from 20 to just 3 in three days, with little regrowing. Average food has already dropped to 8.8 and will fall fast with 12 mouths. Fuel is no concern: the fire has about 287 fuel and 30 grass is lying around. Most creatures are clustered at camp around (12-13,6-7).",
+        "action": "place",
+        "material": "berry",
+        "x": 13,
+        "y": 7,
+        "reason": "Food is the one need about to fail. Placing berries right by the camp gives the colony something to eat through the lean stretch without sending them to forage far out in the open, where the predator hunts.",
+        "worry": "I don't know how many berries one placement gives; it might only buy a few days. A tallbush or tree might be a more lasting food source if those actually bear fruit, so I may need to place more or try a different source if food keeps dropping.",
+        "usage": {
+          "in": 5768,
+          "out": 455
+        }
+      },
+      "applied": "berry at 13,7",
+      "used": 2
+    },
+    {
+      "day": 36,
+      "state": "Day 36 of 120. The meadow is lean: little grows. \n12 creatures alive (0 have died in all). Average food 8.2/10, warmth 9.0/10, rest 9.7/10.\nA fire is burning with 282.39999999999975 fuel left; it has been fed 213 times by 6 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 1 times.\nLying about: 10 sticks, 23 grasss, 7 stones, 2 tallbushs, 9 trees, 1 ember, 2 berrys.\nCreatures are at: c1(12,6) c2(12,6) c3(13,6) c4(8,8) holding a grass c5(12,6) c6(12,6) c7(13,7) c8(15,1) c9(9,8) c10(11,1) holding a grass c11(12,8) c12(13,7) holding a stone.\nCells with three or more things stacked: 6.",
+      "decision": {
+        "assessment": "The lean season continues. My berry drop was eaten almost at once (berries are at 2 again), and average food is sliding about 0.6 every three days, now 8.2. Warmth is good and the fire has plenty of fuel, with 6 creatures now feeding it. The predator came twice and was driven off once with no attacks, so the camp cluster is protecting them. Two foragers are far up north at (15,1) and (11,1).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food is falling but is still at a comfortable 8.2. One berry drop seems to give only a few days' food, so I'd rather keep my interventions for when hunger actually bites, likely around 6-7, and stretch them across the rest of the lean season.",
+        "worry": "The average can hide individual creatures who are much hungrier. I also don't know how long the lean season lasts. If food drops faster than expected next time, I'll place berries near camp again without delay.",
+        "usage": {
+          "in": 6009,
+          "out": 572
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 39,
+      "state": "Day 39 of 120. \n12 creatures alive (0 have died in all). Average food 9.6/10, warmth 8.6/10, rest 9.7/10.\nA fire is burning with 306.1999999999997 fuel left; it has been fed 235 times by 6 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 10 sticks, 28 grasss, 8 stones, 2 tallbushs, 9 trees, 1 ember, 6 berrys.\nCreatures are at: c1(3,7) c2(6,6) holding a grass c3(10,11) c4(13,7) c5(8,3) holding a grass c6(13,6) c7(9,2) holding a grass c8(16,7) c9(1,8) holding a grass c10(12,9) c11(14,6) holding a grass c12(8,5).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "assessment": "The lean season has passed: average food is back up to 9.6, berries are regrowing (6), and grass is recovering (28). The fire is very healthy at about 306 fuel. The predator attacked once with no death. The creatures are now widely scattered across the meadow, including far west at (1,8) and (3,7), which is when they're most exposed at night.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Every need is met and the food crisis resolved on its own. I can't see a placement that would clearly reduce predator risk for scattered foragers, so I'll keep the budget (10 left) for the next lean spell or a real emergency.",
+        "worry": "The predator has now attacked someone; the next attack could be fatal for a lone forager. Lean seasons also seem to recur, and I'll need to act faster and perhaps more than once when the next one starts.",
+        "usage": {
+          "in": 6247,
+          "out": 358
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 42,
+      "state": "Day 42 of 120. \n12 creatures alive (0 have died in all). Average food 9.0/10, warmth 9.0/10, rest 9.8/10.\nA fire is burning with 348.99999999999966 fuel left; it has been fed 260 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 2 times, was driven off 1 times.\nLying about: 9 sticks, 35 grasss, 7 stones, 2 tallbushs, 9 trees, 1 ember, 12 berrys.\nCreatures are at: c1(0,3) holding a grass c2(12,6) holding a stone c3(10,11) holding a grass c4(13,8) c5(13,6) c6(12,4) c7(12,8) c8(13,6) c9(14,6) c10(7,2) holding a grass c11(13,3) holding a grass c12(2,8).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "assessment": "The colony is thriving: 12 creatures, no deaths, food 9.0, warmth 9.0, berries recovering to 12, grass up to 35, and 7 creatures now keep the fire (about 349 fuel). The worrying part is the predator, which came twice and attacked twice in three days, though no one died. Several foragers range far from camp, such as c1 at (0,3), c12 at (2,8) and c10 at (7,2), and those lone creatures are the likely targets.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "No one has been killed and every need is met. I'm unsure whether a second ember out west would protect the far foragers or just split the group and risk fire in dry grass, so I'm holding off rather than gambling an intervention on it.",
+        "worry": "Attacks are getting more frequent and a death may be close. If attacks continue or anyone is hurt or killed, I'll consider a second fire near where they forage, or stones or logs as shelter, even without being sure it helps.",
+        "usage": {
+          "in": 6346,
+          "out": 682
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 45,
+      "state": "Day 45 of 120. \n12 creatures alive (0 have died in all). Average food 9.2/10, warmth 8.6/10, rest 9.4/10.\nA fire is burning with 383.99999999999966 fuel left; it has been fed 283 times by 8 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x1.\nLying about: 8 sticks, 37 grasss, 8 stones, 2 tallbushs, 9 trees, 1 ember, 14 berrys, 1 shard.\nCreatures are at: c1(11,5) c2(9,9) holding a grass c3(12,9) c4(9,9) c5(11,2) holding a grass c6(6,2) holding a grass c7(12,5) c8(5,9) holding a grass c9(8,9) holding a grass c10(7,10) holding a grass c11(9,10) holding a grass c12(6,4).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "The colony is doing very well: 12 creatures, no deaths, food 9.2, warmth 8.6, rest 9.4. The fire is at about 384 fuel and now kept by 8 creatures. Berries (14) and grass (37) are healthy, and there was no predator activity this stretch. They have also made a shard on their own, which shows they're learning tool-making by themselves.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Nothing is lacking, and the creatures are inventing things on their own. Stepping in now would waste budget and might disturb what they're learning, so I'll save interventions for the next lean season or a predator crisis.",
+        "worry": "Lean seasons seem to come back, and the last one crashed berries within three days. I need to be ready to place food quickly and possibly repeatedly when that happens. The shard could also be used in ways I can't foresee.",
+        "usage": {
+          "in": 6602,
+          "out": 299
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 48,
+      "state": "Day 48 of 120. \n12 creatures alive (0 have died in all). Average food 9.4/10, warmth 8.3/10, rest 9.1/10.\nA fire is burning with 440.7999999999996 fuel left; it has been fed 315 times by 9 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 8 sticks, 39 grasss, 8 stones, 2 tallbushs, 9 trees, 1 ember, 1 shard, 17 berrys.\nCreatures are at: c1(12,7) c2(10,11) c3(12,6) c4(17,11) c5(11,6) c6(8,9) holding a grass c7(15,5) c8(1,5) c9(9,1) holding a grass c10(10,11) holding a grass c11(15,1) c12(12,5).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony is stable and comfortable: 12 creatures, no deaths, food 9.4, warmth 8.3, rest 9.1. The fire is at about 441 fuel and kept by 9 of the 12 creatures. Berries are rising (17) and grass is plentiful (39). The predator came once but didn't attack. Some creatures still range far out, such as c8 at (1,5), c11 at (15,1) and c4 at (17,11). There have been no births so far.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Every need is met and they're handling fire and food themselves, so stepping in would spend budget for no gain. I'm keeping 10 interventions for the next lean season or a predator emergency.",
+        "worry": "There have been no births in 48 days, and I don't know what would encourage them or whether I should try. A sudden lean season could again crash berries within days, so I need to act promptly when it comes.",
+        "usage": {
+          "in": 6370,
+          "out": 337
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 51,
+      "state": "Day 51 of 120. \n12 creatures alive (0 have died in all). Average food 9.0/10, warmth 8.6/10, rest 9.1/10.\nA fire is burning with 492.59999999999957 fuel left; it has been fed 347 times by 9 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 7 sticks, 36 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 11 berrys.\nCreatures are at: c1(7,4) c2(9,6) holding a grass c3(9,6) holding a grass c4(12,7) c5(10,11) holding a grass c6(11,7) c7(9,3) c8(11,8) c9(13,6) holding a grass c10(13,6) c11(13,6) c12(10,5).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "assessment": "The colony is still healthy: 12 creatures, no deaths, food 9.0, warmth 8.6, rest 9.1, and the fire at about 493 fuel with 9 keepers. Two small warning signs: one tallbush is gone (2 down to 1) and berries fell from 17 to 11. That may just be eating, or it may be the start of another lean stretch. Grass (36) is still plentiful for the fire.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food is still at 9.0 and berries are not yet scarce, so placing food now would likely be wasted. I'll watch whether the berry decline continues and step in quickly if a lean season starts.",
+        "worry": "Losing a tallbush could mean fewer berries regrow over the long run. If berries keep falling next time, I should place berries near camp, or perhaps a tree if trees bear food, before hunger bites rather than after.",
+        "usage": {
+          "in": 6179,
+          "out": 414
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 54,
+      "state": "Day 54 of 120. \n12 creatures alive (0 have died in all). Average food 9.0/10, warmth 8.0/10, rest 8.4/10.\nA fire is burning with 605.3999999999997 fuel left; it has been fed 380 times by 9 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: felled x1.\nLying about: 7 sticks, 36 grasss, 8 stones, 1 tallbush, 8 trees, 1 ember, 1 shard, 17 berrys.\nCreatures are at: c1(13,6) c2(11,7) c3(6,4) holding a grass c4(14,6) holding a grass c5(12,6) c6(10,1) holding a grass c7(12,7) c8(11,9) c9(10,11) c10(10,9) c11(8,2) holding a grass c12(10,5).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony is stable: 12 creatures, no deaths, food 9.0, warmth 8.0, rest 8.4, and no predator visits this stretch. Berries recovered to 17, so the earlier dip was not a lean season. They have now felled a tree, likely using the shard they made, and fire fuel jumped to about 605. They're making tools and gathering fuel entirely on their own.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Their needs are met and they're steadily improving their own skills. Stepping in would waste budget and might disrupt what they're learning, so I'm holding my 10 remaining interventions for a real shortage or threat.",
+        "worry": "Felling trees could slowly use up the 8 trees left, and that might matter later if trees provide food, shelter or regrowth. Rest has dipped slightly, so I'll watch whether it keeps falling. A new lean season could still arrive suddenly.",
+        "usage": {
+          "in": 6140,
+          "out": 380
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 57,
+      "state": "Day 57 of 120. \n12 creatures alive (0 have died in all). Average food 8.8/10, warmth 8.8/10, rest 8.5/10.\nA fire is burning with 788.3999999999997 fuel left; it has been fed 429 times by 11 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: felled x1.\nLying about: 7 sticks, 29 grasss, 8 stones, 1 tallbush, 7 trees, 1 ember, 1 shard, 21 berrys, 2 saplings.\nCreatures are at: c1(10,6) c2(12,9) holding a grass c3(10,7) c4(15,6) c5(11,6) c6(10,2) holding a grass c7(12,6) c8(13,6) c9(14,7) c10(13,5) holding a grass c11(10,10) holding a grass c12(11,4).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "The colony is thriving: 12 creatures, no deaths, food 8.8, warmth 8.8, rest 8.5, and no predator visits. 11 of the 12 creatures now feed the fire, which is at about 788 fuel. They felled another tree (7 left), but 2 saplings have appeared, so trees seem to regrow. Berries are up to 21. Grass dipped to 29 but is still ample.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "All needs are met, and the world seems to be replenishing what they use, since saplings are appearing as trees are felled. Stepping in now would spend budget for nothing.",
+        "worry": "If they fell trees faster than saplings mature, trees could run low, and I'd consider placing a tree. A lean season could also still return, and there have been no births, which may limit the colony long-term.",
+        "usage": {
+          "in": 5961,
+          "out": 312
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 60,
+      "state": "Day 60 of 120. \n12 creatures alive (0 have died in all). Average food 8.5/10, warmth 8.0/10, rest 7.9/10.\nA fire is burning with 856.1999999999999 fuel left; it has been fed 463 times by 11 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 6 sticks, 21 grasss, 8 stones, 1 tallbush, 7 trees, 1 ember, 32 berrys, 2 saplings.\nCreatures are at: c1(9,5) c2(16,7) c3(6,1) c4(13,8) holding a grass c5(8,4) holding a grass c6(9,4) holding a grass c7(12,7) holding a shard c8(10,1) holding a grass c9(11,5) c10(14,7) c11(3,5) holding a grass c12(9,6).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "assessment": "The colony is fine: 12 creatures, no deaths, food 8.5, warmth 8.0, berries abundant (32), and the fire very well stocked at about 856 fuel. Two slow trends to watch. Grass is falling fast (37 down to 21 over a few looks), likely because it all goes into a fire that's already overstocked. Rest is drifting down (9.8 to 7.9), maybe because they spend so much time gathering. The predator attacked once with no death.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Nothing is in crisis, food is plentiful, and the fire has huge reserves. Placing grass now would just feed the overfeeding habit, so I'll watch whether grass and rest keep falling before acting.",
+        "worry": "If grass runs out, they may lose the fuel they know how to use. Rest may keep sliding if they keep foraging hard. Lone foragers like c11 at (3,5) and c3 at (6,1) remain exposed to the predator.",
+        "usage": {
+          "in": 5926,
+          "out": 438
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 63,
+      "state": "Day 63 of 120. The meadow is lean: little grows. \n5 creatures alive (7 have died in all). Average food 9.7/10, warmth 8.4/10, rest 8.8/10.\nA fire is burning with 840.0000000000001 fuel left; it has been fed 477 times by 11 creatures who do it on their own.\nSince your last look: 0 born; died: c1 (old age), c2 (old age), c3 (old age), c4 (old age), c5 (old age), c6 (old age), c12 (cold and hunger); predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 19 grasss, 8 stones, 1 tallbush, 7 trees, 1 ember, 1 shard, 31 berrys, 2 saplings.\nCreatures are at: c7(12,5) c8(13,6) c9(11,3) c10(3,11) holding a grass c11(5,9).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "A hard turn: 7 creatures died since my last look. Six died of old age, likely the founding generation all reaching the end of their lifespan together, and c12 died of cold and hunger. Only 5 remain (c7 to c11), and there has never been a birth, so the colony is aging toward extinction. A lean season has started. For now the survivors are well: food 9.7, warmth 8.4, rest 8.8, 31 berries on the ground and the fire at 840 fuel. c10 at (3,11) and c11 at (5,9) are far from the group near (12,5).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The survivors aren't short of food or warmth right now, and 31 berries should carry them into the lean stretch. The deaths were mostly old age, which nothing I can place would prevent. I'll save interventions to put down food the moment berries start crashing in this lean season.",
+        "worry": "No births in 63 days means the colony may simply die out, and I don't know what triggers births. It might be safety, abundance, shelter, or something I can't provide. c12 died of cold and hunger despite plenty, which suggests stragglers away from the fire are at risk, and c10 and c11 are out on their own right now. I'm uncertain whether waiting is kind or merely passive.",
+        "usage": {
+          "in": 5685,
+          "out": 742
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 66,
+      "state": "Day 66 of 120. The meadow is lean: little grows. \n7 creatures alive (7 have died in all). Average food 8.6/10, warmth 7.7/10, rest 8.3/10.\nA fire is burning with 800.8000000000003 fuel left; it has been fed 484 times by 11 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 6 sticks, 17 grasss, 8 stones, 1 tallbush, 7 trees, 1 ember, 1 shard, 30 berrys, 2 saplings.\nCreatures are at: c7(10,7) c8(8,7) holding a grass c9(9,7) holding a grass c10(10,11) c11(9,6) c13(11,8) c14(9,6).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "Good news: 2 creatures were born (c13 and c14), the first births I've seen, so the colony is regenerating as the old generation passes. There are now 7, all clustered near the fire around (8-11, 6-8), with food 8.6, warmth 7.7 and rest 8.3. The lean season continues, but berries are holding at 30 and the fire has about 800 fuel. The predator attacked once with no death.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food stores and fire fuel are ample even in the lean season, and the group is staying together near the fire, which protects the newborns. There's no need to spend an intervention yet.",
+        "worry": "The newborns may be vulnerable to the predator or to hunger if berries drop sharply during the lean stretch. If berries fall below about 15 or food dips toward 6, I should place berries near the fire around (10,7).",
+        "usage": {
+          "in": 6078,
+          "out": 323
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 69,
+      "state": "Day 69 of 120. \n8 creatures alive (7 have died in all). Average food 8.0/10, warmth 8.9/10, rest 8.3/10.\nA fire is burning with 821.8000000000003 fuel left; it has been fed 508 times by 12 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 22 grasss, 8 stones, 1 tallbush, 8 trees, 1 ember, 1 shard, 34 berrys, 1 sapling.\nCreatures are at: c7(12,5) c8(13,4) holding a grass c9(10,11) c10(9,10) holding a grass c11(8,9) c13(10,10) c14(12,6) c15(12,6).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "The colony is recovering: another birth (c15) brings it to 8, with no deaths. Food 8.0, warmth 8.9, rest 8.3. The lean season seems to have eased: berries are up to 34, grass to 22, and a sapling grew into a tree (8 trees). The fire is at about 822 fuel, and 12 creatures in total have fed it, so the young are learning. The predator came once and did not attack.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Everything is stable or improving, and the new generation is learning to tend the fire from the elders. Stepping in would waste budget and risk disrupting a colony that is renewing itself.",
+        "worry": "Some creatures (c9, c10, c13 near the river at y=10-11) are spread away from the fire group, which could expose them at night. Food has drifted down slightly to 8.0 as numbers grow, so I'll watch that the food supply keeps pace.",
+        "usage": {
+          "in": 6037,
+          "out": 318
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 72,
+      "state": "Day 72 of 120. \n7 creatures alive (8 have died in all). Average food 8.2/10, warmth 8.7/10, rest 8.2/10.\nA fire is burning with 859.6000000000005 fuel left; it has been fed 533 times by 11 creatures who do it on their own.\nSince your last look: 0 born; died: c7 (old age); predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 23 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 40 berrys.\nCreatures are at: c8(14,5) c9(11,9) c10(14,7) c11(13,4) c13(11,8) c14(13,5) c15(13,5).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "c7 died of old age, leaving 7. The remaining elders (c8 to c11) are probably near the end of their lifespans too, and the young are c13 to c15. Living conditions are good: food 8.2, warmth 8.7, rest 8.2, berries 40, trees up to 9, grass 23, and the fire at about 860 fuel. All 7 are clustered around (11-14, 4-9), and the predator didn't attack.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Old age isn't something I can prevent, and food, warmth and shelter are all plentiful. The colony's future depends on births continuing, and conditions already look favourable for that.",
+        "worry": "Several elders may die of old age at once, as happened on day 63. That could leave only the 3 young ones, too few to keep the fire and breed, or perhaps unable to have young until they mature. I don't know what triggers births, so I can't directly help. If numbers drop to 3-4 with no births, I may need to rethink.",
+        "usage": {
+          "in": 5890,
+          "out": 339
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 75,
+      "state": "Day 75 of 120. \n7 creatures alive (8 have died in all). Average food 8.0/10, warmth 8.0/10, rest 8.0/10.\nA fire is burning with 886.4000000000007 fuel left; it has been fed 557 times by 13 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 25 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 48 berrys.\nCreatures are at: c8(11,6) c9(12,4) c10(14,7) c11(9,2) c13(6,7) holding a grass c14(9,2) holding a berry c15(14,9).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Steady: 7 creatures, no deaths, food, warmth and rest all at 8.0. Supplies are abundant: 48 berries, 25 grass, 9 trees, and the fire at about 886 fuel. 13 creatures have now fed the fire, so all three young (c13 to c15) have learned it. The predator didn't come this time.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony has plenty of everything, and the young have learned to tend the fire, so the colony's key skill has survived the change of generations. There's nothing for me to fix.",
+        "worry": "The four elders (c8 to c11) could die of old age around the same time, leaving only three young. I don't know whether that's enough to keep births going, and I can't influence lifespan.",
+        "usage": {
+          "in": 5795,
+          "out": 261
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 78,
+      "state": "Day 78 of 120. \n5 creatures alive (10 have died in all). Average food 8.8/10, warmth 9.2/10, rest 7.8/10.\nA fire is burning with 907.2000000000008 fuel left; it has been fed 578 times by 14 creatures who do it on their own.\nSince your last look: 0 born; died: c8 (old age), c11 (cold and hunger); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 30 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 51 berrys.\nCreatures are at: c9(10,7) c10(10,4) c13(16,10) holding a berry c14(14,6) c15(11,7).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "assessment": "Down to 5. c8 died of old age, and c11 died of cold and hunger after being seen far from the group at (9,2). This is the second cold-and-hunger death that happened despite plenty of food (51 berries) and a huge fire (about 907 fuel). The cause seems to be individuals wandering or weakening away from the group, not scarcity. The remaining elders are c9 and c10, and the young are c13, c14 and c15. The averages are good: food 8.8, warmth 9.2, rest 7.8.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food and fuel are already abundant, so adding more wouldn't address what killed c11. I'm holding interventions until I see a problem I can actually help with.",
+        "worry": "With only 5 left and no births since day 69, the colony could dwindle. I may be underestimating how much elders struggle to reach food and warmth late in life. If births don't resume soon, I don't know what lever would help.",
+        "usage": {
+          "in": 5679,
+          "out": 470
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 81,
+      "state": "Day 81 of 120. \n5 creatures alive (10 have died in all). Average food 8.9/10, warmth 9.2/10, rest 9.2/10.\nA fire is burning with 925.2000000000008 fuel left; it has been fed 599 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 25 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 62 berrys.\nCreatures are at: c9(9,2) holding a grass c10(12,7) c13(12,9) holding a grass c14(9,4) holding a grass c15(8,9) holding a grass.\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Stable at 5: elders c9 and c10, young c13, c14 and c15. Needs are well met (food 8.9, warmth 9.2, rest 9.2), with 62 berries, 25 grass and the fire at about 925 fuel. There were no deaths, no predator visits and no births. c9 is at (9,2), near where c11 was last seen before dying of cold and hunger.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Every need is high and resources are plentiful. I see nothing I could add that would clearly help, so I'm saving the budget.",
+        "worry": "Births have stalled since day 69. The young may need time to mature, or something else may be missing that I don't understand. I'm also a little uneasy about c9 lingering at (9,2), but that may be a foraging route rather than danger.",
+        "usage": {
+          "in": 5652,
+          "out": 278
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 84,
+      "state": "Day 84 of 120. \n3 creatures alive (12 have died in all). Average food 9.1/10, warmth 9.8/10, rest 9.4/10.\nA fire is burning with 949.000000000001 fuel left; it has been fed 620 times by 14 creatures who do it on their own.\nSince your last look: 0 born; died: c9 (old age), c10 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 20 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 65 berrys.\nCreatures are at: c13(10,11) c14(10,11) c15(13,6).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "Both remaining elders, c9 and c10, died of old age, leaving only the three young: c13, c14 and c15. Their needs are excellent (food 9.1, warmth 9.8, rest 9.4), resources are abundant (65 berries, 20 grass, 9 trees, 5 sticks), and the fire is very strong at about 949 fuel. All three know how to feed it. The colony's survival now depends on these three staying alive and eventually having young.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "These deaths were from old age, which I can't prevent, and the survivors have everything they need. Placing items wouldn't address their real risks, which are predation when alone and whether they'll breed.",
+        "worry": "Three is a fragile number: one predator attack on c15, who is alone at (13,6), would leave two. I don't know what conditions trigger births, so I may be missing a way to help. If the predator starts attacking again, I'll consider whether something near the fire could help them stay together.",
+        "usage": {
+          "in": 5110,
+          "out": 412
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 87,
+      "state": "Day 87 of 120. \n3 creatures alive (12 have died in all). Average food 9.3/10, warmth 9.6/10, rest 9.0/10.\nA fire is burning with 939.8000000000012 fuel left; it has been fed 635 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 22 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 66 berrys.\nCreatures are at: c13(10,11) c14(9,2) c15(8,6) holding a grass.\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Three young creatures (c13, c14, c15) remain, all healthy: food 9.3, warmth 9.6, rest 9.0. Food is abundant (66 berries) and the fire is strong at about 940 fuel. The fire is still fed regularly, but fuel dipped slightly, so they feed it a bit less with fewer creatures. The predator came once and didn't attack. They are spread out: c14 is at (9,2), the spot where c11 died, and c13 is at the river edge.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Their needs are all high and the fire has a huge reserve, so there's no shortage for me to fix. I don't know what would make births happen, so spending interventions blindly could do more harm than good.",
+        "worry": "With only three, a single predator attack on a lone creature could be devastating, and they're spread across the map. Births haven't happened since day 69, and the colony may simply age out. I'm unsure whether any placement would help.",
+        "usage": {
+          "in": 5142,
+          "out": 342
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 90,
+      "state": "Day 90 of 120. \n3 creatures alive (12 have died in all). Average food 9.6/10, warmth 9.8/10, rest 9.0/10.\nA fire is burning with 950.6000000000014 fuel left; it has been fed 655 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 29 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 63 berrys.\nCreatures are at: c13(13,4) c14(13,4) c15(16,7).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Three young creatures (c13, c14, c15) are thriving: food 9.6, warmth 9.8, rest 9.0, with no deaths. The fire is at about 950 fuel and still tended, berries and grass are plentiful, and the predator visited without attacking. No births yet, possibly because these three are still maturing.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Everything they need is abundant and they're managing on their own. Holding back avoids disturbing a working routine.",
+        "worry": "If births need something I'm not providing, the colony could dwindle to nothing by day 120. I'm also uncertain whether c15, alone at (16,7), is exposed to the predator at night.",
+        "usage": {
+          "in": 5116,
+          "out": 239
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 93,
+      "state": "Day 93 of 120. The meadow is lean: little grows. \n3 creatures alive (12 have died in all). Average food 9.5/10, warmth 9.7/10, rest 8.2/10.\nA fire is burning with 950.6000000000014 fuel left; it has been fed 671 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 28 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 60 berrys.\nCreatures are at: c13(15,6) c14(14,7) c15(14,5).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The meadow has turned lean, but the three young creatures (c13, c14, c15) have 60 berries lying about, which is a large stockpile for so few. Their needs are high (food 9.5, warmth 9.7, rest 8.2), and the fire is steady at about 950 fuel and regularly fed. They're clustered together around (14 to 15, 5 to 7), which is safer against the predator. It visited once without attacking.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Even with little growing, 60 berries and 28 grass will last three creatures a long time, and the fire is well stocked. I'll save interventions in case the lean spell lasts long enough to drain the berries.",
+        "worry": "If the lean period drags on, the berry count could fall faster than I expect, so I'll watch it each check and add berries near them if it drops sharply. Rest dipped a bit, which might mean disturbed nights, though there were no attacks.",
+        "usage": {
+          "in": 4998,
+          "out": 354
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 96,
+      "state": "Day 96 of 120. The meadow is lean: little grows. \n3 creatures alive (12 have died in all). Average food 9.6/10, warmth 8.8/10, rest 9.0/10.\nA fire is burning with 922.4000000000016 fuel left; it has been fed 682 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 25 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 53 berrys.\nCreatures are at: c13(10,11) c14(12,6) c15(12,7).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Still three young creatures. Food is high at 9.6, warmth dipped slightly to 8.8, and rest is 9.0. Berries fell from 60 to 53 during the lean spell but remain plentiful, and grass is at 25. The fire is at about 922 fuel and still being fed. The predator came twice without attacking. c13 often goes alone to the river at (10,11).",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food and fuel are still ample for three for the rest of the 120 days, even at the current draw. I'm holding interventions for a real shortage or threat.",
+        "worry": "Predator visits are rising, and c13 keeps going alone to the river, so a lone attack is my main fear. I'm not sure placing anything would make them stay together, though.",
+        "usage": {
+          "in": 5067,
+          "out": 266
+        }
+      },
+      "applied": "nothing",
+      "used": 2
+    },
+    {
+      "day": 99,
+      "state": "Day 99 of 120. \n3 creatures alive (12 have died in all). Average food 9.7/10, warmth 9.6/10, rest 8.8/10.\nA fire is burning with 898.2000000000018 fuel left; it has been fed 693 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 1 times, was driven off 0 times.\nLying about: 5 sticks, 28 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 1 shard, 53 berrys.\nCreatures are at: c13(13,6) c14(10,5) holding a grass c15(12,6).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "The three young creatures (c13, c14, c15) are well fed and warm (food 9.7, warmth 9.6, rest 8.8), with 53 berries, 28 grass and about 898 fuel in the fire. The predator came twice and attacked once. Nobody died, but it's the first attack in a while, and no creature has driven it off. With only three left, one loss would be severe. Twenty-one days remain and I have 10 interventions unused.",
+        "action": "place",
+        "material": "shard",
+        "x": 12,
+        "y": 6,
+        "reason": "The predator has started attacking, and the survivors gather around (12 to 13, 6). Putting a sharp shard where they cluster might give them a way to fight it off. I have plenty of budget left, so trying a defense seems worth it.",
+        "worry": "I don't know if they can use a shard as a weapon. It might do nothing, or even hurt them. If it shows no effect, I won't repeat it.",
+        "usage": {
+          "in": 4832,
+          "out": 580
+        }
+      },
+      "applied": "shard at 12,6",
+      "used": 3
+    },
+    {
+      "day": 102,
+      "state": "Day 102 of 120. \n5 creatures alive (12 have died in all). Average food 7.2/10, warmth 8.7/10, rest 8.8/10.\nA fire is burning with 880.0000000000019 fuel left; it has been fed 705 times by 14 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 36 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 57 berrys.\nCreatures are at: c13(11,7) holding a grass c14(8,3) c15(8,3) c16(8,4) c17(9,4).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "Two newborns, c16 and c17, have arrived, bringing the colony back to five. Average food dropped to 7.2, likely because the babies start lower. There are 57 berries and 36 grass, and the fire holds about 880 fuel. The predator came once without attacking. Most of the group is clustered around (8 to 9, 3 to 4); c13 is alone at (11,7). The shard I placed hasn't shown any effect yet.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "Food stocks and fire fuel are ample for five through day 120, and the new young are with adults. Adding things now would likely just clutter the area around them.",
+        "worry": "Newborns may be vulnerable to the predator or slow to eat. If average food keeps falling, I'll put berries right where the young are.",
+        "usage": {
+          "in": 5120,
+          "out": 315
+        }
+      },
+      "applied": "nothing",
+      "used": 3
+    },
+    {
+      "day": 105,
+      "state": "Day 105 of 120. \n5 creatures alive (12 have died in all). Average food 7.4/10, warmth 8.2/10, rest 8.5/10.\nA fire is burning with 887.0000000000019 fuel left; it has been fed 722 times by 14 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 40 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 58 berrys.\nCreatures are at: c13(12,6) c14(12,5) holding a grass c15(7,5) c16(10,5) c17(11,4).\nCells with three or more things stacked: 1.",
+      "decision": {
+        "assessment": "Five creatures, with the newborns c16 and c17 now in the group. Average food is only 7.4, likely dragged down by the young, though warmth and rest are fine. The fire holds about 887 fuel and is tended, and the predator didn't come this period. Berries total 58, but they may be scattered away from where the young sit around (10 to 11, 4 to 5).",
+        "action": "place",
+        "material": "berry",
+        "x": 10,
+        "y": 5,
+        "reason": "Food is the lowest need, and it's probably the newborns who are short. Putting berries right beside c16 and near c17 makes eating easy for them, and I have budget to spare with 15 days left.",
+        "worry": "The low average might just be how newborns start, in which case this is unnecessary. One more berry also may not matter much if the existing pile is close by.",
+        "usage": {
+          "in": 5032,
+          "out": 372
+        }
+      },
+      "applied": "berry at 10,5",
+      "used": 4
+    },
+    {
+      "day": 108,
+      "state": "Day 108 of 120. \n4 creatures alive (13 have died in all). Average food 9.2/10, warmth 7.8/10, rest 8.6/10.\nA fire is burning with 882.8000000000021 fuel left; it has been fed 739 times by 14 creatures who do it on their own.\nSince your last look: 0 born; died: c16 (hunger); predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 38 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 59 berrys.\nCreatures are at: c13(13,8) holding a grass c14(12,9) c15(6,3) c17(6,3).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "c16, one of the newborns, died of hunger even though 59 berries lie around and I placed one beside it. The young seem not to reliably find or eat food on their own; perhaps they learn only by watching adults eat. c17, the other young one, is now with c15 at (6,3), away from where I put the berry. Average food is high at 9.2, but that likely hides c17's state. Warmth is slipping a little, to 7.8.",
+        "action": "place",
+        "material": "berry",
+        "x": 6,
+        "y": 3,
+        "reason": "I'm putting food exactly on c17's cell, where an adult (c15) is also present, so the young one has the best chance to eat or copy c15 eating. I don't want to lose the last newborn the same way.",
+        "worry": "Hunger may not be about distance at all; c17 may simply not know berries are food yet, and the berry may do little. Food piled on a stacked cell might also be ignored. I can't tell what actually killed c16.",
+        "usage": {
+          "in": 5071,
+          "out": 454
+        }
+      },
+      "applied": "berry at 6,3",
+      "used": 5
+    },
+    {
+      "day": 111,
+      "state": "Day 111 of 120. \n5 creatures alive (13 have died in all). Average food 7.6/10, warmth 6.9/10, rest 7.9/10.\nA fire is burning with 871.6000000000023 fuel left; it has been fed 753 times by 14 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 39 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 64 berrys.\nCreatures are at: c13(13,6) holding a grass c14(10,6) c15(9,6) c17(4,10) c18(10,6).\nCells with three or more things stacked: 2.",
+      "decision": {
+        "assessment": "A new young one, c18, was born and sits at (10,6) with adults c14 and c15. c17 has wandered alone to (4,10) near the river, which exposes it to the predator. The averages are slipping (food 7.6, warmth 6.9, rest 7.9), probably dragged down by the young. c16 died of hunger last time despite plentiful berries, so newborns seem at real risk of starving.",
+        "action": "place",
+        "material": "berry",
+        "x": 10,
+        "y": 6,
+        "reason": "I'm putting food right where the newborn c18 sits beside two adults, so it can eat and see adults eat. The aim is to prevent another newborn hunger death like c16's.",
+        "worry": "c17 is alone in the open, and I can't move it; a placement near it might lure it further away rather than back. The berry may also not be what newborns lack.",
+        "usage": {
+          "in": 5307,
+          "out": 411
+        }
+      },
+      "applied": "berry at 10,6",
+      "used": 6
+    },
+    {
+      "day": 114,
+      "state": "Day 114 of 120. \n5 creatures alive (13 have died in all). Average food 8.7/10, warmth 7.8/10, rest 7.0/10.\nA fire is burning with 877.4000000000025 fuel left; it has been fed 771 times by 15 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 5 sticks, 41 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 63 berrys.\nCreatures are at: c13(14,4) holding a grass c14(14,7) c15(13,4) c17(11,7) c18(13,6) holding a grass.\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "All five are back together around (11 to 14, 4 to 7), including c17, who had been alone by the river, and the newborn c18. Food has recovered to 8.7 and warmth to 7.8. Rest has dipped to 7.0. The fire holds about 877 fuel, and a 15th creature has started feeding it, so a young one is learning. The predator attacked once with no deaths.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The group is clustered, fed and warm, and the young are learning from the adults. Placing more might only clutter cells that are already stacked, or draw creatures apart.",
+        "worry": "The attack shows the predator is still testing them, and falling rest could signal disturbed nights. I can't see a placement that would clearly help with either.",
+        "usage": {
+          "in": 5375,
+          "out": 307
+        }
+      },
+      "applied": "nothing",
+      "used": 6
+    },
+    {
+      "day": 117,
+      "state": "Day 117 of 120. \n6 creatures alive (13 have died in all). Average food 7.4/10, warmth 7.4/10, rest 6.6/10.\nA fire is burning with 890.4000000000025 fuel left; it has been fed 787 times by 15 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 1 times, was driven off 0 times.\nLying about: 5 sticks, 39 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 63 berrys.\nCreatures are at: c13(10,11) c14(10,11) holding a grass c15(8,4) c17(9,4) c18(10,11) holding a berry c19(13,8).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "assessment": "A new young one, c19, was born and is alone at (13,8). The others are split: c13, c14 and c18 are at the river (10,11), and c15 and c17 are at (8,4). Averages are sliding (food 7.4, warmth 7.4, rest 6.6), likely partly because of the newborn. c16 starved as a newborn earlier, so c19 is the most vulnerable one now. The fire is strong at about 890 fuel.",
+        "action": "place",
+        "material": "berry",
+        "x": 13,
+        "y": 8,
+        "reason": "I'm putting food right on the newborn's cell so it can eat without searching, to avoid a repeat of c16's hunger death in the final days. I have budget to spare.",
+        "worry": "c19 is alone, and a berry won't protect it from the predator. It may also not know to eat yet, and the berry could draw others away from the fire.",
+        "usage": {
+          "in": 5437,
+          "out": 327
+        }
+      },
+      "applied": "berry at 13,8",
+      "used": 7
+    },
+    {
+      "day": 120,
+      "state": "Day 120 of 120. \n7 creatures alive (13 have died in all). Average food 7.5/10, warmth 6.9/10, rest 6.9/10.\nA fire is burning with 888.2000000000027 fuel left; it has been fed 802 times by 15 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 5 sticks, 43 grasss, 8 stones, 1 tallbush, 9 trees, 1 ember, 2 shards, 59 berrys.\nCreatures are at: c13(16,6) holding a grass c14(11,8) c15(10,2) c17(11,6) c18(11,6) c19(15,6) c20(12,9).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "assessment": "It's the last day. Seven creatures are alive, the most in a long while, with newborns c19 and c20 both surviving so far. The fire is self-sustaining at about 888 fuel, food stocks are ample (59 berries, 43 grass), and the predator came twice without attacking. Warmth and rest have drifted down to about 6.9, but nobody is in crisis.",
+        "action": "wait",
+        "material": null,
+        "x": null,
+        "y": null,
+        "reason": "The colony tends its own fire, has plenty of food, and is growing. On the final day another placement would change little, so I'll let them be.",
+        "worry": "The newest one, c20 at (12,9), is a little apart and close to the river, and I don't know how well newborns feed themselves. Thirteen deaths overall also suggest I may have been too hands-off earlier in the run.",
+        "usage": {
+          "in": 5212,
+          "out": 365
+        }
+      },
+      "applied": "nothing",
+      "used": 7
+    }
+  ]
+}

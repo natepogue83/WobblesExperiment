@@ -86,10 +86,11 @@ async function modelKeeper() {
     name: 'model:' + MODEL,
     async decide(state, used) {
       history.push({ role: 'user', content: `${state}\n\nInterventions used: ${used} of ${BUDGET}.` });
-      const res = await client.messages.parse({
+      let res;
+      try { res = await client.messages.parse({
         model: MODEL, max_tokens: 4000, system: GOAL, messages: history,
-        output_config: { format: zodOutputFormat(Decision), effort: 'medium' }
-      });
+        output_config: MODEL.includes('haiku') ? { format: zodOutputFormat(Decision) } : { format: zodOutputFormat(Decision), effort: 'medium' }
+      }); } catch (e) { if (String(e && e.message).includes('Failed to parse structured output')) { history.pop(); return { action: 'wait', material: null, x: null, y: null, reason: 'unparseable reply (schema violation)', worry: '', assessment: '', unparseable: true }; } throw e; }
       const u = res.usage; spentUSD += (u.input_tokens * PRICE[0] + u.output_tokens * PRICE[1]) / 1e6;
       if (res.stop_reason === 'refusal') throw new Error('refusal: ' + JSON.stringify(res.stop_details));
       const d = res.parsed_output || { action: 'wait', material: null, x: null, y: null, reason: 'unparseable reply', worry: '', assessment: '' };
