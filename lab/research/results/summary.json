@@ -1,0 +1,240 @@
+{
+  "h1": {
+    "spread": 32,
+    "kept": 28,
+    "isolatedLearned": 0,
+    "n": 64,
+    "spreadCI": {
+      "mean": 0.5,
+      "lo": 0.375,
+      "hi": 0.625,
+      "n": 64
+    }
+  },
+  "h2": {
+    "culture": 33,
+    "foundersGone": 64,
+    "n": 64,
+    "cultureCI": {
+      "mean": 0.515625,
+      "lo": 0.390625,
+      "hi": 0.640625,
+      "n": 64
+    }
+  },
+  "h3": {
+    "control": {
+      "n": 64,
+      "extinct": 1,
+      "dCaution": {
+        "mean": -0.004548012456527361,
+        "lo": -0.03852205043600881,
+        "hi": 0.02989672660944553,
+        "n": 63
+      },
+      "dBrawn": {
+        "mean": -0.00635038679949757,
+        "lo": -0.03214038685921261,
+        "hi": 0.01984839535660324,
+        "n": 63
+      },
+      "born": {
+        "mean": 16.765625,
+        "lo": 15.953125,
+        "hi": 17.484375,
+        "n": 64
+      },
+      "byBeast": 0,
+      "hunger": 36,
+      "fireAlive": 33,
+      "attacks": 0,
+      "droveOff": 0,
+      "shards": 527,
+      "felled": 316,
+      "joined": 325,
+      "mechanism": {
+        "individuals": 1350,
+        "rhoCautionOffspring": {
+          "mean": -0.008941191181579473,
+          "lo": -0.06090811548614474,
+          "hi": 0.04518115914698908,
+          "n": 1350
+        },
+        "cautiousN": 449,
+        "boldN": 469,
+        "cautiousOffspring": 1.599109131403118,
+        "boldOffspring": 1.607675906183369,
+        "cautiousFlee": 0,
+        "boldFlee": 0,
+        "cautiousRestClosed": 0.29607821920681143,
+        "boldRestClosed": 0.1638902733262124,
+        "cautiousEat": 0.17147140302738448,
+        "boldEat": 0.1915966549769024
+      }
+    },
+    "predator": {
+      "n": 64,
+      "extinct": 10,
+      "dCaution": {
+        "mean": 0.017174981742706527,
+        "lo": -0.019105768103240252,
+        "hi": 0.05311822573023466,
+        "n": 54
+      },
+      "dBrawn": {
+        "mean": 0.0015989202573311395,
+        "lo": -0.022773763538865753,
+        "hi": 0.026515127726250184,
+        "n": 54
+      },
+      "born": {
+        "mean": 16.53125,
+        "lo": 15.296875,
+        "hi": 17.734375,
+        "n": 64
+      },
+      "byBeast": 36,
+      "hunger": 300,
+      "fireAlive": 31,
+      "attacks": 450,
+      "droveOff": 183,
+      "shards": 503,
+      "felled": 326,
+      "joined": 261,
+      "mechanism": {
+        "individuals": 1225,
+        "rhoCautionOffspring": {
+          "mean": 0.019925345064798417,
+          "lo": -0.036425631308729105,
+          "hi": 0.07568883688104845,
+          "n": 1225
+        },
+        "cautiousN": 425,
+        "boldN": 411,
+        "cautiousOffspring": 1.748235294117647,
+        "boldOffspring": 1.6204379562043796,
+        "cautiousFlee": 0.03412306327455509,
+        "boldFlee": 0.013807718240165887,
+        "cautiousRestClosed": 0.20324150325682516,
+        "boldRestClosed": 0.11146463145219612,
+        "cautiousEat": 0.1413148187791148,
+        "boldEat": 0.13708178216944197
+      }
+    },
+    "targeted": {
+      "n": 64,
+      "extinct": 7,
+      "dCaution": {
+        "mean": -0.0014922212208586698,
+        "lo": -0.034741314460548574,
+        "hi": 0.031003666859948917,
+        "n": 57
+      },
+      "dBrawn": {
+        "mean": 0.005021035585020003,
+        "lo": -0.02089353979762066,
+        "hi": 0.030559161053929633,
+        "n": 57
+      },
+      "born": {
+        "mean": 15.734375,
+        "lo": 14.578125,
+        "hi": 16.8125,
+        "n": 64
+      },
+      "byBeast": 2,
+      "hunger": 54,
+      "fireAlive": 37,
+      "attacks": 97,
+      "droveOff": 265,
+      "shards": 713,
+      "felled": 455,
+      "joined": 441,
+      "mechanism": {
+        "individuals": 1296,
+        "rhoCautionOffspring": {
+          "mean": 0.012478450535826373,
+          "lo": -0.04213535065456394,
+          "hi": 0.06981217470738652,
+          "n": 1296
+        },
+        "cautiousN": 403,
+        "boldN": 467,
+        "cautiousOffspring": 1.553349875930521,
+        "boldOffspring": 1.537473233404711,
+        "cautiousFlee": 0.03821797179504858,
+        "boldFlee": 0.018576803162424663,
+        "cautiousRestClosed": 0.26446853860114344,
+        "boldRestClosed": 0.1520159965785389,
+        "cautiousEat": 0.16273295380229177,
+        "boldEat": 0.16515600170976116
+      }
+    },
+    "predMinusControl": {
+      "mean": 0.02172299419923389,
+      "lo": -0.028527992012790056,
+      "hi": 0.06985281169554583,
+      "n": 117
+    },
+    "targetedMinusControl": {
+      "mean": 0.0030557912356686907,
+      "lo": -0.04402707535939148,
+      "hi": 0.05031394336635465,
+      "n": 120
+    }
+  },
+  "ablations": {
+    "baseline": {
+      "n": 64,
+      "extinct": 0,
+      "fireAlive": 36,
+      "alive": {
+        "mean": 11.796875,
+        "lo": 11.59375,
+        "hi": 11.953125,
+        "n": 64
+      },
+      "hunger": 96,
+      "shards": 246
+    },
+    "noWatch": {
+      "n": 64,
+      "extinct": 0,
+      "fireAlive": 6,
+      "alive": {
+        "mean": 9.46875,
+        "lo": 8.890625,
+        "hi": 10,
+        "n": 64
+      },
+      "hunger": 587,
+      "shards": 222
+    },
+    "wipeDaily": {
+      "n": 64,
+      "extinct": 0,
+      "fireAlive": 0,
+      "alive": {
+        "mean": 6.046875,
+        "lo": 5.4375,
+        "hi": 6.640625,
+        "n": 64
+      },
+      "hunger": 202,
+      "shards": 72
+    },
+    "noBreed": {
+      "n": 64,
+      "extinct": 0,
+      "fireAlive": 33,
+      "alive": {
+        "mean": 5.34375,
+        "lo": 5.09375,
+        "hi": 5.5625,
+        "n": 64
+      },
+      "hunger": 38,
+      "shards": 229
+    }
+  }
+}
