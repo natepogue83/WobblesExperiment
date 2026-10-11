@@ -23,7 +23,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(HERE, 'results', 'keeper');
 fs.mkdirSync(OUT, { recursive: true });
 // .env: only ANTHROPIC_API_KEY is read; the value never goes anywhere but the SDK.
-try { for (const line of fs.readFileSync(path.join(HERE, '..', '..', '.env'), 'utf8').split('\n')) { const m = line.match(/^ANTHROPIC_API_KEY=(.+)$/); if (m && !process.env.ANTHROPIC_API_KEY) process.env.ANTHROPIC_API_KEY = m[1].trim(); } } catch {}
+try { for (const line of fs.readFileSync(path.join(HERE, '..', '..', '.env'), 'utf8').split('\n')) { const m = line.match(/^(ANTHROPIC_API_KEY|ANTHROPIC_WORKSPACE_ID)=(.+)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim(); } } catch {}
 
 const MODE = process.env.KEEPER || 'mock';
 const MODEL = process.env.MODEL || 'claude-opus-5-5';
@@ -69,7 +69,8 @@ async function modelKeeper() {
   const { default: Anthropic } = await import('@anthropic-ai/sdk');
   const { z } = await import('zod');
   const { zodOutputFormat } = await import('@anthropic-ai/sdk/helpers/zod');
-  const client = new Anthropic();
+  // An organisation-level key must name a workspace; a workspace-scoped key needs nothing more.
+  const client = new Anthropic(process.env.ANTHROPIC_WORKSPACE_ID ? { defaultHeaders: { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID } } : {});
   const Decision = z.object({
     thinking_aloud: z.string().describe('what you believe is going on and what you are trying to achieve'),
     action: z.enum(['wait', 'place', 'rain']),
@@ -109,7 +110,7 @@ async function play(seed, keeper) {
   for (let day = 2; day < DAYS; day += EVERY) {
     const state = describe(w, since); since = w.tick;
     let d;
-    try { d = await keeper.decide(state, used, w); } catch (e) { d = { action: 'wait', reason: 'error: ' + (e && e.message || e) }; }
+    try { d = await keeper.decide(state, used, w); } catch (e) { const msg = 'error: ' + (e && e.message || e); if (keeper.name.startsWith('model')) throw new Error(msg); d = { action: 'wait', reason: msg }; }
     let applied = 'nothing';
     if (d.action !== 'wait' && used < BUDGET) {
       used++;
