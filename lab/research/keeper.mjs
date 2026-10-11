@@ -54,7 +54,8 @@ function describe(w, sinceTick) {
   const lines = [];
   lines.push(`Day ${day} of 120. ${w.weather.rain ? 'Raining. ' : ''}${w.weather.lean ? 'The meadow is lean: little grows. ' : ''}`);
   lines.push(`${alive.length} creatures alive (${w.creatures.length - alive.length} have died in all). Average food ${mean('energy')}/10, warmth ${mean('warmth')}/10, rest ${mean('rest')}/10.`);
-  lines.push(rep.alive ? `A fire is burning with ${rep.fuel} fuel left; it has been fed ${rep.feeds} times by ${rep.doers.length} creatures who do it on their own.` : rep.feeds ? `No fire now. One burned earlier and was fed ${rep.feeds} times.` : 'No fire. There has never been one.');
+  const fires = live(w).filter(o => o.burning > 0 && o.fuel > 0);
+  lines.push(fires.length ? `Fires burning: ${fires.map(o => `at (${o.x},${o.y}) with ${o.fuel} fuel`).join('; ')}. Fires have been fed ${rep.feeds} times in all, by ${rep.doersAlive.length} living creatures.` : `No fire burning now. Fires have been fed ${rep.feeds} times in all.`);
   lines.push(`Since your last look: ${births} born; ${deaths.length ? 'died: ' + deaths.join(', ') : 'no deaths'}; predator came ${recent.filter(e => e.kind === 'prowler_came').length} times, attacked ${recent.filter(e => e.kind === 'attacked').length} times, was driven off ${recent.filter(e => e.kind === 'drove_off').length} times.`);
   const made = ['made_shard', 'felled', 'joined', 'made_fire'].map(k => [k, recent.filter(e => e.kind === k).length]).filter(([, n]) => n).map(([k, n]) => `${k.replace('_', ' ')} x${n}`).join(', ');
   if (made) lines.push(`They did: ${made}.`);
@@ -117,13 +118,14 @@ async function play(seed, keeper) {
     let applied = 'nothing';
     if (d.action !== 'wait' && used < BUDGET) {
       used++;
-      if (d.action === 'rain') { w.weather.rain = 1; for (const c of w.cells) c.wet = 1; applied = 'rain'; }
+      if (d.action === 'rain') { w.weather.forcedUntil = w.tick + 4; for (const c of w.cells) c.wet = 1; applied = 'rain'; }   // a real 4-hour spell (fixed after the 2026-10-11 review)
       else if (d.action === 'place' && d.material && MATS.includes(d.material) && Number.isInteger(d.x) && Number.isInteger(d.y)) { const cell = w.cells[d.y * W + d.x]; if (cell && !cell.water) { keeperPlace(w, d.material, d.x, d.y, d.material === 'ember' ? { fuel: 120 } : {}); applied = `${d.material} at ${d.x},${d.y}`; } else applied = 'refused: water or off the board'; }
     } else if (d.action !== 'wait') applied = 'refused: budget spent';
     log.push({ day: Math.floor(w.tick / DAY) + 1, state, decision: d, applied, used });
     if (MODE !== 'mock' && keeper.name.startsWith('model')) process.stdout.write(`  seed ${seed} day ${Math.floor(w.tick / DAY) + 1}: ${d.action}${d.material ? ' ' + d.material : ''} -> ${applied}  ($${spentUSD.toFixed(2)} so far)\n`);
     if (spentUSD > CAP_USD) { log.push({ stopped: 'spend cap reached' }); break; }
-    run(w, EVERY * DAY);
+    run(w, Math.min(EVERY * DAY, DAYS * DAY - w.tick));   // score exactly at day 120 (fixed after the 2026-10-11 review)
+    if (w.tick >= DAYS * DAY) break;
   }
   const rep = fireReport(w), alive = w.creatures.filter(c => c.alive).length, died = w.events.filter(e => e.kind === 'died');
   const summary = { keeper: keeper.name, seed, alive, born: w.events.filter(e => e.kind === 'born').length, died: died.length, byBeast: died.filter(d => d.cause === 'the beast').length, hunger: died.filter(d => /hunger/.test(d.cause)).length, fireAlive: rep.alive, feeds: rep.feeds, doers: rep.doers.length, interventions: used, overBudgetAttempts: log.filter(l => l.applied === 'refused: budget spent').length, spentUSD: +spentUSD.toFixed(3) };
