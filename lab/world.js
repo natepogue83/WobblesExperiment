@@ -213,7 +213,7 @@ export function prowlerStep(world, r) {
   for (const p of world.prowlers) {
     if (!night || p.fed >= 1 || p.fled) { p.gone = true; emit(world, { kind: 'prowler_left', x: p.x, y: p.y, fed: p.fed, fled: !!p.fled }); continue; }
     const targeted = world.opts.threatMode === 'targeted';
-    const prey = world.creatures.filter(k => k.alive && Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= (targeted ? 9 : 7) && !protectedAt(world, k.x, k.y, world.creatures) && (!targeted || (k.plan && k.plan.action === 'rest')))
+    const prey = world.creatures.filter(k => k.alive && Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= (targeted ? 9 : 7) && !protectedAt(world, k.x, k.y, world.creatures) && (!targeted || k.lastAction === 'rest'))
       .sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
     if (!prey) { // wander the edge, slowly
       if (r() < 0.5) { const dx = Math.floor(r() * 3) - 1, dy = Math.floor(r() * 3) - 1; const c = cellAt(world, p.x + dx, p.y + dy); if (c && !c.water && c.heat === 0) { p.x = c.x; p.y = c.y; } }

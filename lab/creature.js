@@ -379,7 +379,7 @@ export function creatureStep(world, c) {
   if (outcome === 'sheltered' || outcome === 'cosy' || outcome === 'ate' || outcome === 'snug' || outcome === 'safe') for (const b of c.builds) if (Math.max(Math.abs(b.x - c.x), Math.abs(b.y - c.y)) <= (outcome === 'snug' || outcome === 'safe' ? 1 : 0) && world.tick - b.t < 400) remember(c, b.key, 'paid_off', Math.max(0.05, delta) * 0.8, 0.5);
   if (delta > 0.08) { let w = 0.5; for (let i = c.episodes.length - 1; i >= 0 && i >= c.episodes.length - 3; i--) { const ep = c.episodes[i]; if (world.tick - ep.t > 10 || ep.key === p.key) continue; remember(c, ep.key, 'led_on', delta * w, 0.4); w *= 0.6; } }
   c.episodes.push({ t: world.tick, key: p.key, outcome, delta }); if (c.episodes.length > 60) c.episodes.shift();
-  c.acted++;
+  c.acted++; c.lastAction = p.action;
   emit(world, { kind: 'acted', who: c.id, action: p.action, key: p.key, outcome, x: c.x, y: c.y });
   // Others nearby who were watching (or just looking that way) pick up a weaker memory.
   if (!world.opts.noWatch) for (const k of others(world, c, 2)) {
