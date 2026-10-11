@@ -140,6 +140,7 @@ async function main() {
       `| killed by the predator (all colonies) | ${conds.map(c => stats[c].byBeast).join(' | ')} |`,
       `| hunger deaths (all colonies) | ${conds.map(c => stats[c].hunger).join(' | ')} |`,
       `| predator attacks / driven off | ${conds.map(c => stats[c].attacks + ' / ' + stats[c].droveOff).join(' | ')} |`,
+      `| fire burning at day 120 | ${conds.map(c => stats[c].fireAlive + '/' + stats[c].n).join(' | ')} |`,
       `| shards struck / trees felled / tools joined | ${conds.map(c => [stats[c].shards, stats[c].felled, stats[c].joined].join(' / ')).join(' | ')} |`,
       ``, `Difference in caution change, predator minus control: **${fmt(summary.h3.predMinusControl)}**. Targeted predator minus control: **${fmt(summary.h3.targetedMinusControl)}**.\n`);
     // mechanism: per-individual caution vs offspring, within predator colonies
