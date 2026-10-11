@@ -1,0 +1,62 @@
+[
+  {
+    "keeper": "mock",
+    "seed": 1,
+    "alive": 12,
+    "born": 6,
+    "died": 0,
+    "byBeast": 0,
+    "hunger": 0,
+    "fireAlive": true,
+    "feeds": 273,
+    "doers": 6,
+    "interventions": 2,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0
+  },
+  {
+    "keeper": "none",
+    "seed": 1,
+    "alive": 12,
+    "born": 6,
+    "died": 0,
+    "byBeast": 0,
+    "hunger": 0,
+    "fireAlive": false,
+    "feeds": 0,
+    "doers": 0,
+    "interventions": 0,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0
+  },
+  {
+    "keeper": "scripted",
+    "seed": 1,
+    "alive": 8,
+    "born": 3,
+    "died": 1,
+    "byBeast": 0,
+    "hunger": 1,
+    "fireAlive": false,
+    "feeds": 99,
+    "doers": 5,
+    "interventions": 1,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0
+  },
+  {
+    "keeper": "random",
+    "seed": 1,
+    "alive": 12,
+    "born": 6,
+    "died": 0,
+    "byBeast": 0,
+    "hunger": 0,
+    "fireAlive": false,
+    "feeds": 6,
+    "doers": 0,
+    "interventions": 6,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0
+  }
+]

@@ -1,0 +1,422 @@
+{
+  "summary": {
+    "keeper": "scripted",
+    "seed": 2,
+    "alive": 12,
+    "born": 20,
+    "died": 14,
+    "byBeast": 1,
+    "hunger": 3,
+    "fireAlive": true,
+    "feeds": 1019,
+    "doers": 20,
+    "interventions": 1,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0
+  },
+  "log": [
+    {
+      "day": 3,
+      "state": "Day 3 of 120. \n6 creatures alive (0 have died in all). Average food 9.6/10, warmth 4.6/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 34 grasss, 4 logs, 8 stones, 16 berrys, 3 roots, 1 tallbush, 5 trees.\nCreatures are at: c1(6,3) holding a grass c2(3,11) c3(14,6) c4(3,7) holding a stick c5(7,3) c6(13,8).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "action": "place",
+        "material": "ember",
+        "x": 9,
+        "y": 5,
+        "reason": "an ember on the first look"
+      },
+      "applied": "ember at 9,5",
+      "used": 1
+    },
+    {
+      "day": 6,
+      "state": "Day 6 of 120. \n6 creatures alive (0 have died in all). Average food 9.5/10, warmth 8.9/10, rest 9.7/10.\nA fire is burning with 95.80000000000001 fuel left; it has been fed 10 times by 3 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 50 grasss, 4 logs, 8 stones, 40 berrys, 3 roots, 1 tallbush, 5 trees, 1 ember.\nCreatures are at: c1(8,4) c2(8,5) holding a grass c3(13,3) c4(10,6) c5(8,4) holding a grass c6(9,4).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 9,
+      "state": "Day 9 of 120. \n6 creatures alive (0 have died in all). Average food 9.6/10, warmth 9.1/10, rest 9.8/10.\nA fire is burning with 119.80000000000001 fuel left; it has been fed 32 times by 3 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 46 grasss, 4 logs, 8 stones, 51 berrys, 2 roots, 1 tallbush, 5 trees, 1 ember.\nCreatures are at: c1(8,4) c2(10,5) c3(9,6) c4(11,6) holding a grass c5(9,6) c6(7,3).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 12,
+      "state": "Day 12 of 120. \n6 creatures alive (0 have died in all). Average food 9.7/10, warmth 9.5/10, rest 9.8/10.\nA fire is burning with 116.60000000000002 fuel left; it has been fed 45 times by 4 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 56 grasss, 4 logs, 8 stones, 52 berrys, 2 roots, 5 trees, 1 ember, 1 sapling.\nCreatures are at: c1(8,4) c2(7,1) c3(8,8) c4(9,6) holding a grass c5(10,3) holding a grass c6(9,4).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 15,
+      "state": "Day 15 of 120. \n9 creatures alive (0 have died in all). Average food 8.9/10, warmth 8.6/10, rest 9.0/10.\nA fire is burning with 145.39999999999998 fuel left; it has been fed 67 times by 4 creatures who do it on their own.\nSince your last look: 3 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 9 sticks, 60 grasss, 4 logs, 7 stones, 45 berrys, 2 roots, 5 trees, 1 ember, 2 saplings.\nCreatures are at: c1(7,4) c2(10,2) holding a stone c3(10,1) holding a grass c4(13,4) c5(9,7) c6(15,4) c7(8,7) c8(8,7) c9(9,7) holding a grass.\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 18,
+      "state": "Day 18 of 120. \n10 creatures alive (0 have died in all). Average food 9.0/10, warmth 9.7/10, rest 8.6/10.\nA fire is burning with 168.19999999999993 fuel left; it has been fed 89 times by 5 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x1, made fire x1.\nLying about: 7 sticks, 58 grasss, 4 logs, 7 stones, 44 berrys, 2 roots, 5 trees, 1 ember, 3 saplings, 1 shard.\nCreatures are at: c1(11,5) c2(8,5) holding a grass c3(8,4) c4(8,3) c5(11,6) c6(10,2) c7(10,4) c8(10,4) c9(10,4) holding a stone c10(10,5).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 21,
+      "state": "Day 21 of 120. \n11 creatures alive (0 have died in all). Average food 8.1/10, warmth 8.8/10, rest 7.1/10.\nA fire is burning with 192.19999999999993 fuel left; it has been fed 112 times by 3 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x1.\nLying about: 7 sticks, 39 grasss, 4 logs, 7 stones, 51 berrys, 2 roots, 5 trees, 1 ember, 3 saplings, 2 shards.\nCreatures are at: c1(9,5) c2(9,4) c3(11,4) c4(10,5) c5(9,1) holding a grass c6(8,6) c7(8,1) c8(10,5) c9(8,1) holding a stone c10(10,5) c11(8,6).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 24,
+      "state": "Day 24 of 120. \n12 creatures alive (0 have died in all). Average food 8.2/10, warmth 9.6/10, rest 6.8/10.\nA fire is burning with 217.9999999999999 fuel left; it has been fed 138 times by 3 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 1 times, attacked 0 times, was driven off 1 times.\nThey did: made shard x1, made fire x1.\nLying about: 6 sticks, 32 grasss, 4 logs, 5 stones, 49 berrys, 2 roots, 6 trees, 1 ember, 3 saplings, 3 shards.\nCreatures are at: c1(9,4) c2(8,5) holding a stone c3(9,2) holding a grass c4(8,3) c5(10,11) holding a grass c6(9,2) holding a grass c7(7,3) c8(9,4) c9(10,11) holding a stone c10(8,7) holding a stone c11(9,3) c12(10,5).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 27,
+      "state": "Day 27 of 120. \n12 creatures alive (0 have died in all). Average food 8.7/10, warmth 9.7/10, rest 7.7/10.\nA fire is burning with 231.79999999999984 fuel left; it has been fed 156 times by 3 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 36 grasss, 4 logs, 8 stones, 43 berrys, 2 roots, 7 trees, 1 ember, 2 saplings, 2 shards.\nCreatures are at: c1(9,4) c2(10,11) holding a grass c3(7,1) holding a grass c4(7,7) holding a grass c5(9,2) holding a grass c6(10,3) c7(14,3) c8(10,11) holding a grass c9(11,4) c10(9,4) c11(8,5) holding a shard c12(9,4).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 30,
+      "state": "Day 30 of 120. \n12 creatures alive (0 have died in all). Average food 9.2/10, warmth 9.4/10, rest 6.8/10.\nA fire is burning with 295.5999999999998 fuel left; it has been fed 188 times by 6 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made fire x1.\nLying about: 6 sticks, 34 grasss, 4 logs, 7 stones, 35 berrys, 1 root, 8 trees, 1 ember, 3 shards, 1 sapling.\nCreatures are at: c1(7,6) c2(9,4) c3(7,2) c4(10,7) c5(5,6) c6(7,4) c7(4,5) c8(10,5) c9(7,4) c10(1,5) holding a stone c11(14,8) holding a grass c12(8,6).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 33,
+      "state": "Day 33 of 120. The meadow is lean: little grows. \n12 creatures alive (0 have died in all). Average food 8.0/10, warmth 8.8/10, rest 7.9/10.\nA fire is burning with 348.5999999999998 fuel left; it has been fed 218 times by 6 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x1, made fire x1.\nLying about: 6 sticks, 22 grasss, 4 logs, 7 stones, 40 berrys, 1 root, 8 trees, 1 ember, 4 shards, 1 sapling.\nCreatures are at: c1(7,5) c2(3,11) holding a grass c3(9,4) c4(10,7) c5(13,4) c6(3,10) holding a grass c7(8,4) c8(4,7) c9(13,4) c10(3,3) holding a stone c11(10,5) c12(9,3).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 36,
+      "state": "Day 36 of 120. The meadow is lean: little grows. \n12 creatures alive (0 have died in all). Average food 8.2/10, warmth 8.9/10, rest 8.7/10.\nA fire is burning with 367.39999999999975 fuel left; it has been fed 241 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: made shard x3.\nLying about: 6 sticks, 15 grasss, 4 logs, 8 stones, 32 berrys, 9 trees, 1 ember, 7 shards.\nCreatures are at: c1(8,7) c2(14,6) c3(9,6) c4(8,5) c5(9,8) c6(6,7) c7(11,8) c8(9,8) c9(11,6) holding a grass c10(12,8) c11(5,6) c12(9,7).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 39,
+      "state": "Day 39 of 120. \n12 creatures alive (0 have died in all). Average food 7.9/10, warmth 9.3/10, rest 8.5/10.\nA fire is burning with 420.1999999999997 fuel left; it has been fed 271 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 3 logs, 6 stones, 47 berrys, 9 trees, 1 ember, 7 shards, 18 grasss.\nCreatures are at: c1(6,5) c2(10,4) holding a stone c3(9,9) c4(6,5) holding a grass c5(9,8) c6(8,6) holding a grass c7(8,5) c8(4,5) c9(9,10) c10(9,5) holding a stone c11(11,4) holding a log c12(9,4).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 42,
+      "state": "Day 42 of 120. \n12 creatures alive (0 have died in all). Average food 7.2/10, warmth 9.6/10, rest 7.9/10.\nA fire is burning with 527.9999999999997 fuel left; it has been fed 309 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 6 sticks, 3 logs, 7 stones, 57 berrys, 9 trees, 1 ember, 6 shards, 21 grasss.\nCreatures are at: c1(14,4) c2(8,5) holding a shard c3(10,5) c4(9,4) c5(10,9) c6(7,5) holding a grass c7(9,8) c8(8,5) c9(9,4) c10(10,6) holding a stone c11(7,3) c12(9,6).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 45,
+      "state": "Day 45 of 120. \n12 creatures alive (1 have died in all). Average food 7.2/10, warmth 9.1/10, rest 7.4/10.\nA fire is burning with 627.9999999999997 fuel left; it has been fed 352 times by 7 creatures who do it on their own.\nSince your last look: 1 born; died: c11 (hunger); predator came 1 times, attacked 1 times, was driven off 1 times.\nLying about: 5 sticks, 3 logs, 7 stones, 61 berrys, 9 trees, 1 ember, 7 shards, 25 grasss.\nCreatures are at: c1(10,6) c2(8,6) c3(10,2) holding a stick c4(7,5) c5(11,7) c6(10,3) c7(6,5) holding a berry c8(11,5) c9(9,6) c10(11,6) holding a stone c12(10,3) c13(10,9).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 48,
+      "state": "Day 48 of 120. \n12 creatures alive (2 have died in all). Average food 8.4/10, warmth 9.3/10, rest 8.4/10.\nA fire is burning with 8 fuel left; it has been fed 381 times by 7 creatures who do it on their own.\nSince your last look: 1 born; died: c1 (hunger); predator came 1 times, attacked 0 times, was driven off 0 times.\nThey did: made fire x1.\nLying about: 5 sticks, 3 logs, 7 stones, 52 berrys, 9 trees, 1 ember, 7 shards, 24 grasss.\nCreatures are at: c2(10,5) holding a grass c3(8,4) c4(10,5) c5(9,10) c6(7,7) c7(6,5) holding a stone c8(8,3) c9(2,6) holding a grass c10(6,5) c12(6,4) c13(11,5) c14(8,7).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 51,
+      "state": "Day 51 of 120. \n12 creatures alive (2 have died in all). Average food 8.5/10, warmth 9.0/10, rest 7.6/10.\nA fire is burning with 749.6 fuel left; it has been fed 416 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 4 sticks, 3 logs, 7 stones, 54 berrys, 9 trees, 1 ember, 7 shards, 23 grasss.\nCreatures are at: c2(4,4) holding a grass c3(10,1) c4(9,6) holding a grass c5(10,3) holding a grass c6(10,1) holding a grass c7(10,7) c8(7,6) c9(11,4) c10(8,5) holding a stone c12(8,9) holding a grass c13(11,3) c14(10,8).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 54,
+      "state": "Day 54 of 120. \n12 creatures alive (2 have died in all). Average food 8.5/10, warmth 8.8/10, rest 7.6/10.\nA fire is burning with 773.4000000000002 fuel left; it has been fed 441 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 1 times, was driven off 0 times.\nLying about: 4 sticks, 3 logs, 7 stones, 53 berrys, 9 trees, 1 ember, 6 shards, 23 grasss.\nCreatures are at: c2(10,4) c3(9,10) c4(8,7) c5(8,4) c6(8,4) c7(8,9) c8(9,4) holding a grass c9(17,10) holding a grass c10(7,5) holding a stone c12(8,7) c13(0,1) c14(7,5) holding a shard.\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 57,
+      "state": "Day 57 of 120. \n12 creatures alive (2 have died in all). Average food 7.9/10, warmth 9.1/10, rest 7.0/10.\nA fire is burning with 817.4000000000002 fuel left; it has been fed 468 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 4 times.\nLying about: 4 sticks, 3 logs, 6 stones, 62 berrys, 9 trees, 1 ember, 7 shards, 29 grasss.\nCreatures are at: c2(7,9) holding a stone c3(8,4) c4(7,5) c5(7,9) holding a grass c6(10,7) c7(10,4) c8(4,5) holding a grass c9(10,7) c10(10,6) holding a stone c12(6,2) c13(9,4) c14(12,7).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 60,
+      "state": "Day 60 of 120. \n12 creatures alive (2 have died in all). Average food 7.8/10, warmth 9.7/10, rest 6.8/10.\nA fire is burning with 837.2000000000004 fuel left; it has been fed 492 times by 7 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 1 times.\nThey did: made shard x1, felled x3, joined x2, made fire x2.\nLying about: 10 sticks, 9 logs, 7 stones, 58 berrys, 5 trees, 1 ember, 6 shards, 1 axe, 40 grasss.\nCreatures are at: c2(12,3) c3(9,10) c4(8,7) c5(10,5) c6(11,9) holding a stone c7(9,5) c8(6,5) holding a grass c9(10,6) c10(10,8) c12(11,9) c13(9,4) c14(9,8) holding a axe.\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 63,
+      "state": "Day 63 of 120. The meadow is lean: little grows. \n6 creatures alive (8 have died in all). Average food 6.9/10, warmth 9.0/10, rest 6.7/10.\nA fire is burning with 802.0000000000006 fuel left; it has been fed 503 times by 7 creatures who do it on their own.\nSince your last look: 0 born; died: c2 (old age), c3 (old age), c4 (old age), c5 (old age), c6 (old age), c10 (the beast); predator came 1 times, attacked 1 times, was driven off 0 times.\nThey did: joined x1.\nLying about: 24 sticks, 4 logs, 7 stones, 58 berrys, 5 trees, 1 ember, 3 axes, 5 shards, 45 grasss, 1 sapling.\nCreatures are at: c7(9,7) c8(12,1) c9(11,9) holding a grass c12(7,6) c13(9,4) c14(10,0).\nCells with three or more things stacked: 13.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 66,
+      "state": "Day 66 of 120. The meadow is lean: little grows. \n5 creatures alive (9 have died in all). Average food 8.7/10, warmth 8.8/10, rest 7.7/10.\nA fire is burning with 749.8000000000008 fuel left; it has been fed 511 times by 7 creatures who do it on their own.\nSince your last look: 0 born; died: c7 (hunger); predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 27 sticks, 3 logs, 7 stones, 54 berrys, 5 trees, 1 ember, 3 axes, 5 shards, 38 grasss, 2 saplings.\nCreatures are at: c8(10,8) holding a grass c9(8,5) c12(9,7) c13(12,1) c14(7,5).\nCells with three or more things stacked: 11.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 69,
+      "state": "Day 69 of 120. \n8 creatures alive (9 have died in all). Average food 9.1/10, warmth 8.5/10, rest 8.2/10.\nA fire is burning with 717.8000000000008 fuel left; it has been fed 521 times by 7 creatures who do it on their own.\nSince your last look: 3 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 27 sticks, 3 logs, 7 stones, 55 berrys, 5 trees, 1 ember, 3 axes, 4 shards, 39 grasss, 3 saplings.\nCreatures are at: c8(7,5) holding a grass c9(5,5) holding a grass c12(8,2) c13(8,4) c14(9,4) holding a shard c15(8,3) c16(7,6) c17(11,9).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 72,
+      "state": "Day 72 of 120. \n10 creatures alive (9 have died in all). Average food 8.7/10, warmth 9.8/10, rest 8.3/10.\nA fire is burning with 716.6000000000009 fuel left; it has been fed 538 times by 8 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: joined x1.\nLying about: 26 sticks, 3 logs, 7 stones, 45 berrys, 5 trees, 1 ember, 3 axes, 4 shards, 48 grasss, 4 saplings.\nCreatures are at: c8(9,4) c9(9,4) c12(6,5) c13(8,4) c14(8,4) holding a axe c15(7,5) c16(9,5) c17(6,8) holding a grass c18(7,1) c19(9,4).\nCells with three or more things stacked: 13.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 75,
+      "state": "Day 75 of 120. \n9 creatures alive (11 have died in all). Average food 9.1/10, warmth 8.8/10, rest 9.5/10.\nA fire is burning with 714.4000000000011 fuel left; it has been fed 555 times by 9 creatures who do it on their own.\nSince your last look: 1 born; died: c8 (old age), c9 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 25 sticks, 3 logs, 7 stones, 41 berrys, 6 trees, 1 ember, 3 axes, 4 shards, 46 grasss, 3 saplings.\nCreatures are at: c12(11,6) c13(9,4) c14(14,8) c15(12,6) holding a stick c16(11,7) c17(11,9) c18(11,6) c19(8,6) holding a grass c20(9,4).\nCells with three or more things stacked: 14.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 78,
+      "state": "Day 78 of 120. \n10 creatures alive (11 have died in all). Average food 9.6/10, warmth 8.5/10, rest 9.5/10.\nA fire is burning with 775.2000000000013 fuel left; it has been fed 581 times by 11 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 21 sticks, 2 logs, 7 stones, 35 berrys, 7 trees, 1 ember, 3 axes, 4 shards, 49 grasss, 2 saplings.\nCreatures are at: c12(10,11) c13(9,4) c14(9,4) c15(11,10) c16(10,11) holding a stick c17(10,5) c18(9,4) c19(11,5) holding a grass c20(10,1) c21(10,10).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 81,
+      "state": "Day 81 of 120. \n12 creatures alive (11 have died in all). Average food 9.5/10, warmth 8.7/10, rest 9.4/10.\nA fire is burning with 867.2000000000013 fuel left; it has been fed 613 times by 14 creatures who do it on their own.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 2 logs, 7 stones, 29 berrys, 8 trees, 1 ember, 3 axes, 4 shards, 52 grasss, 1 sapling.\nCreatures are at: c12(10,5) c13(8,4) c14(9,6) c15(13,0) holding a grass c16(8,4) c17(6,5) c18(13,2) holding a grass c19(9,4) holding a grass c20(9,5) c21(12,9) holding a stick c22(7,5) holding a grass c23(11,5) holding a grass.\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 84,
+      "state": "Day 84 of 120. \n11 creatures alive (12 have died in all). Average food 9.5/10, warmth 9.1/10, rest 9.7/10.\nA fire is burning with 930.0000000000015 fuel left; it has been fed 637 times by 16 creatures who do it on their own.\nSince your last look: 0 born; died: c12 (old age); predator came 1 times, attacked 0 times, was driven off 0 times.\nThey did: made fire x1.\nLying about: 6 sticks, 2 logs, 6 stones, 34 berrys, 9 trees, 1 ember, 3 axes, 4 shards, 55 grasss.\nCreatures are at: c13(10,11) c14(14,3) c15(8,4) c16(13,0) holding a grass c17(7,2) c18(11,7) c19(13,4) holding a grass c20(13,0) holding a grass c21(1,0) holding a stone c22(13,3) c23(8,4).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 87,
+      "state": "Day 87 of 120. \n11 creatures alive (12 have died in all). Average food 9.6/10, warmth 8.0/10, rest 9.3/10.\nA fire is burning with 924.8000000000017 fuel left; it has been fed 649 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 1 times.\nThey did: made shard x2.\nLying about: 2 sticks, 2 logs, 6 stones, 33 berrys, 9 trees, 1 ember, 3 axes, 5 shards, 62 grasss.\nCreatures are at: c13(10,6) c14(8,5) c15(1,5) c16(12,3) holding a grass c17(10,8) holding a shard c18(8,9) holding a stick c19(12,6) holding a grass c20(10,8) holding a stone c21(0,4) c22(13,0) c23(7,5).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 90,
+      "state": "Day 90 of 120. \n12 creatures alive (12 have died in all). Average food 9.4/10, warmth 8.3/10, rest 9.4/10.\nA fire is burning with 965.6000000000018 fuel left; it has been fed 672 times by 16 creatures who do it on their own.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: felled x1.\nLying about: 8 sticks, 2 logs, 7 stones, 26 berrys, 8 trees, 1 ember, 3 axes, 5 shards, 51 grasss, 1 sapling.\nCreatures are at: c13(8,4) c14(9,6) holding a shard c15(8,5) c16(9,6) holding a grass c17(9,6) c18(3,6) holding a grass c19(8,4) holding a grass c20(3,7) holding a grass c21(11,5) holding a grass c22(5,9) holding a grass c23(8,4) c24(9,4).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 93,
+      "state": "Day 93 of 120. The meadow is lean: little grows. \n12 creatures alive (12 have died in all). Average food 9.4/10, warmth 8.3/10, rest 9.6/10.\nA fire is burning with 1020.6000000000017 fuel left; it has been fed 698 times by 16 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nThey did: felled x2.\nLying about: 25 sticks, 1 log, 7 stones, 10 berrys, 6 trees, 1 ember, 3 axes, 5 shards, 48 grasss, 2 saplings.\nCreatures are at: c13(9,4) c14(8,4) holding a shard c15(8,4) holding a grass c16(17,6) holding a grass c17(13,10) holding a grass c18(7,1) holding a grass c19(10,7) holding a stick c20(12,2) c21(11,3) holding a grass c22(11,1) c23(0,0) c24(8,4).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 96,
+      "state": "Day 96 of 120. The meadow is lean: little grows. \n12 creatures alive (12 have died in all). Average food 8.8/10, warmth 9.1/10, rest 9.6/10.\nA fire is burning with 1070.400000000002 fuel left; it has been fed 723 times by 17 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 17 sticks, 1 log, 7 stones, 9 berrys, 6 trees, 1 ember, 3 axes, 5 shards, 39 grasss, 2 saplings.\nCreatures are at: c13(9,4) c14(8,4) holding a shard c15(9,4) c16(8,4) c17(5,4) c18(14,2) holding a stick c19(9,6) c20(10,7) holding a grass c21(8,5) c22(6,6) c23(13,1) c24(9,3).\nCells with three or more things stacked: 11.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 99,
+      "state": "Day 99 of 120. \n12 creatures alive (12 have died in all). Average food 9.5/10, warmth 9.3/10, rest 9.5/10.\nA fire is burning with 1134.200000000002 fuel left; it has been fed 746 times by 18 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 10 sticks, 1 log, 6 stones, 6 trees, 1 ember, 10 berrys, 3 axes, 4 shards, 43 grasss, 2 saplings.\nCreatures are at: c13(9,4) holding a shard c14(8,4) holding a shard c15(12,1) holding a grass c16(12,9) holding a stone c17(9,4) c18(10,5) c19(10,5) c20(8,4) c21(10,2) holding a grass c22(12,9) holding a grass c23(9,4) holding a grass c24(11,3) holding a stick.\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 102,
+      "state": "Day 102 of 120. \n12 creatures alive (12 have died in all). Average food 9.4/10, warmth 8.9/10, rest 9.4/10.\nA fire is burning with 1226.0000000000023 fuel left; it has been fed 776 times by 18 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: felled x1, joined x1.\nLying about: 10 sticks, 1 log, 6 stones, 6 trees, 1 ember, 20 berrys, 4 axes, 4 shards, 49 grasss, 2 saplings.\nCreatures are at: c13(9,4) holding a stick c14(3,5) holding a shard c15(7,5) holding a log c16(9,4) c17(4,3) holding a stone c18(8,4) c19(11,8) holding a grass c20(12,4) c21(8,3) c22(9,6) c23(10,2) c24(15,8).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 105,
+      "state": "Day 105 of 120. \n11 creatures alive (13 have died in all). Average food 9.4/10, warmth 9.2/10, rest 9.6/10.\nA fire is burning with 1352.0000000000023 fuel left; it has been fed 814 times by 18 creatures who do it on their own.\nSince your last look: 0 born; died: c13 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 11 sticks, 7 stones, 7 trees, 1 ember, 19 berrys, 4 axes, 4 shards, 33 grasss, 1 sapling.\nCreatures are at: c14(8,4) holding a shard c15(9,6) c16(10,5) c17(9,4) c18(13,9) holding a grass c19(9,6) c20(8,6) holding a grass c21(10,5) c22(10,4) c23(9,4) c24(3,5) holding a grass.\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 108,
+      "state": "Day 108 of 120. \n12 creatures alive (14 have died in all). Average food 9.3/10, warmth 9.1/10, rest 9.4/10.\nA fire is burning with 1542.8000000000025 fuel left; it has been fed 853 times by 18 creatures who do it on their own.\nSince your last look: 2 born; died: c14 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nThey did: felled x2.\nLying about: 11 sticks, 7 stones, 5 trees, 1 ember, 3 axes, 5 shards, 30 grasss, 13 berrys, 1 sapling.\nCreatures are at: c15(9,4) c16(9,4) c17(8,4) c18(10,11) holding a grass c19(10,4) c20(8,4) c21(8,5) c22(9,4) c23(10,4) c24(3,8) holding a grass c25(10,5) c26(16,2).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 111,
+      "state": "Day 111 of 120. \n12 creatures alive (14 have died in all). Average food 9.5/10, warmth 9.3/10, rest 9.6/10.\nA fire is burning with 1616.6000000000026 fuel left; it has been fed 887 times by 19 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 7 stones, 5 trees, 1 ember, 1 axe, 5 shards, 9 sticks, 31 grasss, 18 berrys, 1 sapling.\nCreatures are at: c15(9,3) c16(6,2) holding a grass c17(8,4) c18(2,4) holding a grass c19(10,5) c20(9,3) holding a grass c21(9,3) holding a grass c22(9,6) c23(11,3) holding a grass c24(4,6) c25(8,4) c26(8,5).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 114,
+      "state": "Day 114 of 120. \n12 creatures alive (14 have died in all). Average food 9.3/10, warmth 8.7/10, rest 9.4/10.\nA fire is burning with 1685.4000000000028 fuel left; it has been fed 922 times by 19 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 7 stones, 6 trees, 1 ember, 1 axe, 5 shards, 9 sticks, 29 grasss, 13 berrys, 1 sapling.\nCreatures are at: c15(14,4) holding a grass c16(9,4) c17(8,5) holding a grass c18(8,4) c19(12,5) holding a grass c20(15,2) c21(5,5) holding a grass c22(8,4) c23(12,10) holding a grass c24(9,6) c25(10,11) holding a grass c26(13,8).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 117,
+      "state": "Day 117 of 120. \n12 creatures alive (14 have died in all). Average food 9.5/10, warmth 9.3/10, rest 9.7/10.\nA fire is burning with 1771.4000000000028 fuel left; it has been fed 955 times by 19 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 7 stones, 6 trees, 1 ember, 5 shards, 8 sticks, 31 grasss, 16 berrys, 2 saplings.\nCreatures are at: c15(4,5) holding a grass c16(9,4) c17(9,4) c18(9,4) holding a grass c19(8,6) c20(11,6) c21(13,3) holding a grass c22(11,5) holding a grass c23(8,4) c24(8,7) c25(6,9) holding a grass c26(9,4).\nCells with three or more things stacked: 4.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    },
+    {
+      "day": 120,
+      "state": "Day 120 of 120. \n12 creatures alive (14 have died in all). Average food 9.7/10, warmth 8.9/10, rest 9.8/10.\nA fire is burning with 1814.200000000003 fuel left; it has been fed 984 times by 19 creatures who do it on their own.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 7 stones, 6 trees, 1 ember, 5 shards, 6 sticks, 31 grasss, 10 berrys, 3 saplings.\nCreatures are at: c15(5,5) holding a grass c16(6,9) c17(11,4) c18(13,6) holding a grass c19(4,5) holding a grass c20(8,4) c21(7,4) holding a grass c22(9,6) holding a grass c23(8,5) c24(5,5) holding a grass c25(8,5) holding a grass c26(15,3) holding a stick.\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "scripted"
+      },
+      "applied": "nothing",
+      "used": 1
+    }
+  ]
+}

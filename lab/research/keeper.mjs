@@ -10,6 +10,7 @@
 //   KEEPER=mock node lab/research/keeper.mjs            dry run, no API calls
 //   KEEPER=model SEEDS=1,2 node lab/research/keeper.mjs  real runs (reads ANTHROPIC_API_KEY from .env)
 //   KEEPER=all  ...                                      model + the three baselines
+//   KEEPER=baselines ...                                 the three baselines only, no API
 // Env: MODEL (default claude-opus-5-5), EVERY (days between decisions, default 3),
 //      BUDGET (interventions, default 12), CAP_USD (stop everything past this spend, default 4).
 import fs from 'node:fs';
@@ -131,7 +132,7 @@ async function play(seed, keeper) {
 
 const rows = [];
 for (const seed of SEEDS) {
-  const keepers = MODE === 'mock' ? [mockKeeper, noneKeeper, scriptedKeeper, randomKeeper(seed)] : MODE === 'model' ? [await modelKeeper()] : [await modelKeeper(), noneKeeper, scriptedKeeper, randomKeeper(seed)];
+  const keepers = MODE === 'mock' ? [mockKeeper, noneKeeper, scriptedKeeper, randomKeeper(seed)] : MODE === 'baselines' ? [noneKeeper, scriptedKeeper, randomKeeper(seed)] : MODE === 'model' ? [await modelKeeper()] : [await modelKeeper(), noneKeeper, scriptedKeeper, randomKeeper(seed)];
   for (const k of keepers) { const s = await play(seed, k); rows.push(s); console.log(JSON.stringify(s)); if (spentUSD > CAP_USD) break; }
   if (spentUSD > CAP_USD) { console.log('Spend cap reached; stopping.'); break; }
 }

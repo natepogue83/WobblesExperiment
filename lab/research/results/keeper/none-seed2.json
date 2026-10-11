@@ -1,0 +1,419 @@
+{
+  "summary": {
+    "keeper": "none",
+    "seed": 2,
+    "alive": 10,
+    "born": 18,
+    "died": 14,
+    "byBeast": 1,
+    "hunger": 3,
+    "fireAlive": false,
+    "feeds": 0,
+    "doers": 0,
+    "interventions": 0,
+    "overBudgetAttempts": 0,
+    "spentUSD": 0
+  },
+  "log": [
+    {
+      "day": 3,
+      "state": "Day 3 of 120. \n6 creatures alive (0 have died in all). Average food 9.6/10, warmth 4.6/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 34 grasss, 4 logs, 8 stones, 16 berrys, 3 roots, 1 tallbush, 5 trees.\nCreatures are at: c1(6,3) holding a grass c2(3,11) c3(14,6) c4(3,7) holding a stick c5(7,3) c6(13,8).\nCells with three or more things stacked: 3.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 6,
+      "state": "Day 6 of 120. \n6 creatures alive (0 have died in all). Average food 9.4/10, warmth 0.0/10, rest 9.8/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 62 grasss, 4 logs, 8 stones, 25 berrys, 2 roots, 1 tallbush, 5 trees.\nCreatures are at: c1(8,4) c2(5,5) c3(12,6) c4(8,6) c5(14,4) c6(12,7).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 9,
+      "state": "Day 9 of 120. \n6 creatures alive (0 have died in all). Average food 9.4/10, warmth 0.0/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 80 grasss, 4 logs, 8 stones, 1 root, 1 tallbush, 5 trees, 23 berrys.\nCreatures are at: c1(13,5) c2(9,1) c3(13,5) c4(6,10) c5(12,4) c6(12,6).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 12,
+      "state": "Day 12 of 120. \n8 creatures alive (0 have died in all). Average food 9.2/10, warmth 1.5/10, rest 9.5/10.\nNo fire. There has never been one.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 94 grasss, 3 logs, 6 stones, 1 root, 1 tallbush, 5 trees, 17 berrys.\nCreatures are at: c1(9,5) c2(11,7) c3(12,1) holding a stone c4(8,5) holding a log c5(11,8) c6(2,2) holding a stone c7(8,4) c8(9,6).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 15,
+      "state": "Day 15 of 120. \n9 creatures alive (0 have died in all). Average food 8.8/10, warmth 0.6/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 1 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 12 sticks, 103 grasss, 4 logs, 8 stones, 1 tallbush, 5 trees, 9 berrys, 1 sapling.\nCreatures are at: c1(9,3) holding a grass c2(3,11) holding a stick c3(10,4) c4(8,3) c5(12,8) c6(2,10) c7(11,7) c8(8,3) c9(11,4) holding a stick.\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 18,
+      "state": "Day 18 of 120. \n10 creatures alive (0 have died in all). Average food 8.7/10, warmth 0.6/10, rest 9.3/10.\nNo fire. There has never been one.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 101 grasss, 4 logs, 8 stones, 1 tallbush, 5 trees, 2 saplings, 8 berrys.\nCreatures are at: c1(9,1) c2(7,5) c3(13,1) c4(10,11) c5(8,6) c6(3,3) c7(13,7) c8(9,6) holding a stick c9(6,5) holding a grass c10(9,6) holding a grass.\nCells with three or more things stacked: 11.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 21,
+      "state": "Day 21 of 120. \n10 creatures alive (0 have died in all). Average food 8.1/10, warmth 0.1/10, rest 9.2/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 84 grasss, 4 logs, 8 stones, 1 tallbush, 5 trees, 2 saplings, 11 berrys.\nCreatures are at: c1(9,6) holding a grass c2(13,2) c3(10,6) c4(11,7) c5(9,6) c6(13,4) c7(12,8) c8(8,5) c9(12,7) holding a stick c10(3,11) holding a stick.\nCells with three or more things stacked: 4.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 24,
+      "state": "Day 24 of 120. \n11 creatures alive (1 have died in all). Average food 9.0/10, warmth 0.8/10, rest 9.4/10.\nNo fire. There has never been one.\nSince your last look: 2 born; died: c7 (the beast); predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 14 sticks, 77 grasss, 4 logs, 8 stones, 5 trees, 2 saplings, 10 berrys.\nCreatures are at: c1(16,10) c2(8,9) c3(5,7) c4(13,3) c5(0,10) c6(4,6) c8(9,10) c9(17,11) c10(9,10) c11(16,10) c12(16,10).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 27,
+      "state": "Day 27 of 120. \n11 creatures alive (1 have died in all). Average food 8.8/10, warmth 0.0/10, rest 9.2/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 80 grasss, 4 logs, 8 stones, 6 trees, 2 saplings, 9 berrys.\nCreatures are at: c1(16,10) c2(8,0) holding a grass c3(12,6) c4(11,2) c5(5,5) holding a stick c6(8,5) c8(8,9) c9(12,3) c10(9,3) holding a stick c11(10,2) c12(11,3).\nCells with three or more things stacked: 6.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 30,
+      "state": "Day 30 of 120. \n11 creatures alive (1 have died in all). Average food 9.2/10, warmth 0.0/10, rest 9.2/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 92 grasss, 4 logs, 8 stones, 7 trees, 2 saplings, 4 berrys.\nCreatures are at: c1(8,8) c2(8,3) c3(6,5) c4(10,4) c5(4,9) c6(11,5) holding a stick c8(13,6) c9(8,4) c10(9,2) c11(0,10) holding a grass c12(0,10) holding a stick.\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 33,
+      "state": "Day 33 of 120. The meadow is lean: little grows. \n12 creatures alive (1 have died in all). Average food 7.9/10, warmth 0.3/10, rest 9.4/10.\nNo fire. There has never been one.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 93 grasss, 4 logs, 8 stones, 7 trees, 2 saplings, 1 berry.\nCreatures are at: c1(11,4) holding a stick c2(11,9) holding a grass c3(10,11) c4(10,5) c5(8,4) c6(11,2) c8(10,6) c9(10,5) c10(16,10) c11(9,8) c12(5,7) c13(11,5).\nCells with three or more things stacked: 12.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 36,
+      "state": "Day 36 of 120. The meadow is lean: little grows. \n12 creatures alive (1 have died in all). Average food 6.6/10, warmth 0.1/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 95 grasss, 4 logs, 8 stones, 7 trees, 2 saplings, 3 berrys.\nCreatures are at: c1(12,5) holding a grass c2(11,5) c3(10,6) c4(12,8) c5(11,5) c6(8,4) c8(10,5) c9(10,11) c10(11,5) c11(10,11) c12(3,11) c13(12,8).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 39,
+      "state": "Day 39 of 120. \n12 creatures alive (2 have died in all). Average food 9.2/10, warmth 0.5/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 1 born; died: c8 (cold and hunger); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 100 grasss, 4 logs, 8 stones, 8 trees, 1 sapling, 3 berrys.\nCreatures are at: c1(11,5) c2(11,5) holding a grass c3(6,4) c4(8,4) c5(10,8) c6(11,5) c9(6,6) c10(6,7) c11(10,4) c12(6,5) c13(8,3) holding a grass c14(16,10) holding a stick.\nCells with three or more things stacked: 11.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 42,
+      "state": "Day 42 of 120. \n12 creatures alive (2 have died in all). Average food 9.2/10, warmth 0.1/10, rest 9.9/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 109 grasss, 4 logs, 8 stones, 9 trees.\nCreatures are at: c1(9,1) c2(4,5) holding a grass c3(16,10) c4(15,5) c5(4,5) c6(16,10) c9(10,11) c10(3,11) c11(5,4) c12(4,5) c13(7,3) c14(9,2) holding a grass.\nCells with three or more things stacked: 14.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 45,
+      "state": "Day 45 of 120. \n12 creatures alive (2 have died in all). Average food 8.6/10, warmth 0.0/10, rest 9.5/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 108 grasss, 4 logs, 8 stones, 9 trees.\nCreatures are at: c1(6,5) holding a grass c2(12,8) holding a grass c3(7,5) c4(6,0) c5(13,5) c6(16,10) c9(13,4) c10(4,6) c11(2,5) holding a grass c12(5,7) c13(12,7) c14(11,6) holding a stick.\nCells with three or more things stacked: 16.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 48,
+      "state": "Day 48 of 120. \n12 creatures alive (2 have died in all). Average food 8.4/10, warmth 0.0/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 105 grasss, 4 logs, 8 stones, 9 trees, 1 berry.\nCreatures are at: c1(5,5) c2(3,11) c3(11,6) c4(10,4) c5(12,6) c6(3,9) holding a grass c9(10,5) c10(7,3) c11(8,7) c12(3,11) holding a grass c13(9,4) c14(13,4).\nCells with three or more things stacked: 12.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 51,
+      "state": "Day 51 of 120. \n12 creatures alive (2 have died in all). Average food 8.9/10, warmth 0.1/10, rest 9.8/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 105 grasss, 4 logs, 7 stones, 9 trees, 1 berry.\nCreatures are at: c1(3,11) c2(6,8) c3(10,4) holding a grass c4(7,6) holding a grass c5(3,11) c6(12,7) c9(10,5) holding a grass c10(12,2) c11(4,8) c12(5,7) holding a stone c13(10,8) c14(12,7).\nCells with three or more things stacked: 11.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 54,
+      "state": "Day 54 of 120. \n12 creatures alive (2 have died in all). Average food 9.3/10, warmth 0.0/10, rest 9.5/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 3 times, attacked 1 times, was driven off 0 times.\nLying about: 14 sticks, 113 grasss, 4 logs, 8 stones, 9 trees, 2 berrys.\nCreatures are at: c1(11,3) c2(17,11) c3(10,11) holding a grass c4(13,8) c5(14,7) c6(12,5) c9(13,7) c10(15,5) c11(13,5) c12(6,0) holding a grass c13(3,9) c14(13,6).\nCells with three or more things stacked: 11.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 57,
+      "state": "Day 57 of 120. \n12 creatures alive (2 have died in all). Average food 9.1/10, warmth 0.0/10, rest 8.9/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 2 times, was driven off 0 times.\nLying about: 14 sticks, 110 grasss, 4 logs, 8 stones, 9 trees.\nCreatures are at: c1(6,3) c2(13,4) holding a grass c3(12,4) holding a grass c4(13,7) holding a grass c5(10,1) c6(0,9) c9(7,4) c10(16,10) c11(9,5) holding a grass c12(10,3) c13(11,1) holding a berry c14(2,8).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 60,
+      "state": "Day 60 of 120. \n12 creatures alive (2 have died in all). Average food 8.9/10, warmth 0.0/10, rest 8.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 1 times, was driven off 0 times.\nLying about: 14 sticks, 99 grasss, 4 logs, 8 stones, 9 trees, 9 berrys.\nCreatures are at: c1(10,7) c2(11,6) holding a grass c3(10,5) holding a grass c4(10,6) c5(8,4) c6(13,6) holding a grass c9(10,11) c10(8,4) c11(0,0) c12(13,6) c13(12,4) c14(8,5).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 63,
+      "state": "Day 63 of 120. The meadow is lean: little grows. \n6 creatures alive (8 have died in all). Average food 7.9/10, warmth 0.0/10, rest 7.0/10.\nNo fire. There has never been one.\nSince your last look: 0 born; died: c1 (old age), c2 (old age), c3 (old age), c4 (old age), c5 (old age), c6 (old age); predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 93 grasss, 4 logs, 8 stones, 9 trees, 12 berrys.\nCreatures are at: c9(9,3) c10(9,4) c11(6,1) c12(8,4) c13(6,3) c14(1,7).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 66,
+      "state": "Day 66 of 120. The meadow is lean: little grows. \n6 creatures alive (8 have died in all). Average food 7.8/10, warmth 0.0/10, rest 6.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 85 grasss, 4 logs, 8 stones, 9 trees, 13 berrys.\nCreatures are at: c9(16,10) c10(8,3) c11(3,11) c12(9,5) c13(12,6) c14(11,8).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 69,
+      "state": "Day 69 of 120. \n5 creatures alive (9 have died in all). Average food 7.4/10, warmth 0.0/10, rest 7.7/10.\nNo fire. There has never been one.\nSince your last look: 0 born; died: c13 (cold and hunger); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 76 grasss, 4 logs, 8 stones, 9 trees, 44 berrys.\nCreatures are at: c9(10,9) c10(4,4) c11(8,3) c12(10,3) c14(8,3).\nCells with three or more things stacked: 13.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 72,
+      "state": "Day 72 of 120. \n5 creatures alive (9 have died in all). Average food 7.3/10, warmth 0.0/10, rest 6.8/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 78 grasss, 4 logs, 8 stones, 9 trees, 54 berrys.\nCreatures are at: c9(9,6) c10(7,5) c11(12,5) holding a berry c12(9,8) c14(7,4).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 75,
+      "state": "Day 75 of 120. \n3 creatures alive (11 have died in all). Average food 7.5/10, warmth 0.0/10, rest 8.4/10.\nNo fire. There has never been one.\nSince your last look: 0 born; died: c12 (cold and hunger), c9 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 76 grasss, 4 logs, 8 stones, 9 trees, 57 berrys.\nCreatures are at: c10(5,6) c11(5,6) c14(8,4).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 78,
+      "state": "Day 78 of 120. \n2 creatures alive (12 have died in all). Average food 8.5/10, warmth 0.0/10, rest 9.1/10.\nNo fire. There has never been one.\nSince your last look: 0 born; died: c10 (old age); predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 72 grasss, 4 logs, 8 stones, 9 trees, 69 berrys.\nCreatures are at: c11(10,9) c14(10,7).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 81,
+      "state": "Day 81 of 120. \n4 creatures alive (12 have died in all). Average food 8.7/10, warmth 2.5/10, rest 8.3/10.\nNo fire. There has never been one.\nSince your last look: 2 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 81 grasss, 4 logs, 8 stones, 9 trees, 63 berrys.\nCreatures are at: c11(8,5) c14(11,3) c15(11,4) c16(11,4).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 84,
+      "state": "Day 84 of 120. \n3 creatures alive (13 have died in all). Average food 9.0/10, warmth 0.3/10, rest 9.5/10.\nNo fire. There has never been one.\nSince your last look: 0 born; died: c11 (old age); predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 81 grasss, 4 logs, 8 stones, 9 trees, 64 berrys.\nCreatures are at: c14(7,7) c15(9,7) c16(8,7) holding a grass.\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 87,
+      "state": "Day 87 of 120. \n3 creatures alive (13 have died in all). Average food 9.3/10, warmth 0.0/10, rest 9.0/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 78 grasss, 4 logs, 8 stones, 9 trees, 70 berrys.\nCreatures are at: c14(10,3) c15(10,4) c16(10,4) holding a grass.\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 90,
+      "state": "Day 90 of 120. \n4 creatures alive (13 have died in all). Average food 9.2/10, warmth 1.3/10, rest 9.5/10.\nNo fire. There has never been one.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 74 grasss, 4 logs, 8 stones, 9 trees, 64 berrys.\nCreatures are at: c14(8,5) c15(10,2) c16(8,4) holding a grass c17(11,3).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 93,
+      "state": "Day 93 of 120. The meadow is lean: little grows. \n4 creatures alive (13 have died in all). Average food 9.8/10, warmth 0.0/10, rest 9.1/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 2 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 73 grasss, 4 logs, 8 stones, 9 trees, 41 berrys.\nCreatures are at: c14(4,8) c15(4,6) c16(2,6) c17(3,6).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 96,
+      "state": "Day 96 of 120. The meadow is lean: little grows. \n5 creatures alive (13 have died in all). Average food 9.7/10, warmth 0.7/10, rest 9.5/10.\nNo fire. There has never been one.\nSince your last look: 1 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 62 grasss, 4 logs, 8 stones, 9 trees, 23 berrys.\nCreatures are at: c14(9,5) c15(16,6) c16(0,10) holding a stick c17(10,5) c18(1,7).\nCells with three or more things stacked: 5.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 99,
+      "state": "Day 99 of 120. \n4 creatures alive (14 have died in all). Average food 9.5/10, warmth 0.0/10, rest 9.8/10.\nNo fire. There has never been one.\nSince your last look: 0 born; died: c14 (old age); predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 70 grasss, 4 logs, 7 stones, 9 trees, 21 berrys.\nCreatures are at: c15(11,7) c16(8,5) c17(9,10) c18(0,0) holding a stone.\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 102,
+      "state": "Day 102 of 120. \n4 creatures alive (14 have died in all). Average food 9.6/10, warmth 0.0/10, rest 10.0/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 76 grasss, 4 logs, 8 stones, 9 trees, 22 berrys.\nCreatures are at: c15(5,3) c16(8,0) c17(3,11) holding a grass c18(1,8) holding a stick.\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 105,
+      "state": "Day 105 of 120. \n4 creatures alive (14 have died in all). Average food 9.7/10, warmth 0.0/10, rest 9.9/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 82 grasss, 4 logs, 8 stones, 9 trees, 27 berrys.\nCreatures are at: c15(8,4) c16(9,3) c17(10,1) c18(9,1).\nCells with three or more things stacked: 8.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 108,
+      "state": "Day 108 of 120. \n5 creatures alive (14 have died in all). Average food 9.7/10, warmth 1.2/10, rest 9.8/10.\nNo fire. There has never been one.\nSince your last look: 1 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 84 grasss, 4 logs, 8 stones, 9 trees, 21 berrys.\nCreatures are at: c15(16,10) c16(16,10) c17(8,5) c18(6,3) c19(8,6).\nCells with three or more things stacked: 10.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 111,
+      "state": "Day 111 of 120. \n5 creatures alive (14 have died in all). Average food 9.3/10, warmth 0.3/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 85 grasss, 4 logs, 8 stones, 9 trees, 18 berrys.\nCreatures are at: c15(9,5) c16(9,3) c17(3,7) c18(9,5) c19(2,8) holding a grass.\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 114,
+      "state": "Day 114 of 120. \n8 creatures alive (14 have died in all). Average food 9.5/10, warmth 1.6/10, rest 9.8/10.\nNo fire. There has never been one.\nSince your last look: 3 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 14 sticks, 82 grasss, 4 logs, 8 stones, 9 trees, 10 berrys.\nCreatures are at: c15(8,1) c16(8,5) holding a grass c17(7,6) c18(12,7) c19(8,5) holding a grass c20(1,4) holding a grass c21(0,10) c22(10,10).\nCells with three or more things stacked: 7.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 117,
+      "state": "Day 117 of 120. \n8 creatures alive (14 have died in all). Average food 9.4/10, warmth 0.2/10, rest 9.8/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 0 times, attacked 0 times, was driven off 0 times.\nLying about: 13 sticks, 84 grasss, 4 logs, 8 stones, 9 trees, 9 berrys.\nCreatures are at: c15(10,10) c16(10,5) c17(12,9) c18(10,6) c19(12,5) holding a grass c20(12,7) c21(0,10) holding a stick c22(8,7).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    },
+    {
+      "day": 120,
+      "state": "Day 120 of 120. \n8 creatures alive (14 have died in all). Average food 9.2/10, warmth 0.0/10, rest 9.6/10.\nNo fire. There has never been one.\nSince your last look: 0 born; no deaths; predator came 1 times, attacked 0 times, was driven off 0 times.\nLying about: 12 sticks, 76 grasss, 4 logs, 8 stones, 9 trees, 11 berrys.\nCreatures are at: c15(12,8) c16(9,7) c17(4,6) c18(12,2) c19(11,5) holding a stick c20(3,5) c21(0,10) holding a stick c22(13,8).\nCells with three or more things stacked: 9.",
+      "decision": {
+        "action": "wait",
+        "reason": "none"
+      },
+      "applied": "nothing",
+      "used": 0
+    }
+  ]
+}
