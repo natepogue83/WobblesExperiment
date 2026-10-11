@@ -23,18 +23,18 @@ Generated 2026-10-11 by `node lab/research/run.mjs`. Intervals are 95% bootstrap
 |---|---|---|---|
 | change in mean caution, founders to survivors | -0.00 [-0.04, 0.03] | 0.02 [-0.02, 0.05] | -0.00 [-0.03, 0.03] |
 | change in mean brawn | -0.01 [-0.03, 0.02] | 0.00 [-0.02, 0.03] | 0.01 [-0.02, 0.03] |
-| births per colony | 16.77 [15.95, 17.48] | 16.53 [15.30, 17.73] | 15.73 [14.58, 16.81] |
+| births per colony | 16.77 [15.97, 17.48] | 16.53 [15.25, 17.72] | 15.73 [14.53, 16.84] |
 | colonies extinct by day 120 | 1/64 | 10/64 | 7/64 |
 | killed by the predator (all colonies) | 0 | 36 | 2 |
 | hunger deaths (all colonies) | 36 | 300 | 54 |
 | predator attacks / driven off | 0 / 0 | 450 / 183 | 97 / 265 |
 | shards struck / trees felled / tools joined | 527 / 316 / 325 | 503 / 326 / 261 | 713 / 455 / 441 |
 
-Difference in caution change, predator minus control: **0.02 [-0.03, 0.07]**. Targeted predator minus control: **0.00 [-0.04, 0.05]**.
+Difference in caution change, predator minus control: **0.02 [-0.03, 0.07]**. Targeted predator minus control: **0.00 [-0.05, 0.05]**.
 
 ### H3a mechanism, predator colonies (1225 individuals who lived 16+ days)
 
-Spearman rho, caution vs offspring: **0.02 [-0.04, 0.08]**.
+Spearman rho, caution vs offspring: **0.02 [-0.03, 0.08]**.
 
 | | cautious (≥0.6, n=425) | bold (<0.4, n=411) |
 |---|---|---|
@@ -56,7 +56,7 @@ Spearman rho, caution vs offspring: **0.01 [-0.04, 0.07]**.
 
 ### H3a mechanism, no predator colonies (1350 individuals who lived 16+ days)
 
-Spearman rho, caution vs offspring: **-0.01 [-0.06, 0.05]**.
+Spearman rho, caution vs offspring: **-0.01 [-0.06, 0.04]**.
 
 | | cautious (≥0.6, n=449) | bold (<0.4, n=469) |
 |---|---|---|

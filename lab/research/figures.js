@@ -30,7 +30,7 @@ export function dotCI({ title, unit, rows, width = 720 }) {
 
 // Grouped bars for two series over a few categories; values as shares or counts.
 export function bars({ title, unit, groups, series, pct = false, width = 720 }) {
-  const left = 60, right = 30, top = 70, bottom = 60, h = 320, plotW = width - left - right, plotH = h - top - bottom;
+  const left = 60, right = 30, top = 84, bottom = 60, h = 334, plotW = width - left - right, plotH = h - top - bottom;
   const max = Math.max(...series.flatMap(s => s.values)) * 1.15 || 1;
   const Y = v => top + plotH - v / max * plotH;
   const gw = plotW / groups.length, bw = Math.min(44, gw / (series.length + 1));
@@ -40,7 +40,7 @@ export function bars({ title, unit, groups, series, pct = false, width = 720 }) 
   s += `<text x="${left}" y="26" font-size="15" font-weight="600" fill="${INK}">${esc(title)}</text>`;
   s += `<text x="${left}" y="44" fill="${INK2}">${esc(unit)}</text>`;
   // legend
-  series.forEach((se, i) => { const lx = width - right - 170 + i * 0; const yy = 22 + i * 16; s += `<rect x="${width - right - 150}" y="${yy - 9}" width="10" height="10" rx="2" fill="${colors[i]}"/><text x="${width - right - 134}" y="${yy}" fill="${INK}">${esc(se.name)}</text>`; });
+  series.forEach((se, i) => { const lx = left + i * 170, yy = top - 12; s += `<rect x="${lx}" y="${yy - 9}" width="10" height="10" rx="2" fill="${colors[i]}"/><text x="${lx + 16}" y="${yy}" fill="${INK}">${esc(se.name)}</text>`; });
   for (const t of niceTicks(0, max, 4)) { if (t > max) continue; s += `<line x1="${left}" x2="${width - right}" y1="${Y(t)}" y2="${Y(t)}" stroke="${GRID}"/><text x="${left - 8}" y="${Y(t) + 4}" text-anchor="end" fill="${INK2}">${pct ? Math.round(t * 100) + '%' : fmtTick(t)}</text>`; }
   groups.forEach((g, gi) => {
     const cx = left + gi * gw + gw / 2, x0 = cx - (series.length * bw + (series.length - 1) * 2) / 2;

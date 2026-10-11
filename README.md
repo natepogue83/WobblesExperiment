@@ -1,8 +1,16 @@
 # Wobblins
 
+**Research first:** [`lab/research/REPORT.md`](lab/research/REPORT.md) is a pre-registered study of a
+recipe-free artificial-life world: *when selection pressure doesn't select, because learning
+absorbs it*. The pre-registration, the decision log, the one-command harness and the results
+are in [`lab/research/`](lab/research/). The simulation itself is [`lab/`](lab/), described below.
+The code was written by an AI agent (Claude) under Nate Pogue's direction; the research design
+and the decisions are his.
+
+---
+
 A tiny, never-resetting world of curious Wobblins. You shape their world; they invent.
-The binding spec is [CONTRACT.md](CONTRACT.md). The week-1 brief is
-`C:\Users\ignit\Downloads\week1-build-plan.md`.
+The binding spec is [CONTRACT.md](CONTRACT.md).
 
 ## Run it
 

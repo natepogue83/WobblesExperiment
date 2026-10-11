@@ -92,7 +92,10 @@ async function main() {
   if (!only || only === 'h3') for (const cond of ['control', 'predator', 'targeted']) for (const s of SEEDS) jobs.push({ exp: 'h3', seed: s, cond });
   if (!only || only === 'ablations') for (const cond of ['baseline', 'noWatch', 'wipeDaily', 'noBreed']) for (const s of SEEDS) jobs.push({ exp: 'ablation', seed: s, cond });
   console.log(`${jobs.length} runs, N = ${N} seeds, ${Math.min(cpus().length - 1, jobs.length)} workers`);
-  const rs = await runAll(jobs);
+  const fresh = await runAll(jobs);
+  const ran = new Set(fresh.map(r => r.exp));
+  const old = only && fs.existsSync(path.join(OUT, 'raw.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'raw.json'), 'utf8')).filter(r => !ran.has(r.exp)) : [];
+  const rs = [...old, ...fresh];
   fs.writeFileSync(path.join(OUT, 'raw.json'), JSON.stringify(rs));
 
   const md = [`# Results (N = ${N} seeds per condition)\n`, `Generated ${new Date().toISOString().slice(0, 10)} by \`node lab/research/run.mjs\`. Intervals are 95% bootstrap CIs over seeds.\n`];
@@ -158,7 +161,7 @@ async function main() {
     fs.writeFileSync(path.join(OUT, 'fig-h3-caution.svg'), dotCI({ title: 'Change in mean caution, founders to day-120 survivors', unit: 'caution (0 to 1.6)', rows: conds.map(c => ({ label: names[c], ci: stats[c].dCaution })) }));
     fs.writeFileSync(path.join(OUT, 'fig-h3-births.svg'), dotCI({ title: 'Births per colony over 120 days', unit: 'births', rows: conds.map(c => ({ label: names[c], ci: stats[c].born })) }));
     const mp = summary.h3.predator.mechanism;
-    fs.writeFileSync(path.join(OUT, 'fig-h3a-nights.svg'), bars({ title: 'How cautious and bold creatures spend their nights (predator colonies)', unit: 'share of night ticks', groups: ['fleeing', 'resting somewhere closed', 'eating'], series: [{ name: 'cautious (≥0.6)', values: [mp.cautiousFlee, mp.cautiousRestClosed, mp.cautiousEat] }, { name: 'bold (<0.4)', values: [mp.boldFlee, mp.boldRestClosed, mp.boldEat] }], pct: true }));
+    fs.writeFileSync(path.join(OUT, 'fig-h3a-nights.svg'), bars({ title: 'Nights in predator colonies: cautious versus bold', unit: 'share of night ticks', groups: ['fleeing', 'resting somewhere closed', 'eating'], series: [{ name: 'cautious (≥0.6)', values: [mp.cautiousFlee, mp.cautiousRestClosed, mp.cautiousEat] }, { name: 'bold (<0.4)', values: [mp.boldFlee, mp.boldRestClosed, mp.boldEat] }], pct: true }));
   }
   // ---- ablations -------------------------------------------------------------------------------
   const ab = pick(rs, 'ablation');
