@@ -7,5 +7,9 @@
   "scripts": {
     "test": "node tests/run-all.js",
     "start": "node server.js"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "zod": "^4.6.5"
   }
 }
