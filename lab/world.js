@@ -59,7 +59,10 @@ export function addObject(world, kind, x, y, state = {}) {
   world.objects.push(o);
   return o;
 }
-export function objectsAt(world, x, y) { return world.objects.filter(o => !o.gone && !o.held && o.x === x && o.y === y); }
+export function objectsAt(world, x, y, idx) { if (idx) return x >= 0 && y >= 0 && x < W && y < H ? idx.get(y * W + x) || EMPTY : EMPTY; return world.objects.filter(o => !o.gone && !o.held && o.x === x && o.y === y); }
+const EMPTY = Object.freeze([]);
+// Everything lying in each cell, built once when many cells are about to be asked.
+export function indexObjects(world) { const m = new Map(); for (const o of world.objects) { if (o.gone || o.held) continue; const k = o.y * W + o.x; let a = m.get(k); if (!a) m.set(k, a = []); a.push(o); } return m; }
 export function live(world) { return world.objects.filter(o => !o.gone); }
 export function emit(world, ev) { world.events.push({ t: world.tick, ...ev }); return ev; }
 
@@ -142,24 +145,24 @@ export function sparksAt(world, x, y, r) {
 }
 
 // How high the hard things in a cell are stacked (stones and logs make footing; sticks and grass don't).
-export function stackHeight(world, x, y) {
+export function stackHeight(world, x, y, idx) {
   let h = 0;
-  for (const o of objectsAt(world, x, y)) { const m = MATERIALS[o.kind]; if (m.fixed || o.burning) continue; if (m.hard >= 0.6 && m.weight >= 3) h += 1; else if (m.hard >= 0.6) h += 0.5; }
+  for (const o of objectsAt(world, x, y, idx)) { const m = MATERIALS[o.kind]; if (m.fixed || o.burning) continue; if (m.hard >= 0.6 && m.weight >= 3) h += 1; else if (m.hard >= 0.6) h += 0.5; }
   return Math.floor(h);
 }
 // A cell is covered when something big and long (a trunk) lies on top of a stack at least one high.
-export function covered(world, x, y) {
-  const here = objectsAt(world, x, y);
-  return stackHeight(world, x, y) >= 1 && here.some(o => o.kind === 'log') && here.filter(o => MATERIALS[o.kind].hard >= 0.6 && MATERIALS[o.kind].weight >= 3).length >= 2;
+export function covered(world, x, y, idx) {
+  const here = objectsAt(world, x, y, idx);
+  return stackHeight(world, x, y, idx) >= 1 && here.some(o => o.kind === 'log') && here.filter(o => MATERIALS[o.kind].hard >= 0.6 && MATERIALS[o.kind].weight >= 3).length >= 2;
 }
 
 // A cell is walled when three or more of its four sides are blocked by a stack, a standing
 // tree or bush, or water. Nothing big can get in; it is also a little warmer out of the wind.
-export function walled(world, x, y) {
+export function walled(world, x, y, idx) {
   let sides = 0;
   for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
     const c = cellAt(world, x + dx, y + dy);
-    if (!c || c.water || stackHeight(world, x + dx, y + dy) >= 1 || objectsAt(world, x + dx, y + dy).some(o => MATERIALS[o.kind].fixed)) sides++;
+    if (!c || c.water || stackHeight(world, x + dx, y + dy, idx) >= 1 || objectsAt(world, x + dx, y + dy, idx).some(o => MATERIALS[o.kind].fixed)) sides++;
   }
   return sides >= 3;
 }

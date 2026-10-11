@@ -19,6 +19,7 @@ export function step(world) {
   for (const c of world.creatures) creatureStep(world, c);
   breedingStep(world);
   world.tick++;
+  if (world.tick % 24 === 0) world.objects = world.objects.filter(o => !o.gone);   // drop what is gone; nothing points at it any more
 }
 export function run(world, ticks) { for (let i = 0; i < ticks; i++) step(world); return world; }
 

@@ -6,7 +6,7 @@
 // Seeing another creature act gives a weaker memory than doing it yourself.
 // No recipes, no hidden property is ever read here.
 import { rngFor } from '../src/sim/rng.js';
-import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, sparksAt, stackHeight, covered, walled, cutTree, splitLog, protectedAt, addObject, W, H } from './world.js';
+import { MATERIALS, cellAt, objectsAt, live, lookAt, featureKey, isNight, emit, sparksAt, stackHeight, covered, walled, cutTree, splitLog, protectedAt, addObject, indexObjects, W, H } from './world.js';
 
 export const ACTIONS = ['pickup', 'place', 'taste', 'strike', 'approach', 'climb', 'watch', 'beckon', 'rest', 'flee', 'wander'];
 const VIEW = 3;             // how far they see
@@ -46,8 +46,8 @@ function others(world, c, d = VIEW) { return world.creatures.filter(k => k !== c
 function beasts(world, c, d = VIEW + 2) { return (world.prowlers || []).filter(p => !p.gone && near(c, p, d)); }
 // The nearest spot that would keep a beast off: by a fire, inside walls, or in a crowd.
 function safeSpot(world, c) {
-  let best = null, bd = 99;
-  for (const cell of world.cells) { if (cell.water) continue; const d = Math.max(Math.abs(cell.x - c.x), Math.abs(cell.y - c.y)); if (d > VIEW + 2 || d >= bd) continue; if (cell.heat > 0 || walled(world, cell.x, cell.y)) { best = cell; bd = d; } }
+  let best = null, bd = 99; const idx = indexObjects(world);
+  for (const cell of world.cells) { if (cell.water) continue; const d = Math.max(Math.abs(cell.x - c.x), Math.abs(cell.y - c.y)); if (d > VIEW + 2 || d >= bd) continue; if (cell.heat > 0 || walled(world, cell.x, cell.y, idx)) { best = cell; bd = d; } }
   if (!best) { const crowd = others(world, c, VIEW + 2).filter(k => others(world, k, 1).length >= 1)[0]; if (crowd) best = { x: crowd.x, y: crowd.y }; }
   return best;
 }
@@ -64,10 +64,11 @@ function remembered(c, fk, p) { return { x: p.x, y: p.y, remembered: fk, kind: n
 function options(world, c) {
   const out = [];
   const seen = visible(world, c);
+  const idx = indexObjects(world);   // one pass over the objects for all the cell questions below
   notePlaces(world, c);
   const seenKeys = new Set(seen.map(o => featureKey(lookAt(world, o))));
   const carryFk = c.carrying ? featureKey(lookAt(world, c.carrying)) : null;
-  const me = stackHeight(world, c.x, c.y) >= 1 ? 'high' : 'low';
+  const me = stackHeight(world, c.x, c.y, idx) >= 1 ? 'high' : 'low';
   for (const o of seen) {
     const fk = featureKey(lookAt(world, o));
     if (!c.carrying) out.push({ action: 'pickup', target: o, key: expKey(fk, 'pickup') });
@@ -92,7 +93,7 @@ function options(world, c) {
     if (bc && !bc.water && !objectsAt(world, bc.x, bc.y).some(o => MATERIALS[o.kind].fixed)) out.push({ action: 'place', target: { x: bc.x, y: bc.y, cell: true, kind: null }, key: expKey('beside', 'place', carryFk) });
   }
   // Climb onto a stack next to me.
-  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const cx = c.x + dx, cy = c.y + dy; if (stackHeight(world, cx, cy) >= 1) out.push({ action: 'climb', target: { x: cx, y: cy, kind: null, cell: true }, key: expKey('stack', 'climb') }); }
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const cx = c.x + dx, cy = c.y + dy; if (stackHeight(world, cx, cy, idx) >= 1) out.push({ action: 'climb', target: { x: cx, y: cy, kind: null, cell: true }, key: expKey('stack', 'climb') }); }
   for (const k of others(world, c)) { out.push({ action: 'watch', target: k, key: expKey('creature', 'watch') }); if ((c.bonds[k.id] || 0) > 0.1) out.push({ action: 'beckon', target: k, key: expKey('creature', 'beckon') }); }
   // A beast in sight: run for somewhere safe, or hit it with what I carry.
   for (const b of beasts(world, c)) {
@@ -102,20 +103,20 @@ function options(world, c) {
   }
   // Rest here, or go and rest somewhere particular: by a fire, under a roof, inside walls.
   const when = isNight(world) ? 'night' : 'day';
-  out.push({ action: 'rest', target: null, key: expKey(when, 'rest', placeKind(world, c.x, c.y)) });
+  out.push({ action: 'rest', target: null, key: expKey(when, 'rest', placeKind(world, c.x, c.y, idx)) });
   const spots = [];
-  for (let dy = -VIEW; dy <= VIEW; dy++) for (let dx = -VIEW; dx <= VIEW; dx++) { const cell = cellAt(world, c.x + dx, c.y + dy); if (!cell || cell.water || (!dx && !dy)) continue; const pk = placeKind(world, cell.x, cell.y); if (pk !== 'open' && !spots.some(s => s.pk === pk)) spots.push({ pk, cell }); }
+  for (let dy = -VIEW; dy <= VIEW; dy++) for (let dx = -VIEW; dx <= VIEW; dx++) { const cell = cellAt(world, c.x + dx, c.y + dy); if (!cell || cell.water || (!dx && !dy)) continue; const pk = placeKind(world, cell.x, cell.y, idx); if (pk !== 'open' && !spots.some(s => s.pk === pk)) spots.push({ pk, cell }); }
   for (const s of spots) out.push({ action: 'rest', target: { x: s.cell.x, y: s.cell.y, cell: true, kind: null }, key: expKey(when, 'rest', s.pk) });
   out.push({ action: 'wander', target: null, key: 'wander' });
   return out;
 }
 
 // What kind of place a cell is, in visible terms.
-function placeKind(world, x, y) {
+function placeKind(world, x, y, idx) {
   const cell = cellAt(world, x, y);
   if (cell && cell.heat > 0) return 'fire';
-  if (covered(world, x, y)) return 'roof';
-  if (walled(world, x, y)) return 'walls';
+  if (covered(world, x, y, idx)) return 'roof';
+  if (walled(world, x, y, idx)) return 'walls';
   return 'open';
 }
 
