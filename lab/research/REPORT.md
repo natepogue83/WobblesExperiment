@@ -220,7 +220,7 @@ read the intervals as rough. Full table and every decision: `results/keeper/KEEP
 | Keeper | alive at day 120 | hunger deaths | fire burning at the end | interventions used |
 |---|---|---|---|---|
 | Opus 5.5 | 7.0 [3.0, 10.8] | 1.5 [0.7, 2.7] | 5/6 | 7.3 [6.0, 9.3] |
-| Haiku 4.5 | see KEEPER.md | | | 12 of 12, every seed |
+| Haiku 4.5 | 9.2 [6.5, 11.7] | 1.2 [0.7, 1.7] | 4/6 | 12 of 12, every seed |
 | none | 8.3 [4.3, 11.7] | 3.8 [2.0, 5.8] | 1/6 | 0 |
 | scripted ember | 7.5 [3.8, 10.7] | 3.8 [2.0, 5.8] | 3/6 | 1 |
 | random | 8.7 [4.7, 11.8] | 2.8 [1.2, 4.8] | 2/6 | 12, with 53 tries past budget |
