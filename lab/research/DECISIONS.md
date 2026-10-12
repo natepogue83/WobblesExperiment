@@ -20,13 +20,18 @@ changed. Drafted from the project thread by the agent; Nate edits and signs off.
 | 2026-10-10 | "How could I turn this into something a frontier lab would want to hire me for?" | The decision to treat the lab as research: hypotheses, controls, honesty about the negative result. |
 | 2026-10-11 | "We need this ready for my portfolio before I apply to Anthropic Fellows. With that context, what would you change?" Then: "Create the plan and then execute." | Pre-registration before the confirmatory runs; the 64-seed harness; this log. |
 
+| 2026-10-11 | Had a separate AI system (Astra) review the work as a skeptical Fellows reviewer. | Review 1: the headline was retracted; four bugs and a false anecdote were found. |
+| 2026-10-11 | "Just fix it and I'll have Astra review before another run." | The v2 run, already started, was stopped unread so the fixes could be reviewed first. |
+| 2026-10-12 | Sent v2 and then v3 back to Astra before any confirmatory run. | Review 2 ("redesign first") and review 3 ("run after these changes") reshaped the design; the confirmatory run used a fresh seed bank. |
+| 2026-10-12 | Accepted the result as registered: effect modification, not the story the project started with. | The report leads with the actual finding and the record of what went wrong. |
+
 ## What the agent got wrong, and who caught it
 
 - The agent built menus and art that read as machine-made; Nate caught it twice.
 - The agent built a lab view with a light source per object; Nate caught the lag.
-- The agent's pilot (8 seeds) reported that a predator selected for boldness. The
-  pre-registered 64-seed run found no effect on caution in either direction. The pilot
-  was noise. Pre-registering before the confirmatory run is what kept that honest.
+- The agent wrote v1's headline ("learning absorbed the pressure") after the registered prediction failed, and copied a model's false account of a colony into the report. Astra caught both.
+- The agent's measurements had bugs it had not tested for; Astra found them in three rounds.
+- The agent overstated progress twice in status documents ("every fix has a test", "ran v2"); Astra caught both.
 
 ## What Nate decided against
 
