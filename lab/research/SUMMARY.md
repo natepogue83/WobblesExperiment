@@ -4,7 +4,7 @@
 
 ## The short version
 
-I built a small simulated world where creatures learn from what happens to them, learn by
+I had Claude build a small simulated world where creatures learn from what happens to them, learn by
 watching each other, have children who inherit their temperament but none of their memories, and
 keep a fire going across generations. Then I added a predator and asked one question: **does
 learning about danger hide that danger from evolution?** If creatures can simply learn to avoid
