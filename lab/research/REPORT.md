@@ -229,8 +229,8 @@ Re-analyse the saved data (about a minute). Git stores the raw data compressed; 
 first, and the analysis checks its hash against the run's manifest before doing anything:
 
 ```
-git clone <repository>
-cd woblins
+git clone https://github.com/natepogue83/WobblesExperiment.git
+cd WobblesExperiment
 node tests/run-all.js
 gunzip -k lab/research/results/raw.json.gz
 ANALYZE=1 node lab/research/run.mjs
