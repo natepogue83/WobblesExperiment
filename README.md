@@ -7,7 +7,15 @@ risk learning we did not establish a positive predator-related advantage for cau
 learning shifted selection slightly toward boldness. The report tells how
 the first version's headline was wrong and how the audits caught it. Pre-registrations, reviews,
 responses, the run log, the harness and every result are in [`lab/research/`](lab/research/).
-The code was written by an AI agent (Claude) under Nate Pogue's direction.
+
+**Why this is here.** The code was written by an AI agent (Claude) under Nate Pogue's direction;
+Nate does not write code. The evolutionary result is small. The part that matters for AI
+oversight is the process: the agent's first write-up rationalised a failed prediction into a
+headline, repeated a model's false anecdote as fact, and overstated what had been measured. A
+second AI reviewer (Astra) caught each of these from a snapshot, the human retracted and re-ran on
+fresh seeds, and every version, including the stopped run, is kept here. It is a worked example of
+what it takes to trust research an AI agent produced: pre-registration in git, hashed inputs, a
+reviewer that didn't write the code, and a person who decides what the write-up is allowed to claim.
 
 ---
 

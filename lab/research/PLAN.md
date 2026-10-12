@@ -1,3 +1,5 @@
+> **Superseded (2026-10-12).** This was the plan written on 2026-10-11 before the audits. Its "headline result" came from the 64-seed pilot and was retracted after Astra's first review (noise, interval straddling zero), and its claim that an isolated creature never acquires the fire was contradicted by the H1 test (fed without watching in 30% of colonies). It is kept for the record only. For what was actually found, read [SUMMARY.md](SUMMARY.md) and [REPORT.md](REPORT.md).
+
 # Plan: the lab as a research portfolio piece
 
 Target: Anthropic Fellows application, January cohort, due 2026-10-18.

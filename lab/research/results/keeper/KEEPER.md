@@ -1,3 +1,5 @@
+> **Unreliable, kept for the record.** Astra's audit found the rain tool broken, scoring applied late and a false anecdote in the write-up. The harness was fixed afterwards but this run was never repeated, so none of the numbers below should be cited. See REPORT.md, appendix B.
+
 # The Keeper study (H4, exploratory)
 
 Each Keeper saw the colony every 3 days for 120 days and could intervene up to 12 times. Seeds are identical across Keepers. Intervals are 95% bootstrap CIs over seeds (small N; read as rough).

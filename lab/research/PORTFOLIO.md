@@ -13,4 +13,4 @@ I built a small deterministic world where creatures learn from experience and fr
 **Tags:** artificial life, cultural evolution, pre-registration, evaluation, AI-assisted research.
 
 **Images:** `results/captures/` (board by day, the fire at night with the predator, a Wobblin up
-close) and the three figures in `results/`.
+close) and the figure in `results/`.

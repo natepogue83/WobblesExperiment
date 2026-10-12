@@ -21,7 +21,7 @@ S is the offspring-weighted minus plain mean caution over each colony's cohort b
 
 | predator | E_on | E_off | I = E_off - E_on | seeds with all four arms | decision |
 |---|---|---|---|---|---|
-| default | -0.008 [-0.014, -0.002] | -0.001 [-0.008, 0.005] | **0.006 [0.000, 0.012]** | 256 | effect modification: I is positive, but a positive predator-related selection differential without risk learning is not shown |
+| default | -0.008 [-0.014, -0.002] | -0.001 [-0.008, 0.005] | **0.006 [0.0003, 0.012]** | 256 | effect modification: I is positive, but a positive predator-related selection differential without risk learning is not shown |
 | direct | 0.011 [0.005, 0.017] | (same as E_on: no prowler, so no risk learning) | n/a | 256 | (secondary) |
 | gene | 0.009 [0.004, 0.015] | (same as E_on: no prowler, so no risk learning) | n/a | 256 | (secondary) |
 

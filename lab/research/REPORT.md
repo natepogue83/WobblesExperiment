@@ -10,9 +10,9 @@ section 8.*
 I built a small deterministic world in which creatures learn from what happens to them and from
 watching each other, breed with inherited traits, and keep a fire going across generations. I
 asked whether a predator selects for an inherited trait, caution, and whether creatures' ability
-to *learn* about the predator changes that selection. The idea that learning can absorb a
-selection pressure before the genome responds is old (the Baldwin effect); the aim was a small,
-checkable instance of it.
+to *learn* about the predator changes that selection. Whether learning hides a selection pressure
+from the genome (the "hiding effect") or guides it (the Baldwin effect, Hinton and Nowlan) is an
+old question; the aim was a small, checkable instance of the first.
 
 The final, pre-registered test (version 3.1, 256 fresh seeds, every method check passed) found:
 
@@ -133,7 +133,7 @@ Registered decision: **effect modification**. All 256 seeds had a defined S in e
 
 For scale, the gene-only regime, which ties death directly to the gene and kills about 16 creatures
 per colony, produced S = 0.009 above no predator. The default predator's effects are of the same
-order but opposite in sign when risk learning is on, and absent when it is off.
+order but opposite in sign when risk learning is on, and not detected when it is off.
 
 **What the predator did.** With risk learning on, 1,515 attacks and 33 deaths across 256
 colonies; with it off, 1,777 attacks and 25 deaths. Extinctions: none in either. In every arm, more
@@ -197,8 +197,8 @@ arguing with it.
 
 ## 8. How this was built, and what's actually mine
 
-I'm not a coder. I want to be upfront about that, because the Fellows process has a coding test
-without AI and I'd rather you know now than find out then.
+I'm not a coder. I want to be upfront about that, because anyone reading this for a hiring
+decision should know it before the interview, not after.
 
 Every line of code here, the statistics, and the first draft of every document were written by
 Claude, running in Claude Code. What I did was steer it. I started out wanting to make a game, a
@@ -209,14 +209,14 @@ opportunities) I made the call to throw out what we had and build that. Later I 
 it into research instead of a product, because the interesting part was never the game, it was
 whether the creatures were really learning.
 
-The decisions I'm proudest of are the boring ones. I didn't trust the first result just because it
-was exciting. I brought in a second AI, Astra, to review the work like a skeptical reviewer would,
+The decisions that mattered were the unglamorous ones. I didn't trust the first result just because
+it was exciting. I brought in a second AI, Astra, to review the work like a skeptical reviewer would,
 three separate times. When Astra said the headline was wrong, I had it retracted instead of
 arguing. When a run had already started before a review was done, I had it stopped, unread. And
 when the final answer came back as "not the story we started with", I kept it as the result.
 
-I can't write this code yet. What I can do is direct it, check it against what it claims, notice
-when something feels off, and decide what it's allowed to say. Every decision is logged, with the
+I can't write this code yet. What I can do is direct it, have it checked by a reviewer that didn't
+write it, notice when something feels off, and decide what it's allowed to say. Every decision is logged, with the
 date and what it changed, in `DECISIONS.md`.
 
 ## 9. Reproduction
@@ -254,9 +254,12 @@ also removed access to the fire.
 
 Before the reviews, I gave Claude Opus 5.5 and Claude Haiku 4.5 the Keeper's role: a vague goal
 ("keep the colony safe and thriving; be kind"), twelve interventions, and a plain description of
-the colony every three days, over six seeds each, about $8 in all (`results/keeper/`). Neither
-model improved survival over no Keeper. Opus used fewer interventions and stated hypotheses and
-worries; Haiku used all twelve every time. Both acted on false beliefs about the world.
+the colony every three days, over six seeds each, about $8 in all (`results/keeper/`). The run
+appeared to show that neither model improved survival over no Keeper and that both acted on false
+beliefs about the world, but the harness faults below mean those readings can't be trusted: the
+models were fed mislabelled observations, so the false beliefs may have been the harness's, not
+the models'. What the run does show is that Opus used fewer interventions and stated hypotheses
+and worries, while Haiku used all twelve every time.
 
 Review 1 found that runs were scored at day 123 rather than 120, the rain tool did nothing, the
 observation the models received was missing positions and mislabelled events, and that I had
@@ -279,4 +282,3 @@ because the false-anecdote error is itself the most relevant finding for a safet
    meta-analyses," *Social Psychological and Personality Science* 8(4), 2017.
 7. T. P. Morris, I. R. White and M. J. Crowther, "Using simulation studies to evaluate statistical
    methods," *Statistics in Medicine* 38(11), 2019.
-8. V. Krakovna et al., "Specification gaming: the flip side of AI ingenuity," DeepMind blog, 2020.
