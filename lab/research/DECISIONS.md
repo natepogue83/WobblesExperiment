@@ -2,8 +2,8 @@
 
 This is how I steered the project. Claude (through Claude Code) wrote the code; the calls
 below are mine, in the order I made them, with what each one changed. Claude drafted this
-from our project thread and I've edited it. Quotes are what I actually said at the time,
-typos cleaned up.
+from our project thread, in my voice; I haven't edited it yet. Quotes are what I said at the
+time, with typos cleaned up.
 
 | When (UTC) | Nate's call | What it changed |
 |---|---|---|

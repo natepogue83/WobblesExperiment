@@ -17,16 +17,17 @@ was something else. **Their culture survives because they watch each other.**
 
 ## What I found
 
-- **Watching is what keeps the tradition alive.** A creature that could watch others was about
-  twice as likely to start feeding the fire (66% of colonies against 30%). When no one could learn
+- **Watching is what keeps the tradition alive.** One creature, kept in the colony with the
+  same access to the fire, went on to feed it within two weeks in 66% of colonies when it could
+  learn by watching others, and in 30% when it could not. When no one could learn
   by watching, the fire survived in 14% of colonies instead of 61%.
 - **New generations pick it up by seeing it done.** After every original creature had died, the fire
   was still being kept by their descendants in 61% of colonies. In colonies where descendants took up
   the fire, on average 94% of them had watched someone feed it before they first did.
 - **The predator didn't reward caution.** When creatures couldn't learn about the predator, we
   couldn't detect any advantage for being born cautious. When they could learn about it, the
-  bolder ones did very slightly better. That difference is measurable but small, and it only just clears
-  the bar we set in advance.
+  bolder ones did very slightly better. The main pre-registered test, the difference between those
+  two situations, is small and only just clears the bar we set in advance.
 
 ## How it was checked
 
