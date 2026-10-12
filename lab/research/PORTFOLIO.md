@@ -1,22 +1,12 @@
 # Portfolio entry (draft for the site)
 
-**Title:** When selection pressure doesn't select
+**Title:** Does learning hide a predator from evolution?
 
-**One line:** A pre-registered study in a recipe-free artificial-life world: a predator added
-to select for caution changed nothing in the genome, because learned, shared behaviour
-absorbed the pressure first.
+**One line:** A pre-registered test in a small artificial-life world, run only after three rounds of independent audit caught a wrong headline, four measurement bugs and a false anecdote in the first version.
 
 **Blurb (about 120 words):**
 
-I built a small deterministic world where creatures learn from what happens to them and from
-watching each other, breed with inherited traits, and keep culture alive across generations.
-Then I added a predator to see whether evolution would select for caution. An eight-seed pilot
-said it selected for boldness. I pre-registered the hypotheses, ran 64 seeds per condition, and
-the effect vanished: cautious creatures behaved differently but had the same number of
-children. Learning covered the gap before selection could. Switching off learning-by-watching
-cut the colony's fire-keeping six-fold. A final exploratory study put Claude in the Keeper's
-seat with a vague goal and a budget, and recorded what it optimised. The code was written by
-an AI agent under my direction; the questions, decisions and honesty are mine.
+I built a small deterministic world where creatures learn from experience and from watching each other, breed with inherited traits, and keep a fire alive across generations. I asked whether a predator selects for caution, and whether learning about the predator hides that pressure from evolution. My first version claimed it did; an independent reviewer showed the claim was written after a failed prediction and rested on buggy measurements. Three review rounds later, a fresh 256-seed pre-registered run found no cautious advantage to hide: risk learning shifted selection slightly toward boldness. Watching others roughly doubled the chance of taking up the fire. The code was written by an AI agent under my direction; the decisions, and the record of every mistake, are mine.
 
 **Links:** report, pre-registration, decision log, repository, 3D view.
 

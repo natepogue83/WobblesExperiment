@@ -1,11 +1,12 @@
 # Wobblins
 
-**Research first:** [`lab/research/REPORT.md`](lab/research/REPORT.md) is a pre-registered study of a
-recipe-free artificial-life world: *when selection pressure doesn't select, because learning
-absorbs it*. The pre-registration, the decision log, the one-command harness and the results
-are in [`lab/research/`](lab/research/). The simulation itself is [`lab/`](lab/), described below.
-The code was written by an AI agent (Claude) under Nate Pogue's direction; the research design
-and the decisions are his.
+**Research first:** [`lab/research/REPORT.md`](lab/research/REPORT.md) is a pre-registered study in a small
+artificial-life world: does learning about a predator hide it from evolution? After three rounds of
+independent review and a fresh 256-seed run, the answer here is no: risk learning shifts selection
+slightly toward boldness, and there was no cautious advantage for it to hide. The report tells how
+the first version's headline was wrong and how the audits caught it. Pre-registrations, reviews,
+responses, the run log, the harness and every result are in [`lab/research/`](lab/research/).
+The code was written by an AI agent (Claude) under Nate Pogue's direction.
 
 ---
 
