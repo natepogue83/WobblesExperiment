@@ -2,8 +2,9 @@
 
 **Research first:** [`lab/research/REPORT.md`](lab/research/REPORT.md) is a pre-registered study in a small
 artificial-life world: does learning about a predator hide it from evolution? After three rounds of
-independent review and a fresh 256-seed run, the answer here is no: risk learning shifts selection
-slightly toward boldness, and there was no cautious advantage for it to hide. The report tells how
+independent review and a fresh 256-seed run, the shielding prediction was not supported: without
+risk learning we did not establish a positive predator-related advantage for caution, and risk
+learning shifted selection slightly toward boldness. The report tells how
 the first version's headline was wrong and how the audits caught it. Pre-registrations, reviews,
 responses, the run log, the harness and every result are in [`lab/research/`](lab/research/).
 The code was written by an AI agent (Claude) under Nate Pogue's direction.

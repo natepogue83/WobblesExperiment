@@ -14,9 +14,10 @@ checkable instance of it.
 
 The final, pre-registered test (version 3.1, 256 fresh seeds, every method check passed) found:
 
-- **No sign that learning hides an advantage for caution.** With predator-risk learning switched
-  off, the predator had no detectable effect on selection for caution
-  (E_off = −0.001, 95% interval −0.008 to 0.005). There was no advantage for learning to hide.
+- **The shielding prediction was not supported.** With predator-risk learning switched off, we
+  did not establish a positive predator-related advantage for caution
+  (E_off = −0.001, 95% interval −0.008 to 0.005). Small positive effects remain compatible with
+  that interval; the result is not proof that the advantage is exactly zero.
 - **With risk learning on, the predator slightly favoured bolder creatures**
   (E_on = −0.008, interval −0.014 to −0.002).
 - The difference between the two, the pre-registered primary test, was positive but barely
@@ -28,9 +29,11 @@ Three supporting results are robust at this scale:
 
 - A creature that could not learn by watching fed the fire by day 17 in 30% of colonies, against
   66% when it could (difference 0.36, interval 0.28 to 0.44).
-- In 94% of cases, a descendant's first feeding of the fire came after it had watched another
-  creature do it.
-- Switching off learning by watching cut fire survival to day 50 from 156 of 256 colonies to 36.
+- In the 170 colonies where descendants took up fire-feeding, on average 94% of a colony's
+  descendant practitioners (interval 90% to 97%) had watched another creature feed the fire before
+  their own first feed.
+- Switching off learning by watching cut fire survival to day 50 from 156 of 256 colonies (61%)
+  to 36 (14%): 47 percentage points, or about 77% fewer colonies.
 
 The more instructive result is the path to these numbers. My first confirmatory run (v1) reported
 that learning "absorbed" the predator's pressure. That claim was an explanation written after the
@@ -148,18 +151,20 @@ Watching is not strictly necessary, but it roughly doubles the chance.
 
 **H2, persistence (70 days).** In 155 of 256 colonies (0.61, 0.55 to 0.66) every founder had died,
 a fire was burning, and a descendant fed it in the last four days. A fire burned without a gap
-from day 3 to day 70 in 140. Among colonies with descendant practitioners, 94% (90% to 97%) of
-them had seen an actual feed before their own first. That is evidence of opportunity to learn by
+from day 3 to day 70 in 140. In the 170 colonies with at least one descendant practitioner, the
+average within-colony share of descendant practitioners who had seen an actual feed before their
+own first was 94% (90% to 97%); the other 86 colonies had none and are excluded from that share. That is evidence of opportunity to learn by
 watching, not proof that watching caused it.
 
-**Ablations (descriptive; predator present, 50 days).** Fire burning at day 50: unchanged 156/256;
-no learning by watching 36; memory wiped every dawn 1; no children 132.
+**Ablations (descriptive; predator present, 50 days).** Fire burning at day 50: unchanged 156/256
+(61%); no learning by watching 36 (14%); memory wiped every dawn 1; no children 132.
 
 ## 5. What this does and does not show
 
-It shows that, in this world, the default predator does not create a detectable advantage for
-caution when creatures cannot learn about it, and that switching risk learning on shifts selection
-slightly toward boldness. One hypothesis, untested here: creatures that learn which places are
+It shows that, in this world, we could not establish a positive predator-related advantage for
+caution when creatures cannot learn about the predator (small positive effects remain compatible
+with the data), and that switching risk learning on shifts the predator-related selection
+differential downward, slightly toward boldness. One hypothesis, untested here: creatures that learn which places are
 dangerous get much of caution's protection without the cost of caution, so the bold do a little
 better. A study designed for that question would need to measure the costs of caution directly.
 
@@ -206,17 +211,27 @@ it is allowed to claim.
 
 ## 9. Reproduction
 
+Re-analyse the saved data (about a minute). Git stores the raw data compressed; decompress it
+first, and the analysis checks its hash against the run's manifest before doing anything:
+
 ```
 git clone <repository>
 cd woblins
 node tests/run-all.js
+gunzip -k lab/research/results/raw.json.gz
+ANALYZE=1 node lab/research/run.mjs
+```
+
+Re-run the whole experiment from scratch (about thirty minutes on twelve cores). The command
+refuses to overwrite earlier output, so move the saved results aside first:
+
+```
+mkdir saved && mv lab/research/results/raw.json* lab/research/results/manifest*.json saved/
 node lab/research/run.mjs
 ```
 
-The confirmatory command refuses to run over existing output; to reproduce, move `results/raw.json*`
-and `results/manifest*.json` aside first. It takes about thirty minutes on twelve cores.
-`ANALYZE=1` re-analyses the saved data and checks its hash. `PRECISION=1` and `ANALYZE_DEV=1`
-reproduce the development work on seeds 1001 to 1064.
+The new `raw.json` should have the same SHA-256 as `rawHash` in the saved manifest.
+`PRECISION=1` and `ANALYZE_DEV=1` reproduce the development work on seeds 1001 to 1064.
 
 ## Appendix A. v1, as it was
 
