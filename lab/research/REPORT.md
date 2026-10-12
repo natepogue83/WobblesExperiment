@@ -1,5 +1,7 @@
 # Does learning hide a predator from evolution? A pre-registered test in a small artificial-life world, after three rounds of independent audit
 
+*A one-page plain-language summary is [SUMMARY.md](SUMMARY.md).*
+
 *Nate Pogue. October 2026. The code was written by an AI agent (Claude) under my direction; see
 section 8.*
 
@@ -39,7 +41,7 @@ The more instructive result is the path to these numbers. My first confirmatory 
 that learning "absorbed" the predator's pressure. That claim was an explanation written after the
 registered prediction failed, and it rested on a measurement with four bugs. Three rounds of
 independent review found those bugs and several more, and each round changed the design. Section 2
-tells that story, because it is what I would most want a safety reader to judge me on.
+summarises how, and [HISTORY.md](HISTORY.md) has the details.
 
 ## 1. The world
 
@@ -71,22 +73,16 @@ on and off, down to a digest of the complete final state, in all 256 seeds.
 walls and a crowd of three keep it off; a hard enough blow drives it away. It rarely kills: 33
 deaths across 256 colonies with risk learning on. It mostly mauls: about 1,500 attacks.
 
-## 2. How the study changed, and why
+## 2. How this was checked
 
-| stage | what happened |
-|---|---|
-| Pilot (8 seeds) | Suggested the predator selected for *boldness*. |
-| v1 pre-registration and run (64 seeds) | No effect on caution. I explained the null as "learning absorbed the pressure", though the registered mechanism prediction had failed. |
-| Review 1 | Found that the explanation was not shown, four measurement bugs (the "practitioner" count included creatures that only watched; one attack was re-remembered every tick; "sheltering" counted walking toward shelter; a predator read a stale record), a model anecdote I had copied into the report that was false (a colony I described as having "no births" had seven), and missing reproduction files. |
-| v2 | Fixes and a new pre-registration. The run was **stopped unread** so the fixes could be reviewed first. |
-| Review 2 | "Redesign first": the learning switch leaked, the decision table could turn a wide null into a claim, the positive control could not establish what it said, and further bugs. |
-| v3 | Predator learning separated into its own memory; a gene-only simulation check; decision rules taken from the review; N chosen from a precision run on separate development seeds. |
-| Review 3 | "Run after these specific changes": the analysis would certify incomplete data (it gave a confident verdict from one seed), the code freeze missed the random-number module, a cohort boundary was off by one tick, and the memory wipe kept the new memory. |
-| v3.1 | Fixed; amended pre-registration; a new seed bank per v3's own rule; run once. |
-
-Everything is preserved: v1's outputs (`results-v1/`, tag `confirmatory-v1`), all three reviews
-(`reviews/`), point-by-point responses (`REVIEW-RESPONSE*.md`), and every launch, including the
-stopped one (`RUNLOG.md`).
+The predictions for each test were committed to git before it ran. A separate AI system, Astra,
+reviewed the work three times from exported snapshots. The first review showed that v1's headline
+("learning absorbed the pressure") was an explanation written after its prediction failed, found
+four measurement bugs and a false claim I had copied from a model, and the headline was retracted.
+The second and third reviews reshaped the design. One run was stopped unread so a review could come
+first. The final test ran once, on fresh seeds, and Astra reproduced it from the saved data. The
+full version history is in [HISTORY.md](HISTORY.md); every review, response and launch is kept
+(`reviews/`, `REVIEW-RESPONSE*.md`, `RUNLOG.md`).
 
 ## 3. Methods (v3.1)
 

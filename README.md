@@ -1,6 +1,6 @@
 # Wobblins
 
-**Research first:** [`lab/research/REPORT.md`](lab/research/REPORT.md) is a pre-registered study in a small
+**Research first:** start with the one-page [`lab/research/SUMMARY.md`](lab/research/SUMMARY.md). The full study, [`lab/research/REPORT.md`](lab/research/REPORT.md), is a pre-registered study in a small
 artificial-life world: does learning about a predator hide it from evolution? After three rounds of
 independent review and a fresh 256-seed run, the shielding prediction was not supported: without
 risk learning we did not establish a positive predator-related advantage for caution, and risk
