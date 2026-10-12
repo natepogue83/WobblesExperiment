@@ -244,7 +244,7 @@ export function creatureStep(world, c) {
   // Mauled since my last step: remember it, once, against what I was doing, and where.
   if (!c.alive) return;
   c.did = 'nothing'; c.didOutcome = null;
-  if (world.opts.wipeDaily && world.tick % 24 === 5) { c.exp.clear(); c.episodes = []; c.places = {}; c.builds = []; c.plan = null; c.attackedAt = null; }
+  if (world.opts.wipeDaily && world.tick % 24 === 5) { c.exp.clear(); c.episodes = []; c.places = {}; c.builds = []; c.plan = null; c.attackedAt = null; c.risk = {}; }   // bonds are kept
   if (c.attackedAt && c.attackedAt.t !== c.attackProcessed) {
     c.attackProcessed = c.attackedAt.t;
     const place = c.attackedAt.place || placeKind(world, c.attackedAt.x, c.attackedAt.y);

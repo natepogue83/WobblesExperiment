@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { selectionDifferential, pairedDiffCI, clusterSpearman, bootstrapMeanCI } from '../lab/research/stats.js';
-import { interaction, commonSeedEffects, decide, seedsFor, observedFeedFirst, bySeed } from '../lab/research/analyze.js';
+import { interaction, commonSeedEffects, decide, seedsFor, observedFeedFirst, bySeed, validateRows } from '../lab/research/analyze.js';
 import { section, ok } from './lib.js';
 
 section('S: Robertson-Price selection differential, known answers');
@@ -41,7 +41,9 @@ section('The pre-registered decision rules, on invented examples');
 {
   const ci = (lo, hi) => ({ lo, hi, mean: (lo + hi) / 2 });
   // Astra's first example: both arms favour caution equally; I = 0 tightly. Not "no selection".
-  assert.match(decide({ Eoff: ci(0.03, 0.05), I: ci(-0.005, 0.005) }, 0.02, true), /^equivalence/);
+  assert.match(decide({ Eoff: ci(0.03, 0.05), I: ci(-0.005, 0.005) }, 0.02, true), /^bounded/);
+  assert.match(decide({ Eoff: ci(0.01, 0.05), I: ci(0.01, 0.05) }, 0.02, true, false), /^withheld/);
+  assert.match(decide({ Eoff: ci(-0.05, -0.03), I: ci(-0.04, -0.02) }, 0.01, true), /shifts the predator-related selection differential upward/);
   // Astra's second example: I positive only because E_on is negative; not shielding.
   assert.match(decide({ Eoff: ci(-0.01, 0.01), I: ci(0.02, 0.06) }, 0.02, true), /^effect modification/);
   assert.match(decide({ Eoff: ci(0.01, 0.05), I: ci(0.01, 0.05) }, 0.02, true), /^attenuation/);
@@ -49,6 +51,19 @@ section('The pre-registered decision rules, on invented examples');
   assert.match(decide({ Eoff: ci(0, 0.02), I: ci(-0.05, -0.01) }, 0.02, true), /^opposite/);
   assert.match(decide({ Eoff: ci(0.01, 0.05), I: ci(0.01, 0.05) }, 0.02, false), /^unvalidated/);
   ok('attenuation needs both I and E_off clearly positive; a wide null is inconclusive; failed checks override everything');
+}
+
+section('Invalid input is rejected before any analysis');
+{
+  const expected = [1, 2, 3].flatMap(s => ['none|on', 'none|off'].map(cond => ({ exp: 'h3', cond, seed: s })));
+  const full = expected.map(j => ({ ...j, S_caution: 0.01, tick: 2880 }));
+  assert.equal(validateRows(full, expected, { h3: ['S_caution', 'tick'] }).ok, true);
+  assert.equal(validateRows(full.filter(r => r.seed === 1), expected).ok, false, 'one seed only');
+  assert.equal(validateRows(full.filter(r => r.cond !== 'none|off'), expected).missing, 3, 'a whole arm missing');
+  assert.equal(validateRows([...full, full[0]], expected).duplicate, 1);
+  assert.equal(validateRows([...full, { exp: 'h3', cond: 'x', seed: 9 }], expected).unexpected, 1);
+  assert.equal(validateRows(full.map(({ tick, ...r }) => r), expected, { h3: ['tick'] }).badFields, 6);
+  ok('one seed, a missing arm, duplicates, unexpected jobs and missing fields are all rejected');
 }
 
 section('Sample size from per-seed variability');
@@ -92,7 +107,9 @@ section('The harness exits cleanly');
   const bad = spawnSync(process.execPath, ['lab/research/run.mjs'], { env: { ...process.env, N: '8' }, timeout: 60000, encoding: 'utf8' });
   assert.notEqual(bad.status, 0, 'a confirmatory run with an override must refuse');
   assert.match(bad.stderr, /takes no overrides/);
-  ok('the worker pool terminates every worker; a confirmatory run refuses overrides');
+  const fail = spawnSync(process.execPath, ['lab/research/run.mjs'], { env: { ...process.env, SMOKE: 'fail' }, timeout: 60000, encoding: 'utf8' });
+  assert.notEqual(fail.status, 0, 'a failing job makes the run fail'); assert.equal(fail.signal, null, 'and it exits by itself rather than hanging');
+  ok('the worker pool terminates every worker on success and on failure; a confirmatory run refuses overrides');
 }
 
 console.log('\ntest-lab-analysis: all passed');

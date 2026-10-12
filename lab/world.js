@@ -216,8 +216,9 @@ export function prowlerStep(world, r) {
   if (!world.opts.threat) return;
   world.prowlers = world.prowlers || [];
   // Simulation check ('gene'): once a day, at dawn, every creature dies with a chance that falls with
-  // its caution gene, wherever it is and whatever it does. The expected effect on selection is
-  // known in direction and can be estimated in size, with nothing behavioural in the way.
+  // its caution gene, wherever it is and whatever it does. The mortality rule involves no behaviour;
+  // the resulting effect on lifetime offspring still passes through the whole ecology, so this is an
+  // empirical check that a gene-linked pressure yields a resolvable signal, not a known-answer one.
   if (world.opts.threatMode === 'gene') {
     if (world.tick % DAY !== 5 || world.tick <= 5 * DAY) return;
     for (const k of world.creatures) if (k.alive && r() < (world.opts.geneChance ?? 0.02) * Math.max(0, 1 - k.genome.caution / 1.6)) { k.alive = false; emit(world, { kind: 'died', who: k.id, cause: 'the beast', x: k.x, y: k.y }); }
@@ -226,8 +227,8 @@ export function prowlerStep(world, r) {
   // Positive control ('exposure'): no chase, no fleeing. At night, a creature that rested last tick
   // in the open (no fire, no walls) is taken with a fixed chance. The cost lands exactly on the
   // behaviour caution is meant to change, so this regime should select for caution if anything does.
-  // Assay check ('direct'): no behaviour involved. At night every creature outside fire or walls is taken
-  // with a chance that falls with its caution gene. If the selection measure cannot see this, it can see nothing.
+  // Stress test ('direct'): at night every creature outside fire or walls is taken with a chance that
+  // falls with its caution gene. Where a creature is (fire, walls) still matters, so behaviour is involved.
   if (world.opts.threatMode === 'direct') {
     if (!isNight(world) || world.tick <= 5 * DAY) return;
     for (const k of world.creatures) {
@@ -258,7 +259,7 @@ export function prowlerStep(world, r) {
   for (const p of world.prowlers) {
     if (!night || p.fed >= 1 || p.fled) { p.gone = true; emit(world, { kind: 'prowler_left', x: p.x, y: p.y, fed: p.fed, fled: !!p.fled }); continue; }
     const targeted = world.opts.threatMode === 'targeted' || world.opts.threatMode === 'exposure';
-    const prey = world.creatures.filter(k => k.alive && Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= 7 && !protectedAt(world, k.x, k.y, world.creatures) && (!targeted || k.lastAction === 'rest'))
+    const prey = world.creatures.filter(k => Math.max(Math.abs(k.x - p.x), Math.abs(k.y - p.y)) <= 7 && vulnerable(world, k, targeted ? (world.opts.threatMode || 'targeted') : 'default'))
       .sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
     if (!prey) { // wander the edge, slowly
       if (r() < 0.5) { const dx = Math.floor(r() * 3) - 1, dy = Math.floor(r() * 3) - 1; const c = cellAt(world, p.x + dx, p.y + dy); if (c && !c.water && c.heat === 0) { p.x = c.x; p.y = c.y; } }

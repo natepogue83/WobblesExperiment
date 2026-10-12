@@ -31,14 +31,30 @@ export function commonSeedEffects(pOff, nOff, pOn, nOn, B = 10000) {
 
 // The pre-registered decision rules (PREREGISTRATION-v3.md), applied mechanically.
 // delta: the smallest effect on S worth resolving; validated: did the method checks pass?
-export function decide({ Eoff, I }, delta, validated) {
+// Branches are checked in this order; the first that applies is the conclusion. "attenuation" says
+// only that I is positive, not that it exceeds delta: its size is always reported with it.
+export function decide({ Eoff, I }, delta, validated, complete = true) {
   if (!validated) return 'unvalidated: report estimates and limitations only';
+  if (!complete) return 'withheld: fewer seeds than the registered minimum have a defined S in all four arms; conditional estimates only';
   const pos = ci => ci.lo > 0, neg = ci => ci.hi < 0, inside = ci => ci.lo > -delta && ci.hi < delta;
-  if (pos(I) && pos(Eoff)) return 'attenuation: the specified risk learning attenuates a positive predator-related advantage of caution';
-  if (pos(I)) return 'effect modification: I is positive but a positive advantage of caution without risk learning is not shown';
-  if (neg(I)) return 'opposite direction: risk learning strengthens the predator effect on caution';
-  if (inside(I)) return `equivalence: any attenuation is smaller than ${delta} in this setting`;
+  if (pos(I) && pos(Eoff)) return 'attenuation: I is positive and E_off is positive, so the specified risk learning reduces a positive predator-related selection differential on caution (see the size of I)';
+  if (pos(I)) return 'effect modification: I is positive, but a positive predator-related selection differential without risk learning is not shown';
+  if (neg(I)) return 'opposite direction: risk learning shifts the predator-related selection differential upward relative to risk learning off (see the signs of E_on and E_off)';
+  if (inside(I)) return `bounded: the mean interaction lies within ±${delta} at the 95% level; this does not mean either predator effect is zero`;
   return 'inconclusive: the interval includes zero and effects of meaningful size';
+}
+
+// Input validation: the rows must be exactly the expected jobs, once each, with the required fields.
+// Missing jobs are invalid input (an error), never undefined biology.
+export function validateRows(rows, expected, required = {}) {
+  const key = r => `${r.exp}|${r.cond}|${r.seed}`;
+  const want = new Set(expected.map(key)), seen = new Map();
+  for (const r of rows) seen.set(key(r), (seen.get(key(r)) || 0) + 1);
+  const missing = [...want].filter(k => !seen.has(k)), duplicate = [...seen].filter(([, n]) => n > 1).map(([k]) => k), unexpected = [...seen.keys()].filter(k => !want.has(k));
+  const badFields = [];
+  for (const r of rows) for (const f of (required[r.exp] || [])) if (!(f in r)) badFields.push(key(r) + ':' + f);
+  const ok = !missing.length && !duplicate.length && !unexpected.length && !badFields.length;
+  return { ok, missing: missing.length, duplicate: duplicate.length, unexpected: unexpected.length, badFields: badFields.length, examples: [...missing, ...duplicate, ...unexpected, ...badFields].slice(0, 5) };
 }
 
 // Sample size for a two-sided 5% test with 80% power, from the per-seed SD of a contrast.

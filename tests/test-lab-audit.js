@@ -126,12 +126,14 @@ section('Each predator rule is one definition: the direct predator ignores crowd
 section('Eligibility is logged before the attack, including on the tick a creature dies');
 {
   const w = newColony(4, 6, { threat: true, threatMode: 'direct', directChance: 1e9 });   // certain death when eligible
-  run(w, 6 * DAY - 7);
-  let guard = 0; while (!w.events.some(e => e.cause === 'the beast') && guard++ < 5 * DAY) step(w);
+  run(w, 5 * DAY);   // the direct predator acts only after tick 120
+  let guard = 0, snap = null;
+  while (!w.events.some(e => e.cause === 'the beast') && guard++ < 5 * DAY) { snap = Object.fromEntries(w.creatures.map(c => [c.id, { ...c.vuln }])); step(w); }
   const e = w.events.find(x => x.cause === 'the beast');
   assert.ok(e, 'someone was taken');
   const victim = w.creatures.find(c => c.id === e.who);
-  assert.ok(victim.vuln.ticks >= 1 && victim.vuln.direct >= 1, 'the fatal tick is counted');
+  assert.equal(victim.vuln.ticks - snap[victim.id].ticks, 1, 'exactly one night tick added on the fatal step');
+  assert.equal(victim.vuln.direct - snap[victim.id].direct, 1, 'and exactly one direct-eligibility tick');
   ok('the victim of a fatal attack has its last night tick and its eligibility recorded');
 }
 
@@ -150,13 +152,29 @@ section('Dawn wipe clears fright memory; breeding order is shuffled');
 {
   const w = newColony(6, 6, { threat: false, wipeDaily: true });
   run(w, 20);
-  w.creatures[0].attackedAt = { x: 0, y: 0, t: w.tick };
+  w.creatures[0].attackedAt = { x: 0, y: 0, t: w.tick }; w.creatures[0].attackProcessed = w.tick; w.creatures[0].risk = { open: 2 };
   while (w.tick % 24 !== 6) step(w);
   assert.equal(w.creatures[0].attackedAt, null);
+  assert.deepEqual(w.creatures[0].risk, {}, 'risk memory cleared at dawn');
   const fs = await import('node:fs');
   const src = fs.readFileSync(new URL('../lab/creature.js', import.meta.url), 'utf8');
   assert.ok(src.includes('[live[i], live[j]] = [live[j], live[i]]'), 'breeding scans in shuffled order');
-  ok('the dawn wipe removes the fright location; breeding uses a seeded shuffle');
+  ok('the dawn wipe removes the fright location and the risk memory; breeding uses a seeded shuffle');
+}
+
+section('The gene-only hazard depends on the gene, not on place or behaviour');
+{
+  // hazard per dawn = 0.02 x (1 - caution / 1.6): caution 0.2 -> 0.0175, caution 0.8 -> 0.01
+  const w = newColony(7, 2, { threat: true, threatMode: 'gene', geneChance: 0.02 });
+  while (w.tick !== 6 * DAY + 5) step(w);
+  const [lo, hi] = w.creatures; lo.genome.caution = 0.2; hi.genome.caution = 0.8; lo.alive = hi.alive = true;
+  const { prowlerStep } = await import('../lab/world.js');
+  prowlerStep(w, () => 0.012);   // a draw between the two hazards
+  assert.equal(lo.alive, false, 'low caution taken'); assert.equal(hi.alive, true, 'high caution spared');
+  lo.alive = true; hi.x = 0; hi.y = 0; lo.x = 17; lo.y = 0;
+  prowlerStep(w, () => 0.012);
+  assert.equal(lo.alive, false); assert.equal(hi.alive, true, 'place does not matter');
+  ok('a draw of 0.012 takes caution 0.2 and spares caution 0.8, wherever they are');
 }
 
 console.log('\ntest-lab-audit: all passed');
