@@ -8,7 +8,7 @@ switch removes and what it keeps. Each line points to the test that checks it, i
 
 ## Where predator knowledge lives
 
-In v3, everything a creature learns about the predator is in one of two places:
+In v3, the learned records that carry predator risk into later decisions are in two places (with one more route, credit, noted below):
 
 1. **Risk memory** (`c.risk`): learned night-time danger per kind of place (`fire`, `walls`,
    `roof`, `crowd`, `open`). Written only by `learnRisk`. It changes resting choices at night.
@@ -24,8 +24,8 @@ Before v3, attacks were written into the experience memory of whatever the creat
 |---|---|---|---|
 | being attacked by the predator | no risk memory | no risk memory | *Risk learning off: no route...* |
 | being mauled after a failed strike | no encounter memory, no risk memory | no encounter memory | same |
-| fleeing (including reaching safety) | no encounter memory, no risk memory | not observed | same |
-| striking the predator (driving it off or failing) | no encounter memory | not observed | same |
+| fleeing (including reaching safety) | no encounter memory, no risk memory | observers with risk learning off do not record it (with it on, the ordinary observation loop does) | same |
+| striking the predator (driving it off or failing) | no encounter memory | as for fleeing | same |
 | credit flowing back from a predator encounter to earlier actions or to things built nearby | none | n/a | (code: `credit` gate in `creatureStep`) |
 | fright preferences after an attack (avoiding the attack site, favouring closed places for ten days) | switched off | n/a | (code: the two `!c.noRiskLearn` conditions in `score`) |
 
@@ -39,8 +39,10 @@ Before v3, attacks were written into the experience memory of whatever the creat
 | learning by watching, for everything except predator encounters | needed to separate the two | same |
 | **instincts**: fleeing a visible predator, the safe-spot finder, attraction to warmth, the caution-weighted pull toward closed places at night | inherited behaviour, not learning | (unchanged code paths) |
 
+Encounter episodes are still stored in the episode list with risk learning off, but no credit flows from them while the switch is off. With risk learning on, a predator outcome can also credit ordinary memories of earlier actions or of things built nearby; that is part of what the switch removes.
+
 ## What this means for the claim
 
-v3 tests whether removing **this specific predator-risk learning** changes the predator's effect
+v3 tests whether disabling **these enumerated risk-learning and fright pathways** changes the predator's effect
 on selection for caution. Shared fire culture, building and instincts remain available in both
 arms. A positive result would be about this intervention, not about "learning" in general.

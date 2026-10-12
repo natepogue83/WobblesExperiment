@@ -9,3 +9,4 @@ Every confirmatory launch, in order, including ones that were stopped.
 | 2026-10-11 13:53 | `3cfd866` (tag `preregistration-v2`) | v2 confirmatory run, N = 64 (1,088 runs) | **stopped at about 270 of 1,088 runs at Nate's request, so the v2 fixes could be independently reviewed first. The harness writes nothing until every run finishes; no v2 results were written or seen.** |
 | 2026-10-11 about 22:39 | `7132241` | v3 development precision run, seeds 1001-1064 (512 runs), not confirmatory | completed; `results-dev/PRECISION.md` |
 | 2026-10-11 about 22:48 | `7132241`+ | dry run of the v3 analysis on the development data | completed; `results-dev/dry-analysis/` |
+| 2026-10-12 | `6f7fe87` | v3.1 development precision rerun with the final code, seeds 1001-1064, and its dry analysis at delta 0.01 | completed; `results-dev/v3.1/` (run.mjs was edited while it ran, for the new seed bank only; the workers had already loaded the committed code) |

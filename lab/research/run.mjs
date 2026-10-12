@@ -6,7 +6,8 @@
 //   ANALYZE=1 node lab/research/run.mjs        re-analyse results/raw.json without simulating anything
 //
 // Seed banks never overlap: regression tests use 1-7, v1 and the stopped v2 used 1-64, the v2
-// calibration used 101-116, v3 development uses 1001-1064, v3 confirmation uses 2001 onward.
+// calibration used 101-116, v3 development uses 1001-1064, the v3 bank 2001-2256 was registered and
+// never accessed, v3.1 confirmation uses 3001-3256.
 // v1 is reproducible from git tag confirmatory-v1; its outputs are in results-v1/.
 import { Worker, isMainThread, parentPort } from 'node:worker_threads';
 import { cpus } from 'node:os';
@@ -32,7 +33,7 @@ export const FROZEN = {
   geneChance: 0.02,
   confirmSeeds: null            // filled below from N
 };
-FROZEN.confirmSeeds = range(2001, 2000 + FROZEN.N);
+FROZEN.confirmSeeds = range(3001, 3000 + FROZEN.N);   // v3.1: a new bank, per the v3 rule for post-commitment amendments
 const DEV_SEEDS = range(1001, 1064), TEST_SEEDS = [1, 2];
 
 const PRED = {
@@ -178,7 +179,7 @@ async function precision() {
 function analyze(rs, seeds, OUT, expected) {
   const v = validateRows(rs, expected, REQUIRED);
   if (!v.ok) throw new Error(`invalid input, no analysis: ${v.missing} missing, ${v.duplicate} duplicate, ${v.unexpected} unexpected jobs, ${v.badFields} missing fields (e.g. ${v.examples.join(', ')})`);
-  const md = [`# Results v3 (${seeds.length} seeds per condition, seeds ${seeds[0]}-${seeds.at(-1)})\n`, `Pre-registration: PREREGISTRATION-v3.md. Contrasts are paired by seed (bootstrap over seeds, 10,000 resamples); the interaction uses only seeds where all four arms have a defined S. Correlations resample whole colonies.\n`];
+  const md = [`# Results v3.1 (${seeds.length} seeds per condition, seeds ${seeds[0]}-${seeds.at(-1)})\n`, `Pre-registration: PREREGISTRATION-v3.md, version 3.1. Contrasts are paired by seed (bootstrap over seeds, 10,000 resamples); the interaction uses only seeds where all four arms have a defined S. Correlations resample whole colonies.\n`];
   const summary = {};
   // Manipulation checks (pre-registered pass rules)
   const colonies = (p, l) => rs.filter(r => r.exp === 'h3' && r.cond === h3cond(p, l));
@@ -203,7 +204,7 @@ function analyze(rs, seeds, OUT, expected) {
   // Primary: default predator
   const P = ['default', 'direct', 'gene'];
   summary.h3 = {};
-  md.push('## H3: predator effect on selection for caution, and its interaction with risk learning\n', 'S is the offspring-weighted minus plain mean caution over each colony\'s cohort born by day 60, early deaths included. Default is primary; direct and gene are secondary checks.\n',
+  md.push('## H3: predator effect on selection for caution, and its interaction with risk learning\n', 'S is the offspring-weighted minus plain mean caution over each colony\'s cohort born before day 60 (tick 1440), early deaths included. Default is primary; direct and gene are secondary checks.\n',
     '| predator | E_on | E_off | I = E_off - E_on | seeds with all four arms | decision |', '|---|---|---|---|---|---|');
   for (const p of P) {
     if (p !== 'default') { const eon = pairedDiffCI(S(rs, p, 'on', seeds), S(rs, 'none', 'on', seeds)); summary.h3[p] = { Eon: eon }; md.push(`| ${p} | ${fmt(eon, 3)} | (same as E_on: no prowler, so no risk learning) | n/a | ${eon.n} | (secondary) |`); continue; }

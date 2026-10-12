@@ -1,25 +1,48 @@
-# Pre-registration v3
+# Pre-registration, version 3.1
 
-Written 2026-10-12, after the second independent review (`reviews/2026-10-11-astra-review-2.md`,
-verdict "redesign first"), and before any v3 confirmatory run. It supersedes
-`PREREGISTRATION-v2.md`, whose run was stopped unread (`RUNLOG.md`). v1 stands as it was (tag
-`confirmatory-v1`, outputs in `results-v1/`).
+Version 3 was written 2026-10-12 after the second independent review. **Version 3.1** amends it
+after the third review (`reviews/2026-10-12-astra-review-3.md`, verdict "run after these specific
+changes"), before any confirmatory run. The file name is kept because the harness hashes it as an
+input; the version that governs the run is the one recorded in the run's manifest.
 
-Correction to v2: v2 said every fix had a regression test in `tests/test-lab-audit.js`. That was
-not true; several had none. In v3 every item below names its test.
+v1 stands as it was (tag `confirmatory-v1`, outputs in `results-v1/`). v2 was stopped unread
+(`RUNLOG.md`). v3's confirmation bank (2001 to 2256) was registered but never accessed.
 
-## The question, narrowed
+## Amendments in 3.1 (what changed from 3, and why)
+
+1. **Input validation.** The analysis now refuses to run unless the rows are exactly the expected
+   jobs, each once, with required fields. Missing jobs are invalid input, never undefined biology.
+   (The review showed the v3 analysis certifying a one-seed input.)
+2. **Usable-seed rule.** A categorical primary conclusion requires every seed to have a defined S in
+   all four primary arms. Otherwise the conclusion is "withheld" and only conditional estimates,
+   missingness and all-colony outcomes are reported.
+3. **Freeze.** The clean-tree check covers the whole tracked repository. Every input file,
+   including `src/sim/rng.js`, this document and `RISK-LEARNING.md`, is hashed at launch and
+   checked again at completion; reanalysis is bound to the raw-data hash and logged.
+4. **Cohort boundary.** The cohort is creatures born **strictly before** tick 1440. (A creature born
+   at tick 1440 can still breed at tick 2879, the last processed tick.)
+5. **Specificity check.** Compares a digest of the complete final state of each no-predator colony
+   with risk learning on and off, not five summary numbers.
+6. **Dawn wipe.** Now clears risk memory too, so the wipe ablation removes it.
+7. **Wording.** "Equivalence" becomes "bounded"; the negative-interaction label no longer claims
+   that risk learning "strengthens" the predator effect; branch order is stated; the gene regime is
+   described as an empirical check; delta's justification is restated as a declared choice.
+8. **Seed bank.** v3's own rule says an amendment after commitment takes a new seed bank. So 3.1
+   confirms on **seeds 3001 to 3256**. The 2001 to 2256 bank stays unused.
+
+## The question
 
 Does a predator change selection on the inherited caution trait, and does **predator-risk
-learning** (defined exactly in `RISK-LEARNING.md`) change that effect?
+learning**, as defined in `RISK-LEARNING.md`, change that effect?
 
-This is a question about one software intervention in one simulated world. A result either way
-says nothing about "learning" in general, and nothing about shared fire culture, building or
-instinct, which stay available in both arms.
+This tests one software intervention in one simulated world: switching off the enumerated
+risk-learning and fright pathways. Shared fire culture, building, comfort learning, instincts and
+the physical consequences of injury remain in both arms. A result either way says nothing about
+"learning" in general.
 
 ## Design
 
-**Arms (H3), 120 days each:**
+**Arms, 120 days each:**
 
 | arm | predator | risk learning |
 |---|---|---|
@@ -30,127 +53,115 @@ instinct, which stay available in both arms.
 | gene-on | gene-only regime (simulation check) | on |
 | direct-on | direct predator (stress test) | on |
 
-The gene-only and direct regimes have no prowler, so no risk learning ever happens in them and
-their "on" and "off" arms are identical. This was verified on all 64 development seeds, so only
-"on" is run.
+The gene-only and direct regimes have no prowler, so risk learning never occurs in them; their on
+and off arms were identical in every saved field on all 64 development seeds, so only "on" is run.
 
-**Seeds.** Confirmation uses seeds **2001 to 2256** (N = 256), which nothing else has used.
-Development used 1001 to 1064; the v2 calibration used 101 to 116; v1 and the stopped v2 used 1
-to 64; regression tests use 1 to 7. The banks do not overlap. The seed list is fixed in code
-(`FROZEN.confirmSeeds`), and a confirmatory run refuses any environment override.
+**Seeds.** 3001 to 3256 (N = 256). Development 1001 to 1064; v2 calibration 101 to 116; v1 and v2
+1 to 64; regression tests 1 to 7; v3's unused bank 2001 to 2256. The list is fixed in code
+(`FROZEN.confirmSeeds`); a confirmatory run refuses overrides, a dirty tree, and existing output.
 
 **Measure.** For each colony, S is the Robertson–Price selection differential on caution over the
-cohort born at or before day 60 (tick 1440): offspring-weighted mean caution minus plain mean,
-early deaths counted with their actual offspring (often zero). Every cohort member has a full
-60-day lifespan before the end at tick 2880. S is undefined (not zero) for a colony whose cohort
-has fewer than two members or no births.
+cohort born before tick 1440 (day 60): offspring-weighted mean caution minus plain mean, early
+deaths counted with their actual offspring. Each cohort member's whole lifespan (old age at more
+than 1440 ticks) ends within the run, which processes ticks 0 to 2879. S is undefined (not zero)
+when the cohort has fewer than two members or no births.
 
-**Contrasts.** E_on = S(default-on) − S(none-on). E_off = S(default-off) − S(none-off).
-I = E_off − E_on. All three are computed on the **common set of seeds** where all four arms
-have a defined S, paired by seed, with a 95% percentile bootstrap over seeds (10,000 resamples,
-seeded). The number of seeds used and dropped is reported.
+**Contrasts.** E_on = S(default-on) − S(none-on); E_off = S(default-off) − S(none-off);
+I = E_off − E_on. All three on the common set of seeds where all four arms have a defined S,
+paired by seed, 95% percentile bootstrap over seeds, 10,000 seeded resamples.
 
-## Method checks (validation), with pass rules fixed now
+## Method checks (validation)
 
-| check | rule | test |
+| check | pass rule | test or evidence |
 |---|---|---|
-| risk learning off removes risk memory | every creature in every none-off and default-off colony ends with zero risk memory and no `dark beast` experience | `test-lab-audit.js`: *Risk learning off: no route...* |
-| risk learning on learns risk | at least 90% of default-on colonies have some risk memory | development: 63/64 |
-| comfort learning about rest is kept | every default colony, in both arms, has rest memories | *...keeps comfort learning about rest* |
-| the switch is specific to predator risk | none-on and none-off identical in every seed | development: 64/64 identical |
+| risk learning off removes risk memory | every creature in every none-off and default-off colony ends with zero risk memory and no `dark beast` experience | `test-lab-audit.js` *Risk learning off...* |
+| risk learning on learns risk | at least 90% of default-on colonies have some risk memory | development |
+| comfort learning about rest is kept | every default colony in both arms has rest memories | *...keeps comfort learning about rest* |
+| the switch is specific | the complete final-state digest of none-on equals none-off in every seed | development (`results-dev/v3.1/`) |
 | full horizon | every H3 colony scored at tick 2880 | harness |
-| simulation check | S(gene-on) − S(none-on) has a 95% interval above zero | development: 0.015 [0.000, 0.030] |
+| simulation check | S(gene-on) − S(none-on): 95% interval above zero | development |
 
-**Validated** means every check passes. The simulation check is not a measure of "the smallest
-effect the method can detect"; it shows only that a deliberately strong, behaviour-free,
-gene-linked mortality produces a selection signal this analysis can resolve at N = 256.
+**Validated** means every check passes. The specificity check is a negative control for effects
+of the switch when there are no predator encounters; the pathway tests cover what it does when
+there are. The simulation check is an empirical gate: passing means this gene-linked regime gave a
+resolvable positive reproductive signal at N = 256; failing means the gate failed, and does not
+license retuning and retrying. It is not a measure of the method's detection limit.
 
-## The effect size worth resolving
+## delta
 
-**delta = 0.01** in units of S. On development seeds the gene-only regime, which kills about 17
-creatures per colony with a hazard tied directly to the caution gene, produced an S difference of
-about 0.015. delta is two-thirds of that: an attenuation of the predator's effect smaller than
-two-thirds of the strongest gene-linked pressure we built is, in this world, too small to matter
-for the question. It is about 6% of the founders' spread in caution (SD 0.174).
+**delta = 0.01**, in units of S (caution units of the offspring-weighted mean), declared as the
+absolute interaction size this study is designed to resolve. For scale only: it is about 6% of the
+founders' SD of caution (0.174), and about two-thirds of the S difference the gene-only regime
+produced on development seeds. Smaller interactions remain possible and may matter under other
+questions or over longer runs. delta was 0.02 in a development dry run and was set to 0.01 before
+any confirmatory data; that makes a "bounded" result harder, not easier.
 
-## Sample size
+## Planning figures
 
-On development seeds the per-seed SD of I was 0.051 (`results-dev/PRECISION.md`). With N = 256
-the standard error of I is about 0.0032, so a 95% interval has a half-width of about 0.006, which
-is narrow enough for an interval to sit inside ±0.01 when the true I is zero, and gives roughly
-85% power to detect I = 0.01. The per-seed SD of the gene check was 0.062, giving a standard error
-of about 0.004 at N = 256. These are planning figures from 64 development seeds and may be
-optimistic.
+From the 64 development seeds (rerun with the final code in `results-dev/v3.1/PRECISION.md`), the
+per-seed SD of I was about 0.05, giving a standard error near 0.003 at N = 256. Under a normal
+approximation that is roughly 88% power to detect I = 0.01, about 35% for I = 0.005, and about a
+77% chance that the interval falls inside ±0.01 when the true I is zero. These are planning
+calculations from 64 seeds, not measured operating characteristics of the whole decision table.
+An inconclusive result is an accepted possible outcome.
 
 ## Decision rules (primary: the default predator)
 
-Applied mechanically by `decide()` in `analyze.js` and tested on invented cases in
-`test-lab-analysis.js`.
+Applied mechanically by `decide()` in `analyze.js`, tested on invented cases in
+`test-lab-analysis.js`. Checked **in this order**; the first that applies is the conclusion.
 
-| evidence | what we will conclude |
-|---|---|
-| any method check fails | **unvalidated**: report the estimates and limitations only; no claim about attenuation |
-| I clearly positive (interval above zero) **and** E_off clearly positive | **attenuation**: risk learning, as defined, attenuates a positive predator-related advantage of caution; we state the size and the scope of the intervention |
-| I clearly positive, E_off not clearly positive | **effect modification**: the intended shielding of a positive advantage is not established |
-| I clearly negative | **opposite direction**: risk learning strengthens the predator's effect on caution |
-| I's interval entirely inside (−0.01, +0.01) | **equivalence**: any attenuation is smaller than 0.01 in this setting; this does not mean either predator effect is zero |
-| anything else | **inconclusive**: the interval includes zero and effects of meaningful size |
+| order | evidence | conclusion |
+|---|---|---|
+| 1 | any method check fails | **unvalidated**: estimates and limitations only |
+| 2 | fewer than all 256 seeds have S in all four arms | **withheld**: conditional estimates only |
+| 3 | I's interval above zero **and** E_off's interval above zero | **attenuation**: risk learning, as defined, reduces a positive predator-related selection differential on caution; I's size is always reported, and "attenuation" does not mean larger than delta |
+| 4 | I's interval above zero, E_off's not | **effect modification**: shielding of a positive advantage is not established |
+| 5 | I's interval below zero | **opposite direction**: risk learning shifts the predator-related selection differential upward relative to risk learning off; the signs of E_on and E_off are reported before any stronger wording |
+| 6 | I's interval entirely inside (−0.01, +0.01) | **bounded**: the mean interaction lies within ±0.01 at the 95% level; this does not mean either predator effect is zero, nor rule out a large proportional change in a small E_off |
+| 7 | anything else | **inconclusive** |
 
-E_on and E_off are always reported alongside I. A significant result on a secondary contrast
-cannot replace the primary.
+E_on and E_off are always reported with I. No secondary result can replace the primary.
 
 ## Secondary and descriptive (not tests)
 
-- **Gene-only and direct regimes**: E_on only.
-- **All-colony outcomes** per arm: extinctions, births, cohort births, predator and hunger
-  deaths, mean caution of the living at day 120 (survivor-conditioned, labelled as such), and
-  the count of undefined S.
-- **Caution and vulnerability**: within-colony rank correlation, resampling whole colonies (2,000
-  resamples), between caution and the share of night ticks a cohort member was takeable under each
-  predator's rule, logged before each predator draw (so a creature taken on a tick is counted).
-  Every cohort member is included; there is no age filter. Degenerate resamples are dropped and
-  counted.
-- **H1 (does feeding the fire depend on watching?)**: share of colonies in which c2 fed the fire
-  by day 17 with watching allowed versus blocked (c2 keeps full access), paired difference.
-  Prediction: allowed minus blocked is above zero. This is a difference in probability, not proof
-  that watching is necessary.
-- **H2 (persistence after the founders die, 70 days)**: late practice (founders all dead, a fire
-  burning, fed by a descendant in the last four days); whether a fire burned with no gap; and, per
-  colony with at least one descendant practitioner, the share who **observed an actual feed**
-  before their own first feed, in event order. Colonies with no descendant practitioner are
-  excluded from that share and counted. Aggregation is the mean over colonies, with a bootstrap
-  over colonies. "More than half" means the interval is above 0.5. Observing first is evidence of
-  an opportunity to learn, not proof that observation caused it.
-- **Ablations (predator present, 50 days)**: unchanged, no learning by watching, memory wiped
-  every dawn (outcome memory and fright location; bonds kept), no children. Paired differences
-  from unchanged.
+- Gene-only and direct regimes: E_on only.
+- All-colony outcomes per arm: extinctions, births, offspring credited to cohort parents (a child
+  of two cohort parents counts twice), predator attacks and non-fatal attacks, predator and hunger
+  deaths, mean caution of the living at day 120 (survivors only), undefined S.
+- Caution and vulnerability, learning-on arms: caution and the share of night ticks takeable under
+  each rule (logged before each draw, fatal ticks included) are ranked within colony, scaled, pooled
+  and correlated (Spearman); interval by resampling colonies (2,000). Cohort members with no night
+  ticks are excluded and counted; degenerate resamples are dropped and counted.
+- H1: share of colonies in which c2 fed the fire by day 17, watching allowed versus blocked (c2
+  keeps full access); paired difference; predicted above zero.
+- H2 (70 days): late practice; a fire with no gap; per colony with a descendant practitioner, the
+  share who observed an actual feed before their own first, in event order; mean over colonies,
+  bootstrap over colonies; "more than half" means the interval is above 0.5; colonies without a
+  descendant practitioner are excluded and counted. Observing first is opportunity, not cause.
+- Ablations (predator present, 50 days): unchanged, no learning by watching, memory wiped every
+  dawn (outcome memory, fright location and risk memory; bonds kept), no children.
 
 ## Development observations, disclosed
 
-On development seeds 1001 to 1064 (`results-dev/`), and in a dry run of this exact analysis on
-those seeds (`results-dev/dry-analysis/`):
-
-- the default predator killed 3 creatures across 64 colonies with risk learning on, and 10 with
-  it off; it mostly mauls rather than kills, so it may exert little selection at all;
-- all method checks passed, the gene check only just (lower bound 0.000);
-- the dry-run decision was "equivalence" at delta 0.02. delta was then set to 0.01 for the reason
-  above, before any confirmatory run. We record this so a reader can judge whether it moved the
-  goalposts.
+From development seeds 1001 to 1064 (`results-dev/`, and the final-code rerun in
+`results-dev/v3.1/`): the default predator kills very few creatures (3 in 64 colonies with risk
+learning on, 10 off, in the v3 run) and mostly mauls; non-fatal attacks were in the hundreds. The
+v3 dry run at delta 0.02 decided "equivalence"; rerun at delta 0.01 the same data are
+"inconclusive" (I = 0.001 [−0.011, 0.014]). Both are preserved and labelled.
 
 ## Execution
 
-- `node lab/research/run.mjs`, at a committed, clean tree. The manifest records the commit,
-  whether the tree was dirty, source hashes, the seed list, the frozen settings, node version,
-  the number of runs expected and completed, and that the run was fresh rather than merged.
-- A run is invalid if any job fails, if the tree is dirty, or if completed runs are fewer than
-  expected. An invalid run is logged in `RUNLOG.md` and repeated from scratch at the same commit;
-  it is never merged with another.
-- A bug found after this document is committed is handled as a written amendment with a new
-  version number and a new seed bank. Results from incompatible code versions are never pooled.
+- `node lab/research/run.mjs` at a committed tree with no tracked changes. It writes
+  `manifest-launch.json` with input hashes before simulating, verifies the hashes after, refuses to
+  overwrite earlier output, writes `raw.json` and a manifest with its hash, then analyses.
+- A run is invalid if any job fails, inputs change, or fewer runs complete than expected. An invalid
+  run is logged in `RUNLOG.md` and repeated from scratch at the same commit; runs are never merged.
+- A bug found after this version is committed is handled as a new written version with a new seed
+  bank. Results from incompatible versions are never pooled.
 
-## What would change our minds
+## How we will report each outcome
 
-If validation fails, we claim nothing about attenuation. If the primary result is equivalence,
-we say risk learning does not detectably attenuate the default predator's effect in this world,
-and we report E_on to say whether there was much of an effect to attenuate. If it is attenuation,
-we report it with its size and scope. If it is inconclusive, we say so as the headline.
+Unvalidated or withheld: say so as the headline, with estimates. Bounded: report the bound, with
+E_on and E_off to show how much predator effect there was to change. Attenuation: report its size
+and the scope of the intervention. Effect modification or opposite direction: report I with the
+signs of E_on and E_off. Inconclusive: say so as the headline.
