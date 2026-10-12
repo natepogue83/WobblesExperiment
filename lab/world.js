@@ -188,17 +188,41 @@ export function splitLog(world, log, who) {
 // ---- the prowler: a hungry thing that comes out of the dark ------------------------------------
 // It wants a creature on its own, in the open. Fire, walls and a crowd keep it off. It never
 // learns; it is weather with teeth. What the creatures make of it, they make themselves.
+// Who each predator could take this tick, from one definition shared by the predators and by the
+// measurements (v3, after the second review). 'none' has no predator; its creatures are scored
+// against every definition as a counterfactual.
+export const PREDATOR_MODES = ['default', 'targeted', 'exposure', 'direct'];
+export function shelteredAt(world, x, y) { const c = cellAt(world, x, y); return !c || c.heat > 0 || walled(world, x, y); }
+export function crowdAt(world, x, y) { let n = 0; for (const k of world.creatures) if (k.alive && Math.max(Math.abs(k.x - x), Math.abs(k.y - y)) <= 1) n++; return n; }
+export function vulnerable(world, k, mode) {
+  if (!k.alive || shelteredAt(world, k.x, k.y)) return false;
+  if (mode === 'default') return crowdAt(world, k.x, k.y) < 3;
+  if (mode === 'targeted' || mode === 'exposure') return k.lastAction === 'rest';
+  if (mode === 'direct') return true;
+  return false;
+}
 export function protectedAt(world, x, y, creatures) {
   const c = cellAt(world, x, y);
   if (!c) return true;
   if (c.heat > 0 || walled(world, x, y)) return true;
-  if (world.opts.threatMode === 'targeted' || world.opts.threatMode === 'exposure') return false;   // numbers do not help against these
+  if (world.opts.threatMode && world.opts.threatMode !== 'default') return false;   // numbers do not help against these
   let company = 0; for (const k of creatures) if (k.alive && Math.max(Math.abs(k.x - x), Math.abs(k.y - y)) <= 1) company++;
   return company >= 3;
 }
 export function prowlerStep(world, r) {
+  // Eligibility is logged for every living creature before any predator acts, so a creature killed
+  // on this tick is counted, and every arm (including no predator) is scored under every definition.
+  if (isNight(world)) for (const k of world.creatures) { if (!k.alive) continue; const v = k.vuln; v.ticks++; for (const m of PREDATOR_MODES) if (vulnerable(world, k, m)) v[m]++; if (vulnerable(world, k, 'exposure')) v.restOpen++; }
   if (!world.opts.threat) return;
   world.prowlers = world.prowlers || [];
+  // Simulation check ('gene'): once a day, at dawn, every creature dies with a chance that falls with
+  // its caution gene, wherever it is and whatever it does. The expected effect on selection is
+  // known in direction and can be estimated in size, with nothing behavioural in the way.
+  if (world.opts.threatMode === 'gene') {
+    if (world.tick % DAY !== 5 || world.tick <= 5 * DAY) return;
+    for (const k of world.creatures) if (k.alive && r() < (world.opts.geneChance ?? 0.02) * Math.max(0, 1 - k.genome.caution / 1.6)) { k.alive = false; emit(world, { kind: 'died', who: k.id, cause: 'the beast', x: k.x, y: k.y }); }
+    return;
+  }
   // Positive control ('exposure'): no chase, no fleeing. At night, a creature that rested last tick
   // in the open (no fire, no walls) is taken with a fixed chance. The cost lands exactly on the
   // behaviour caution is meant to change, so this regime should select for caution if anything does.
@@ -207,9 +231,7 @@ export function prowlerStep(world, r) {
   if (world.opts.threatMode === 'direct') {
     if (!isNight(world) || world.tick <= 5 * DAY) return;
     for (const k of world.creatures) {
-      if (!k.alive) continue;
-      const c = cellAt(world, k.x, k.y);
-      if (c.heat > 0 || walled(world, k.x, k.y)) continue;
+      if (!vulnerable(world, k, 'direct')) continue;
       if (r() < (world.opts.directChance ?? 0.002) * Math.max(0, 1 - k.genome.caution / 1.6)) { k.alive = false; emit(world, { kind: 'attacked', who: k.id, x: k.x, y: k.y, killed: true }); emit(world, { kind: 'died', who: k.id, cause: 'the beast', x: k.x, y: k.y }); }
     }
     return;
@@ -217,9 +239,7 @@ export function prowlerStep(world, r) {
   if (world.opts.threatMode === 'exposure') {
     if (!isNight(world) || world.tick <= 5 * DAY) return;
     for (const k of world.creatures) {
-      if (!k.alive || k.lastAction !== 'rest') continue;
-      const c = cellAt(world, k.x, k.y);
-      if (c.heat > 0 || walled(world, k.x, k.y)) continue;
+      if (!vulnerable(world, k, 'exposure')) continue;
       if (r() < (world.opts.exposureChance ?? 0.05)) { k.alive = false; k.attackedAt = { x: k.x, y: k.y, t: world.tick }; emit(world, { kind: 'attacked', who: k.id, x: k.x, y: k.y, killed: true }); emit(world, { kind: 'died', who: k.id, cause: 'the beast', x: k.x, y: k.y }); }
     }
     return;
@@ -245,7 +265,7 @@ export function prowlerStep(world, r) {
       continue;
     }
     if (Math.max(Math.abs(prey.x - p.x), Math.abs(prey.y - p.y)) <= 1) {
-      prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick };
+      prey.hurt = world.tick; prey.attackedAt = { x: prey.x, y: prey.y, t: world.tick, place: shelteredAt(world, prey.x, prey.y) ? 'fire' : crowdAt(world, prey.x, prey.y) >= 2 ? 'crowd' : 'open' };
       p.fed = 1;
       if (world.opts.threatMode === 'exposure' || prey.needs.energy < 0.35 || world.tick - (prey.lastHurt || -999) < 2 * DAY) { prey.alive = false; emit(world, { kind: 'died', who: prey.id, cause: 'the beast', x: prey.x, y: prey.y }); emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y, killed: true }); }
       else { prey.needs.energy = Math.max(0.05, prey.needs.energy - 0.15); prey.lastHurt = world.tick; emit(world, { kind: 'attacked', who: prey.id, x: prey.x, y: prey.y }); }

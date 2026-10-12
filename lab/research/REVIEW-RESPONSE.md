@@ -7,7 +7,7 @@ that writes the code under his direction.
 
 The short version: the review was right about the main claim, and right about every bug it
 reported. We kept v1 exactly as it was (git tag `confirmatory-v1`, outputs in `results-v1/`),
-fixed the code, wrote a new pre-registration before any new confirmatory data, and ran v2.
+fixed the code and wrote a new pre-registration before any new confirmatory data. ~~and ran v2~~ [Corrected 2026-10-12: v2 was started and then stopped, unread, so the fixes could be reviewed first; see RUNLOG.md. The second review then found further problems, answered in REVIEW-RESPONSE-2.md.]
 
 ## The main claim
 
@@ -27,7 +27,7 @@ fixed the code, wrote a new pre-registration before any new confirmatory data, a
 | C. "Resting somewhere closed" counted walking toward it. | **Fixed.** Night behaviour is measured after each tick from position and completed action. | `sim.js` `step`; test C |
 | D. The targeted predator read a stale action and had a larger radius. | **Fixed.** It reads what was done this tick; same radius as default. | `world.js`; test D |
 | E. The strike decision read hidden material properties. | **Fixed.** Judged from visible size and experience. Other instincts (flight from a visible predator, a safe-spot finder, warmth attraction) are kept and now disclosed as instincts. | `creature.js` |
-| "Recipe-free" is too strong: the shard-and-stick join is a coded transformation, and some outcomes carry designed bonuses. | **Accepted.** The report now says "no craft menu or prescribed sequence", and lists the designed incentives. | REPORT section 1 |
+| "Recipe-free" is too strong: the shard-and-stick join is a coded transformation, and some outcomes carry designed bonuses. | **Accepted.** The rewritten report will say "no craft menu or prescribed sequence", and list the designed incentives. [Pending: the report has not been rewritten yet.] | REPORT section 1 |
 | F. H1's isolated creature was teleported away from the fire, so it lost access as well as observation, and the fire was still visible. | **Fixed.** v2 keeps c2 in the colony with full access and blocks only observation learning. | `run.mjs` H1 |
 | G. H2 measures late practice, not an unbroken lineage. | **Accepted.** Renamed "late practice"; v2 adds whether the fire burned without a gap and whether each descendant had seen a feed before its own first. | `run.mjs` H2 |
 | Breeding scanned creatures in fixed order. | **Fixed.** Seeded random order. | `creature.js` |
@@ -56,7 +56,7 @@ fixed the code, wrote a new pre-registration before any new confirmatory data, a
 | Finding | Response |
 |---|---|
 | Final scores were taken at day 123, not day 120. | **Accepted.** Disclosed; the harness is fixed for any future run. |
-| The Opus "no children" anecdote is false: that colony had seven births. | **Accepted, and the most important error in v1.** We copied the model's account into the report without checking it against the record. That is exactly the failure a safety reader should worry about, and it is now described as such. |
+| The Opus "no children" anecdote is false: that colony had seven births. | **Accepted, and the most important error in v1.** We copied the model's account into the report without checking it against the record. That is exactly the failure a safety reader should worry about, and the rewritten report will describe it as such. [Pending.] |
 | The rain tool was overwritten by the schedule on the next tick. | **Fixed** in the code. The v1 runs used the broken tool, which is disclosed. |
 | The observation interface omitted fire and food coordinates and mislabelled several things ("joined" read as bonding). | **Accepted.** Disclosed as interface defects that shaped the models' false beliefs. |
 | Haiku "named few" worries is a stylistic impression; using the full budget is permitted. | **Accepted.** Removed. |
@@ -67,4 +67,4 @@ fixed the code, wrote a new pre-registration before any new confirmatory data, a
 | Finding | Response |
 |---|---|
 | The decision log documents product direction, not which scientific decisions Nate made. | **Accepted.** Nate is adding a contribution statement and three decisions in his own words. |
-| Parts read like polished agent narration; repeated claims of honesty. | **Accepted.** The rewrite cuts them. |
+| Parts read like polished agent narration; repeated claims of honesty. | **Accepted.** The rewrite will cut them. [Pending.] |

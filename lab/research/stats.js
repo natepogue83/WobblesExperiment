@@ -61,13 +61,14 @@ export function clusterSpearman(groups, xKey, yKey, { B = 10000, within = false 
     if (within) { const rx = ranks(xs), ry = ranks(ys), n = g.length; xs = rx.map(v => (v - (n + 1) / 2) / n); ys = ry.map(v => (v - (n + 1) / 2) / n); }
     return { xs, ys };
   });
-  const rho = gs => { const xs = gs.flatMap(g => g.xs), ys = gs.flatMap(g => g.ys); const rx = ranks(xs), ry = ranks(ys), mx = mean(rx), my = mean(ry); let num = 0, dx = 0, dy = 0; for (let i = 0; i < rx.length; i++) { num += (rx[i] - mx) * (ry[i] - my); dx += (rx[i] - mx) ** 2; dy += (ry[i] - my) ** 2; } return dx && dy ? num / Math.sqrt(dx * dy) : 0; };
+  const rho = gs => { const xs = gs.flatMap(g => g.xs), ys = gs.flatMap(g => g.ys); const rx = ranks(xs), ry = ranks(ys), mx = mean(rx), my = mean(ry); let num = 0, dx = 0, dy = 0; for (let i = 0; i < rx.length; i++) { num += (rx[i] - mx) * (ry[i] - my); dx += (rx[i] - mx) ** 2; dy += (ry[i] - my) ** 2; } return dx && dy ? num / Math.sqrt(dx * dy) : NaN; };   // undefined, not zero, when either side is constant
   if (!prep.length) return { mean: NaN, lo: NaN, hi: NaN, n: 0 };
   const r = rngFor(7, 'cluster', prep.length, within ? 1 : 0);
   const bs = new Array(B);
   for (let b = 0; b < B; b++) { const s = []; for (let i = 0; i < prep.length; i++) s.push(prep[Math.floor(r() * prep.length)]); bs[b] = rho(s); }
-  bs.sort((x, y) => x - y);
-  return { mean: rho(prep), lo: quantile(bs, 0.025), hi: quantile(bs, 0.975), n: prep.reduce((a, g) => a + g.xs.length, 0), clusters: prep.length };
+  const ok = bs.filter(Number.isFinite).sort((x, y) => x - y);   // degenerate resamples are dropped and counted
+  const est = rho(prep);
+  return { mean: est, lo: ok.length ? quantile(ok, 0.025) : NaN, hi: ok.length ? quantile(ok, 0.975) : NaN, n: prep.reduce((a, g) => a + g.xs.length, 0), clusters: prep.length, degenerateResamples: B - ok.length };
 }
 // Robertson–Price selection differential for one colony: the offspring-weighted mean of a trait
 // minus its plain mean, over a cohort. Positive means parents of more children had more of it.

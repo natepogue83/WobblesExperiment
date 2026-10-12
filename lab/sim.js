@@ -25,8 +25,8 @@ export function step(world) {
     const company = world.creatures.filter(k => k !== c && k.alive && Math.max(Math.abs(k.x - c.x), Math.abs(k.y - c.y)) <= 1).length;
     const kind = cell.heat > 0 ? 'fire' : walled(world, c.x, c.y) ? 'walls' : covered(world, c.x, c.y) ? 'roof' : company >= 2 ? 'crowd' : 'open';
     n.ticks++; n[kind]++;
-    const safe = cell.heat > 0 || walled(world, c.x, c.y) || (company >= 2 && !['targeted', 'exposure'].includes(world.opts.threatMode));
-    if (!safe) n.exposed++;
+    // 'exposed' (post-action, descriptive): outside fire and walls, and, for the default predator's rules, not in a crowd of three.
+    if (!(cell.heat > 0 || walled(world, c.x, c.y)) && company < 2) n.exposed++;
     if (c.did === 'rest') { n.rested++; if (cell.heat > 0 || walled(world, c.x, c.y)) n.restedProtected++; }
     if (c.didOutcome === 'ate') n.ate++;
     if (c.did === 'flee') n.fled++;
@@ -51,7 +51,7 @@ export function keeperPlace(world, kind, x, y, state = {}) {
 export function clone(world) {
   const w = JSON.parse(JSON.stringify({ ...world, creatures: [], objects: world.objects.map(o => ({ ...o })) }));
   const byId = Object.fromEntries(w.objects.map(o => [o.id, o]));
-  w.creatures = world.creatures.map(c => ({ ...c, needs: { ...c.needs }, genome: { ...c.genome }, bonds: { ...c.bonds }, places: JSON.parse(JSON.stringify(c.places || {})), builds: (c.builds || []).map(b => ({ ...b })), night: { ...(c.night || {}) }, attackedAt: c.attackedAt ? { ...c.attackedAt } : null, plan: null,
+  w.creatures = world.creatures.map(c => ({ ...c, needs: { ...c.needs }, genome: { ...c.genome }, bonds: { ...c.bonds }, places: JSON.parse(JSON.stringify(c.places || {})), builds: (c.builds || []).map(b => ({ ...b })), night: { ...(c.night || {}) }, risk: { ...(c.risk || {}) }, vuln: { ...(c.vuln || {}) }, attackedAt: c.attackedAt ? { ...c.attackedAt } : null, plan: null,
     carrying: c.carrying ? byId[c.carrying.id] : null, episodes: c.episodes.slice(),
     exp: new Map([...c.exp].map(([k, e]) => [k, { ...e, outcomes: { ...e.outcomes } }])) }));
   return w;
