@@ -1,0 +1,198 @@
+{
+  "checks": {
+    "riskOffHasNoRiskMemory": true,
+    "riskOnLearnsInMostDefaultColonies": true,
+    "restLearningInBothArms": true,
+    "switchHasNoEffectWithoutPredator": true,
+    "fullHorizon": true,
+    "geneCheckPositive": true,
+    "onRiskShare": 0.98046875,
+    "geneCheck": {
+      "mean": 0.009369439157845667,
+      "lo": 0.0037927970414844896,
+      "hi": 0.014971063225604849,
+      "n": 256,
+      "dropped": 0
+    },
+    "validated": true
+  },
+  "h3": {
+    "default": {
+      "Eon": {
+        "mean": -0.007730762916687439,
+        "lo": -0.0139631382642923,
+        "hi": -0.0015824618320503222,
+        "n": 256,
+        "dropped": 0
+      },
+      "Eoff": {
+        "mean": -0.0013448921612758318,
+        "lo": -0.007547542879005459,
+        "hi": 0.004630178201897469,
+        "n": 256,
+        "dropped": 0
+      },
+      "I": {
+        "mean": 0.006385870755411608,
+        "lo": 0.0002939731717289242,
+        "hi": 0.012495185730977222,
+        "n": 256,
+        "dropped": 0
+      },
+      "commonSeeds": 256,
+      "decision": "effect modification: I is positive, but a positive predator-related selection differential without risk learning is not shown"
+    },
+    "direct": {
+      "Eon": {
+        "mean": 0.011327030542487458,
+        "lo": 0.005171518440761772,
+        "hi": 0.017391403449902174,
+        "n": 256,
+        "dropped": 0
+      }
+    },
+    "gene": {
+      "Eon": {
+        "mean": 0.009369439157845667,
+        "lo": 0.0037927970414844896,
+        "hi": 0.014971063225604849,
+        "n": 256,
+        "dropped": 0
+      }
+    }
+  },
+  "behaviour": {
+    "none:default": {
+      "mean": -0.3531090328942583,
+      "lo": -0.38824098315809974,
+      "hi": -0.3180730434685062,
+      "n": 3170,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "none:direct": {
+      "mean": -0.4459440082958107,
+      "lo": -0.47815204115146276,
+      "hi": -0.41270679172321006,
+      "n": 3170,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "none:restOpen": {
+      "mean": -0.21724331374428504,
+      "lo": -0.25816074537717887,
+      "hi": -0.17722804106369705,
+      "n": 3170,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "default:default": {
+      "mean": -0.27882237734038534,
+      "lo": -0.31441499553179586,
+      "hi": -0.2439654245895448,
+      "n": 3173,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "default:direct": {
+      "mean": -0.39666565382259256,
+      "lo": -0.42969464767698606,
+      "hi": -0.3636091281532442,
+      "n": 3173,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "default:restOpen": {
+      "mean": -0.09409822286657837,
+      "lo": -0.13304201584945563,
+      "hi": -0.05656283871248507,
+      "n": 3173,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "direct:default": {
+      "mean": -0.2126042345906332,
+      "lo": -0.24563857923142282,
+      "hi": -0.18137118034746652,
+      "n": 4803,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "direct:direct": {
+      "mean": -0.2842067641134465,
+      "lo": -0.3132537953962133,
+      "hi": -0.25545503012596577,
+      "n": 4803,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "direct:restOpen": {
+      "mean": -0.11695469419999104,
+      "lo": -0.14743563753882466,
+      "hi": -0.08639612687397143,
+      "n": 4803,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "gene:default": {
+      "mean": -0.21244959894847967,
+      "lo": -0.24667422536002104,
+      "hi": -0.1790688489708971,
+      "n": 5025,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "gene:direct": {
+      "mean": -0.3119277304126862,
+      "lo": -0.3419997678637039,
+      "hi": -0.28144707576686645,
+      "n": 5025,
+      "clusters": 256,
+      "degenerateResamples": 0
+    },
+    "gene:restOpen": {
+      "mean": -0.11977956666029335,
+      "lo": -0.15238235862444027,
+      "hi": -0.08924998769391655,
+      "n": 5025,
+      "clusters": 256,
+      "degenerateResamples": 0
+    }
+  },
+  "h1": {
+    "open": {
+      "mean": 0.6640625,
+      "lo": 0.60546875,
+      "hi": 0.72265625,
+      "n": 256
+    },
+    "blocked": {
+      "mean": 0.3046875,
+      "lo": 0.25,
+      "hi": 0.36328125,
+      "n": 256
+    },
+    "diff": {
+      "mean": 0.359375,
+      "lo": 0.27734375,
+      "hi": 0.44140625,
+      "n": 256,
+      "dropped": 0
+    }
+  },
+  "h2": {
+    "latePractice": {
+      "mean": 0.60546875,
+      "lo": 0.546875,
+      "hi": 0.6640625,
+      "n": 256
+    },
+    "observedFirstColonyMean": {
+      "mean": 0.9377544351073762,
+      "lo": 0.9017740429505137,
+      "hi": 0.9686793884220355,
+      "n": 170
+    },
+    "coloniesWithDescPractitioners": 170
+  }
+}
