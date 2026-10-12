@@ -19,7 +19,6 @@ changed. Drafted from the project thread by the agent; Nate edits and signs off.
 | 2026-10-09 | Overnight brief: work without approvals; everything should be pieces that break apart, tools should be invented, buildings, an outside threat and competition "so there is a reason to evolve", an environment as open as possible. | Trees, shards, cutting, joining, walls, the prowler, lean seasons, brawn, fleeing, place-based rest. The pilot that suggested the predator selected for boldness. |
 | 2026-10-10 | "How could I turn this into something a frontier lab would want to hire me for?" | The decision to treat the lab as research: hypotheses, controls, honesty about the negative result. |
 | 2026-10-11 | "We need this ready for my portfolio before I apply to Anthropic Fellows. With that context, what would you change?" Then: "Create the plan and then execute." | Pre-registration before the confirmatory runs; the 64-seed harness; this log. |
-
 | 2026-10-11 | Had a separate AI system (Astra) review the work as a skeptical Fellows reviewer. | Review 1: the headline was retracted; four bugs and a false anecdote were found. |
 | 2026-10-11 | "Just fix it and I'll have Astra review before another run." | The v2 run, already started, was stopped unread so the fixes could be reviewed first. |
 | 2026-10-12 | Sent v2 and then v3 back to Astra before any confirmatory run. | Review 2 ("redesign first") and review 3 ("run after these changes") reshaped the design; the confirmatory run used a fresh seed bank. |
