@@ -199,15 +199,29 @@ arguing with it.
   tested).
 - The Keeper study (appendix B) is an audited prototype, not a result.
 
-## 8. How this was built
+## 8. How this was built, and what's actually mine
 
-The code, the statistics and the first drafts of every document were written by an AI agent
-(Claude, through Claude Code) working under my direction. I made the decisions in
-`DECISIONS.md`: what the world should be, when the work was missing the mark, to turn it into
-research, to submit it to independent review, to stop a run until a review was done, and to keep
-every failure in the record. The three reviews were done by a separate AI system (Astra) from
-exported snapshots. I cannot write this code myself yet; I can direct it, check it, and decide what
-it is allowed to claim.
+I'm not a coder. I want to be upfront about that, because the Fellows process has a coding test
+without AI and I'd rather you know now than find out then.
+
+Every line of code here, the statistics, and the first draft of every document were written by
+Claude, running in Claude Code. What I did was steer it. I started out wanting to make a game, a
+mix of Pocket God and Thronglets with creatures that actually learn. When it kept coming out
+feeling generic I said so, more than once, and when I finally figured out what I was really
+picturing (creatures that learn and evolve on their own, no recipes, the player just setting up
+opportunities) I made the call to throw out what we had and build that. Later I decided to turn
+it into research instead of a product, because the interesting part was never the game, it was
+whether the creatures were really learning.
+
+The decisions I'm proudest of are the boring ones. I didn't trust the first result just because it
+was exciting. I brought in a second AI, Astra, to review the work like a skeptical reviewer would,
+three separate times. When Astra said the headline was wrong, I had it retracted instead of
+arguing. When a run had already started before a review was done, I had it stopped, unread. And
+when the final answer came back as "not the story we started with", I kept it as the result.
+
+I can't write this code yet. What I can do is direct it, check it against what it claims, notice
+when something feels off, and decide what it's allowed to say. Every decision is logged, with the
+date and what it changed, in `DECISIONS.md`.
 
 ## 9. Reproduction
 

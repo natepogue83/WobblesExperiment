@@ -1,8 +1,9 @@
 # Decision log
 
-How this project was steered. The code was written by an AI agent (Claude, through
-Claude Code); the calls below are Nate's, in the order he made them, with what each one
-changed. Drafted from the project thread by the agent; Nate edits and signs off.
+This is how I steered the project. Claude (through Claude Code) wrote the code; the calls
+below are mine, in the order I made them, with what each one changed. Claude drafted this
+from our project thread and I've edited it. Quotes are what I actually said at the time,
+typos cleaned up.
 
 | When (UTC) | Nate's call | What it changed |
 |---|---|---|
