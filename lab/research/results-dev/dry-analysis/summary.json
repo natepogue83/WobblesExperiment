@@ -1,0 +1,162 @@
+{
+  "checks": {
+    "riskOffHasNoRiskMemory": true,
+    "riskOnLearnsInMostDefaultColonies": true,
+    "restLearningInBothArms": true,
+    "switchHasNoEffectWithoutPredator": true,
+    "fullHorizon": true,
+    "geneCheckPositive": true,
+    "onRiskShare": 0.984375,
+    "geneCheck": {
+      "mean": 0.015285090948282825,
+      "lo": 0.0003986016708378895,
+      "hi": 0.030480925745852806,
+      "n": 64,
+      "dropped": 0
+    },
+    "validated": true
+  },
+  "h3": {
+    "default": {
+      "Eon": {
+        "mean": 0.008853875679113346,
+        "lo": -0.0048688603137065686,
+        "hi": 0.022805339292690442,
+        "n": 64,
+        "dropped": 0
+      },
+      "Eoff": {
+        "mean": 0.010136070208189213,
+        "lo": -0.0021709964126728127,
+        "hi": 0.022627340111370003,
+        "n": 64,
+        "dropped": 0
+      },
+      "I": {
+        "mean": 0.0012821945290758634,
+        "lo": -0.010806453249971456,
+        "hi": 0.01382266044774309,
+        "n": 64,
+        "dropped": 0
+      },
+      "commonSeeds": 64,
+      "decision": "equivalence: any attenuation is smaller than 0.02 in this setting"
+    },
+    "direct": {
+      "Eon": {
+        "mean": 0.009730406447901217,
+        "lo": -0.004959898798715518,
+        "hi": 0.023954349206853427,
+        "n": 64,
+        "dropped": 0
+      }
+    },
+    "gene": {
+      "Eon": {
+        "mean": 0.015285090948282825,
+        "lo": 0.0003986016708378895,
+        "hi": 0.030480925745852806,
+        "n": 64,
+        "dropped": 0
+      }
+    }
+  },
+  "behaviour": {
+    "none:default": {
+      "mean": -0.35383786430331804,
+      "lo": -0.4209859313179141,
+      "hi": -0.28268256577746587,
+      "n": 800,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "none:direct": {
+      "mean": -0.4314549091250454,
+      "lo": -0.5013339755070613,
+      "hi": -0.35709017889872846,
+      "n": 800,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "none:restOpen": {
+      "mean": -0.1434843455643124,
+      "lo": -0.23138600735475617,
+      "hi": -0.0486700196401163,
+      "n": 800,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "default:default": {
+      "mean": -0.23147667292486906,
+      "lo": -0.30087082592636083,
+      "hi": -0.16217919415921647,
+      "n": 803,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "default:direct": {
+      "mean": -0.3490273201655461,
+      "lo": -0.4209781170880709,
+      "hi": -0.27570912416516646,
+      "n": 803,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "default:restOpen": {
+      "mean": -0.056295239437792195,
+      "lo": -0.13455476346824277,
+      "hi": 0.027803621764610292,
+      "n": 803,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "direct:default": {
+      "mean": -0.24700572899184342,
+      "lo": -0.3036296148294239,
+      "hi": -0.18835995437124592,
+      "n": 1247,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "direct:direct": {
+      "mean": -0.3046156532442792,
+      "lo": -0.35859705435384953,
+      "hi": -0.25043099633167243,
+      "n": 1247,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "direct:restOpen": {
+      "mean": -0.0928302489993822,
+      "lo": -0.1490287232673049,
+      "hi": -0.03619087346738193,
+      "n": 1247,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "gene:default": {
+      "mean": -0.24672576891090528,
+      "lo": -0.2988713569311497,
+      "hi": -0.1918019417495357,
+      "n": 1327,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "gene:direct": {
+      "mean": -0.29711336776218145,
+      "lo": -0.3478767535399173,
+      "hi": -0.24243993508706432,
+      "n": 1327,
+      "clusters": 64,
+      "degenerateResamples": 0
+    },
+    "gene:restOpen": {
+      "mean": -0.18436524268136698,
+      "lo": -0.23809489743587742,
+      "hi": -0.12853866880452608,
+      "n": 1327,
+      "clusters": 64,
+      "degenerateResamples": 0
+    }
+  }
+}

@@ -26,8 +26,8 @@ const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 
 // ---- frozen settings (PREREGISTRATION-v3.md). A confirmatory run refuses any override. -----------
 export const FROZEN = {
-  N: 192,                       // chosen from the precision run on the development bank (results-dev/PRECISION.md)
-  delta: 0.02,                  // smallest effect on S worth resolving
+  N: 256,                       // chosen from the precision run on the development bank (results-dev/PRECISION.md)
+  delta: 0.01,                  // smallest effect on S worth resolving (PREREGISTRATION-v3.md)
   directChance: 0.002,
   geneChance: 0.02,
   confirmSeeds: null            // filled below from N
@@ -118,7 +118,10 @@ function provenance(extra) {
   return { harness: 'v3', commit, dirty, node: process.version, generated: new Date().toISOString(), env: Object.fromEntries(Object.entries(process.env).filter(([k]) => ['N', 'ONLY', 'PRECISION', 'ANALYZE', 'SMOKE'].includes(k))), sourceHashes: Object.fromEntries(files.map(f => [f, hash(f)])), ...extra };
 }
 
-function h3jobs(seeds, preds) { const out = []; for (const p of preds) for (const l of ['on', 'off']) for (const s of seeds) out.push({ exp: 'h3', seed: s, cond: h3cond(p, l), opts: { ...PRED[p], noRiskLearn: l === 'off' } }); return out; }
+function h3jobs(seeds, preds, arms = { none: ['on', 'off'], default: ['on', 'off'], direct: ['on', 'off'], gene: ['on', 'off'] }) { const out = []; for (const p of preds) for (const l of arms[p]) for (const s of seeds) out.push({ exp: 'h3', seed: s, cond: h3cond(p, l), opts: { ...PRED[p], noRiskLearn: l === 'off' } }); return out; }
+// Confirmatory arms. The direct and gene regimes have no prowler, so risk learning never occurs and
+// their on and off arms are identical (verified on all 64 development seeds); only 'on' is run.
+const CONFIRM_ARMS = { none: ['on', 'off'], default: ['on', 'off'], direct: ['on'], gene: ['on'] };
 const S = (rs, p, l, seeds, k = 'S_caution') => bySeed(rs, 'h3', h3cond(p, l), k, seeds);
 
 // ---- development: how variable are the real contrasts, and what N does that imply? -------------------------
@@ -153,18 +156,22 @@ function analyze(rs, seeds, OUT) {
   const summary = {};
   // Manipulation checks (pre-registered pass rules)
   const colonies = (p, l) => rs.filter(r => r.exp === 'h3' && r.cond === h3cond(p, l));
-  const offRisk = ['default', 'direct', 'gene', 'none'].every(p => colonies(p, 'off').every(r => r.ind.every(i => i.riskTotal === 0 && i.riskKeys === 0)));
+  const offRisk = ['default', 'none'].every(p => colonies(p, 'off').every(r => r.ind.every(i => i.riskTotal === 0 && i.riskKeys === 0)));
   const onRiskShare = colonies('default', 'on').filter(r => r.ind.some(i => i.riskTotal > 0)).length / Math.max(1, colonies('default', 'on').length);
   const restBoth = ['on', 'off'].every(l => colonies('default', l).every(r => r.ind.some(i => i.restKeys > 0)));
   const horizon = rs.filter(r => r.exp === 'h3').every(r => r.tick === END);
+  const key = r => JSON.stringify([r.S_caution, r.born, r.alive, r.hunger, r.cohortN]);
+  const offN = new Map(colonies('none', 'off').map(r => [r.seed, key(r)]));
+  const specific = colonies('none', 'on').length > 0 && colonies('none', 'on').every(r => offN.get(r.seed) === key(r));
   const geneCheck = pairedDiffCI(S(rs, 'gene', 'on', seeds), S(rs, 'none', 'on', seeds));
-  const checks = { riskOffHasNoRiskMemory: offRisk, riskOnLearnsInMostDefaultColonies: onRiskShare >= 0.9, restLearningInBothArms: restBoth, fullHorizon: horizon, geneCheckPositive: geneCheck.lo > 0 };
+  const checks = { riskOffHasNoRiskMemory: offRisk, riskOnLearnsInMostDefaultColonies: onRiskShare >= 0.9, restLearningInBothArms: restBoth, switchHasNoEffectWithoutPredator: specific, fullHorizon: horizon, geneCheckPositive: geneCheck.lo > 0 };
   const validated = Object.values(checks).every(Boolean);
   summary.checks = { ...checks, onRiskShare, geneCheck, validated };
   md.push('## Manipulation and method checks\n', '| check | rule | result |', '|---|---|---|',
     `| risk learning off removes risk memory | every creature in every off colony has none | ${offRisk ? 'pass' : 'FAIL'} |`,
     `| risk learning on learns risk | in at least 90% of default-predator colonies | ${(onRiskShare * 100).toFixed(0)}%: ${onRiskShare >= 0.9 ? 'pass' : 'FAIL'} |`,
     `| comfort learning about rest is kept | rest memories exist in both arms | ${restBoth ? 'pass' : 'FAIL'} |`,
+    `| the switch is specific to predator risk | no-predator colonies identical with it on and off, every seed | ${specific ? 'pass' : 'FAIL'} |`,
     `| full horizon | every colony scored at tick ${END} | ${horizon ? 'pass' : 'FAIL'} |`,
     `| simulation check: the gene-only regime raises S | paired interval above zero | ${fmt(geneCheck, 3)}: ${geneCheck.lo > 0 ? 'pass' : 'FAIL'} |`,
     `\nAll checks ${validated ? '**passed**' : '**did not all pass**'}.\n`);
@@ -174,13 +181,14 @@ function analyze(rs, seeds, OUT) {
   md.push('## H3: predator effect on selection for caution, and its interaction with risk learning\n', 'S is the offspring-weighted minus plain mean caution over each colony\'s cohort born by day 60, early deaths included. Default is primary; direct and gene are secondary checks.\n',
     '| predator | E_on | E_off | I = E_off - E_on | seeds with all four arms | decision |', '|---|---|---|---|---|---|');
   for (const p of P) {
+    if (p !== 'default') { const eon = pairedDiffCI(S(rs, p, 'on', seeds), S(rs, 'none', 'on', seeds)); summary.h3[p] = { Eon: eon }; md.push(`| ${p} | ${fmt(eon, 3)} | (same as E_on: no prowler, so no risk learning) | n/a | ${eon.n} | (secondary) |`); continue; }
     const e = commonSeedEffects(S(rs, p, 'off', seeds), S(rs, 'none', 'off', seeds), S(rs, p, 'on', seeds), S(rs, 'none', 'on', seeds));
     const d = p === 'default' ? decide(e, FROZEN.delta, validated) : '(secondary)';
     summary.h3[p] = { ...e, decision: d };
     md.push(`| ${p} | ${fmt(e.Eon, 3)} | ${fmt(e.Eoff, 3)} | **${fmt(e.I, 3)}** | ${e.commonSeeds} | ${d} |`);
   }
   md.push('', '### All-colony outcomes\n', `| condition | extinct | cohort births | births | killed by predator | hunger deaths | mean caution of the living at day 120 | S undefined |`, '|---|---|---|---|---|---|---|---|');
-  for (const p of ['none', ...P]) for (const l of ['on', 'off']) { const c = colonies(p, l); md.push(`| ${h3cond(p, l)} | ${c.filter(r => r.extinct).length}/${c.length} | ${fmt(bootstrapMeanCI(c.map(r => r.cohortOffspring)), 1)} | ${fmt(bootstrapMeanCI(c.map(r => r.born)), 1)} | ${c.reduce((a, r) => a + r.byBeast, 0)} | ${c.reduce((a, r) => a + r.hunger, 0)} | ${fmt(bootstrapMeanCI(c.map(r => r.cautionEnd)), 3)} | ${c.filter(r => !finite(r.S_caution)).length} |`); }
+  for (const p of ['none', ...P]) for (const l of CONFIRM_ARMS[p]) { const c = colonies(p, l); md.push(`| ${h3cond(p, l)} | ${c.filter(r => r.extinct).length}/${c.length} | ${fmt(bootstrapMeanCI(c.map(r => r.cohortOffspring)), 1)} | ${fmt(bootstrapMeanCI(c.map(r => r.born)), 1)} | ${c.reduce((a, r) => a + r.byBeast, 0)} | ${c.reduce((a, r) => a + r.hunger, 0)} | ${fmt(bootstrapMeanCI(c.map(r => r.cautionEnd)), 3)} | ${c.filter(r => !finite(r.S_caution)).length} |`); }
   // Behaviour (descriptive): does the caution gene change pre-attack vulnerability? (cohort, every member, no age filter)
   md.push('', '### Caution and vulnerability before each night attack draw (descriptive; cohort, all members)\n', 'Within-colony rank correlation between caution and the share of night ticks a creature was takeable under each predator\'s rule, scored for everyone in every arm.\n', '| arm | default rule | direct rule (outside fire and walls) | resting in the open |', '|---|---|---|---|');
   summary.behaviour = {};
@@ -215,19 +223,23 @@ function analyze(rs, seeds, OUT) {
 async function main() {
   if (process.env.SMOKE) { const rs = await runAll(TEST_SEEDS.map(s => ({ exp: 'smoke', seed: s, cond: 'smoke' }))); console.log('smoke ok', rs.length); return; }
   if (process.env.PRECISION) return precision();
+  // Dry run of the confirmatory analysis on development data, to check it executes (not a result).
+  if (process.env.ANALYZE_DEV) { const D = path.join(HERE, 'results-dev', 'dry-analysis'); fs.mkdirSync(D, { recursive: true }); const raw = JSON.parse(fs.readFileSync(path.join(HERE, 'results-dev', 'raw-precision.json'), 'utf8')); return analyze(raw, DEV_SEEDS, D); }
   const OUT = path.join(HERE, 'results'); fs.mkdirSync(OUT, { recursive: true });
   const seeds = FROZEN.confirmSeeds;
   if (process.env.ANALYZE) { const raw = JSON.parse(fs.readFileSync(path.join(OUT, 'raw.json'), 'utf8')); return analyze(raw, seeds, OUT); }
   for (const k of ['N', 'DIRECT_CHANCE', 'GENE_CHANCE', 'EXPOSURE_CHANCE', 'ONLY']) if (process.env[k]) throw new Error(`the confirmatory run takes no overrides (${k} is set); see PREREGISTRATION-v3.md`);
+  { const p = provenance({}); if (p.dirty !== false) throw new Error('the confirmatory run needs a clean, committed tree (git status shows changes under lab/); see PREREGISTRATION-v3.md'); }
   const jobs = [
     ...['open', 'blocked'].flatMap(cond => seeds.map(s => ({ exp: 'h1', seed: s, cond }))),
     ...seeds.map(s => ({ exp: 'h2', seed: s, cond: 'default' })),
-    ...h3jobs(seeds, Object.keys(PRED)),
+    ...h3jobs(seeds, Object.keys(PRED), CONFIRM_ARMS),
     ...Object.entries({ baseline: {}, noWatch: { noWatch: true }, wipeDaily: { wipeDaily: true }, noBreed: { noBreed: true } }).flatMap(([k, o]) => seeds.map(s => ({ exp: 'ablation', seed: s, cond: k, opts: { threat: true, ...o } })))
   ];
   console.log(`v3 confirmatory run: ${jobs.length} runs on seeds ${seeds[0]}-${seeds.at(-1)}`);
   const rs = await runAll(jobs);
   fs.writeFileSync(path.join(OUT, 'raw.json'), JSON.stringify(rs));
+  if (rs.length !== jobs.length) throw new Error(`invalid run: ${rs.length} of ${jobs.length} completed`);
   fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify(provenance({ seeds, frozen: FROZEN, runs: rs.length, expectedRuns: jobs.length, fresh: true }), null, 2));
   analyze(rs, seeds, OUT);
 }
